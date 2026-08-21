@@ -38,7 +38,7 @@ Reload catalogue seed (deletes, then inserts):
 | `docker compose -f docs/run/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
 | `docker compose -f docs/run/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images, so it is enough after code or Flyway changes.
+`start-app.sh` rebuilds images after code or **new** Flyway versions. Do not edit a migration that already ran: Flyway checksum-fails, Data Plane crash-loops, and Control Plane shows `Catalogue read failed (502)`. Recover with `docker compose -f docs/run/docker-compose.yml down -v`, then `./docs/run/start-app.sh`. To reload seed without a new migration, use `./docs/run/seed-db.sh`.
 
 ### Check it is up
 
@@ -63,8 +63,8 @@ Grafana LGTM can take a minute. Wait until logs print `The OpenTelemetry collect
 | 3007 | Data Plane | http://localhost:3007 |
 | 3008 | Agent Runtime | http://localhost:3008 |
 | 3009 | Capability Registry | http://localhost:3009 |
-| 4317 | OTLP gRPC ingestion | `localhost:4317` |
-| 4318 | OTLP HTTP ingestion | `http://localhost:4318` |
+| 4317 | OTLP gRPC ingestion | http://localhost:4317 |
+| 4318 | OTLP HTTP ingestion | http://localhost:4318 |
 | 5432 | Postgres 16 | `fabric` / `fabric` |
 | 8080 | Adminer | http://localhost:8080 |
 
