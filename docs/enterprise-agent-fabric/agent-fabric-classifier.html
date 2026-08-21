@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheap layers first; safety on every path</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f8fafc;
+      --color-ink:     #1e293b;
+      --color-muted:   #64748b;
+      --color-accent:  #f97316;
+      --font-sans:     'Inter', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Flowchart · Layered classification</p>
+    <h1>Cheap layers first; safety on every path</h1>
+    <svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-clf-title hir-clf-desc">
+      <title id="hir-clf-title">Layered classification</title>
+      <desc id="hir-clf-desc">Input is pruned to eligible routes, then rules, classifier, and rare LLM fallback. Every path ends in safety, then an outcome of route, clarify, or abstain.</desc>
+      <defs>
+        <marker id="hir-clf-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
+        <marker id="hir-clf-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f97316"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <line x1="200" y1="88" x2="200" y2="120" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+      <line x1="200" y1="176" x2="200" y2="220" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+      <line x1="200" y1="316" x2="200" y2="360" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+      <line x1="280" y1="268" x2="496" y2="268" stroke="#f97316" stroke-width="1.4" marker-end="url(#hir-clf-arrow-accent)"/>
+      <path d="M 280,408 H 352 Q 360,408 360,400 V 292 Q 360,284 368,284 H 496" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+      <line x1="200" y1="456" x2="200" y2="488" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+      <path d="M 280,512 H 400 Q 408,512 408,504 V 308 Q 408,300 416,300 H 496" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+      <line x1="584" y1="312" x2="584" y2="400" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-clf-arrow)"/>
+
+      <rect x="292" y="248" width="44" height="12" rx="2" fill="#f8fafc"/>
+      <text x="314" y="257" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">MATCH</text>
+      <rect x="212" y="328" width="64" height="12" rx="2" fill="#f8fafc"/>
+      <text x="244" y="337" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">NO MATCH</text>
+      <rect x="292" y="388" width="72" height="12" rx="2" fill="#f8fafc"/>
+      <text x="328" y="397" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">CONFIDENT</text>
+      <rect x="212" y="464" width="72" height="12" rx="2" fill="#f8fafc"/>
+      <text x="248" y="473" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">UNCERTAIN</text>
+
+      <rect x="120" y="40" width="160" height="48" rx="24" fill="rgba(30,41,59,0.03)" stroke="rgba(30,41,59,0.30)" stroke-width="1"/>
+      <text x="200" y="68" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Input + session</text>
+
+      <rect x="120" y="120" width="160" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="120" y="120" width="160" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="200" y="144" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Eligible routes</text>
+      <text x="200" y="160" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">claims ∩ channel</text>
+
+      <polygon points="200,220 280,268 200,316 120,268" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="200" y="264" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">① Rules</text>
+      <text x="200" y="280" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">cmd · event · chip</text>
+
+      <polygon points="200,360 280,408 200,456 120,408" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="200" y="404" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">② Classifier</text>
+      <text x="200" y="420" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">kNN · &lt;50ms</text>
+
+      <rect x="120" y="488" width="160" height="48" rx="6" fill="#f8fafc"/>
+      <rect x="120" y="488" width="160" height="48" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="200" y="516" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">③ LLM fallback</text>
+
+      <rect x="496" y="248" width="176" height="64" rx="6" fill="#f8fafc"/>
+      <rect x="496" y="248" width="176" height="64" rx="6" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1"/>
+      <text x="584" y="276" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">④ Safety</text>
+      <text x="584" y="292" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">every path</text>
+
+      <rect x="496" y="400" width="176" height="56" rx="24" fill="rgba(30,41,59,0.03)" stroke="rgba(30,41,59,0.30)" stroke-width="1"/>
+      <text x="584" y="424" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Outcome</text>
+      <text x="584" y="440" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">route · clarify · abstain</text>
+
+      <line x1="40" y1="564" x2="920" y2="564" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="40" y="584" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.18em">LEGEND</text>
+      <rect x="40" y="600" width="40" height="10" rx="5" fill="rgba(30,41,59,0.03)" stroke="rgba(30,41,59,0.30)" stroke-width="1"/>
+      <text x="88" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Start / end</text>
+      <polygon points="176,605 184,600 192,605 184,610" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="200" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Decision</text>
+      <rect x="272" y="600" width="14" height="10" rx="2" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1"/>
+      <text x="292" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Safety (every path)</text>
+      <line x1="444" y1="605" x2="472" y2="605" stroke="#f97316" stroke-width="1.4" marker-end="url(#hir-clf-arrow-accent)"/>
+      <text x="480" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Rules match</text>
+    </svg>
+  </div>
+</body>
+</html>

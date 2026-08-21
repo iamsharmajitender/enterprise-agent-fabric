@@ -1,0 +1,174 @@
+---
+title: "Agent Runtime (AR)"
+sidebar_label: Agent Runtime
+sidebar_position: 3
+slug: /enterprise-agent-fabric/agent-runtime
+description: "Agent Runtime: specialized agents underneath. Run pin, loop, Patterns 0-3. Calls Shared for Memory, RAG, and Tools. Hydrates from the Agent Capability Registry. Returns HTTP and Kafka."
+---
+
+import Details from '@theme/Details';
+
+# Agent Runtime (AR)
+
+Parent: [Enterprise Agent Fabric](/intent/enterprise-agent-fabric) · Sibling: [Agent Front Door](/intent/enterprise-agent-fabric/agent-front-door) · [Agent Plane](/intent/enterprise-agent-fabric/agent-plane) · [Agent Capability Registry](/intent/enterprise-agent-fabric/agent-capability-registry)
+
+**Specialized agents underneath. Does the work. Does not classify the next utterance. Does not own agent identity.**
+
+Only the **AFD** starts NAR. On `route`, that AFD `POST`s the freeze. NAR **fetches the catalogue row** from the Agent Data Plane at the pinned version, copies it into the **run pin**, requests a token for the pinned **`agent_client_id`**, returns `202 { "correlation_id" }`, and runs. It does not load `active`. It does not re-classify. Memory, RAG, and Tools sit in **Shared**, called from NAR, not inside NAR. The **Agent Capability Registry** sits with Agent Plane. Shared NAR is compute. It is not one robot badge for every route.
+
+How-to: [Wire agentic app](/playbooks/agents/intent-router/wire-agentic-app) · [Session custody](/playbooks/agents/orchestration/session-custody) · [Token and session boundary](/playbooks/governance/runtime/foundation/token-and-session-boundary). Fabric rule: [Three principals](/intent/enterprise-agent-fabric#three-principals).
+
+---
+
+## 1. Job
+
+| Component | Owns | Does not own | Scale unit | If it dies |
+| --- | --- | --- | --- | --- |
+| **NAR** | Run pin, Pattern 0-3, loop. Requests a route-scoped agent token after freeze | Next-utterance classify, `active` lookup, Shared stores, agent IdP registration, dual check | Per `activation_target` | Controlled error after `202` |
+| **Shared** | Memory, RAG, Tools | Route choice, pin, start | Platform | Runs degrade; routing still works |
+| **Memory** (in Shared) | Short / long term via `session_id` | Ingress classify | Platform | Runs degrade; routing still works |
+| **RAG** (in Shared) | Corpus retrieve | Ingress classify | Platform | Grounding degrades; routing still works |
+| **Tools / PEP** (in Shared) | Actions scoped by pinned manifest. Dual check: user entitlements (or approval) and agent scopes | Route choice, mint | With NAR | Side effects stop |
+| **Model router** | Which LLM. Called by NAR | Which `route_id` | LLM gateway | Inference fails; decide unaffected |
+
+Patterns 0-3 answer **who decides the next step** inside NAR. They do not answer how the run is started. `activation_target` on the catalogue row says which NAR to start (omit = shared runtime). Catalogue: [Agents Blueprint](/blueprints/agents-blueprint) · [Route contract reference](/playbooks/agents/intent-router/route-contract-reference).
+
+### Run pin
+
+| Record | Who writes it | Lives where | Job |
+| --- | --- | --- | --- |
+| **Run pin** | NAR | Durable run store | Copy of the freeze versions plus loop checkpoint, token reference, `run_id` |
+
+The AFD freeze is `route_id` + versions + `activation_target` + `agent_client_id` + `correlation_id`. NAR copies that freeze, then requests a token for the pinned `agent_client_id`. Pin miss: **NAR API**, not NAR DB. Route pin vs run pin: [Session custody](/playbooks/agents/orchestration/session-custody). Token is a store reference, not a god token in the run JSON. Field: [Agent client id](/playbooks/agents/intent-router/route-contract-reference#agent-client-id).
+
+### Three principals (NAR is not the robot)
+
+Do not collapse NAR into a fat identity block. Parent: [Three principals](/intent/enterprise-agent-fabric#three-principals) (FR-10).
+
+| Principal | NAR's job | NAR must not |
+| --- | --- | --- |
+| **User** | Carry claims or approval id into Shared Tools / PEP | Use the user bearer as the tool-call `Authorization` |
+| **Agent** | After freeze, request a downscoped token for the pinned `agent_client_id` | Boot one token with every route's scopes, derive the client from `route_id`, or register IdP clients |
+| **NAR workload** | Prove this box may talk to Shared, IdP, model router | Call downstream APIs as the NAR service account |
+
+`activation_target` says which NAR fleet to start (omit = shared runtime). That is isolation of the box. `agent_client_id` on the catalogue row names the robot. A new use case is still a new catalogue row and a new `agent_client_id`, not a new NAR. Route change mid-session: new downscoped token for the new row's client. Jobs use the same robot badge.
+
+### Three routers (NAR owns two)
+
+| Router | Question | Who calls it |
+| --- | --- | --- |
+| **Agent Data Plane** | Which workflow / manifest / app? | Agent Front Door |
+| **Agent planner** (inside NAR) | Which tool / step next? | NAR |
+| **Model router** | Which LLM endpoint for this inference? | NAR |
+
+Do not collapse them. Ingress classify is [Agent Plane](/intent/enterprise-agent-fabric/agent-plane).
+
+---
+
+## 2. APIs {#apis}
+
+Agent Plane and NAR are not public URLs. Channels never dial `activation_target`. Callers never dial NAR. `202` comes from NAR. NAR copies the freeze into the run pin, then requests a token for the pinned `agent_client_id`. It does not classify. It does not load `active`.
+
+NAR **returns two ways:** HTTP API and Kafka. Same slim status / result. The Chat AFD fans that out as SSE/poll. The API AFD fans it out as `GET` job or by consuming `{runs_topic}`.
+
+JSON examples are collapsed.
+
+| Box | Public / channel | Internal |
+| --- | --- | --- |
+| **NAR** | None | Start, resume, open-run by `session_id`, run status HTTP. Publishes the same slim status / result on Kafka. Calls Shared |
+| **Shared** | None | Memory, RAG, Tools. NAR only |
+
+| Method | Path | When / response |
+| --- | --- | --- |
+| `POST` | `{activation_target}` (typical: `/v1/runs`) | `outcome=route` after catalog read. `mode: new`. AFD sends freeze + goal. NAR mints `correlation_id`. `202 { "correlation_id" }`. Pattern 0 may return the inference body |
+| `POST` | `/v1/runs/{correlation_id}/turns` | Stickiness. Frozen route/session already has `correlation_id`. Accepted / slim. Same run, no new classify |
+| `GET` | `/v1/runs?session_id=` | AFD frozen-route/session TTL miss. Open run + pin, or empty. AFD does not query the NAR DB |
+| `GET` | `/v1/runs/{correlation_id}` | AFD poll. Status + slim result. UI SSE/poll and jobs `GET` job read this |
+| `publish` | `{runs_topic}` (configurable) | Same slim status / result as `GET`. Progress and completion. AFD consumes. Not a decide. Not a new start |
+
+Idempotency: jobs send `idempotency_key` on start. Same key must not start a second run.
+
+<Details summary="App start and 202 (JSON)">
+
+AFD does not send `correlation_id` on `mode: new`. NAR returns it.
+
+```json
+{
+  "mode": "new",
+  "idempotency_key": "alert-88421:v1",
+  "session_id": "sess-88",
+  "route_id": "fraud_investigate",
+  "route_table_version": "2026.08.1",
+  "activation_target": "https://assistant-app.internal/v1/runs",
+  "agent_client_id": "fraud-investigate-v2",
+  "contract": {
+    "tool_manifest": "fraud-investigate-v2",
+    "manifest_version": "2026.08.1",
+    "policy_profile": "fraud_ops_read_plus_notes",
+    "model_profile": "reasoning-standard",
+    "max_loop_steps": 12
+  },
+  "goal": {
+    "alert_id": "alert-88421",
+    "account_id": "acct-4412"
+  }
+}
+```
+
+```json
+{
+  "correlation_id": "corr-9f3c"
+}
+```
+
+</Details>
+
+<Details summary="App return: HTTP GET and Kafka (JSON)">
+
+Same slim body on `GET /v1/runs/{correlation_id}` and on `{runs_topic}`.
+
+```json
+{
+  "correlation_id": "corr-9f3c",
+  "status": "completed",
+  "result": {
+    "message": "Fee of $42 is the monthly account charge."
+  }
+}
+```
+
+</Details>
+
+Who calls start and how fan-out works: [Agent Front Door call map](/intent/enterprise-agent-fabric/agent-front-door#call-map).
+
+---
+
+## 3. Shared
+
+**Memory**, **RAG**, and **Tools** sit in Shared. The **Agent Capability Registry** sits with Agent Plane. NAR calls them. They are not a third AFD and not inside NAR.
+
+After freeze, NAR **downloads the whole pinned manifest**, hydrates each `id@version` onto the run pin, then sends schemas only to the LLM. It does not fetch a tool mid-loop. Domain `invoke` hits a governed business API. Agent-start `invoke` hits the API AFD jobs URL. [Agent Capability Registry](/intent/enterprise-agent-fabric/agent-capability-registry).
+
+Shared is not a side door. Tools and PEP run only after the freeze. Every tool call dual-checks **user** (live claims or stored approval) and **agent** (route-scoped bearer). NAR proposes; Shared enforces. If Shared is down, routing still works and NAR degrades.
+
+---
+
+## 4. Scaling {#scaling}
+
+Run capacity is a different fleet from decide. NAR instances scale per `activation_target`, independent of Agent Plane.
+
+| Axis | Grows with | Does not grow with | Scale signal |
+| --- | --- | --- | --- |
+| **NAR instances** | In-flight runs per `activation_target` | Agent Plane decide QPS | Per-fabric queue depth |
+| **Shared (Memory, RAG, Tools)** | In-flight NAR calls | Decide RPS | Per-capability latency / error rate |
+| **Agent Capability Registry** | Pin hydrates (refs per new run) | Tokens in the loop, SSE | Hydrate p99, catalog QPS |
+
+Loop may take seconds to minutes. Not on the decide clock. After `202`, a NAR failure is a controlled error, not a fake success.
+
+AFD and Plane scale: [Agent Front Door](/intent/enterprise-agent-fabric/agent-front-door#scaling) · [Agent Plane](/intent/enterprise-agent-fabric/agent-plane#scaling). Fabric isolation: [Enterprise Agent Fabric](/intent/enterprise-agent-fabric#isolation-and-shed).
+
+---
+
+## Read next
+
+**[Agent Capability Registry](/intent/enterprise-agent-fabric/agent-capability-registry)** · [Agent Front Door](/intent/enterprise-agent-fabric/agent-front-door) · [Agent Plane](/intent/enterprise-agent-fabric/agent-plane) · [Three principals](/intent/enterprise-agent-fabric#three-principals) · [Session custody](/playbooks/agents/orchestration/session-custody) · [Token and session boundary](/playbooks/governance/runtime/foundation/token-and-session-boundary) · [Wire agentic app](/playbooks/agents/intent-router/wire-agentic-app)

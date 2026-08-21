@@ -1,0 +1,22 @@
+{
+  "id": "start_contract_review",
+  "version": "1.0.0",
+  "kind": "agent_start",
+  "description": "Start governed Legal MSA review as a jobs run.",
+  "input_schema": {
+    "type": "object",
+    "required": ["document_id"],
+    "properties": {
+      "document_id": { "type": "string" },
+      "matter_id": { "type": "string" }
+    }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api-afd.internal/v1/jobs",
+    "auth": "calling-agent-oauth",
+    "body": { "route_id": "contract_review" }
+  },
+  "status": "published",
+  "owner": "legal-agents"
+}

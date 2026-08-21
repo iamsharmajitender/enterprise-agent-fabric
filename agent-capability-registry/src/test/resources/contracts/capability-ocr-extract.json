@@ -1,0 +1,23 @@
+{
+  "id": "ocr_extract",
+  "version": "1.2.0",
+  "kind": "domain",
+  "description": "Extract text from a document id.",
+  "input_schema": {
+    "type": "object",
+    "required": ["doc_id"],
+    "properties": { "doc_id": { "type": "string" } }
+  },
+  "output_schema": {
+    "type": "object",
+    "required": ["text"],
+    "properties": { "text": { "type": "string" } }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api.internal/ocr/extract",
+    "auth": "domain-oauth"
+  },
+  "status": "published",
+  "owner": "document-intel"
+}

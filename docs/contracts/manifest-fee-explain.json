@@ -1,0 +1,13 @@
+{
+  "manifest_id": "fee_explain_v1",
+  "manifest_version": "2026.08.1",
+  "tools": [
+    {
+      "name": "account_fee_lookup",
+      "capability_id": "account_fee_lookup",
+      "capability_version": "1.0.0",
+      "pdp_action": "account_fee_lookup",
+      "risk_tier": "low"
+    }
+  ]
+}

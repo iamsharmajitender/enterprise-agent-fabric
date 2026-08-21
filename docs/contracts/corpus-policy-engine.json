@@ -1,0 +1,10 @@
+{
+  "corpus_id": "policy-engine",
+  "display_name": "Policy engine",
+  "url": "https://retrieve.internal/v1/search",
+  "collection": "policy-engine",
+  "auth": "workload-oauth",
+  "owner": "policy-ops",
+  "status": "published",
+  "region": null
+}

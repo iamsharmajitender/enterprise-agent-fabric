@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" class="light" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Enterprise Agent Fabric</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=header-sticky" />
+  </head>
+  <body>
+    <a class="skip" href="#page">Skip to content</a>
+    <header class="top">
+      <div class="brand">
+        <p class="kicker">Control Plane</p>
+        <a href="/" class="brand-home"><h1>Enterprise Agent Fabric</h1></a>
+      </div>
+      <p id="table-meta" class="meta" aria-live="polite">Loading catalogue…</p>
+      <nav class="header-actions" aria-label="External tools">
+        <a
+          class="header-btn"
+          href="http://localhost:3000/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Observability</a>
+        <a
+          class="header-btn"
+          href="http://localhost:3005/chat.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Scratchpad</a>
+      </nav>
+    </header>
+    <div id="status" class="banner" role="alert" hidden></div>
+    <main class="page" id="page" tabindex="-1"></main>
+    <script src="/app.js?v=landing-grid" type="module"></script>
+  </body>
+</html>

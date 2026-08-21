@@ -1,0 +1,21 @@
+package com.fabric.adp.adapters.in.http;
+
+import com.fabric.adp.application.HealthService;
+import com.fabric.adp.domain.HealthStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HealthController {
+
+  private final HealthService healths;
+
+  public HealthController(HealthService healths) {
+    this.healths = healths;
+  }
+
+  @GetMapping("/health")
+  public HealthStatus health() {
+    return healths.current();
+  }
+}

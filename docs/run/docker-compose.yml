@@ -1,0 +1,142 @@
+# Local fabric only. One Compose file, one Postgres, four databases.
+# From repo root: ./docs/run/start-app.sh
+# App services join this file. Control Plane UI is on 3006 (catalogue browser; no database).
+# Adminer (Postgres GUI): http://localhost:8080 — System PostgreSQL, Server postgres, user/password fabric.
+# Grafana LGTM (OTel): http://localhost:3000 — admin/admin. OTLP gRPC 4317, OTLP HTTP 4318.
+
+name: agent-fabric
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    image: agent-fabric-postgres:16
+    environment:
+      POSTGRES_USER: fabric
+      POSTGRES_PASSWORD: fabric
+      POSTGRES_DB: afd
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fabric -d afd"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer:5
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent-capability-registry:
+    build:
+      context: ../../agent-capability-registry
+      dockerfile: Dockerfile
+    image: agent-fabric-registry:0.1.0
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/acr
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+    ports:
+      - "3009:3009"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  agent-data-plane:
+    build:
+      context: ../../agent-data-plane
+      dockerfile: Dockerfile
+    image: agent-fabric-data-plane:0.1.0
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/adp
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  agent-control-plane:
+    build:
+      context: ../../agent-control-plane
+      dockerfile: Dockerfile
+    image: agent-fabric-control-plane:0.1.0
+    environment:
+      ADP_BASE_URL: http://agent-data-plane:3007
+      ACR_BASE_URL: http://agent-capability-registry:3009
+      PORT: "3006"
+    ports:
+      - "3006:3006"
+    depends_on:
+      agent-data-plane:
+        condition: service_started
+      agent-capability-registry:
+        condition: service_started
+    restart: unless-stopped
+
+  agent-runtime:
+    build:
+      context: ../../agent-runtime
+      dockerfile: Dockerfile
+    image: agent-fabric-runtime:0.1.0
+    environment:
+      DATABASE_URL: postgresql+psycopg://fabric:fabric@postgres:5432/ar
+      DATA_PLANE_URL: http://agent-data-plane:3007
+      REGISTRY_URL: http://agent-capability-registry:3009
+    ports:
+      - "3008:3008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-data-plane:
+        condition: service_started
+      agent-capability-registry:
+        condition: service_started
+
+  agent-front-door:
+    build:
+      context: ../../agent-front-door
+      dockerfile: Dockerfile
+    image: agent-fabric-front-door:0.1.0
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/afd
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+      DATA_PLANE_URL: http://agent-data-plane:3007
+      RUNTIME_URL: http://agent-runtime:3008
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-data-plane:
+        condition: service_started
+      agent-runtime:
+        condition: service_started
+
+  otel-lgtm:
+    image: grafana/otel-lgtm:latest
+    ports:
+      - "3000:3000"   # Grafana Web UI
+      - "4317:4317"   # OTLP gRPC ingestion
+      - "4318:4318"   # OTLP HTTP ingestion
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - lgtm-data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  lgtm-data:

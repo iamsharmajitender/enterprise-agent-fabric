@@ -1,0 +1,473 @@
+-- Teaching capabilities and manifests. Scripts/seed is the operational source of truth.
+DELETE FROM registry.manifests;
+DELETE FROM registry.capabilities;
+
+INSERT INTO registry.capabilities (
+  id, version, kind, description, input_schema, output_schema, invoke, snippet, owner, status
+) VALUES
+(
+  'web_search',
+  '1.0.0',
+  'domain',
+  'Search the public web.',
+  '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/search/web","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'assistant-platform',
+  'published'
+),
+(
+  'fetch_url',
+  '1.0.0',
+  'domain',
+  'Fetch a URL and return text.',
+  '{"type":"object","required":["url"],"properties":{"url":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/fetch","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'assistant-platform',
+  'published'
+),
+(
+  'note_store',
+  '1.0.0',
+  'domain',
+  'Store a research note.',
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/notes","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'assistant-platform',
+  'published'
+),
+(
+  'draft_brief',
+  '1.0.0',
+  'domain',
+  'Draft a research brief.',
+  '{"type":"object","required":["audience"],"properties":{"audience":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/briefs","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'assistant-platform',
+  'published'
+),
+(
+  'draft_memo',
+  '1.0.0',
+  'domain',
+  'Draft a counsel-ready memo.',
+  '{"type":"object","required":["audience"],"properties":{"audience":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/legal/memo","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'legal-agents',
+  'published'
+),
+(
+  'ocr_extract',
+  '1.2.0',
+  'domain',
+  'Extract text from a document id.',
+  '{"type":"object","required":["doc_id"],"properties":{"doc_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/ocr/extract","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'document-intel',
+  'published'
+),
+(
+  'risk_engine',
+  '1.0.0',
+  'domain',
+  'Score risk from extracted clauses.',
+  '{"type":"object","required":["score_profile"],"properties":{"score_profile":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/legal/risk","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'legal-agents',
+  'published'
+),
+(
+  'account_fee_lookup',
+  '1.0.0',
+  'domain',
+  'Look up why an account was charged a fee.',
+  '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/fees/explain","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'accounts',
+  'published'
+),
+(
+  'clause_search',
+  '1.0.0',
+  'domain',
+  'Search extracted text for clause topics.',
+  '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/legal/clauses/search","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'legal-agents',
+  'published'
+),
+(
+  'policy_search',
+  '1.0.0',
+  'domain',
+  'Search a policy or playbook corpus.',
+  '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/legal/playbook/search","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'legal-agents',
+  'published'
+),
+(
+  'notify_customer',
+  '1.0.0',
+  'domain',
+  'Send a customer notification.',
+  '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/notify","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'ops',
+  'published'
+),
+(
+  'identity_check',
+  '1.0.0',
+  'domain',
+  'Verify cardholder identity.',
+  '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/cards/identity","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'cards',
+  'published'
+),
+(
+  'limit_check',
+  '1.0.0',
+  'domain',
+  'Check product and freeze limits.',
+  '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/cards/limits","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'cards',
+  'published'
+),
+(
+  'freeze_card',
+  '1.0.0',
+  'domain',
+  'Freeze a payment card.',
+  '{"type":"object","required":["card_id"],"properties":{"card_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/cards/freeze","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'cards',
+  'published'
+),
+(
+  'doc_intake',
+  '1.0.0',
+  'domain',
+  'Collect and store onboarding documents.',
+  '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/kyc/docs","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'kyc-ops',
+  'published'
+),
+(
+  'case_open',
+  '1.0.0',
+  'domain',
+  'Open a dispute case.',
+  '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/disputes/open","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'ops',
+  'published'
+),
+(
+  'packet_summarize',
+  '1.0.0',
+  'domain',
+  'Summarize an intake packet.',
+  '{"type":"object","required":["packet_id"],"properties":{"packet_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/disputes/summarize","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'ops',
+  'published'
+),
+(
+  'id_verify',
+  '1.0.0',
+  'domain',
+  'Verify identity documents for KYC.',
+  '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/kyc/id-verify","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'kyc-ops',
+  'published'
+),
+(
+  'sanctions_api',
+  '1.0.0',
+  'domain',
+  'Screen a customer against sanctions lists.',
+  '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/kyc/sanctions","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'financial-crime',
+  'published'
+),
+(
+  'kyc_risk_engine',
+  '1.0.0',
+  'domain',
+  'Score KYC risk as low or high.',
+  '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/kyc/risk","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'kyc-ops',
+  'published'
+),
+(
+  'account_activate',
+  '1.0.0',
+  'domain',
+  'Activate a customer account after KYC approvals.',
+  '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/kyc/activate","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'kyc-ops',
+  'published'
+),
+(
+  'parse_ticket',
+  '1.0.0',
+  'domain',
+  'Parse a support ticket.',
+  '{"type":"object","required":["ticket_id"],"properties":{"ticket_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/tickets/parse","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'ops',
+  'published'
+),
+(
+  'tag_intent',
+  '1.0.0',
+  'domain',
+  'Tag ticket intent.',
+  '{"type":"object","required":["ticket_id"],"properties":{"ticket_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/tickets/tag","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'ops',
+  'published'
+),
+(
+  'draft_reply',
+  '1.0.0',
+  'domain',
+  'Draft a ticket reply.',
+  '{"type":"object","required":["ticket_id"],"properties":{"ticket_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/tickets/reply","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'ops',
+  'published'
+),
+(
+  'score_offer',
+  '1.0.0',
+  'domain',
+  'Score a product offer.',
+  '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/product/score","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'product',
+  'published'
+),
+(
+  'compare_options',
+  '1.0.0',
+  'domain',
+  'Compare product options.',
+  '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"https://api.internal/product/compare","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'product',
+  'published'
+);
+
+INSERT INTO registry.manifests (manifest_id, manifest_version, tools, status) VALUES
+(
+  'search_only', '2026.08.1', '[{"name":"web_search","capability_id":"web_search","capability_version":"1.0.0","pdp_action":"web_search","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'research_assistant', '2026.08.1', $$[
+    {"name":"web_search","capability_id":"web_search","capability_version":"1.0.0","pdp_action":"web_search","risk_tier":"low"},
+    {"name":"fetch_url","capability_id":"fetch_url","capability_version":"1.0.0","pdp_action":"fetch_url","risk_tier":"low"},
+    {"name":"note_store","capability_id":"note_store","capability_version":"1.0.0","pdp_action":"note_store","risk_tier":"low"},
+    {"name":"draft_brief","capability_id":"draft_brief","capability_version":"1.0.0","pdp_action":"draft_brief","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'fraud_one_tool', '2026.08.1', '[{"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}]'::jsonb,
+  'published'
+),
+(
+  'fraud_casefile', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'fee_explain', '2026.08.1', '[{"name":"account_fee_lookup","capability_id":"account_fee_lookup","capability_version":"1.0.0","pdp_action":"account_fee_lookup","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'contract_investigate', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"policy_search","capability_id":"policy_search","capability_version":"1.0.0","pdp_action":"policy_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'account_notify', '2026.08.1', '[{"name":"notify_customer","capability_id":"notify_customer","capability_version":"1.0.0","pdp_action":"notify_customer","risk_tier":"medium"}]'::jsonb,
+  'published'
+),
+(
+  'card_freeze', '2026.08.1', $$[
+    {"name":"identity_check","capability_id":"identity_check","capability_version":"1.0.0","pdp_action":"identity_check","risk_tier":"medium"},
+    {"name":"limit_check","capability_id":"limit_check","capability_version":"1.0.0","pdp_action":"limit_check","risk_tier":"medium"},
+    {"name":"freeze_card","capability_id":"freeze_card","capability_version":"1.0.0","pdp_action":"freeze_card","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'dispute_intake', '2026.08.1', $$[
+    {"name":"doc_intake","capability_id":"doc_intake","capability_version":"1.0.0","pdp_action":"doc_intake","risk_tier":"low"},
+    {"name":"case_open","capability_id":"case_open","capability_version":"1.0.0","pdp_action":"case_open","risk_tier":"medium"},
+    {"name":"packet_summarize","capability_id":"packet_summarize","capability_version":"1.0.0","pdp_action":"packet_summarize","risk_tier":"low"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'clause_lookup', '2026.08.1', '[{"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'template_retrieve', '2026.08.1', $$[
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"policy_search","capability_id":"policy_search","capability_version":"1.0.0","pdp_action":"policy_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'msa_risk_review', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"policy_search","capability_id":"policy_search","capability_version":"1.0.0","pdp_action":"policy_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'kyc_onboarding', '2026.08.1', $$[
+    {"name":"doc_intake","capability_id":"doc_intake","capability_version":"1.0.0","pdp_action":"doc_intake","risk_tier":"low"},
+    {"name":"id_verify","capability_id":"id_verify","capability_version":"1.0.0","pdp_action":"id_verify","risk_tier":"medium"},
+    {"name":"sanctions_api","capability_id":"sanctions_api","capability_version":"1.0.0","pdp_action":"sanctions_screen","risk_tier":"high"},
+    {"name":"kyc_risk_engine","capability_id":"kyc_risk_engine","capability_version":"1.0.0","pdp_action":"kyc_risk_score","risk_tier":"medium"},
+    {"name":"account_activate","capability_id":"account_activate","capability_version":"1.0.0","pdp_action":"account_activate","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'claims_adjudicate', '2026.08.1', $$[
+    {"name":"policy_search","capability_id":"policy_search","capability_version":"1.0.0","pdp_action":"policy_search","risk_tier":"low"},
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'ticket_triage', '2026.08.1', $$[
+    {"name":"parse_ticket","capability_id":"parse_ticket","capability_version":"1.0.0","pdp_action":"parse_ticket","risk_tier":"low"},
+    {"name":"tag_intent","capability_id":"tag_intent","capability_version":"1.0.0","pdp_action":"tag_intent","risk_tier":"low"},
+    {"name":"draft_reply","capability_id":"draft_reply","capability_version":"1.0.0","pdp_action":"draft_reply","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'product_explain', '2026.08.1', $$[
+    {"name":"score_offer","capability_id":"score_offer","capability_version":"1.0.0","pdp_action":"score_offer","risk_tier":"low"},
+    {"name":"compare_options","capability_id":"compare_options","capability_version":"1.0.0","pdp_action":"compare_options","risk_tier":"low"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'narrow_review', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'contract_review', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"policy_search","capability_id":"policy_search","capability_version":"1.0.0","pdp_action":"policy_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'due_diligence', '2026.08.1', $$[
+    {"name":"policy_search","capability_id":"policy_search","capability_version":"1.0.0","pdp_action":"policy_search","risk_tier":"low"},
+    {"name":"clause_search","capability_id":"clause_search","capability_version":"1.0.0","pdp_action":"clause_search","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'pack_then_review', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+);
+

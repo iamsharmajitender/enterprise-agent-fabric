@@ -1,0 +1,23 @@
+{
+  "id": "account_fee_lookup",
+  "version": "1.0.0",
+  "kind": "domain",
+  "description": "Look up why an account was charged a fee.",
+  "input_schema": {
+    "type": "object",
+    "required": ["account_id"],
+    "properties": { "account_id": { "type": "string" } }
+  },
+  "output_schema": {
+    "type": "object",
+    "required": ["text"],
+    "properties": { "text": { "type": "string" } }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api.internal/fees/explain",
+    "auth": "domain-oauth"
+  },
+  "owner": "accounts",
+  "status": "published"
+}

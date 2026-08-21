@@ -1,0 +1,9 @@
+server.port: 3007
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/adp}
+    username: ${SPRING_DATASOURCE_USERNAME:fabric}
+    password: ${SPRING_DATASOURCE_PASSWORD:fabric}
+  flyway:
+    enabled: true

@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Cursor (local to this machine; not part of the product)
+.cursor/
+AGENTS.md
+
+# IntelliJ (Java services)
+.idea/
+*.iml
+
+# Env / secrets — keep committed examples
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Node (agent-control-plane)
+node_modules/
+dist/
+
+# Maven (agent-front-door, agent-data-plane, agent-capability-registry)
+target/
+
+# Python / uv (agent-runtime)
+.venv/
+__pycache__/
+.pytest_cache/

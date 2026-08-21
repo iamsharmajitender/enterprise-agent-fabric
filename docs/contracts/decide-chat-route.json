@@ -1,0 +1,8 @@
+{
+  "outcome": "route",
+  "intent_label": "fee_explain",
+  "route_id": "fee_explain",
+  "route_version": "2026.08.1",
+  "confidence": 0.91,
+  "eligible_routes": ["fee_explain", "account_history", "policy_qa"]
+}

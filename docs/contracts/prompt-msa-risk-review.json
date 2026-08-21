@@ -1,0 +1,17 @@
+{
+  "prompt_id": "msa_risk_review_v1",
+  "prompt_version": "2026.08.1",
+  "host": "You are counsel's MSA risk-review worker. Do only the current stage. Do not choose the next stage. Do not invent tools.",
+  "status": "published",
+  "owner": "legal-agents",
+  "by_llm_role": {
+    "query_formulation": {
+      "task_type": "plan",
+      "text": "Write the search query for this stage's corpus only. Do not pick a different index."
+    },
+    "synthesis": {
+      "task_type": "synthesize",
+      "text": "Draft the counsel memo from validated stage outputs only. Ground claims in retrieved clauses and playbook hits."
+    }
+  }
+}

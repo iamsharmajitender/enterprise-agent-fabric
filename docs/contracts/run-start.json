@@ -1,0 +1,17 @@
+{
+  "mode": "new",
+  "idempotency_key": "sess-88:fee_explain:v1",
+  "session_id": "sess-88",
+  "route_id": "fee_explain",
+  "route_version": "2026.08.1",
+  "activation_target": "http://agent-runtime:3008/v1/runs",
+  "agent_client_id": "fee-explain-v1",
+  "contract": {
+    "tool_manifest": "fee_explain_v1",
+    "manifest_version": "2026.08.1",
+    "policy_profile": "accounts_read",
+    "model_profile": "stub",
+    "max_loop_steps": 12
+  },
+  "goal": { "utterance": "Why was I charged $42?" }
+}

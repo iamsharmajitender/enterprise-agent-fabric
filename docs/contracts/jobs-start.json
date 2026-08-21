@@ -1,0 +1,5 @@
+{
+  "route_id": "fee_explain",
+  "idempotency_key": "job-fee-explain:v1",
+  "payload": { "account_id": "acc-42" }
+}

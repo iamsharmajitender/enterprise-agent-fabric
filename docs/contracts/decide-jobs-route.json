@@ -1,0 +1,8 @@
+{
+  "ingress": "jobs",
+  "channel": "web",
+  "session_id": "job:job-fee-explain:v1",
+  "message": null,
+  "route_id": "fee_explain",
+  "claims": { "sub": "jane", "emts": { "accounts:read": true } }
+}

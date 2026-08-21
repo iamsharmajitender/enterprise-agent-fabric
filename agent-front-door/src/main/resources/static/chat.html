@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Front Door scratchpad</title>
+<style>
+  :root { color-scheme: light; font: 16px/1.45 ui-sans-serif, system-ui, sans-serif; }
+  body { max-width: 40rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; background: #fafafa; }
+  h1 { font-size: 1.125rem; margin: 0 0 0.25rem; }
+  .muted { color: #555; font-size: 0.875rem; margin: 0 0 1rem; }
+  nav { font-size: 0.875rem; margin: 0 0 1rem; }
+  nav a { color: #1a1a1a; }
+  #log {
+    height: 22rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: #888 #eee;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 0.75rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  #log::-webkit-scrollbar { width: 0.75rem; }
+  #log::-webkit-scrollbar-track { background: #eee; }
+  #log::-webkit-scrollbar-thumb { background: #888; border: 2px solid #eee; }
+  form { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+  label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  input, button { font: inherit; padding: 0.5rem 0.75rem; }
+  input { flex: 1; }
+  button:focus-visible, input:focus-visible, a:focus-visible, #log:focus-visible { outline: 2px solid #1a1a1a; outline-offset: 2px; }
+</style>
+<nav>Chat · <a href="/jobs.html">Jobs</a></nav>
+<h1>Channel scratchpad</h1>
+<p class="muted">Same-origin posts to this Front Door. Not a product. Stub user jane. Chat APIs 404 until <code>/v1/assistant/*</code> lands.</p>
+<div id="log" role="log" aria-live="polite" aria-label="Conversation" tabindex="0"></div>
+<form id="f">
+  <label for="m">Message</label>
+  <input id="m" name="message" autocomplete="off" value="Why was I charged $42?">
+  <button type="submit">Send</button>
+</form>
+<script>
+const headers = {
+  Authorization: "Bearer stub",
+  "Content-Type": "application/json",
+  "X-Stub-Claims": '{"sub":"jane","emts":{"accounts:read":true}}',
+};
+let sessionId = null;
+const logEl = document.getElementById("log");
+const log = (line) => {
+  logEl.textContent += line + "\n";
+  logEl.scrollTop = logEl.scrollHeight;
+};
+async function api(path, opt = {}) {
+  const res = await fetch(path, { headers, ...opt });
+  const text = await res.text();
+  let body; try { body = JSON.parse(text); } catch { body = { raw: text }; }
+  if (!res.ok) throw new Error(res.status + " " + text);
+  return body;
+}
+async function poll(id) {
+  for (let i = 0; i < 40; i++) {
+    const ev = await api("/v1/assistant/sessions/" + encodeURIComponent(id) + "/events");
+    const msg = ev.message || ev.result?.message;
+    if (ev.status === "completed" || msg) { log("assistant: " + (msg || JSON.stringify(ev))); return; }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  log("(poll timeout)");
+}
+document.getElementById("f").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const message = document.getElementById("m").value.trim();
+  if (!message) return;
+  log("you: " + message);
+  try {
+    const turn = await api("/v1/assistant/turns", {
+      method: "POST",
+      body: JSON.stringify({ session_id: sessionId, message, hint_id: null, option_id: null }),
+    });
+    sessionId = turn.session_id || sessionId;
+    if (turn.status === "accepted") await poll(sessionId);
+    else if (turn.status === "clarify") log("clarify: " + turn.prompt);
+    else if (turn.status === "abstain") log("abstain: " + (turn.prompt || JSON.stringify(turn)));
+    else log(JSON.stringify(turn));
+  } catch (err) { log("error: " + err.message); }
+});
+(async () => {
+  try {
+    const hints = await api("/v1/assistant/hints");
+    sessionId = hints.session_id || sessionId;
+    const labels = (hints.hints || []).map((h) => h.label).filter(Boolean);
+    if (labels.length) log("hints: " + labels.join(", "));
+  } catch (err) { log("hints unavailable (" + err.message + ")"); }
+})();
+</script>

@@ -1,0 +1,28 @@
+{
+  "manifest_id": "fraud_investigate_v2",
+  "manifest_version": "2026.08.1",
+  "description": "Fraud investigate: domain tools plus Legal start",
+  "tools": [
+    {
+      "name": "search_transactions",
+      "capability_id": "search_transactions",
+      "capability_version": "1.4.0",
+      "pdp_action": "search_transactions",
+      "risk_tier": "low"
+    },
+    {
+      "name": "ocr_extract",
+      "capability_id": "ocr_extract",
+      "capability_version": "1.2.0",
+      "pdp_action": "ocr_extract",
+      "risk_tier": "low"
+    },
+    {
+      "name": "start_contract_review",
+      "capability_id": "start_contract_review",
+      "capability_version": "1.0.0",
+      "pdp_action": "start_contract_review",
+      "risk_tier": "high"
+    }
+  ]
+}

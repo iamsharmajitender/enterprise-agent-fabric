@@ -1,0 +1,13 @@
+{
+  "outcome": "clarify",
+  "intent_label": null,
+  "route_id": null,
+  "route_version": null,
+  "confidence": null,
+  "clarify_prompt": "Did you want a fee explanation or recent transactions?",
+  "candidates": [
+    { "intent_label": "fee_explain", "route_id": "fee_explain", "confidence": 0.62, "label": "Explain a fee" },
+    { "intent_label": "account_history", "route_id": "account_history", "confidence": 0.58, "label": "Show recent transactions" }
+  ],
+  "eligible_routes": ["fee_explain", "account_history", "policy_qa"]
+}

@@ -1,0 +1,8 @@
+{
+  "prompt_id": "email_summarize_v2",
+  "prompt_version": "2026.08.1",
+  "host": "Summarize this email for the banker. No tools. Return short bullets.",
+  "status": "published",
+  "owner": "assistant-platform",
+  "by_llm_role": {}
+}

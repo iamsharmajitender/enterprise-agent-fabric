@@ -1,0 +1,13 @@
+server.port: 3005
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/afd}
+    username: ${SPRING_DATASOURCE_USERNAME:fabric}
+    password: ${SPRING_DATASOURCE_PASSWORD:fabric}
+  flyway:
+    enabled: true
+
+fabric:
+  data-plane-url: ${DATA_PLANE_URL:http://localhost:3007}
+  runtime-url: ${RUNTIME_URL:http://localhost:3008}

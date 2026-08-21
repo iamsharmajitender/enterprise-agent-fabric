@@ -1,0 +1,8 @@
+{
+  "ingress": "chat",
+  "channel": "web",
+  "session_id": "sess-88",
+  "message": "Why was I charged $42?",
+  "route_id": null,
+  "claims": { "sub": "jane", "emts": { "accounts:read": true } }
+}

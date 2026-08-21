@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start, hydrate, 202, then loop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f8fafc; --color-ink: #1e293b; --color-muted: #64748b;
+      --color-accent: #3b82f6; --font-sans: 'Inter', sans-serif;
+      --font-serif: 'Instrument Serif', serif; --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    body {
+      font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Sequence · Agent Runtime</p>
+    <h1>Start, hydrate, 202, then loop</h1>
+    <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="runtime-seq-start-title runtime-seq-start-desc">
+      <title id="runtime-seq-start-title">Start, hydrate, 202, then loop</title>
+      <desc id="runtime-seq-start-desc">AFD posts the freeze. NAR reads the pinned catalogue row, hydrates every capability, mints the agent token, returns 202, then runs. The loop is not on the decide clock.</desc>
+      <defs>
+        <marker id="runtime-seq-start-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
+        <marker id="runtime-seq-start-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/></marker>
+        <marker id="runtime-seq-start-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2563eb"/></marker>
+        <marker id="runtime-seq-start-arrow-open" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polyline points="0 0, 8 3, 0 6" fill="none" stroke="#64748b" stroke-width="1.2"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+      <line x1="96" y1="136" x2="96" y2="456" stroke="rgba(30,41,59,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="288" y1="136" x2="288" y2="456" stroke="rgba(30,41,59,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="480" y1="136" x2="480" y2="456" stroke="rgba(30,41,59,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="672" y1="136" x2="672" y2="456" stroke="rgba(30,41,59,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="864" y1="136" x2="864" y2="456" stroke="rgba(30,41,59,0.20)" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="284" y="176" width="8" height="248" fill="rgba(30,41,59,0.06)" stroke="#64748b" stroke-width="0.8"/>
+      <line x1="96" y1="176" x2="288" y2="176" stroke="#2563eb" stroke-width="1.2" marker-end="url(#runtime-seq-start-arrow-link)"/>
+      <line x1="288" y1="216" x2="480" y2="216" stroke="#64748b" stroke-width="1.2" marker-end="url(#runtime-seq-start-arrow)"/>
+      <line x1="288" y1="256" x2="672" y2="256" stroke="#64748b" stroke-width="1.2" marker-end="url(#runtime-seq-start-arrow)"/>
+      <line x1="288" y1="304" x2="864" y2="304" stroke="#64748b" stroke-width="1.2" marker-end="url(#runtime-seq-start-arrow)"/>
+      <line x1="288" y1="352" x2="104" y2="352" stroke="#3b82f6" stroke-width="1.4" marker-end="url(#runtime-seq-start-arrow-accent)"/>
+      <line x1="288" y1="400" x2="864" y2="400" stroke="#64748b" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#runtime-seq-start-arrow)"/>
+      <rect x="136" y="160" width="64" height="12" rx="2" fill="#f8fafc"/>
+      <text x="168" y="169" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">POST RUN</text>
+      <rect x="336" y="200" width="56" height="12" rx="2" fill="#f8fafc"/>
+      <text x="364" y="209" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ROW GET</text>
+      <rect x="424" y="240" width="64" height="12" rx="2" fill="#f8fafc"/>
+      <text x="456" y="249" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
+      <rect x="520" y="288" width="48" height="12" rx="2" fill="#f8fafc"/>
+      <text x="544" y="297" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">MINT</text>
+      <rect x="136" y="336" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="152" y="345" fill="#3b82f6" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
+      <rect x="520" y="384" width="48" height="12" rx="2" fill="#f8fafc"/>
+      <text x="544" y="393" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">INVOKE</text>
+      <rect x="24" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="24" y="72" width="144" height="56" rx="6" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
+      <rect x="32" y="78" width="28" height="12" rx="2" fill="transparent" stroke="#94a3b8" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="46" y="87" fill="#94a3b8" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AFD</text>
+      <text x="96" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">AFD</text>
+      <text x="96" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">starter</text>
+      <rect x="216" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="216" y="72" width="144" height="56" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <rect x="224" y="78" width="28" height="12" rx="2" fill="transparent" stroke="#3b82f6" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="238" y="87" fill="#3b82f6" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAR</text>
+      <text x="288" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">NAR</text>
+      <text x="288" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">this box</text>
+      <rect x="408" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="408" y="72" width="144" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="416" y="78" width="28" height="12" rx="2" fill="transparent" stroke="#1e293b" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="430" y="87" fill="#1e293b" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DP</text>
+      <text x="480" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Data Plane</text>
+      <text x="480" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">pinned row</text>
+      <rect x="600" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="600" y="72" width="144" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="608" y="78" width="28" height="12" rx="2" fill="transparent" stroke="#1e293b" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="622" y="87" fill="#1e293b" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">REG</text>
+      <text x="672" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Registry</text>
+      <text x="672" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">id@version</text>
+      <rect x="792" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="792" y="72" width="144" height="56" rx="6" fill="rgba(30,41,59,0.03)" stroke="rgba(30,41,59,0.30)" stroke-width="1"/>
+      <rect x="800" y="78" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.30)" stroke-opacity="0.40" stroke-width="0.8"/>
+      <text x="814" y="87" fill="rgba(30,41,59,0.30)" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">IDP</text>
+      <text x="864" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">IdP / PEP</text>
+      <text x="864" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">token · tools</text>
+      <line x1="40" y1="480" x2="920" y2="480" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="40" y="500" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.18em">LEGEND</text>
+      <rect x="40" y="516" width="14" height="10" rx="2" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="60" y="525" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAR</text>
+      <rect x="140" y="516" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="160" y="525" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Hydrate</text>
+    </svg>
+  </div>
+</body>
+</html>
