@@ -1,6 +1,6 @@
 -- Extra catalogue cuts: published / draft / retired (or deprecated) for each type,
 -- plus extra versions so History pages have something to compare.
--- Run after create-seed-data.sql via ./docs/run/seed-db.sh.
+-- Run after create-seed-data.sql via ./docs/run/scripts/seed-db.sh.
 
 \c acr
 
@@ -13,7 +13,7 @@ INSERT INTO registry.capabilities (
   'Extract text from a document id (first cut, retired).',
   '{"type":"object","required":["doc_id"],"properties":{"doc_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/ocr/extract","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/ocr/extract","auth":"domain-oauth"}'::jsonb,
   NULL, 'document-intel', 'retired'
 ),
 (
@@ -21,7 +21,7 @@ INSERT INTO registry.capabilities (
   'Extract text from a document id (superseded published cut).',
   '{"type":"object","required":["doc_id"],"properties":{"doc_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/ocr/extract","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/ocr/extract","auth":"domain-oauth"}'::jsonb,
   NULL, 'document-intel', 'published'
 ),
 (
@@ -29,7 +29,7 @@ INSERT INTO registry.capabilities (
   'Search the public web (retired prototype).',
   '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/search/web","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/search/web","auth":"domain-oauth"}'::jsonb,
   NULL, 'assistant-platform', 'retired'
 ),
 (
@@ -37,7 +37,7 @@ INSERT INTO registry.capabilities (
   'Search the public web (draft next cut).',
   '{"type":"object","required":["query"],"properties":{"query":{"type":"string"},"site":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/search/web","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/search/web","auth":"domain-oauth"}'::jsonb,
   NULL, 'assistant-platform', 'draft'
 ),
 (
@@ -45,7 +45,7 @@ INSERT INTO registry.capabilities (
   'Draft invoice intake extractor, not published.',
   '{"type":"object","required":["doc_id"],"properties":{"doc_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["fields"],"properties":{"fields":{"type":"object"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/invoices/intake","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/invoices/intake","auth":"domain-oauth"}'::jsonb,
   NULL, 'document-intel', 'draft'
 ),
 (
@@ -53,7 +53,7 @@ INSERT INTO registry.capabilities (
   'Retired fax OCR. Do not activate again.',
   '{"type":"object","required":["fax_id"],"properties":{"fax_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/ocr/fax","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/ocr/fax","auth":"domain-oauth"}'::jsonb,
   NULL, 'document-intel', 'retired'
 ),
 (
@@ -61,7 +61,7 @@ INSERT INTO registry.capabilities (
   'Look up the entitled credit limit for an account. Not wired to a manifest yet.',
   '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["limit"],"properties":{"limit":{"type":"number"},"currency":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/credit/limit","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/credit/limit","auth":"domain-oauth"}'::jsonb,
   NULL, 'lending', 'published'
 );
 

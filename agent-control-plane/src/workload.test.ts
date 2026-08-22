@@ -15,5 +15,21 @@ test("package has no HTTP server or Postgres client", () => {
   const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
     dependencies?: Record<string, string>;
   };
-  assert.equal(pkg.dependencies, undefined);
+  const deps = Object.keys(pkg.dependencies ?? {});
+  const forbidden = deps.filter(
+    (name) =>
+      name === "express" ||
+      name === "fastify" ||
+      name === "koa" ||
+      name === "pg" ||
+      name === "postgres" ||
+      name.startsWith("@nestjs/"),
+  );
+  assert.deepEqual(forbidden, []);
+  for (const name of deps) {
+    assert.ok(
+      name.startsWith("@opentelemetry/"),
+      `unexpected runtime dependency: ${name}`,
+    );
+  }
 });

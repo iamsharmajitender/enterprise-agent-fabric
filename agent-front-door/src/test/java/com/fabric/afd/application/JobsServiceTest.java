@@ -10,6 +10,7 @@ import com.fabric.afd.domain.DecideOutcome;
 import com.fabric.afd.domain.EligibleRoute;
 import com.fabric.afd.domain.ForbiddenException;
 import com.fabric.afd.domain.FrozenRoute;
+import com.fabric.afd.domain.HydrateFailedException;
 import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
 import com.fabric.afd.domain.UnavailableException;
@@ -35,7 +36,7 @@ class JobsServiceTest {
     catalogue = new FakeCatalogue();
     runtime = new FakeRuntime();
     freeze = new InMemoryFreezeStore();
-    jobs = new JobsService(decide, catalogue, runtime, freeze);
+    jobs = new JobsService(decide, catalogue, runtime, freeze, new com.fabric.afd.application.BusinessEvents(new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
   }
 
   @Test
@@ -107,6 +108,15 @@ class JobsServiceTest {
   }
 
   @Test
+  void runtimeHydrateFailedPropagates() {
+    runtime.hydrateFail = true;
+    assertThatThrownBy(() -> jobs.start("llm_pipeline", "job-1", Map.of(), jane()))
+        .isInstanceOf(HydrateFailedException.class)
+        .hasMessage("no manifest, workflow, or prompt on pinned catalogue row");
+    assertThat(runtime.starts).isEmpty();
+  }
+
+  @Test
   void missingRouteIdIsBadRequest() {
     assertThatThrownBy(() -> jobs.start(" ", "job-1", Map.of(), jane()))
         .isInstanceOf(BadRequestException.class);
@@ -160,9 +170,13 @@ class JobsServiceTest {
     final List<RunStart> starts = new ArrayList<>();
     final List<String> statusIds = new ArrayList<>();
     boolean missing;
+    boolean hydrateFail;
 
     @Override
     public String start(RunStart start) {
+      if (hydrateFail) {
+        throw new HydrateFailedException("no manifest, workflow, or prompt on pinned catalogue row");
+      }
       starts.add(start);
       return "corr-9f3c";
     }

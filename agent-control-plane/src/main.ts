@@ -2,12 +2,15 @@ import { boot } from "./boot.js";
 import { acrBaseUrl, adpBaseUrl } from "./boot.js";
 import { DataPlaneClient } from "./data-plane-client.js";
 import { RegistryClient } from "./registry-client.js";
+import { startTelemetry, tracedFetch } from "./telemetry.js";
 import { createUiServer, listenPort } from "./ui-server.js";
 
+startTelemetry();
 boot();
 
-const client = new DataPlaneClient(adpBaseUrl());
-const registry = new RegistryClient(acrBaseUrl());
+const fetchImpl = tracedFetch(fetch);
+const client = new DataPlaneClient(adpBaseUrl(), fetchImpl);
+const registry = new RegistryClient(acrBaseUrl(), fetchImpl);
 const server = createUiServer(client, registry);
 const port = listenPort();
 server.listen(port, "0.0.0.0", () => {

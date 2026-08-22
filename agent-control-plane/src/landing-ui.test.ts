@@ -15,19 +15,59 @@ test("landing is titled Enterprise Agent Fabric", () => {
   assert.match(js, /Enterprise Agent Fabric/);
 });
 
-test("header has Observability then Scratchpad buttons that open in a new tab", () => {
+test("header has Glossary then Observability then Scratchpad", () => {
   assert.match(html, /class="header-actions"/);
   assert.match(html, /class="header-btn"/);
   assert.match(html, /href="http:\/\/localhost:3000\/"/);
   assert.match(html, /href="http:\/\/localhost:3005\/chat\.html"/);
   assert.match(html, /target="_blank"/);
+  assert.match(html, />Glossary</);
   assert.match(html, />Observability</);
   assert.match(html, />Scratchpad</);
+  const glossary = html.indexOf(">Glossary<");
   const observability = html.indexOf(">Observability<");
   const scratchpad = html.indexOf(">Scratchpad<");
-  assert.ok(observability > 0 && scratchpad > observability);
+  assert.ok(glossary > 0 && observability > glossary && scratchpad > observability);
   assert.match(css, /\.header-btn/);
   assert.match(css, /\.top \{[\s\S]*position:\s*sticky/);
+});
+
+test("glossary button opens a term table for catalogue rows and fields", () => {
+  assert.match(html, /id="glossary-open"/);
+  assert.match(html, /id="glossary"/);
+  assert.match(html, /role="dialog"/);
+  assert.match(html, /class="glossary__panel"/);
+  assert.match(html, /<details class="glossary__section">/);
+  assert.equal(html.includes('glossary__section" open'), false);
+  assert.match(html, /<summary>Route<\/summary>/);
+  assert.match(html, /<summary>Capability<\/summary>/);
+  assert.match(html, /<summary>Prompt<\/summary>/);
+  assert.match(html, /<summary>Workflow<\/summary>/);
+  assert.match(html, /<summary>Manifest<\/summary>/);
+  assert.match(html, />Route</);
+  assert.match(html, />Capability</);
+  assert.match(html, />Prompt</);
+  assert.match(html, />Workflow</);
+  assert.match(html, />Manifest</);
+  assert.match(html, />Intent</);
+  assert.match(html, />Autonomy</);
+  assert.match(html, />Activation target</);
+  assert.match(html, />Host</);
+  assert.match(html, />Stages</);
+  assert.match(html, />Tools</);
+  assert.match(html, />Active</);
+  assert.match(html, />Single inference</);
+  assert.match(html, /route_id/);
+  assert.match(html, /tool_manifest/);
+  assert.match(html, /aria-expanded="false"/);
+  assert.match(js, /function setGlossaryOpen/);
+  assert.match(js, /glossaryEl.hidden = !open/);
+  assert.match(js, /function closeOtherGlossarySections/);
+  assert.match(js, /section.open = false/);
+  assert.match(css, /\.glossary-table/);
+  assert.match(css, /\.glossary__panel/);
+  assert.match(css, /\.glossary\[hidden\]/);
+  assert.match(css, /\.glossary__section > summary/);
 });
 
 test("home shows a row of status tiles per catalogue type", () => {

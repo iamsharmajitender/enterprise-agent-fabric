@@ -1,0 +1,71 @@
+{
+  "_source": "Teaching seed chat-visible routes from docs/run/seed/create-seed-data.sql. Keyword classify unless hint_contains is set (overlapping keywords). {id} is replaced per run.",
+  "chats": [
+    {
+      "route_id": "agent-chat",
+      "autonomy_mode": 0,
+      "label": "Single inference",
+      "claims": [],
+      "message": "hello",
+      "hint_contains": "Pattern 0 cannot take tools"
+    },
+    {
+      "route_id": "chat_session",
+      "autonomy_mode": 0,
+      "label": "Single inference",
+      "claims": [],
+      "message": "hi",
+      "hint_contains": "session conversation memory"
+    },
+    {
+      "route_id": "agent-policy-qa",
+      "autonomy_mode": 0,
+      "label": "Single inference",
+      "claims": ["policy:read"],
+      "message": "What is the handbook procedure?",
+      "hint_contains": "App prefetches policy-engine and product-faq"
+    },
+    {
+      "route_id": "policy_chat",
+      "autonomy_mode": 0,
+      "label": "Single inference",
+      "claims": ["policy:read"],
+      "message": "policy handbook",
+      "hint_contains": "Prefetch of policy-engine plus session memory"
+    },
+    {
+      "route_id": "search_only",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": [],
+      "message": "search google for {id}"
+    },
+    {
+      "route_id": "research_assistant",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": [],
+      "message": "research sources for topic {id}"
+    },
+    {
+      "route_id": "fee_explain",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["accounts:read"],
+      "message": "Why was I charged $42?",
+      "expected_message": "Fee of $42 is the monthly account charge.",
+      "prove": {
+        "route_version": "2026.08.1",
+        "capability_id": "account_fee_lookup",
+        "capability_version": "1.0.0"
+      }
+    },
+    {
+      "route_id": "product_explain",
+      "autonomy_mode": 3,
+      "label": "Guided",
+      "claims": ["policy:read"],
+      "message": "Explain this loan offer {id}"
+    }
+  ]
+}

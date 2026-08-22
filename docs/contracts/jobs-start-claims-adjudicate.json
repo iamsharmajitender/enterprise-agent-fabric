@@ -1,0 +1,5 @@
+{
+  "route_id": "claims_adjudicate",
+  "idempotency_key": "job-claims-adjudicate:ollama-v1",
+  "payload": { "claim_id": "clm-1001" }
+}

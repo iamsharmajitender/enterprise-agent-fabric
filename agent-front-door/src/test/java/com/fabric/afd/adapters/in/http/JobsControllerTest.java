@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fabric.afd.application.BusinessEvents;
 import com.fabric.afd.application.CataloguePort;
 import com.fabric.afd.application.DecidePort;
 import com.fabric.afd.application.HealthService;
@@ -16,8 +17,10 @@ import com.fabric.afd.domain.DecideCall;
 import com.fabric.afd.domain.DecideOutcome;
 import com.fabric.afd.domain.EligibleRoute;
 import com.fabric.afd.domain.FrozenRoute;
+import com.fabric.afd.domain.HydrateFailedException;
 import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = {JobsController.class, HealthController.class, ApiExceptionHandler.class})
-@Import({ChannelAuthFilter.class, JobsControllerTest.MemConfig.class})
+@Import({RequestIdFilter.class, ChannelAuthFilter.class, JobsControllerTest.MemConfig.class})
 class JobsControllerTest {
 
   private static final String JANE = "{\"sub\":\"jane\",\"emts\":{\"accounts:read\":true}}";
@@ -121,6 +124,24 @@ class JobsControllerTest {
         .andExpect(status().isNotFound());
   }
 
+  @Test
+  void hydrateFailedIs422() throws Exception {
+    mvc.perform(
+            post("/v1/jobs")
+                .header("Authorization", "Bearer stub")
+                .header("X-Stub-Claims", JANE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"route_id":"llm_pipeline","idempotency_key":"hydrate-fail:v1","payload":{}}
+                    """))
+        .andExpect(status().isUnprocessableEntity())
+        .andExpect(jsonPath("$.error.code").value("HYDRATE_FAILED"))
+        .andExpect(
+            jsonPath("$.error.message")
+                .value("no manifest, workflow, or prompt on pinned catalogue row"));
+  }
+
   @TestConfiguration
   static class MemConfig {
     @Bean
@@ -130,7 +151,12 @@ class JobsControllerTest {
 
     @Bean
     JobsService jobsService() {
-      return new JobsService(new StubDecide(), new StubCatalogue(), new StubRuntime(), new InMemoryFreezeStore());
+      return new JobsService(
+          new StubDecide(),
+          new StubCatalogue(),
+          new StubRuntime(),
+          new InMemoryFreezeStore(),
+          new BusinessEvents(new SimpleMeterRegistry()));
     }
   }
 
@@ -166,6 +192,9 @@ class JobsControllerTest {
 
     @Override
     public String start(RunStart start) {
+      if ("hydrate-fail:v1".equals(start.idempotencyKey())) {
+        throw new HydrateFailedException("no manifest, workflow, or prompt on pinned catalogue row");
+      }
       return keys.computeIfAbsent(
           start.idempotencyKey(),
           k -> "job-fee-explain:v1".equals(k) ? "corr-9f3c" : "corr-" + k);

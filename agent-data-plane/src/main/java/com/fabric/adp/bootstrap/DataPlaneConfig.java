@@ -5,6 +5,7 @@ import com.fabric.adp.adapters.out.jdbc.JdbcManifestStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcPromptStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcRouteStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcWorkflowStore;
+import com.fabric.adp.application.BusinessEvents;
 import com.fabric.adp.application.CatalogueService;
 import com.fabric.adp.application.CorpusService;
 import com.fabric.adp.application.CorpusStore;
@@ -18,6 +19,7 @@ import com.fabric.adp.application.RouteStore;
 import com.fabric.adp.application.WorkflowService;
 import com.fabric.adp.application.WorkflowStore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -81,7 +83,12 @@ public class DataPlaneConfig {
   }
 
   @Bean
-  DecideService decideService(CatalogueService catalogue) {
-    return new DecideService(catalogue);
+  BusinessEvents businessEvents(MeterRegistry meters) {
+    return new BusinessEvents(meters);
+  }
+
+  @Bean
+  DecideService decideService(CatalogueService catalogue, BusinessEvents events) {
+    return new DecideService(catalogue, events);
   }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fabric.adp.domain.DecideRequest;
 import com.fabric.adp.domain.DecideResult;
 import com.fabric.adp.domain.ForbiddenException;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,10 @@ class DecideServiceTest {
 
   @BeforeEach
   void setUp() {
-    decide = new DecideService(new CatalogueService(new InMemoryRouteStore().seedDemo()));
+    decide =
+        new DecideService(
+            new CatalogueService(new InMemoryRouteStore().seedDemo()),
+            new BusinessEvents(new SimpleMeterRegistry()));
   }
 
   @Test
@@ -49,6 +53,32 @@ class DecideServiceTest {
     assertThat(result.outcome()).isEqualTo("route");
     assertThat(result.routeId()).isEqualTo("fee_explain");
     assertThat(result.confidence()).isEqualTo(1.0);
+  }
+
+  @Test
+  void jobsNamedHiddenRouteEntitlesWithoutChatVisible() {
+    DecideResult result =
+        decide.decide(
+            new DecideRequest(
+                "jobs",
+                "web",
+                "job:1",
+                null,
+                "claims_adjudicate",
+                Map.of("sub", "jane", "emts", Map.of("claims:read", true))),
+            "afd");
+    assertThat(result.outcome()).isEqualTo("route");
+    assertThat(result.routeId()).isEqualTo("claims_adjudicate");
+    assertThat(result.routeVersion()).isEqualTo("2026.08.1");
+    assertThat(result.confidence()).isEqualTo(1.0);
+  }
+
+  @Test
+  void jobsNamedHiddenRouteWithoutClaimAbstains() {
+    DecideResult result =
+        decide.decide(
+            new DecideRequest("jobs", "web", "job:1", null, "claims_adjudicate", jane()), "afd");
+    assertThat(result.outcome()).isEqualTo("abstain");
   }
 
   @Test

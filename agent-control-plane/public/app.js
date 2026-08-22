@@ -289,6 +289,44 @@ function linkCell(href, text, extra) {
   return td;
 }
 
+const COUNT_ICON_SVG =
+  'viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const TOOL_COUNT_ICON = `<svg ${COUNT_ICON_SVG}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`;
+
+/** Small count badge (icon + number), same visual weight as History's revision pill. */
+function countIcon(count, { label, svg }) {
+  const node = el("span", "count-icon");
+  node.title = label;
+  node.setAttribute("aria-label", label);
+  const glyph = el("span", "count-icon__glyph");
+  glyph.setAttribute("aria-hidden", "true");
+  glyph.innerHTML = svg;
+  node.append(glyph, el("span", "count-icon__value", String(count)));
+  return node;
+}
+
+function manifestCell(item) {
+  const td = document.createElement("td");
+  const wrap = el("span", "cell-with-count");
+  wrap.append(idLink(catalogHref("tool_manifest", item.tool_manifest), item.tool_manifest, "mono"));
+  const tools = item.manifest?.tools;
+  if (
+    Array.isArray(tools) &&
+    !isEmpty(item.tool_manifest) &&
+    item.tool_manifest !== "none"
+  ) {
+    const count = tools.length;
+    wrap.append(
+      countIcon(count, {
+        label: count === 1 ? "1 tool" : `${count} tools`,
+        svg: TOOL_COUNT_ICON,
+      }),
+    );
+  }
+  td.append(wrap);
+  return td;
+}
+
 function showError(message) {
   statusEl.hidden = false;
   statusEl.textContent = message;
@@ -1172,7 +1210,7 @@ async function showRoutes() {
       cell(item.description, "clip"),
       cell(item.model_profile, "mono"),
       cell(item.policy_profile ? policyLabel(item.policy_profile) : null),
-      linkCell(catalogHref("tool_manifest", item.tool_manifest), item.tool_manifest, "mono"),
+      manifestCell(item),
       linkCell(catalogHref("prompt_id", item.prompt_id), item.prompt_id, "mono"),
       cell(retrievalListLabel(item.retrieval)),
       cell(item.chat_visible == null ? null : item.chat_visible ? "Yes" : "No"),
@@ -2627,6 +2665,48 @@ window.addEventListener("popstate", () => {
 document.querySelector(".brand-home")?.addEventListener("click", (event) => {
   event.preventDefault();
   go("/");
+});
+
+const glossaryEl = document.querySelector("#glossary");
+const glossaryOpen = document.querySelector("#glossary-open");
+const glossaryClose = document.querySelector("#glossary-close");
+
+function glossarySections() {
+  return glossaryEl?.querySelectorAll("details.glossary__section") ?? [];
+}
+
+function closeOtherGlossarySections(except) {
+  for (const section of glossarySections()) {
+    if (section !== except) section.open = false;
+  }
+}
+
+function setGlossaryOpen(open) {
+  if (!glossaryEl) return;
+  glossaryEl.hidden = !open;
+  glossaryOpen?.setAttribute("aria-expanded", String(open));
+  if (open) glossaryClose?.focus();
+  else {
+    closeOtherGlossarySections();
+    glossaryOpen?.focus();
+  }
+}
+
+for (const section of glossarySections()) {
+  section.addEventListener("toggle", () => {
+    if (section.open) closeOtherGlossarySections(section);
+  });
+}
+
+glossaryOpen?.addEventListener("click", () => setGlossaryOpen(true));
+glossaryClose?.addEventListener("click", () => setGlossaryOpen(false));
+glossaryEl?.addEventListener("click", (event) => {
+  if (event.target === glossaryEl) setGlossaryOpen(false);
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !glossaryEl || glossaryEl.hidden) return;
+  event.preventDefault();
+  setGlossaryOpen(false);
 });
 
 migrateLegacyHash();

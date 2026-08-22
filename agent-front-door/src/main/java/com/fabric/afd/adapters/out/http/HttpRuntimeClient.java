@@ -3,9 +3,12 @@ package com.fabric.afd.adapters.out.http;
 import com.fabric.afd.application.RuntimePort;
 import com.fabric.afd.domain.CatalogRoute;
 import com.fabric.afd.domain.FrozenRoute;
+import com.fabric.afd.domain.HydrateFailedException;
 import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
 import com.fabric.afd.domain.UnavailableException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +23,8 @@ import org.springframework.web.client.RestClientResponseException;
 public class HttpRuntimeClient implements RuntimePort {
 
   private static final Logger log = LoggerFactory.getLogger(HttpRuntimeClient.class);
+
+  private static final ObjectMapper JSON = new ObjectMapper();
 
   private static final ParameterizedTypeReference<Map<String, Object>> MAP =
       new ParameterizedTypeReference<>() {};
@@ -59,6 +64,9 @@ public class HttpRuntimeClient implements RuntimePort {
       throw e;
     } catch (RestClientResponseException e) {
       log.warn("runtime start failed status={} body={}", e.getStatusCode(), e.getResponseBodyAsString());
+      if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(422))) {
+        throw new HydrateFailedException(runtimeErrorMessage(e));
+      }
       throw new UnavailableException("runtime start unavailable", e);
     } catch (RestClientException e) {
       throw new UnavailableException("runtime start unavailable", e);
@@ -130,5 +138,17 @@ public class HttpRuntimeClient implements RuntimePort {
 
   private static String string(Object value) {
     return value == null ? null : String.valueOf(value);
+  }
+
+  private static String runtimeErrorMessage(RestClientResponseException e) {
+    try {
+      JsonNode message = JSON.readTree(e.getResponseBodyAsString()).path("error").path("message");
+      if (message.isTextual() && !message.asText().isBlank()) {
+        return message.asText();
+      }
+    } catch (Exception ignored) {
+      // fall through to a stable client-facing message
+    }
+    return "hydrate failed";
   }
 }

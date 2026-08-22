@@ -1,5 +1,5 @@
 -- One-shot teaching seed: capabilities + manifests (acr), then catalogue (adp).
--- Run via ./docs/run/seed-db.sh (deletes first, then loads lifecycle cuts).
+-- Run via ./docs/run/scripts/seed-db.sh (deletes first, then loads lifecycle cuts).
 
 \c acr
 INSERT INTO registry.capabilities (
@@ -12,7 +12,7 @@ INSERT INTO registry.capabilities (
   'Search the public web.',
   '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/search/web","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/search/web","auth":"domain-oauth"}'::jsonb,
   NULL,
   'assistant-platform',
   'published'
@@ -24,7 +24,7 @@ INSERT INTO registry.capabilities (
   'Fetch a URL and return text.',
   '{"type":"object","required":["url"],"properties":{"url":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/fetch","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/fetch","auth":"domain-oauth"}'::jsonb,
   NULL,
   'assistant-platform',
   'published'
@@ -36,7 +36,7 @@ INSERT INTO registry.capabilities (
   'Store a research note.',
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/notes","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/notes","auth":"domain-oauth"}'::jsonb,
   NULL,
   'assistant-platform',
   'published'
@@ -48,7 +48,7 @@ INSERT INTO registry.capabilities (
   'Draft a research brief.',
   '{"type":"object","required":["audience"],"properties":{"audience":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/briefs","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/briefs","auth":"domain-oauth"}'::jsonb,
   NULL,
   'assistant-platform',
   'published'
@@ -60,7 +60,7 @@ INSERT INTO registry.capabilities (
   'Draft a counsel-ready memo.',
   '{"type":"object","required":["audience"],"properties":{"audience":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/legal/memo","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/legal/memo","auth":"domain-oauth"}'::jsonb,
   NULL,
   'legal-agents',
   'published'
@@ -72,7 +72,7 @@ INSERT INTO registry.capabilities (
   'Extract text from a document id.',
   '{"type":"object","required":["doc_id"],"properties":{"doc_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/ocr/extract","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/ocr/extract","auth":"domain-oauth"}'::jsonb,
   NULL,
   'document-intel',
   'published'
@@ -84,7 +84,7 @@ INSERT INTO registry.capabilities (
   'Score risk from extracted clauses.',
   '{"type":"object","required":["score_profile"],"properties":{"score_profile":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/legal/risk","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/legal/risk","auth":"domain-oauth"}'::jsonb,
   NULL,
   'legal-agents',
   'published'
@@ -96,7 +96,7 @@ INSERT INTO registry.capabilities (
   'Look up why an account was charged a fee.',
   '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/fees/explain","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/fees/explain","auth":"domain-oauth"}'::jsonb,
   NULL,
   'accounts',
   'published'
@@ -108,7 +108,7 @@ INSERT INTO registry.capabilities (
   'Search extracted text for clause topics.',
   '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/legal/clauses/search","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/legal/clauses/search","auth":"domain-oauth"}'::jsonb,
   NULL,
   'legal-agents',
   'published'
@@ -120,7 +120,7 @@ INSERT INTO registry.capabilities (
   'Search a policy or playbook corpus.',
   '{"type":"object","required":["query"],"properties":{"query":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/legal/playbook/search","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/legal/playbook/search","auth":"domain-oauth"}'::jsonb,
   NULL,
   'legal-agents',
   'published'
@@ -132,7 +132,7 @@ INSERT INTO registry.capabilities (
   'Send a customer notification.',
   '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/notify","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/notify","auth":"domain-oauth"}'::jsonb,
   NULL,
   'ops',
   'published'
@@ -144,7 +144,7 @@ INSERT INTO registry.capabilities (
   'Verify cardholder identity.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/cards/identity","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/cards/identity","auth":"domain-oauth"}'::jsonb,
   NULL,
   'cards',
   'published'
@@ -156,7 +156,7 @@ INSERT INTO registry.capabilities (
   'Check product and freeze limits.',
   '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/cards/limits","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/cards/limits","auth":"domain-oauth"}'::jsonb,
   NULL,
   'cards',
   'published'
@@ -168,7 +168,7 @@ INSERT INTO registry.capabilities (
   'Freeze a payment card.',
   '{"type":"object","required":["card_id"],"properties":{"card_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/cards/freeze","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/cards/freeze","auth":"domain-oauth"}'::jsonb,
   NULL,
   'cards',
   'published'
@@ -180,7 +180,7 @@ INSERT INTO registry.capabilities (
   'Collect and store onboarding documents.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/kyc/docs","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/kyc/docs","auth":"domain-oauth"}'::jsonb,
   NULL,
   'kyc-ops',
   'published'
@@ -192,7 +192,7 @@ INSERT INTO registry.capabilities (
   'Open a dispute case.',
   '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/disputes/open","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/disputes/open","auth":"domain-oauth"}'::jsonb,
   NULL,
   'ops',
   'published'
@@ -204,7 +204,7 @@ INSERT INTO registry.capabilities (
   'Summarize an intake packet.',
   '{"type":"object","required":["packet_id"],"properties":{"packet_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/disputes/summarize","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/disputes/summarize","auth":"domain-oauth"}'::jsonb,
   NULL,
   'ops',
   'published'
@@ -216,7 +216,7 @@ INSERT INTO registry.capabilities (
   'Verify identity documents for KYC.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/kyc/id-verify","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/kyc/id-verify","auth":"domain-oauth"}'::jsonb,
   NULL,
   'kyc-ops',
   'published'
@@ -228,7 +228,7 @@ INSERT INTO registry.capabilities (
   'Screen a customer against sanctions lists.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/kyc/sanctions","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/kyc/sanctions","auth":"domain-oauth"}'::jsonb,
   NULL,
   'financial-crime',
   'published'
@@ -240,7 +240,7 @@ INSERT INTO registry.capabilities (
   'Score KYC risk as low or high.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/kyc/risk","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/kyc/risk","auth":"domain-oauth"}'::jsonb,
   NULL,
   'kyc-ops',
   'published'
@@ -252,7 +252,7 @@ INSERT INTO registry.capabilities (
   'Activate a customer account after KYC approvals.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/kyc/activate","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/kyc/activate","auth":"domain-oauth"}'::jsonb,
   NULL,
   'kyc-ops',
   'published'
@@ -264,7 +264,7 @@ INSERT INTO registry.capabilities (
   'Parse a support ticket.',
   '{"type":"object","required":["ticket_id"],"properties":{"ticket_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/tickets/parse","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/tickets/parse","auth":"domain-oauth"}'::jsonb,
   NULL,
   'ops',
   'published'
@@ -276,7 +276,7 @@ INSERT INTO registry.capabilities (
   'Tag ticket intent.',
   '{"type":"object","required":["ticket_id"],"properties":{"ticket_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/tickets/tag","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/tickets/tag","auth":"domain-oauth"}'::jsonb,
   NULL,
   'ops',
   'published'
@@ -288,7 +288,7 @@ INSERT INTO registry.capabilities (
   'Draft a ticket reply.',
   '{"type":"object","required":["ticket_id"],"properties":{"ticket_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/tickets/reply","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/tickets/reply","auth":"domain-oauth"}'::jsonb,
   NULL,
   'ops',
   'published'
@@ -300,7 +300,7 @@ INSERT INTO registry.capabilities (
   'Score a product offer.',
   '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/product/score","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/product/score","auth":"domain-oauth"}'::jsonb,
   NULL,
   'product',
   'published'
@@ -312,7 +312,7 @@ INSERT INTO registry.capabilities (
   'Compare product options.',
   '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
-  '{"method":"POST","url":"https://api.internal/product/compare","auth":"domain-oauth"}'::jsonb,
+  '{"method":"POST","url":"http://tool-mock:3010/product/compare","auth":"domain-oauth"}'::jsonb,
   NULL,
   'product',
   'published'

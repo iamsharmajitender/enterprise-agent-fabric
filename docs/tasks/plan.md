@@ -1,5 +1,7 @@
 # Implementation Plan: Enterprise Agent Fabric v1 (local)
 
+Observability (OTLP → LGTM, three layers) is a **separate** plan: [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md). Do not fold those tasks into the checkboxes below.
+
 ## Overview
 
 Stand up five independently deployable Fabric services in the existing folders, talking over the pack contracts, so `docker compose up` plus a scripted jobs call proves pin → hydrate → run, then a scripted chat turn proves entitle → classify → freeze → the same AR path. Chat `/v1/assistant/*` on Front Door comes **last**. Postgres is used by Front Door, Data Plane, Runtime, and Registry only. Control Plane has no database and **no APIs** — it only calls Data Plane. Kafka, IdP, and the LLM are stubbed. This plan implements the confirmed intent, not the full pack FR set.
@@ -18,7 +20,7 @@ Stand up five independently deployable Fabric services in the existing folders, 
 
 ## Architecture Decisions
 
-- **Five processes, four databases, one Compose file.** `docs/run/docker-compose.yml`. One Postgres 16 server, databases `afd`, `adp`, `ar`, `acr`. No `acp` database. HTTP: 3005 Front Door, **3006 Control Plane UI**, 3007 Data Plane, 3008 AR, 3009 Registry.
+- **Five processes, four databases, one Compose file.** `docs/run/compose/docker-compose.yml`. One Postgres 16 server, databases `afd`, `adp`, `ar`, `acr`. No `acp` database. HTTP: 3005 Front Door, **3006 Control Plane UI**, 3007 Data Plane, 3008 AR, 3009 Registry.
 - **Frameworks.** Java 21 + Spring Boot 3 + Flyway on Front Door, Data Plane, Registry — **hexagonal** packages `domain`, `application`, `adapters.in` (REST), `adapters.out` (Postgres, HTTP). Domain has no Spring or SQL. Control Plane: TypeScript + Node 22 + `fetch`, **no HTTP server**, no `node-pg`. Runtime: Python 3.12, **uv**, FastAPI HTTP, SQLAlchemy 2 + Alembic, **LangGraph** for the run loop. No shared library in v1 — copy the contract fixtures, not a mono-runtime.
 - **Hexagonal (Java three only).** Driving adapters: HTTP controllers. Driven adapters: Flyway/JDBC and sibling HTTP clients. Use cases live in `application`. Do not put decide/catalogue/freeze logic in controllers.
 - **HTTP APIs between services.** Siblings call HTTP only — never another service’s Postgres, never a shared library. **Channel API:** Front Door `:3005` `/v1/jobs*` first (after AR), then `/v1/assistant/*` last. Same process; no second fleet. **Service APIs:** Data Plane `:3007` `/v1/intent/*` (eligible, decide) and `/v1/catalog/*` (route table + row, manifest pointers); AR `:3008` `/v1/runs*`; Registry `:3009` `/v1/capabilities*` and `/v1/manifests*`. **Control Plane** local UI on **3006** lists catalogue rows by calling Data Plane; it exposes no decide/audit APIs and has no database. Only AFD calls decide.
@@ -70,7 +72,7 @@ Chat JSON never contains `route_id`, `run_id`, `agent_client_id`, `confidence`, 
 
 ### Checkpoint: Foundation
 
-- [x] `docker compose -f docs/run/docker-compose.yml up` — `/health` 200 on 3005, 3007, 3008, 3009; Control Plane process running with no published port; Adminer on 8080
+- [x] `docker compose -f docs/run/compose/docker-compose.yml up` — `/health` 200 on 3005, 3007, 3008, 3009; Control Plane process running with no published port; Adminer on 8080
 - [x] Four empty databases exist (`afd`, `adp`, `ar`, `acr`); Control Plane has none
 - [ ] Review with human before contract work
 
@@ -141,7 +143,7 @@ Chat JSON never contains `route_id`, `run_id`, `agent_client_id`, `confidence`, 
 
 ### Phase 8: Scripted chat demo
 
-- [x] Task 23: `docs/run/demo-chat-turn.sh` + seed + four-DB assertions + Control Plane catalogue fetch
+- [x] Task 23: `docs/run/scripts/demo-chat-turn.sh` + seed + four-DB assertions + Control Plane catalogue fetch
 
 ### Phase 9: Service handbooks
 

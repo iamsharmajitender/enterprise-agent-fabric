@@ -15,7 +15,7 @@
   },
   "invoke": {
     "method": "POST",
-    "url": "https://api.internal/fees/explain",
+    "url": "http://tool-mock:3010/fees/explain",
     "auth": "domain-oauth"
   },
   "owner": "accounts",

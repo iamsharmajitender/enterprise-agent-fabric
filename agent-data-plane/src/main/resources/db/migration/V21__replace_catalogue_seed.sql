@@ -1,5 +1,5 @@
 -- Replaces Flyway V3–V20 catalogue seeds with the Pattern 0–3 teaching set.
--- Re-run without migrate: ./docs/run/seed-db.sh
+-- Re-run without migrate: ./docs/run/scripts/seed-db.sh
 
 -- Wipe catalogue seed rows so create-seed-data.sql can insert a clean teaching set.
 -- Does not drop schema, model profiles, or corpora.

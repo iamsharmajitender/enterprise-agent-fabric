@@ -8,8 +8,10 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.fabric.afd.domain.CatalogRoute;
+import com.fabric.afd.domain.HydrateFailedException;
 import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
+import com.fabric.afd.domain.UnavailableException;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,5 +118,52 @@ class HttpRuntimeClientTest {
 
     assertThat(client.openRun("sess-88").orElseThrow().correlationId()).isEqualTo("corr-9f3c");
     server.verify();
+  }
+
+  @Test
+  void startHydrateFailedIsUnprocessable() {
+    server
+        .expect(requestTo("http://ar/v1/runs"))
+        .andExpect(method(HttpMethod.POST))
+        .andRespond(
+            MockRestResponseCreators.withStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(
+                    """
+                    {"error":{"code":"HYDRATE_FAILED","message":"no manifest, workflow, or prompt on pinned catalogue row"}}
+                    """));
+
+    assertThatThrownBy(() -> client.start(feeExplainStart()))
+        .isInstanceOf(HydrateFailedException.class)
+        .hasMessage("no manifest, workflow, or prompt on pinned catalogue row");
+    server.verify();
+  }
+
+  @Test
+  void startServerErrorIsUnavailable() {
+    server
+        .expect(requestTo("http://ar/v1/runs"))
+        .andExpect(method(HttpMethod.POST))
+        .andRespond(MockRestResponseCreators.withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+
+    assertThatThrownBy(() -> client.start(feeExplainStart())).isInstanceOf(UnavailableException.class);
+    server.verify();
+  }
+
+  private static RunStart feeExplainStart() {
+    return new RunStart(
+        "job-fee-explain:v1",
+        "job:job-fee-explain:v1",
+        new CatalogRoute(
+            "fee_explain",
+            "2026.08.1",
+            "http://agent-runtime:3008/v1/runs",
+            "fee-explain-v1",
+            "fee_explain_v1",
+            "2026.08.1",
+            "accounts_read",
+            "stub",
+            12),
+        Map.of("account_id", "acc-42"));
   }
 }

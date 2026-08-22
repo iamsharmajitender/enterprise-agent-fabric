@@ -1,5 +1,6 @@
 package com.fabric.afd.application;
 
+import com.fabric.afd.bootstrap.TraceIds;
 import com.fabric.afd.domain.BadRequestException;
 import com.fabric.afd.domain.CatalogRoute;
 import com.fabric.afd.domain.DecideCall;
@@ -24,17 +25,24 @@ public class AssistantService {
   private final CataloguePort catalogue;
   private final RuntimePort runtime;
   private final FreezeStore freeze;
+  private final BusinessEvents events;
 
   public AssistantService(
-      DecidePort decide, CataloguePort catalogue, RuntimePort runtime, FreezeStore freeze) {
+      DecidePort decide,
+      CataloguePort catalogue,
+      RuntimePort runtime,
+      FreezeStore freeze,
+      BusinessEvents events) {
     this.decide = decide;
     this.catalogue = catalogue;
     this.runtime = runtime;
     this.freeze = freeze;
+    this.events = events;
   }
 
   public Map<String, Object> hints(String sessionId, Map<String, Object> claims) {
     String sid = orMint(sessionId);
+    TraceIds.put("session_id", sid);
     List<Map<String, Object>> hints = new ArrayList<>();
     for (EligibleRoute route : catalogue.eligible(CHANNEL, claims)) {
       String hintId = "hint-" + token(8);
@@ -53,6 +61,21 @@ public class AssistantService {
   public Map<String, Object> turn(
       String sessionId, String message, String hintId, String optionId, Map<String, Object> claims) {
     String sid = orMint(sessionId);
+    TraceIds.put("session_id", sid);
+    events.emit(
+        "chat.turn.received",
+        "chat.turn",
+        BusinessEvents.fields(
+            "session_id",
+            sid,
+            "channel",
+            CHANNEL,
+            "ingress",
+            INGRESS,
+            "has_hint",
+            String.valueOf(!blank(hintId)),
+            "has_option",
+            String.valueOf(!blank(optionId))));
     if (blank(message) && blank(hintId) && blank(optionId)) {
       throw new BadRequestException("message, hint_id, or option_id is required");
     }
@@ -70,6 +93,8 @@ public class AssistantService {
     String routeId = resolve(sid, hintId, optionId);
     DecideOutcome outcome =
         decide.decide(new DecideCall(INGRESS, CHANNEL, sid, message, routeId, claims));
+    TraceIds.put("outcome", outcome.outcome());
+    TraceIds.put("route_id", outcome.routeId());
     if ("clarify".equals(outcome.outcome())) {
       return clarify(sid, outcome);
     }
@@ -81,9 +106,14 @@ public class AssistantService {
     }
     CatalogRoute row = catalogue.get(outcome.routeId(), outcome.routeVersion());
     String key = sid + ":" + row.routeId() + ":v1";
+    String journeyId = "chat." + row.routeId();
     String correlationId =
         runtime.start(
             new RunStart(key, sid, row, Map.of("utterance", message == null ? "" : message)));
+    TraceIds.put("correlation_id", correlationId);
+    TraceIds.put("route_id", row.routeId());
+    TraceIds.put("route_version", row.routeVersion());
+    TraceIds.put("journey_id", journeyId);
     freeze.save(
         new FrozenRoute(
             sid,
@@ -93,6 +123,23 @@ public class AssistantService {
             row.activationTarget(),
             row.agentClientId(),
             correlationId));
+    events.emit(
+        "run.accepted",
+        journeyId,
+        BusinessEvents.fields(
+            "session_id",
+            sid,
+            "correlation_id",
+            correlationId,
+            "route_id",
+            row.routeId(),
+            "route_version",
+            row.routeVersion(),
+            "channel",
+            CHANNEL,
+            "ingress",
+            INGRESS));
+    events.countOutcome(journeyId, "accepted", CHANNEL);
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", sid);
     body.put("status", "accepted");
@@ -110,6 +157,9 @@ public class AssistantService {
     if (live == null || live.correlationId() == null) {
       throw new NotFoundException(sessionId);
     }
+    TraceIds.put("session_id", sessionId);
+    TraceIds.put("correlation_id", live.correlationId());
+    TraceIds.put("route_id", live.routeId());
     Map<String, Object> status = runtime.status(live.correlationId());
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", sessionId);
@@ -118,10 +168,29 @@ public class AssistantService {
     if (result instanceof Map<?, ?> map && map.get("message") != null) {
       body.put("message", map.get("message"));
     }
+    String journeyId = live.routeId() == null ? "chat.turn" : "chat." + live.routeId();
+    if ("completed".equals(String.valueOf(status.get("status")))) {
+      events.emit(
+          "chat.events.delivered",
+          journeyId,
+          BusinessEvents.fields(
+              "session_id",
+              sessionId,
+              "correlation_id",
+              live.correlationId(),
+              "route_id",
+              live.routeId(),
+              "status",
+              "completed"));
+      events.countOutcome(journeyId, "completed", CHANNEL);
+    }
     return body;
   }
 
   private Map<String, Object> resume(FrozenRoute live, String message) {
+    TraceIds.put("session_id", live.sessionId());
+    TraceIds.put("correlation_id", live.correlationId());
+    TraceIds.put("route_id", live.routeId());
     runtime.resume(live.correlationId(), message);
     freeze.save(live);
     Map<String, Object> body = new LinkedHashMap<>();

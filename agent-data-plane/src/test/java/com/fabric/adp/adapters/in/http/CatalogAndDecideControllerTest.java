@@ -460,7 +460,7 @@ class CatalogAndDecideControllerTest {
 
     @Bean
     DecideService decideService(CatalogueService catalogue) {
-      return new DecideService(catalogue);
+      return new DecideService(catalogue, new com.fabric.adp.application.BusinessEvents(new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
     }
   }
 }

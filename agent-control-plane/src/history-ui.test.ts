@@ -4,10 +4,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-const js = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), "..", "public", "app.js"),
-  "utf8",
-);
+const root = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
+const js = readFileSync(join(root, "app.js"), "utf8");
+const css = readFileSync(join(root, "styles.css"), "utf8");
 
 test("history sits before JSON and opens a dedicated page", () => {
   assert.equal(js.includes("function buildHistory"), false);
@@ -125,6 +124,16 @@ test("capability usage page lists manifests per capability", () => {
   assert.match(js, /Used by/);
   assert.match(js, /capabilityUsage/);
   assert.match(js, /use\.route_id/);
+});
+
+test("routes Manifest column shows a tool-count icon from embedded manifest", () => {
+  const routes = js.slice(js.indexOf("async function showRoutes"), js.indexOf("async function showCapabilities"));
+  assert.match(js, /function countIcon/);
+  assert.match(js, /function manifestCell/);
+  assert.match(js, /TOOL_COUNT_ICON/);
+  assert.match(routes, /manifestCell\(item\)/);
+  assert.match(css, /\.count-icon/);
+  assert.match(css, /\.cell-with-count/);
 });
 
 test("catalogue lists omit Status because tabs already filter", () => {

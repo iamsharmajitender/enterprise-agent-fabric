@@ -3,7 +3,6 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from app.graph import build_stub_graph
 from app.main import create_app
 from in_memory_store import InMemoryRunStore
 
@@ -60,7 +59,7 @@ CAPABILITY = {
     "status": "published",
     "input_schema": {"type": "object"},
     "output_schema": {"type": "object"},
-    "invoke": {"method": "POST", "url": "https://api.internal/fees/explain"},
+    "invoke": {"method": "POST", "url": "http://tool-mock:3010/fees/explain"},
 }
 
 
@@ -70,9 +69,13 @@ class FakeCatalogue:
         self.missing = missing
         self.route_calls: list[tuple[str, str]] = []
         self.decide_calls: list[Any] = []
+        self.workflow_calls: list[str] = []
+        self.prompt_calls: list[str] = []
+        self.workflow: dict[str, Any] = {}
+        self.prompt: dict[str, Any] = {}
 
     def get_route(self, route_id: str, route_version: str) -> dict[str, Any]:
-        from app.hydrate import HydrateError
+        from app.agents.hydrate import HydrateError
 
         self.route_calls.append((route_id, route_version))
         if not route_version:
@@ -80,6 +83,14 @@ class FakeCatalogue:
         if self.missing:
             raise HydrateError(f"catalogue miss {route_id}@{route_version}")
         return self.row
+
+    def get_workflow(self, workflow_id: str) -> dict[str, Any]:
+        self.workflow_calls.append(workflow_id)
+        return self.workflow
+
+    def get_prompt(self, prompt_id: str) -> dict[str, Any]:
+        self.prompt_calls.append(prompt_id)
+        return self.prompt
 
     def decide(self, *_args: Any, **_kwargs: Any) -> None:
         self.decide_calls.append(True)
@@ -105,7 +116,7 @@ class FakeRegistry:
         self.capability_calls: list[tuple[str, str]] = []
 
     def get_manifest(self, manifest_id: str, manifest_version: str) -> dict[str, Any]:
-        from app.hydrate import HydrateError
+        from app.agents.hydrate import HydrateError
 
         self.manifest_calls.append((manifest_id, manifest_version))
         if self.missing_manifest or self.draft:
@@ -113,12 +124,19 @@ class FakeRegistry:
         return self.manifest
 
     def get_capability(self, capability_id: str, version: str) -> dict[str, Any]:
-        from app.hydrate import HydrateError
+        from app.agents.hydrate import HydrateError
 
         self.capability_calls.append((capability_id, version))
         if self.missing_capability or self.draft:
             raise HydrateError(f"capability miss {capability_id}@{version}")
-        return self.capability
+        body = dict(self.capability)
+        body["id"] = capability_id
+        return body
+
+
+class FakeInvoker:
+    def call(self, invoke: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
+        return {"text": CANNED}
 
 
 @pytest.fixture
@@ -137,12 +155,22 @@ def registry() -> FakeRegistry:
 
 
 @pytest.fixture
-def client(store: InMemoryRunStore, catalogue: FakeCatalogue, registry: FakeRegistry) -> TestClient:
+def invoker() -> FakeInvoker:
+    return FakeInvoker()
+
+
+@pytest.fixture
+def client(
+    store: InMemoryRunStore,
+    catalogue: FakeCatalogue,
+    registry: FakeRegistry,
+    invoker: FakeInvoker,
+) -> TestClient:
     return TestClient(
         create_app(
             store=store,
             catalogue=catalogue,
             registry=registry,
-            graph=build_stub_graph(),
+            tool_invoker=invoker,
         )
     )

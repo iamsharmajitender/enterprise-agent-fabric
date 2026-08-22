@@ -1,5 +1,6 @@
 package com.fabric.adp.application;
 
+import com.fabric.adp.bootstrap.TraceIds;
 import com.fabric.adp.domain.DecideRequest;
 import com.fabric.adp.domain.DecideResult;
 import com.fabric.adp.domain.ForbiddenException;
@@ -14,28 +15,86 @@ import java.util.Map;
 public class DecideService {
 
   private final CatalogueService catalogue;
+  private final BusinessEvents events;
 
-  public DecideService(CatalogueService catalogue) {
+  public DecideService(CatalogueService catalogue, BusinessEvents events) {
     this.catalogue = catalogue;
+    this.events = events;
   }
 
   public DecideResult decide(DecideRequest request, String workload) {
     if (!"afd".equals(workload)) {
       throw new ForbiddenException("only afd may call decide");
     }
-    List<RouteRow> eligible = catalogue.eligible(request.channel(), request.entitledClaims());
-    List<String> eligibleIds = eligible.stream().map(RouteRow::routeId).toList();
-    if (eligible.isEmpty()) {
-      return DecideResult.abstain(eligibleIds);
+    DecideResult result;
+    if ("jobs".equals(request.ingress()) && request.hasRouteId()) {
+      result = entitleJob(request);
+    } else {
+      List<RouteRow> eligible = catalogue.eligible(request.channel(), request.entitledClaims());
+      List<String> eligibleIds = eligible.stream().map(RouteRow::routeId).toList();
+      if (eligible.isEmpty()) {
+        result = DecideResult.abstain(eligibleIds);
+      } else if (request.hasRouteId()) {
+        result =
+            eligible.stream()
+                .filter(row -> row.routeId().equals(request.routeId()))
+                .findFirst()
+                .map(row -> DecideResult.route(row, 1.0, eligibleIds))
+                .orElseGet(() -> DecideResult.abstain(eligibleIds));
+      } else {
+        result = keywordRetrieve(request.message(), eligible, eligibleIds);
+      }
     }
-    if (request.hasRouteId()) {
-      return eligible.stream()
-          .filter(row -> row.routeId().equals(request.routeId()))
-          .findFirst()
-          .map(row -> DecideResult.route(row, 1.0, eligibleIds))
-          .orElseGet(() -> DecideResult.abstain(eligibleIds));
-    }
-    return keywordRetrieve(request.message(), eligible, eligibleIds);
+    emitDecide(request, result);
+    TraceIds.put("session_id", request.sessionId());
+    TraceIds.put("outcome", result.outcome());
+    TraceIds.put("route_id", result.routeId());
+    TraceIds.put("route_version", result.routeVersion());
+    return result;
+  }
+
+  private void emitDecide(DecideRequest request, DecideResult result) {
+    String prefix = "jobs".equals(request.ingress()) ? "job" : "chat";
+    String journeyId =
+        result.routeId() != null ? prefix + "." + result.routeId() : prefix + ".decide";
+    String event =
+        switch (result.outcome()) {
+          case "route" -> "intent.decide.routed";
+          case "clarify" -> "intent.decide.clarify";
+          default -> "intent.decide.abstain";
+        };
+    events.emit(
+        event,
+        journeyId,
+        BusinessEvents.fields(
+            "outcome",
+            result.outcome(),
+            "route_id",
+            result.routeId(),
+            "route_version",
+            result.routeVersion(),
+            "session_id",
+            request.sessionId(),
+            "channel",
+            request.channel(),
+            "ingress",
+            request.ingress(),
+            "eligible_count",
+            String.valueOf(result.eligibleRoutes() == null ? 0 : result.eligibleRoutes().size())));
+    events.countDecide(journeyId, result.outcome(), request.channel());
+  }
+
+  private DecideResult entitleJob(DecideRequest request) {
+    List<RouteRow> entitled =
+        catalogue.list().stream()
+            .filter(row -> request.entitledClaims().containsAll(row.requiredClaims()))
+            .toList();
+    List<String> entitledIds = entitled.stream().map(RouteRow::routeId).toList();
+    return entitled.stream()
+        .filter(row -> row.routeId().equals(request.routeId()))
+        .findFirst()
+        .map(row -> DecideResult.route(row, 1.0, entitledIds))
+        .orElseGet(() -> DecideResult.abstain(entitledIds));
   }
 
   private DecideResult keywordRetrieve(

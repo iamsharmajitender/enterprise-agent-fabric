@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fabric.afd.application.AssistantService;
+import com.fabric.afd.application.BusinessEvents;
 import com.fabric.afd.application.CataloguePort;
 import com.fabric.afd.application.DecidePort;
 import com.fabric.afd.application.HealthService;
@@ -17,6 +18,7 @@ import com.fabric.afd.domain.DecideOutcome;
 import com.fabric.afd.domain.EligibleRoute;
 import com.fabric.afd.domain.FrozenRoute;
 import com.fabric.afd.domain.RunStart;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 @WebMvcTest(controllers = {AssistantController.class, HealthController.class, ApiExceptionHandler.class})
-@Import({ChannelAuthFilter.class, AssistantControllerTest.MemConfig.class})
+@Import({RequestIdFilter.class, ChannelAuthFilter.class, AssistantControllerTest.MemConfig.class})
 class AssistantControllerTest {
 
   private static final String JANE = "{\"sub\":\"jane\",\"emts\":{\"accounts:read\":true}}";
@@ -108,7 +110,12 @@ class AssistantControllerTest {
 
     @Bean
     AssistantService assistantService() {
-      return new AssistantService(new StubDecide(), new StubCatalogue(), new StubRuntime(), new InMemoryFreezeStore());
+      return new AssistantService(
+          new StubDecide(),
+          new StubCatalogue(),
+          new StubRuntime(),
+          new InMemoryFreezeStore(),
+          new BusinessEvents(new SimpleMeterRegistry()));
     }
   }
 

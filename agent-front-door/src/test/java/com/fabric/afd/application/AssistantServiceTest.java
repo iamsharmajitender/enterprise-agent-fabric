@@ -36,7 +36,7 @@ class AssistantServiceTest {
     catalogue = new FakeCatalogue();
     runtime = new FakeRuntime();
     freeze = new InMemoryFreezeStore();
-    assistant = new AssistantService(decide, catalogue, runtime, freeze);
+    assistant = new AssistantService(decide, catalogue, runtime, freeze, new com.fabric.afd.application.BusinessEvents(new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
   }
 
   @Test

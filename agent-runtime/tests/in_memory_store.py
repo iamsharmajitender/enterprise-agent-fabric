@@ -1,4 +1,4 @@
-from app.store import RunPin, utcnow
+from app.core.state import RunPin, utcnow
 
 
 class InMemoryRunStore:
@@ -33,6 +33,20 @@ class InMemoryRunStore:
         pin.result = result
         pin.updated_at = utcnow()
         return pin
+
+    def save_progress(
+        self,
+        correlation_id: str,
+        *,
+        working: dict | None = None,
+        checkpoint: dict | None = None,
+    ) -> None:
+        pin = self._by_id[correlation_id]
+        if working is not None:
+            pin.working = working
+        if checkpoint is not None:
+            pin.checkpoint = checkpoint
+        pin.updated_at = utcnow()
 
     def all(self) -> list[RunPin]:
         return list(self._by_id.values())

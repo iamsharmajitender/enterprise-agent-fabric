@@ -1,0 +1,206 @@
+{
+  "_source": "Teaching seed job routes from docs/run/seed/create-seed-data.sql. chat_visible=false plus fee_explain (already a jobs demo). {id} is replaced per run.",
+  "jobs": [
+    {
+      "route_id": "email_summarize",
+      "autonomy_mode": 0,
+      "label": "Single inference",
+      "claims": [],
+      "payload": {
+        "email_id": "eml-{id}",
+        "text": "Customer asked why the monthly account charge posted twice this cycle."
+      }
+    },
+    {
+      "route_id": "fee_explain",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["accounts:read"],
+      "payload": {
+        "account_id": "acc-{id}"
+      }
+    },
+    {
+      "route_id": "fraud_one_tool",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["fraud:read"],
+      "payload": {
+        "case_id": "frd-{id}"
+      }
+    },
+    {
+      "route_id": "fraud_casefile",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["fraud:read"],
+      "payload": {
+        "case_id": "frd-{id}"
+      }
+    },
+    {
+      "route_id": "contract_investigation",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["legal:read"],
+      "payload": {
+        "doc_id": "doc-{id}"
+      }
+    },
+    {
+      "route_id": "llm_pipeline",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": [],
+      "payload": {
+        "text": "Extract then rewrite the dispute note for case {id}."
+      }
+    },
+    {
+      "route_id": "policy_memo",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["policy:read"],
+      "payload": {
+        "topic": "overdraft-fee-{id}"
+      }
+    },
+    {
+      "route_id": "account_notify",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["notify:send"],
+      "payload": {
+        "account_id": "acc-{id}",
+        "customer_id": "cust-{id}"
+      }
+    },
+    {
+      "route_id": "card_freeze",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["cards:freeze"],
+      "payload": {
+        "card_id": "crd-{id}",
+        "account_id": "acc-{id}"
+      }
+    },
+    {
+      "route_id": "dispute_intake",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["disputes:write"],
+      "payload": {
+        "dispute_id": "dsp-{id}"
+      }
+    },
+    {
+      "route_id": "pack_then_notify",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["notify:send"],
+      "payload": {
+        "account_id": "acc-{id}"
+      }
+    },
+    {
+      "route_id": "pack_then_freeze",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["cards:freeze"],
+      "payload": {
+        "card_id": "crd-{id}"
+      }
+    },
+    {
+      "route_id": "pack_then_review",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["legal:read"],
+      "payload": {
+        "doc_id": "doc-{id}"
+      }
+    },
+    {
+      "route_id": "clause_lookup",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["legal:read"],
+      "payload": {
+        "query": "water damage exclusion notice {id}"
+      }
+    },
+    {
+      "route_id": "template_retrieve",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["legal:read"],
+      "payload": {
+        "query": "late-notice exclusion {id}"
+      }
+    },
+    {
+      "route_id": "msa_risk_review",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["legal:read"],
+      "payload": {
+        "doc_id": "msa-{id}"
+      }
+    },
+    {
+      "route_id": "kyc_onboarding",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["kyc:onboard"],
+      "payload": {
+        "applicant_id": "kyc-{id}"
+      }
+    },
+    {
+      "route_id": "claims_adjudicate",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["claims:read"],
+      "payload": {
+        "claim_id": "clm-{id}"
+      }
+    },
+    {
+      "route_id": "ticket_triage",
+      "autonomy_mode": 3,
+      "label": "Guided",
+      "claims": [],
+      "payload": {
+        "ticket_id": "tkt-{id}"
+      }
+    },
+    {
+      "route_id": "narrow_review",
+      "autonomy_mode": 3,
+      "label": "Guided",
+      "claims": ["legal:read"],
+      "payload": {
+        "doc_id": "doc-{id}"
+      }
+    },
+    {
+      "route_id": "contract_review",
+      "autonomy_mode": 3,
+      "label": "Guided",
+      "claims": ["legal:read"],
+      "payload": {
+        "doc_id": "doc-{id}"
+      }
+    },
+    {
+      "route_id": "due_diligence",
+      "autonomy_mode": 3,
+      "label": "Guided",
+      "claims": ["legal:read"],
+      "payload": {
+        "doc_id": "doc-{id}"
+      }
+    }
+  ]
+}

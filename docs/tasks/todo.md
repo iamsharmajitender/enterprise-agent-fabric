@@ -6,6 +6,8 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 **Remaining execution order** (task numbers stay; work this file top-to-bottom from here): service handbooks (25–29) then root README (24). Not today.
 
+**Observability** (O1–O16): [observability-todo.md](./observability-todo.md) — does not replace this list.
+
 ---
 
 ## Task 1: Compose Postgres and stub-auth contract
@@ -13,22 +15,22 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** Compose in `docs/run/` starts Postgres 16 with databases `afd`, `adp`, `ar`, `acr` (no `acp`), plus Adminer for browsing those databases. Document the stub IdP headers every service will enforce.
 
 **Acceptance criteria:**
-- [x] `docker compose -f docs/run/docker-compose.yml up postgres` creates those four databases and no `acp`
+- [x] `docker compose -f docs/run/compose/docker-compose.yml up postgres` creates those four databases and no `acp`
 - [x] Adminer is in the same Compose file on host port 8080 (System PostgreSQL, server `postgres`, user/password `fabric`)
 - [x] `docs/contracts/stub-auth.md` defines channel `Bearer stub` + `X-Stub-Claims` and workload `Bearer fabric-internal` + `X-Workload`
-- [x] `docs/run/.env.example` lists DB URLs for the four services, HTTP ports 3005 / 3007 / 3008 / 3009, and Adminer 8080
+- [x] `docs/run/compose/.env.example` lists DB URLs for the four services, HTTP ports 3005 / 3007 / 3008 / 3009, and Adminer 8080
 
 **Verification:**
-- [x] `docker compose -f docs/run/docker-compose.yml exec postgres psql -U fabric -d afd -c '\l'` shows `afd`, `adp`, `ar`, `acr` only (plus Postgres templates; no `acp`)
+- [x] `docker compose -f docs/run/compose/docker-compose.yml exec postgres psql -U fabric -d afd -c '\l'` shows `afd`, `adp`, `ar`, `acr` only (plus Postgres templates; no `acp`)
 - [x] `curl -sf -o /dev/null localhost:8080` — Adminer login page
 - [x] Manual check: no service code required yet
 
 **Dependencies:** None
 
 **Files likely touched:**
-- `docs/run/docker-compose.yml`
-- `docs/run/init-postgres.sql`
-- `docs/run/.env.example`
+- `docs/run/compose/docker-compose.yml`
+- `docs/run/compose/init-postgres.sql`
+- `docs/run/compose/.env.example`
 - `docs/contracts/stub-auth.md`
 
 **Estimated scope:** Small
@@ -70,7 +72,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 - [x] App uses database `acr` only; Compose on host port 3009
 
 **Verification:**
-- [x] `docker compose -f docs/run/docker-compose.yml up agent-capability-registry` then `curl -sf localhost:3009/health` → `{"status":"UP"}`
+- [x] `docker compose -f docs/run/compose/docker-compose.yml up agent-capability-registry` then `curl -sf localhost:3009/health` → `{"status":"UP"}`
 - [x] Tests pass in the image build (`mvn test`; no local JDK)
 
 **Dependencies:** Task 1
@@ -80,7 +82,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 - `agent-capability-registry/src/main/java/**/domain/**`
 - `agent-capability-registry/src/main/java/**/adapters/in/**`
 - `agent-capability-registry/Dockerfile`
-- `docs/run/docker-compose.yml`
+- `docs/run/compose/docker-compose.yml`
 
 **Estimated scope:** Medium
 
@@ -102,7 +104,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 **Files likely touched:**
 - `agent-data-plane/**`
-- `docs/run/docker-compose.yml`
+- `docs/run/compose/docker-compose.yml`
 
 **Estimated scope:** Medium
 
@@ -127,7 +129,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 - `agent-control-plane/package.json`
 - `agent-control-plane/src/main.ts`
 - `agent-control-plane/Dockerfile`
-- `docs/run/docker-compose.yml`
+- `docs/run/compose/docker-compose.yml`
 
 **Estimated scope:** Medium
 
@@ -153,7 +155,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 - `agent-runtime/uv.lock`
 - `agent-runtime/app/main.py`
 - `agent-runtime/Dockerfile`
-- `docs/run/docker-compose.yml`
+- `docs/run/compose/docker-compose.yml`
 
 **Estimated scope:** Medium
 
@@ -175,7 +177,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 **Files likely touched:**
 - `agent-front-door/**`
-- `docs/run/docker-compose.yml`
+- `docs/run/compose/docker-compose.yml`
 
 **Estimated scope:** Medium
 
@@ -502,7 +504,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** Scripted jobs proof on the same Front Door process. Chat demo stays Task 23 and is chat-only. Document jobs APIs now; root README covering both route families is Task 24 after chat.
 
 **Acceptance criteria:**
-- [x] `docs/run/demo-jobs.sh` proves `POST /v1/jobs` for `fee_explain` and GET until the canned fee message
+- [x] `docs/run/dummy-jobs/1-autonomous/fee_explain.sh` proves `POST /v1/jobs` for `fee_explain` and GET until the canned fee message
 - [x] Front Door README documents `POST /v1/jobs` and `GET /v1/jobs/{correlation_id}`; Layer ①; still one process, no second fleet
 - [x] Demo is idempotent (same jobs key twice still exits 0)
 
@@ -513,7 +515,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Dependencies:** Task 18, Task 30
 
 **Files likely touched:**
-- `docs/run/demo-jobs.sh`
+- `docs/run/dummy-jobs/1-autonomous/fee_explain.sh`
 - `agent-front-door/README.md`
 
 **Estimated scope:** Small
@@ -635,20 +637,20 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** One script is the plan’s success check: compose is up, seed is loaded, one chat turn, four Postgres databases written, Control Plane fetched catalogue/eligible from Data Plane.
 
 **Acceptance criteria:**
-- [x] `docs/run/demo-chat-turn.sh` exits 0 only if slim completed message matches canned text
+- [x] `docs/run/scripts/demo-chat-turn.sh` exits 0 only if slim completed message matches canned text
 - [x] Script fails if any of `afd` / `adp` / `ar` / `acr` lacks the expected row
 - [x] Script fails if Control Plane did not successfully GET eligible and the `fee_explain` catalogue row
 - [x] Seed is idempotent (`compose` or script can reload `fee_explain` + capability + manifest)
 
 **Verification:**
-- [x] `docker compose up -d && ./docs/run/demo-chat-turn.sh`
+- [x] `docker compose up -d && ./docs/run/scripts/demo-chat-turn.sh`
 - [x] Run twice: still exit 0 (idempotent start keys / seeds)
 
 **Dependencies:** Task 10, Task 22
 
 **Files likely touched:**
-- `docs/run/demo-chat-turn.sh`
-- `docs/run/seed-db.sh`
+- `docs/run/scripts/demo-chat-turn.sh`
+- `docs/run/scripts/seed-db.sh`
 
 **Estimated scope:** Medium
 
@@ -782,7 +784,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 ## Checkpoint: Complete
 
-- [ ] `./docs/run/demo-jobs.sh` and `./docs/run/demo-chat-turn.sh` pass on a clean compose
+- [ ] `./docs/run/dummy-jobs/run-job.sh fee_explain` and `./docs/run/dummy-jobs/run-chat.sh fee_explain` pass on a clean compose
 - [ ] Per-service tests pass
 - [ ] Each of the five service `README.md` files matches running APIs and schemas
 - [ ] Out of scope still out (no Kafka, no second AFD fleet, no real model)

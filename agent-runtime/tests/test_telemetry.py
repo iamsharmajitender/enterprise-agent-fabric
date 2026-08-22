@@ -1,0 +1,32 @@
+import json
+import logging
+
+from app import telemetry
+
+
+def test_json_formatter_includes_request_id() -> None:
+    token = telemetry.bind_request_id("req-edge-1")
+    try:
+        formatter = telemetry._JsonFormatter()
+        record = logging.LogRecord(
+            name="fabric.events",
+            level=logging.INFO,
+            pathname=__file__,
+            lineno=1,
+            msg="run.accepted",
+            args=(),
+            exc_info=None,
+        )
+        record.event = "run.accepted"
+        record.correlation_id = "corr-abc"
+        payload = json.loads(formatter.format(record))
+        assert payload["request_id"] == "req-edge-1"
+        assert payload["correlation_id"] == "corr-abc"
+        assert payload["event"] == "run.accepted"
+        assert "trace_id" not in payload
+    finally:
+        telemetry.reset_request_id(token)
+
+
+def test_attach_is_noop_without_span() -> None:
+    telemetry.attach(session_id="sess-88", correlation_id="corr-9f3c")

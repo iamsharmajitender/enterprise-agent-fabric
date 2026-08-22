@@ -106,8 +106,9 @@ Covers jobs start, entitle miss (403, no Runtime start), duplicate idempotency k
 Live proof (compose up):
 
 ```bash
-./docs/run/demo-jobs.sh
-./docs/run/demo-jobs.sh
+./docs/run/dummy-jobs/run-job.sh fee_explain
+./docs/run/dummy-jobs/run-job.sh claims_adjudicate
+./docs/run/dummy-jobs/run-job.sh --list
 ```
 
-Same `idempotency_key` twice still exits 0.
+Each run mints a new `idempotency_key` and payload ids (`account_id`, `claim_id`, …). `correlation_id` comes back from Front Door. Same key twice still returns the original id (`./docs/run/dummy-jobs/run-job.sh --check-idempotency fee_explain`). `claims_adjudicate` needs claim `claims:read`.

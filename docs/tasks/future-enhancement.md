@@ -1,4 +1,14 @@
-# Future enhancement: versioned route table
+# Future enhancements
+
+Deferred work that is **not** on the v1 list in [todo.md](./todo.md). Remaining handbook tasks (25–29) and the root README (24) stay there.
+
+**Active follow-on (separate task list):** three-layer observability against the existing Grafana LGTM stack — [observability-plan.md](./observability-plan.md) and [observability-todo.md](./observability-todo.md). That work does not replace v1 todos.
+
+Also parked here: [versioned route table](#versioned-route-table), [Front Door review follow-ups](#front-door-review-follow-ups), [Shared Memory](#shared-memory-conversation-and-long_term).
+
+---
+
+# Versioned route table
 
 **Status:** Proposal  
 **Date:** 2026-08-21
@@ -69,3 +79,83 @@ Do not merge fee and payments into one workflow. The table is composition of ind
 - Implementing `route_tables` or a publish/activate API.
 - Changing capability, manifest, or prompt versioning.
 - Session stickiness in Front Door (still a separate follow-up).
+
+---
+
+# Front Door review follow-ups
+
+**Status:** Parked  
+**Date:** 2026-08-21  
+**Source:** jobs + chat review of `agent-front-door`
+
+None of these block the local `fee_explain` demo (`POST /v1/jobs` then GET, or chat turn until the canned fee line). Handbook drift is Task 29, not this list.
+
+## Suggestions
+
+- **Bind freeze rows to `sub`.** `GET /v1/assistant/sessions/{id}/events` does not read claims. Stub bearer is caller-asserted (`X-Stub-Claims`), so any stub client who knows a `session_id` can poll. Before a real IdP: store `sub` on the freeze row; pass claims into `events` and reject a mismatch.
+- **Treat only HTTP 202 as Runtime start success.** `HttpRuntimeClient.start` accepts any 2xx with `correlation_id`. The Front Door README says non-202 → 503. Tighten the client to 202 only.
+- **Skip AR open-run on a newly minted `sess-*`.** `AssistantService.turn` calls `GET /v1/runs?session_id=` even when this request minted the id. Skip that lookup when the session was just created.
+- **Stronger HTTP FR-5 tests.** Controller tests substring-match `"route_id"` and similar keys. Reuse the recursive key scanner from `AssistantServiceTest`. Add controller coverage for clarify and continuation.
+- **Jobs idempotency unique index.** Pack wants a unique TTL index on jobs `idempotency_key`. Today uniqueness is `session_id` (jobs use `job:{key}`). Add a constrained index when freeze schema is next touched.
+
+## Spec gaps (Important, not v1 demo blockers)
+
+- **Jobs Layer ① ignores channel.** Jobs with an explicit `route_id` now entitle active catalogue ∩ claims (no `chat_visible`, no Layer ②). `claims_adjudicate` + `claims:read` routes. Remaining: Front Door still hardcodes `channel: "web"`; this path does not filter `channels`. Later: send channel `api` (or the caller’s channel) and entitle catalogue ∩ claims ∩ channel.
+- **Chat can resume a jobs freeze.** Jobs store `job:{idempotency_key}` in the same freeze table chat uses as `session_id`. A chat caller can POST `session_id: "job:…"` and resume or poll without decide. Later: mint/accept only `sess-` on assistant routes; reject `job:` with 400; add a test that `/v1/assistant/turns` does not resume a jobs row.
+- **JDBC freeze store has no tests.** Production is `JdbcFreezeStore` (TTL 45 min, upsert, opaque ids). Automated freeze tests use `InMemoryFreezeStore` only. Later: Flyway-backed tests for save → get, TTL miss, and `putOpaque` / `resolveOpaque`.
+
+---
+
+# Shared Memory (conversation and long_term)
+
+**Status:** Proposal  
+**Date:** 2026-08-22  
+**See also:** root [README Memory](../../README.md#memory)
+
+Catalogue `memory_profile` has four fields. Runtime already persists **`working`** (`ar.runtime.runs.working`) and **`loop`** (`ar.runtime.runs.checkpoint`) when the route asks for them. **`conversation`** and **`long_term`** stay catalogue-only until a Shared Memory box exists. Do not store either on `adp`, `ar`, `afd`, or `acr`.
+
+## Why consider it later
+
+Chat history and recallable facts outlive one `correlation_id`. Jane’s `sess-88` can span many runs. Architecture puts Memory / RAG in **Shared**, keyed by isolation (`tenant`, `user`, `session`), so:
+
+- routing still works if Memory is down (degraded chat, no history)
+- AR is not the system of record for PII transcripts
+- Jane cannot read John’s memory
+
+Stuffing transcripts into `ar.runtime.runs` would mix “this pipeline’s scratchpad” with “what Jane said yesterday” and die with the run pin.
+
+## What v1 does instead
+
+- `dataplane.memory_profiles` records intent (`conversation=session`, `long_term=retrieve_only`, TTL, isolation).
+- Front Door freeze (`afd.frontdoor.freeze` locally; Redis in prod) is route stickiness, not a transcript.
+- Graph `notes` for **this** run go to `working` when `working=session`. Loop cursor goes to `checkpoint` when `loop=checkpoint`. `/v1/runs/{id}/turns` reloads `working.notes`.
+- `/turns` does **not** prepend prior user/assistant utterances. A second `chat_session` turn does not see turn 1.
+
+## When to revive
+
+Revisit when any of these become painful:
+
+- Multi-turn `chat_session` / `policy_chat` cannot answer “what was my account id?” after turn 1.
+- A later job or chat must recall a fact from an earlier journey without stuffing the whole transcript into the prompt.
+- Compliance needs session transcripts outside the run pin, with tenant isolation and TTL.
+
+## Sketch (not in v1)
+
+A fifth store (not one of `afd` / `adp` / `ar` / `acr`):
+
+| Collection | Profile | Key | Write | Read |
+| --- | --- | --- | --- | --- |
+| Session transcript | `conversation=session` | `tenant` / `user` / `session_id` | After each chat turn: `{role, text, ts}` | Next turn: prepend to the LLM user blob. Jobs: skip unless you add follow-ups. |
+| Long-term facts | `long_term=retrieve_only` | Same isolation, separate collection | After the run: summaries / facts, not full notes | Only via a retrieve tool (or prefetch). Never auto-inject into every prompt. |
+| (omit / `none`) | no row, or field `none` | — | Do not write | — |
+
+Honor `ttl_hours` (seed: 24 typical, 8 for KYC/dispute) and `isolation`. Prove conversation on `chat_session` with a stable `session_id` before wiring long_term.
+
+**Still later, same Runtime pin:** continue an in-flight graph from `checkpoint.step` after a replica crash (`loop=checkpoint`). Writes already happen; resume-from-cursor does not.
+
+## Out of scope for this proposal
+
+- Implementing Shared Memory or a RAG index.
+- Moving `working` / `loop` off `ar.runtime.runs`.
+- Treating freeze Redis as conversation memory.
+- Putting transcripts in files or in-process maps.

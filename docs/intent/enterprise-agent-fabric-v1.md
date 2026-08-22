@@ -17,7 +17,7 @@ Do not reopen locked fabric rules. This file is what to build, not how the packs
 
 ## Locked for v1 (so the plan does not drift)
 
-- One Compose file at `docs/run/docker-compose.yml`. One Postgres 16 server; databases `afd`, `adp`, `ar`, `acr` only. No `acp` database.
+- One Compose file at `docs/run/compose/docker-compose.yml`. One Postgres 16 server; databases `afd`, `adp`, `ar`, `acr` only. No `acp` database.
 - The box is **AR** (Agent Runtime), not NAR. Workload header `X-Workload: ar`. Database `ar`.
 - Services talk only via HTTP. No service reads another service’s Postgres. Channel callers use Front Door only.
 - **Control Plane has no Fabric service APIs** (no decide, no audit) and no database. It calls Data Plane with `X-Workload: acp`. Local **catalogue UI** on **3006** lists route rows and shows playbook field detail.
