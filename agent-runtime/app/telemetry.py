@@ -13,6 +13,19 @@ _REQUEST_ID: ContextVar[str | None] = ContextVar("request_id", default=None)
 _state: dict[str, Any] = {"ready": False, "fastapi": None, "log_handler": None}
 
 
+def fabric_resource(service_name: str) -> Any:
+    """Service resource without telemetry.sdk.* (those become noisy Loki/Prometheus labels)."""
+    from opentelemetry.sdk.resources import Resource
+
+    return Resource(
+        attributes={
+            "service.name": service_name,
+            "service.namespace": "agent-fabric",
+            "deployment.environment": "local",
+        }
+    )
+
+
 def setup() -> None:
     """Configure OTLP trace, metric, and log exporters. No-op if packages are missing."""
     endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
@@ -32,20 +45,13 @@ def setup() -> None:
         from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
         from opentelemetry.sdk.metrics import MeterProvider
         from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-        from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
     except ImportError:
         _LOG.warning("opentelemetry packages missing; telemetry disabled")
         return
 
-    resource = Resource.create(
-        {
-            "service.name": service_name,
-            "service.namespace": "agent-fabric",
-            "deployment.environment": "local",
-        }
-    )
+    resource = fabric_resource(service_name)
     base = endpoint.rstrip("/")
 
     trace_provider = TracerProvider(resource=resource)

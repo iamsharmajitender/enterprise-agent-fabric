@@ -1,8 +1,9 @@
 # Agent Capability Registry — solution architecture and design
 
 **Box:** Agent Capability Registry (with Agent Plane; AR hydrates at pin)  
-**Parent:** [Enterprise Agent Fabric](../enterprise-agent-fabric/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-capability-registry.mdx](../enterprise-agent-fabric/agent-capability-registry.mdx)  
+**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-capability-registry.mdx](./narrative/agent-capability-registry.mdx)  
 **Status:** Draft · **Date:** 2026-08-20  
+**This binary:** [02-understand/status.md](../02-understand/status.md). This pack may be ahead of code.  
 **Audience:** CTO / chief architect (solution on a page); platform engineer (design)
 
 Publishers publish versions. Agent developers refer. AR hydrates once, then calls `invoke`. A catalog, not a third AFD, not MCP `list_tools`, and not a client the loop calls on every turn.
@@ -383,4 +384,4 @@ Second `PUT` of `ocr_extract@1.2.0` with `published`: 409. Developer who needs a
 
 ## Read next
 
-[Agent Runtime](./agent-runtime.md) · [Agent Front Door](./agent-front-door.md) · [Agent Plane](./agent-plane.md) · [Behaviour source](../enterprise-agent-fabric/agent-capability-registry.mdx)
+[Agent Runtime](./agent-runtime.md) · [Agent Front Door](./agent-front-door.md) · [Agent Plane](./agent-plane.md) · [Behaviour source](./narrative/agent-capability-registry.mdx)

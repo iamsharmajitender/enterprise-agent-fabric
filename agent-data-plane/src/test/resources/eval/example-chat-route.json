@@ -1,0 +1,14 @@
+{
+  "id": "chat-fee-charged-42",
+  "ingress": "chat",
+  "channel": "web",
+  "message": "Why was I charged $42?",
+  "route_id": null,
+  "claims": { "sub": "jane", "emts": { "accounts:read": true } },
+  "expected": {
+    "outcome": "route",
+    "route_id": "fee_explain",
+    "route_version": "2026.08.1"
+  },
+  "tags": []
+}

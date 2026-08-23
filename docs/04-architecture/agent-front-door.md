@@ -1,8 +1,9 @@
 # Agent Front Door — solution architecture and design
 
 **Box:** Chat AFD (BFF) + API AFD (HTTP handler + Kafka job-start worker)  
-**Parent:** [Enterprise Agent Fabric](../enterprise-agent-fabric/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-front-door.mdx](../enterprise-agent-fabric/agent-front-door.mdx)  
+**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-front-door.mdx](./narrative/agent-front-door.mdx)  
 **Status:** Draft · **Date:** 2026-08-20  
+**This binary:** [02-understand/status.md](../02-understand/status.md). This pack may be ahead of code.  
 **Audience:** CTO / chief architect (solution on a page); platform engineer (design)
 
 Two fleets. One contract. Only way into the Fabric. Kafka `{runs_topic}` is AR return, not a third AFD.
@@ -345,4 +346,4 @@ Continuation `"yes"`: skip decide, read freeze, `POST /v1/runs/{correlation_id}/
 
 ## Read next
 
-[Agent Plane](./agent-plane.md) · [Agent Runtime](./agent-runtime.md) · [Agent Capability Registry](./agent-capability-registry.md) · [Behaviour source](../enterprise-agent-fabric/agent-front-door.mdx)
+[Agent Plane](./agent-plane.md) · [Agent Runtime](./agent-runtime.md) · [Agent Capability Registry](./agent-capability-registry.md) · [Behaviour source](./narrative/agent-front-door.mdx)

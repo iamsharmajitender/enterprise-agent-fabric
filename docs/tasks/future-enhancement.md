@@ -2,7 +2,9 @@
 
 Deferred work that is **not** on the v1 list in [todo.md](./todo.md). Remaining handbook tasks (25–29) and the root README (24) stay there.
 
-**Active follow-on (separate task list):** three-layer observability against the existing Grafana LGTM stack — [observability-plan.md](./observability-plan.md) and [observability-todo.md](./observability-todo.md). That work does not replace v1 todos.
+Docs map: [docs/README.md](../README.md).
+
+**Active follow-on (separate task lists):** three-layer observability against the existing Grafana LGTM stack — [observability-plan.md](./observability-plan.md) and [observability-todo.md](./observability-todo.md). Agent evals (routing golden set, jobs entitle, pin lint) — [eval-plan.md](./eval-plan.md) and [eval-todo.md](./eval-todo.md). Layered intent router (eligible → ① rules → ② retrieve → ③ LLM fallback) — [intent-plan.md](./intent-plan.md) and [intent-todo.md](./intent-todo.md). Route-contract stage data sharing (`goal` / `notes` / slots, prefetch pack, branch, parent→child) — [dataflow-plan.md](./dataflow-plan.md) and [dataflow-todo.md](./dataflow-todo.md). Those lists do not replace v1 todos.
 
 Also parked here: [versioned route table](#versioned-route-table), [Front Door review follow-ups](#front-door-review-follow-ups), [Shared Memory](#shared-memory-conversation-and-long_term).
 
@@ -49,7 +51,7 @@ Revisit if any of these become painful:
 
 - A misroute cannot be replayed because the mix of independently published routes is unknown.
 - Payments shipping poisons fee questions and there is no one-flip rollback of the contest.
-- Golden-set eval needs a certified label set, not “latest of each.”
+- Golden-set eval needs a certified label set, not “latest of each.” Until a table exists, the eval fixtures record the labelled mix in the file header ([eval-plan.md](./eval-plan.md)).
 - Adding or removing a route should be an atomic catalogue publish.
 
 ## Sketch (not in v1)
@@ -112,7 +114,7 @@ None of these block the local `fee_explain` demo (`POST /v1/jobs` then GET, or c
 **Date:** 2026-08-22  
 **See also:** root [README Memory](../../README.md#memory)
 
-Catalogue `memory_profile` has four fields. Runtime already persists **`working`** (`ar.runtime.runs.working`) and **`loop`** (`ar.runtime.runs.checkpoint`) when the route asks for them. **`conversation`** and **`long_term`** stay catalogue-only until a Shared Memory box exists. Do not store either on `adp`, `ar`, `afd`, or `acr`.
+Catalogue `memory_profile` has four fields. Runtime already persists **`working`** (`ar.runtime.runs.working`) and **`loop`** (`ar.runtime.runs.checkpoint`) when the route asks for them. **`conversation`** and **`long_term`** stay catalogue-only until a Shared Memory box exists. Do not store either on `adp`, `ar`, `afd`, or `acr`. Same-run stage JSON handoff (`goal` vs `notes` vs slots, prefetch pack) is **not** this box — that is [dataflow-plan.md](./dataflow-plan.md).
 
 ## Why consider it later
 

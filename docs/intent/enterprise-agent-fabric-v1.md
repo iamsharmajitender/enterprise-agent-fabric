@@ -2,7 +2,8 @@
 
 **Status:** Confirmed 2026-08-20 (AR, HTTP APIs, Control Plane is a Data Plane client, no audit on Data Plane)  
 **Plan:** [tasks/plan.md](../tasks/plan.md) · [tasks/todo.md](../tasks/todo.md)  
-**Behaviour source:** [docs/enterprise-agent-fabric-architecture](../enterprise-agent-fabric-architecture/README.md)
+**Docs map:** [docs/README.md](../README.md)  
+**Behaviour source:** [docs/04-architecture](../04-architecture/README.md)
 
 Do not reopen locked fabric rules. This file is what to build, not how the packs work.
 

@@ -1,10 +1,10 @@
 # Task list: Three-layer observability (local Fabric)
 
-Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md) and [observability checklist](../../.cursor/references/observability-checklist.md). Plan: [observability-plan.md](./observability-plan.md). Blueprint: [Observability: Three Layers, One Graph](https://jitendersharma.dev/blueprints/observability-blueprint).
+Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md) and [observability checklist](../../.cursor/references/observability-checklist.md). Plan: [observability-plan.md](./observability-plan.md). Docs map: [docs/README.md](../README.md). Blueprint: [Observability: Three Layers, One Graph](https://jitendersharma.dev/blueprints/observability-blueprint).
 
 **Execution order:** O1 → O3 (foundation), then O4–O7 (Layer ② path), checkpoint, then O9–O11 (Layer ①), O12–O13 (Layer ③), O14–O16 (intelligence). O8 is optional after O7.
 
-v1 fabric tasks remain in [todo.md](./todo.md); this list does not replace them.
+v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](./eval-todo.md); intent remains in [intent-todo.md](./intent-todo.md); stage data sharing remains in [dataflow-todo.md](./dataflow-todo.md). This list does not replace them.
 
 ---
 

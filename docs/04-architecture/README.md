@@ -1,10 +1,12 @@
 # Enterprise Agent Fabric — solution architecture packs
 
-Four solution-architecture documents, one per Fabric box. Each pack is the **solution architecture** (artifacts 9–12) plus **detailed solution design** (artifacts 13–17) from [case-studies.md](../../case-studies.md). Packs 1–2 (brief, options) and 5–7 (security, operate, evolve) stay on the product pages until those are written.
+These packs are the box design docs in this repo: one per Fabric box. They hold the **solution architecture** plus **detailed solution design**. Long-form MDX is in [narrative/](./narrative/).
 
-**Source of truth for behaviour:** [docs/enterprise-agent-fabric](../enterprise-agent-fabric/). These packs restate that design so a CTO can scan a box in two minutes, and an engineer can implement it.
+These packs may be ahead of code. Behaviour of this binary is [02-understand/status.md](../02-understand/status.md). These packs restate the box design so a CTO can scan a box in two minutes, and an engineer can implement it.
 
-**Status:** Draft, aligned to the pin-split proposal (AFD pins and starts; Agent Plane classifies; AR runs). Playbooks that still put the pin on ACP are behind this paper.
+Playbook and Docusaurus slugs (`/intent/...`, `/playbooks/...`) inside the MDX files are leftovers, not a second site.
+
+**Status:** Draft, aligned to the pin-split proposal (AFD pins and starts; Agent Plane classifies; AR runs).
 
 ## Documents
 
@@ -19,9 +21,9 @@ Read order matches a request: **AFD → Plane → Runtime → Registry**.
 
 ## What each pack contains
 
-Modified from case-studies §B–C. Security, SLO maths, and runbooks are **not** duplicated here; failure design is, because it is load-bearing for this fabric.
+Security, SLO maths, and runbooks are **not** duplicated here; failure design is, because it is load-bearing for this fabric.
 
-| # | Section in each pack | Case-study artifact |
+| # | Section in each pack | What it covers |
 | --- | --- | --- |
 | — | Boundaries and non-goals | Added: this architecture is defined as much by what the box must not do |
 | 9 | Solution on a page | Problem → requirements → architecture → tech choices → outcomes + one diagram |
@@ -49,4 +51,4 @@ Diagrams are G.A.I.N editorial HTML/SVG in [`diagrams/`](./diagrams/) (not Merma
 
 ## Naming
 
-Product pages mix NAFD/NACP with AFD/ACP. Product pages mix NAFD/NACP with AFD/ACP. These packs use the child-page names: **AFD**, **ACP**, **Agent Data Plane**, **AR** (Agent Runtime), **Registry**. Editorial HTML/SVG under `diagrams/` and `docs/enterprise-agent-fabric/` may still say NAR until those figures are redrawn.
+Narrative MDX mixes NAFD/NACP with AFD/ACP. These packs use the child-page names: **AFD**, **ACP**, **Agent Data Plane**, **AR** (Agent Runtime), **Registry**. Editorial HTML/SVG under `diagrams/` and [narrative/](./narrative/) may still say NAR until those figures are redrawn.

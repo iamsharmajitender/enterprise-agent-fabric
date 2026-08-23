@@ -24,8 +24,8 @@ def setup() -> None:
         return
 
     service_name = os.environ.get("OTEL_SERVICE_NAME", "tool-mock")
-    resource = Resource.create(
-        {
+    resource = Resource(
+        attributes={
             "service.name": service_name,
             "service.namespace": "agent-fabric",
             "deployment.environment": "local",

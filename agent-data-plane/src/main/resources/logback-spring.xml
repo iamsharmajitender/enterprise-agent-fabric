@@ -3,10 +3,14 @@
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
   <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
+  <!--
+    captureExperimentalAttributes adds OTel trace_id/span_id from the span.
+    Allowlisted MDC only — Micrometer also puts Brave-style traceId/spanId in MDC.
+  -->
   <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
     <captureExperimentalAttributes>true</captureExperimentalAttributes>
     <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
-    <captureMdcAttributes>*</captureMdcAttributes>
+    <captureMdcAttributes>request_id,event,journey_id,session_id,correlation_id,route_id,route_version,outcome,channel,ingress,reason_class,status,has_hint,has_option,eligible_count</captureMdcAttributes>
   </appender>
 
   <root level="INFO">

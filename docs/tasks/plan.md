@@ -1,6 +1,6 @@
 # Implementation Plan: Enterprise Agent Fabric v1 (local)
 
-Observability (OTLP → LGTM, three layers) is a **separate** plan: [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md). Do not fold those tasks into the checkboxes below.
+Observability (OTLP → LGTM, three layers) is a **separate** plan: [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md). Evals (routing golden set / CI gate) are a **separate** plan: [eval-plan.md](./eval-plan.md) / [eval-todo.md](./eval-todo.md). Intent router (layered classifier ①–③) is a **separate** plan: [intent-plan.md](./intent-plan.md) / [intent-todo.md](./intent-todo.md). Route-contract stage data sharing is a **separate** plan: [dataflow-plan.md](./dataflow-plan.md) / [dataflow-todo.md](./dataflow-todo.md). Do not fold those tasks into the checkboxes below.
 
 ## Overview
 
@@ -16,7 +16,7 @@ Stand up five independently deployable Fabric services in the existing folders, 
 - **Constraint:** Java hexagonal (Front Door, Registry, Data Plane); TypeScript Control Plane is a UI (no Fabric APIs, no DB) that calls Data Plane; Python AR with uv + LangGraph; HTTP on **3005, 3006 (CP UI), 3007, 3008, 3009**; stub Kafka / IdP / LLM; **no decision audit**; each service folder has a detailed `README.md`
 - Out of scope: remaining case-study packs; real Kafka / IdP / LLM; two production AFD fleets; Patterns 0–3; dual-check; **decision audit**; real chat UI; production deploy / SLO maths
 
-**Behaviour source:** [docs/enterprise-agent-fabric-architecture](../enterprise-agent-fabric-architecture/README.md). Do not reopen locked fabric rules. V1 implements them cheaply (HTTP instead of Kafka, stub identity, keyword Layer ②, LangGraph stub node).
+**Docs map:** [docs/README.md](../README.md). **Behaviour source:** [docs/04-architecture](../04-architecture/README.md). Do not reopen locked fabric rules. V1 implements them cheaply (HTTP instead of Kafka, stub identity, keyword Layer ②, LangGraph stub node).
 
 ## Architecture Decisions
 
@@ -164,7 +164,7 @@ Chat JSON never contains `route_id`, `run_id`, `agent_client_id`, `confidence`, 
 
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
-| Three Java copies drift | Med | Same hexagonal Spring/Flyway layout; contract fixtures in `docs/contracts/` are the shared source |
+| Three Java copies drift | Med | Same hexagonal Spring/Flyway layout; contract fixtures in `docs/05-reference/` are the shared source |
 | “Complete services” expands into pack FRs | High | Out of scope stays in this plan; second AFD fleet / SSE / Kafka / Layer ③ are later plans |
 | LangGraph pulls in a live model | Med | Graph has a stub node only; no API key in compose |
 | Hexagonal collapses into controllers | Med | Domain tests with fakes; no Spring imports under `domain/` |

@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/styles.css?v=glossary-accordion" />
+    <link rel="stylesheet" href="/styles.css?v=tools-retrieval-stack" />
   </head>
   <body>
     <a class="skip" href="#page">Skip to content</a>
@@ -188,7 +188,7 @@
                 </tr>
                 <tr>
                   <th scope="row">Eval suite<span class="glossary-key">eval_suite_id</span></th>
-                  <td>Tests that score this route. Not used on the hot path; operators and CI use it.</td>
+                  <td>Optional slice-3 quality suite for <em>this</em> route after start (tool order, citations). Empty is correct for free-form chat. The CI routing golden set is the catalogue board in Data Plane tests, not this pointer. Not used on the hot path.</td>
                 </tr>
               </tbody>
             </table>
@@ -438,6 +438,6 @@
       </div>
       </div>
     </div>
-    <script src="/app.js?v=glossary-accordion" type="module"></script>
+    <script src="/app.js?v=tools-retrieval-stack" type="module"></script>
   </body>
 </html>

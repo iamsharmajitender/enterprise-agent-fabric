@@ -2,6 +2,8 @@
 
 Channel ingress for the local fabric. One Java process on port **3005**. Jobs `/v1/jobs*` is live. Chat `/v1/assistant/*` is the same process and port; those routes land after the jobs path.
 
+Docs map: [docs/README.md](../docs/README.md). Frozen examples: [docs/05-reference/](../docs/05-reference/README.md).
+
 ## Job
 
 Accept a named `route_id` from a partner/system caller, entitle (Layer ① only — no keyword classify, no `clarify`), freeze, start Agent Runtime, return `202 { "correlation_id" }`. Callers may see `route_id` / `correlation_id` (FR-5 is chat-only). Poll status from Runtime HTTP. Do **not** add a second fleet, hostname, or Compose service.
@@ -33,7 +35,7 @@ Authorization: Bearer stub
 X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}
 ```
 
-Missing or invalid bearer: **401**. Stub user `jane` has `accounts:read`, which `fee_explain` requires. Details: [`contracts/stub-auth.md`](../docs/contracts/stub-auth.md).
+Missing or invalid bearer: **401**. Stub user `jane` has `accounts:read`, which `fee_explain` requires. Details: [`05-reference/stub-auth.md`](../docs/05-reference/stub-auth.md).
 
 Outbound to Data Plane and Runtime: `Authorization: Bearer fabric-internal` and `X-Workload: afd`. The JDK HTTP client is pinned to **HTTP/1.1** (Runtime is uvicorn; h2c upgrade fails closed).
 
@@ -49,7 +51,7 @@ Chat `/v1/assistant/hints`, `turns`, and `events` are not served yet (same proce
 
 ### Jobs start
 
-Request ([`contracts/jobs-start.json`](../docs/contracts/jobs-start.json)):
+Request ([`05-reference/jobs-start.json`](../docs/05-reference/jobs-start.json)):
 
 ```json
 {
@@ -59,18 +61,18 @@ Request ([`contracts/jobs-start.json`](../docs/contracts/jobs-start.json)):
 }
 ```
 
-Response ([`contracts/jobs-accepted.json`](../docs/contracts/jobs-accepted.json)): `202 {"correlation_id":"…"}`.
+Response ([`05-reference/jobs-accepted.json`](../docs/05-reference/jobs-accepted.json)): `202 {"correlation_id":"…"}`.
 
-Decide body this box sends ([`contracts/decide-jobs-route.json`](../docs/contracts/decide-jobs-route.json)): `ingress: "jobs"`, `route_id` set, `message` null.
+Decide body this box sends ([`05-reference/decide-jobs-route.json`](../docs/05-reference/decide-jobs-route.json)): `ingress: "jobs"`, `route_id` set, `message` null.
 
 If Runtime does not return `202`, this box responds **503** and does not invent a `correlation_id`. Retry with the same idempotency key.
 
 ## Contracts
 
-- [`contracts/jobs-start.json`](../docs/contracts/jobs-start.json)
-- [`contracts/jobs-accepted.json`](../docs/contracts/jobs-accepted.json)
-- [`contracts/decide-jobs-route.json`](../docs/contracts/decide-jobs-route.json)
-- [`contracts/stub-auth.md`](../docs/contracts/stub-auth.md)
+- [`05-reference/jobs-start.json`](../docs/05-reference/jobs-start.json)
+- [`05-reference/jobs-accepted.json`](../docs/05-reference/jobs-accepted.json)
+- [`05-reference/decide-jobs-route.json`](../docs/05-reference/decide-jobs-route.json)
+- [`05-reference/stub-auth.md`](../docs/05-reference/stub-auth.md)
 
 ## Tables / schema
 

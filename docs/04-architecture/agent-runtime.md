@@ -1,8 +1,9 @@
 # Agent Runtime — solution architecture and design
 
 **Box:** AR (Agent Runtime) + calls into Shared (Memory, RAG, Tools / PEP)  
-**Parent:** [Enterprise Agent Fabric](../enterprise-agent-fabric/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-runtime.mdx](../enterprise-agent-fabric/agent-runtime.mdx)  
+**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-runtime.mdx](./narrative/agent-runtime.mdx)  
 **Status:** Draft · **Date:** 2026-08-20  
+**This binary:** [02-understand/status.md](../02-understand/status.md). This pack may be ahead of code.  
 **Audience:** CTO / chief architect (solution on a page); platform engineer (design)
 
 Specialized agents underneath. Does the work. Does not classify the next utterance. Does not own agent identity. Only the AFD starts AR.
@@ -300,4 +301,4 @@ Pin miss on AFD: `GET /v1/runs?session_id=` returns the open run + pin, or empty
 
 ## Read next
 
-[Agent Front Door](./agent-front-door.md) · [Agent Plane](./agent-plane.md) · [Agent Capability Registry](./agent-capability-registry.md) · [Behaviour source](../enterprise-agent-fabric/agent-runtime.mdx)
+[Agent Front Door](./agent-front-door.md) · [Agent Plane](./agent-plane.md) · [Agent Capability Registry](./agent-capability-registry.md) · [Behaviour source](./narrative/agent-runtime.mdx)

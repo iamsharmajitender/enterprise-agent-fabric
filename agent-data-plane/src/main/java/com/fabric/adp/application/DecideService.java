@@ -97,8 +97,7 @@ public class DecideService {
         .orElseGet(() -> DecideResult.abstain(entitledIds));
   }
 
-  private DecideResult keywordRetrieve(
-      String message, List<RouteRow> eligible, List<String> eligibleIds) {
+  private DecideResult keywordRetrieve(String message, List<RouteRow> eligible, List<String> eligibleIds) {
     String haystack = message == null ? "" : message.toLowerCase(Locale.ROOT);
     record Scored(RouteRow row, int score) {}
     List<Scored> scored = new ArrayList<>();

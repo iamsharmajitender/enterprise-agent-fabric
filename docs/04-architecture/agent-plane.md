@@ -1,8 +1,9 @@
 # Agent Plane — solution architecture and design
 
 **Box:** Agent Control Plane (ACP) + Agent Data Plane  
-**Parent:** [Enterprise Agent Fabric](../enterprise-agent-fabric/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-plane.mdx](../enterprise-agent-fabric/agent-plane.mdx)  
+**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-plane.mdx](./narrative/agent-plane.mdx)  
 **Status:** Draft · **Date:** 2026-08-20  
+**This binary:** [02-understand/status.md](../02-understand/status.md). This pack may be ahead of code.  
 **Audience:** CTO / chief architect (solution on a page); platform engineer (design)
 
 One plane per trust domain. Two boxes inside it. Catalogue plus classify. Does **not** pin. Does **not** start AR. Does **not** mint `correlation_id`.
@@ -330,4 +331,4 @@ Two identical chat turns (double-click). Plane may return `route` twice and writ
 
 ## Read next
 
-[Agent Front Door](./agent-front-door.md) · [Agent Runtime](./agent-runtime.md) · [Agent Capability Registry](./agent-capability-registry.md) · [Behaviour source](../enterprise-agent-fabric/agent-plane.mdx)
+[Agent Front Door](./agent-front-door.md) · [Agent Runtime](./agent-runtime.md) · [Agent Capability Registry](./agent-capability-registry.md) · [Behaviour source](./narrative/agent-plane.mdx)

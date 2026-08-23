@@ -4,6 +4,18 @@ import logging
 from app import telemetry
 
 
+def test_fabric_resource_omits_sdk_labels() -> None:
+    try:
+        resource = telemetry.fabric_resource("agent-runtime")
+    except ImportError:
+        return
+    keys = set(resource.attributes)
+    assert "telemetry.sdk.language" not in keys
+    assert "telemetry.sdk.name" not in keys
+    assert "telemetry.sdk.version" not in keys
+    assert resource.attributes["service.name"] == "agent-runtime"
+
+
 def test_json_formatter_includes_request_id() -> None:
     token = telemetry.bind_request_id("req-edge-1")
     try:

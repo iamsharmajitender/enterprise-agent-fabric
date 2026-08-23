@@ -1,0 +1,35 @@
+# Overlay for grafana/otel-lgtm. Merged via OTELCOL_EXTRA_ARGS.
+# Drops SDK resource labels on all signals; drops Brave-style MDC ids on logs
+# (apps emit OTel trace_id / span_id only).
+processors:
+  resource/strip_sdk:
+    attributes:
+      - key: telemetry.sdk.language
+        action: delete
+      - key: telemetry.sdk.name
+        action: delete
+      - key: telemetry.sdk.version
+        action: delete
+      - key: telemetry.auto.version
+        action: delete
+  attributes/drop_camel_trace:
+    actions:
+      - key: traceId
+        action: delete
+      - key: spanId
+        action: delete
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource/strip_sdk, batch]
+      exporters: [otlp_http/traces]
+    metrics:
+      receivers: [otlp, prometheus/collector]
+      processors: [resource/strip_sdk, batch]
+      exporters: [otlp_http/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [resource/strip_sdk, attributes/drop_camel_trace, batch]
+      exporters: [otlp_http/logs]

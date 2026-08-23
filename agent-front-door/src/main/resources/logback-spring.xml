@@ -5,12 +5,15 @@
 
   <!--
     OTLP logs → Grafana Loki (via otel-lgtm).
+    captureExperimentalAttributes adds OTel trace_id/span_id from the span.
+    Do not capture MDC * — Micrometer Tracing also puts Brave-style traceId/spanId
+    in MDC, which Loki showed as a duplicate pair.
     Source: https://docs.spring.io/spring-boot/3.5/reference/actuator/loggers.html
   -->
   <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
     <captureExperimentalAttributes>true</captureExperimentalAttributes>
     <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
-    <captureMdcAttributes>*</captureMdcAttributes>
+    <captureMdcAttributes>request_id,event,journey_id,session_id,correlation_id,route_id,route_version,outcome,channel,ingress,reason_class,status,has_hint,has_option,eligible_count</captureMdcAttributes>
   </appender>
 
   <root level="INFO">

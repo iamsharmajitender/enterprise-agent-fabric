@@ -92,18 +92,21 @@ test("autonomy chips use named labels and a color class per mode", () => {
   assert.match(js, /return autonomyPill\(value\)/);
 });
 
-test("route detail keeps a retrieval tag then scope", () => {
+test("route detail stacks manifest then retrieval under tools and retrieval", () => {
+  assert.match(js, /stacked: true/);
+  assert.match(js, /function buildSection/);
+  assert.match(js, /function renderRetrievalCard/);
   assert.match(js, /function hasRetrieval/);
-  assert.match(js, /function appendRetrievalFields/);
   assert.match(js, /pill\(retrievalListLabel\(value\), "info"\)/);
   assert.match(js, /hasRetrieval\(row\.retrieval\)/);
   assert.match(js, /"Retrieval", "Chat"/);
   assert.match(js, /"Autonomy", "Description"/);
   assert.match(js, /autonomyCell\(item\.autonomy_mode\)/);
   assert.match(js, /retrievalListLabel\(item\.retrieval\)/);
+  assert.match(css, /\.section-stack/);
   assert.equal(js.includes("Who starts retrieve"), false);
   assert.equal(js.includes("LLM may propose retrieve inside scope"), false);
-  assert.equal(js.includes("function renderRetrieval"), false);
+  assert.equal(js.includes("function appendRetrievalFields"), false);
 });
 
 test("route detail links prompt, workflow, and capability ids", () => {

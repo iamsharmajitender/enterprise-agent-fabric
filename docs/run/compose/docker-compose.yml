@@ -10,6 +10,8 @@ x-otel-env: &otel-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
   OTEL_METRIC_EXPORT_INTERVAL: "500"
   OTEL_RESOURCE_ATTRIBUTES: service.namespace=agent-fabric,deployment.environment=local
+  OTEL_RESOURCE_DISABLED_KEYS: telemetry.sdk.language,telemetry.sdk.name,telemetry.sdk.version
+  OTEL_EXPERIMENTAL_RESOURCE_DISABLED_KEYS: telemetry.sdk.language,telemetry.sdk.name,telemetry.sdk.version
   MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-lgtm:4318/v1/traces
   MANAGEMENT_OTLP_METRICS_EXPORT_URL: http://otel-lgtm:4318/v1/metrics
   MANAGEMENT_OTLP_METRICS_EXPORT_STEP: 1s
@@ -57,8 +59,10 @@ services:
       - "4318:4318"   # OTLP HTTP ingestion
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
+      OTELCOL_EXTRA_ARGS: --config=file:./otelcol-config-fabric.yaml
     volumes:
       - lgtm-data:/data
+      - ./otelcol-fabric.yaml:/otel-lgtm/otelcol-config-fabric.yaml:ro
     restart: unless-stopped
 
   agent-capability-registry:

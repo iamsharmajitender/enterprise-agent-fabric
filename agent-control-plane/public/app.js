@@ -41,6 +41,7 @@ const SECTIONS = [
   },
   {
     title: "Tools and retrieval",
+    stacked: true,
     fields: [
       ["manifest", "Manifest"],
       ["retrieval", "Retrieval"],
@@ -630,11 +631,11 @@ function renderStagesTable(stages) {
   return root;
 }
 
-function renderManifestTable(manifest) {
+function renderManifestTable(manifest, heading = "h3") {
   const card = el("article", "card card--default");
   card.setAttribute("aria-label", "Manifest");
   const header = el("header", "card__header");
-  header.append(el("h3", "card__title", "Manifest"));
+  header.append(el(heading, "card__title", "Manifest"));
   const dl = document.createElement("dl");
   const idValue = el("dd");
   idValue.append(idLink(catalogHref("manifest_id", manifest.manifest_id), manifest.manifest_id, "mono"));
@@ -660,7 +661,8 @@ function renderManifestTable(manifest) {
   );
   const tools = Array.isArray(manifest.tools) ? manifest.tools : [];
   const toolsHead = el("div", "card__section-head");
-  toolsHead.append(el("h4", "card__title", "Tools"), pill(String(tools.length)));
+  const toolsHeading = heading === "h3" ? "h4" : "h5";
+  toolsHead.append(el(toolsHeading, "card__title", "Tools"), pill(String(tools.length)));
   const content = el("div", "card__content");
   content.append(dl, el("hr", "separator"), toolsHead, renderToolsTable(tools));
   card.append(header, content);
@@ -760,28 +762,71 @@ function appendExpandedFields(dl, value, extra) {
   }
 }
 
-function appendRetrievalFields(dl, label, value, extra) {
-  if (!hasRetrieval(value)) {
-    appendDlField(dl, label, null, "retrieval", extra);
-    return;
+function renderEmptyCard(title, value, key, extra) {
+  const card = el("article", "card card--default");
+  card.setAttribute("aria-label", title);
+  const header = el("header", "card__header");
+  header.append(el("h4", "card__title", title));
+  const content = el("div", "card__content");
+  if (isEmpty(value)) content.append(el("span", "empty", "—"));
+  else content.append(renderValue(value, key, extra));
+  card.append(header, content);
+  return card;
+}
+
+function renderRetrievalCard(value) {
+  const card = el("article", "card card--default");
+  card.setAttribute("aria-label", "Retrieval");
+  const header = el("header", "card__header");
+  const head = el("div", "card__section-head");
+  head.append(el("h4", "card__title", "Retrieval"));
+  if (hasRetrieval(value)) {
+    head.append(pill(retrievalListLabel(value), "info"));
   }
-  const tags = el("span", "chips");
-  tags.append(pill(retrievalListLabel(value), "info"));
-  const dt = el("dt", "", label);
-  const dd = el("dd", "");
-  dd.append(tags);
-  dl.append(dt, dd);
-  const scope = retrievalScope(value);
-  appendDlField(dl, "Scope", scope.length === 0 ? null : scope, "scope", extra);
+  header.append(head);
+  const content = el("div", "card__content");
+  if (!hasRetrieval(value)) {
+    content.append(el("span", "empty", "—"));
+  } else {
+    const dl = document.createElement("dl");
+    const scope = retrievalScope(value);
+    appendDlField(dl, "Scope", scope.length === 0 ? null : scope, "scope");
+    content.append(dl);
+  }
+  card.append(header, content);
+  return card;
+}
+
+function renderStackedField(key, label, value, extra) {
+  if (key === "manifest") {
+    return isManifest(value)
+      ? renderManifestTable(value, "h4")
+      : renderEmptyCard("Manifest", value, key, extra);
+  }
+  if (key === "retrieval") return renderRetrievalCard(value);
+  return renderEmptyCard(label, value, key, extra);
+}
+
+function buildSection(section, row, extra = {}) {
+  const block = el("section", "section");
+  block.append(el("h3", "", section.title));
+  if (section.stacked) {
+    const stack = el("div", "section-stack");
+    for (const [key, label] of section.fields) {
+      stack.append(renderStackedField(key, label, row[key], extra));
+    }
+    block.append(stack);
+    return block;
+  }
+  const dl = document.createElement("dl");
+  appendSectionFields(dl, section.fields, row, extra);
+  block.append(dl);
+  return block;
 }
 
 function appendSectionField(dl, key, label, value, extra) {
   if (isManifest(value) || isObjectSchema(value)) {
     appendDlField(dl, label, value, key, extra, true);
-    return;
-  }
-  if (key === "retrieval") {
-    appendRetrievalFields(dl, label, value, extra);
     return;
   }
   if (isPlainRecord(value)) {
@@ -1318,14 +1363,11 @@ async function showCapability(capabilityId, version) {
 
   const sections = [];
   for (const section of CAPABILITY_SECTIONS) {
-    const block = el("section", "section");
-    block.append(el("h3", "", section.title));
-    const dl = document.createElement("dl");
-    appendSectionFields(dl, section.fields, row, {
-      live: !version && (row.status === "published" || !row.status),
-    });
-    block.append(dl);
-    sections.push(block);
+    sections.push(
+      buildSection(section, row, {
+        live: !version && (row.status === "published" || !row.status),
+      }),
+    );
   }
 
   let usedBy = [];
@@ -1589,12 +1631,7 @@ async function showRoute(routeId, routeVersion) {
 
   const sections = [];
   for (const section of SECTIONS) {
-    const block = el("section", "section");
-    block.append(el("h3", "", section.title));
-    const dl = document.createElement("dl");
-    appendSectionFields(dl, section.fields, row);
-    block.append(dl);
-    sections.push(block);
+    sections.push(buildSection(section, row));
   }
 
   const jsonPanel = buildJsonPanel(row);
@@ -2142,14 +2179,11 @@ async function showCatalogDetail({
   const sections = extraNodes ? extraNodes(row) : [];
   if (sectionsOf) {
     for (const section of sectionsOf) {
-      const block = el("section", "section");
-      block.append(el("h3", "", section.title));
-      const dl = document.createElement("dl");
-      appendSectionFields(dl, section.fields, row, {
-        live: !version && (row.status === "published" || !row.status),
-      });
-      block.append(dl);
-      sections.push(block);
+      sections.push(
+        buildSection(section, row, {
+          live: !version && (row.status === "published" || !row.status),
+        }),
+      );
     }
   }
   const jsonPanel = buildJsonPanel(row, jsonTitle, jsonId);

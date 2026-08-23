@@ -54,7 +54,7 @@ Works on any route in this folder. Runtime returns the original id for a duplica
 ./docs/run/dummy-jobs/run-chat.sh --mode 0
 ```
 
-By default `--all` and `--mode` **only POST** and do not wait for completion. Poll each until `completed` / `failed`:
+By default `--all` and `--mode` **only POST** and do not wait for completion. Poll each until `completed`. `WAIT=1` is fail-closed (non-zero on `failed` or timeout) — pin/hydrate smoke, not the routing golden set:
 
 ```bash
 WAIT=1 ./docs/run/dummy-jobs/run-job.sh --all
@@ -89,4 +89,4 @@ Routes that only call domain tools can finish against tool-mock. LLM stages stil
 
 No teaching chat-visible route is autonomy 2. [`chats.json`](chats.json) is the catalogue (route, claims, utterance). Per-route `.sh` files call [`run-chat.sh`](run-chat.sh). `fee_explain` also checks Control Plane, FR-5, the canned fee line, and the four databases.
 
-APIs: [agent-front-door/README.md](../../../agent-front-door/README.md). Swimlane: [../diagrams/swimlane-jobs-fee-explain.html](../diagrams/swimlane-jobs-fee-explain.html).
+APIs: [agent-front-door/README.md](../../../agent-front-door/README.md). Swimlane: [../diagrams/swimlane-jobs-fee-explain.html](../diagrams/swimlane-jobs-fee-explain.html). Docs map: [docs/README.md](../../README.md).

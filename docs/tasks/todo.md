@@ -1,12 +1,18 @@
 # Task list: Enterprise Agent Fabric v1 (local)
 
-Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md). Plan: [plan.md](./plan.md).
+Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md). Plan: [plan.md](./plan.md). Docs map: [docs/README.md](../README.md).
 
 Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane · **3008** AR · **3009** Registry. Control Plane: no database.
 
 **Remaining execution order** (task numbers stay; work this file top-to-bottom from here): service handbooks (25–29) then root README (24). Not today.
 
 **Observability** (O1–O16): [observability-todo.md](./observability-todo.md) — does not replace this list.
+
+**Evals** (E1–E14): [eval-todo.md](./eval-todo.md) — does not replace this list.
+
+**Intent router** (I1–I14): [intent-todo.md](./intent-todo.md) / [intent-plan.md](./intent-plan.md) — layered classifier ①–③; does not replace this list.
+
+**Stage data sharing** (D1–D13): [dataflow-todo.md](./dataflow-todo.md) / [dataflow-plan.md](./dataflow-plan.md) — route-contract `goal` / `notes` / slots; does not replace this list.
 
 ---
 
@@ -17,7 +23,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Acceptance criteria:**
 - [x] `docker compose -f docs/run/compose/docker-compose.yml up postgres` creates those four databases and no `acp`
 - [x] Adminer is in the same Compose file on host port 8080 (System PostgreSQL, server `postgres`, user/password `fabric`)
-- [x] `docs/contracts/stub-auth.md` defines channel `Bearer stub` + `X-Stub-Claims` and workload `Bearer fabric-internal` + `X-Workload`
+- [x] `docs/05-reference/stub-auth.md` defines channel `Bearer stub` + `X-Stub-Claims` and workload `Bearer fabric-internal` + `X-Workload`
 - [x] `docs/run/compose/.env.example` lists DB URLs for the four services, HTTP ports 3005 / 3007 / 3008 / 3009, and Adminer 8080
 
 **Verification:**
@@ -31,7 +37,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 - `docs/run/compose/docker-compose.yml`
 - `docs/run/compose/init-postgres.sql`
 - `docs/run/compose/.env.example`
-- `docs/contracts/stub-auth.md`
+- `docs/05-reference/stub-auth.md`
 
 **Estimated scope:** Small
 
@@ -47,16 +53,16 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 - [x] Chat-slim fixtures contain none of `route_id`, `run_id`, `agent_client_id`, `confidence`, `router_layer`
 
 **Verification:**
-- [x] Manual check: files match pack examples in `docs/enterprise-agent-fabric-architecture/`
+- [x] Manual check: files match pack examples in `docs/04-architecture/`
 
 **Dependencies:** None
 
 **Files likely touched:**
-- `docs/contracts/decide-chat-route.json`
-- `docs/contracts/assistant-turn-request.json`
-- `docs/contracts/run-start.json`
-- `docs/contracts/capability-account-fee-lookup.json`
-- `docs/contracts/manifest-fee-explain.json`
+- `docs/05-reference/decide-chat-route.json`
+- `docs/05-reference/assistant-turn-request.json`
+- `docs/05-reference/run-start.json`
+- `docs/05-reference/capability-account-fee-lookup.json`
+- `docs/05-reference/manifest-fee-explain.json`
 
 **Estimated scope:** Small
 
@@ -227,7 +233,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 **Verification:**
 - [x] Tests pass: manifest get-at-pin
-- [x] Manual: GET matches `docs/contracts/manifest-fee-explain.json`
+- [x] Manual: GET matches `docs/05-reference/manifest-fee-explain.json`
 
 **Dependencies:** Task 8
 
@@ -317,7 +323,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 **Verification:**
 - [x] Tests pass: route / clarify / abstain / forbidden caller
-- [x] Manual: POST body from `docs/contracts/decide-chat-route.json`
+- [x] Manual: POST body from `docs/05-reference/decide-chat-route.json`
 
 **Dependencies:** Task 12
 
@@ -492,8 +498,8 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Files likely touched:**
 - `agent-front-door/src/main/java/**/Jobs*.java`
 - `agent-front-door/src/test/java/**/Jobs*Test.java`
-- `docs/contracts/decide-jobs-route.json`
-- `docs/contracts/jobs-start.json`
+- `docs/05-reference/decide-jobs-route.json`
+- `docs/05-reference/jobs-start.json`
 
 **Estimated scope:** Medium
 

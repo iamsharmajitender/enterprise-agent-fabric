@@ -143,14 +143,20 @@ if msg:
 else:
     print("result:", json.dumps(body.get("result") or body))
 ' "$status_tmp"
+      local st
+      st="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("status") or "")' "$status_tmp")"
       rm -f "$status_tmp"
+      if [[ "$st" != "completed" ]]; then
+        echo "job did not complete: status=${st}" >&2
+        return 1
+      fi
       return 0
     fi
     sleep "$POLL_SLEEP"
   done
   echo "poll timeout for ${correlation_id}: $(cat "$status_tmp")" >&2
   rm -f "$status_tmp"
-  return 0
+  return 1
 }
 
 run_one() {
