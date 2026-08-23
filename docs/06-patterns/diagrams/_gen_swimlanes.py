@@ -20,6 +20,8 @@ SANS = "'Geist', system-ui, sans-serif"
 SERIF = "'Instrument Serif', serif"
 MONO = "'Geist Mono', ui-monospace, monospace"
 FONTS = "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap"
+# Standalone .svg is XML. Bare & in the font URL is a parse error, so <img> shows nothing.
+FONTS_XML = FONTS.replace("&", "&amp;")
 
 
 def chrome(slug: str, title: str, desc: str, vb: str, body: str, h: int) -> str:
@@ -82,7 +84,7 @@ def chrome(slug: str, title: str, desc: str, vb: str, body: str, h: int) -> str:
       <title id="{slug}-title">{title}</title>
       <desc id="{slug}-desc">{desc}</desc>
       <defs>
-        <style>@import url('{FONTS}');</style>
+        <style>@import url('{FONTS_XML}');</style>
         <marker id="{slug}-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="{MUTED}"/></marker>
         <marker id="{slug}-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="{ACCENT}"/></marker>
         <marker id="{slug}-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="{LINK}"/></marker>
@@ -322,6 +324,7 @@ def extract_svg(html: str) -> str:
     end = html.index("</svg>") + len("</svg>")
     svg = html[start:end]
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + svg
+
 
 
 def main() -> None:
