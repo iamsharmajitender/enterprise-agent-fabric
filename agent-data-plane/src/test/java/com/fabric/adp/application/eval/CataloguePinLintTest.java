@@ -21,7 +21,7 @@ class CataloguePinLintTest {
   private final InMemoryCorpusStore corpora = new InMemoryCorpusStore().seedDemo();
 
   @Test
-  void teachingCatalogueIsPinClean() {
+  void catalogueSeedIsPinClean() {
     assertThat(lint(routes.allRoutes())).isEmpty();
   }
 

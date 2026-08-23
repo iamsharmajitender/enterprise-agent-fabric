@@ -1,4 +1,4 @@
-# Teaching use cases
+# Catalogue use cases
 
 What each Pattern 0–3 cluster is for. Route ids link to [routes.md](routes.md). HTTP tools receive the original job/chat **goal**, not prior-stage JSON — OCR text is **not** posted to `risk_engine`. Dummy `completed` does not prove prefetch, slots, branch, or Shared Memory. Status words: [`../02-understand/status.md`](../02-understand/status.md).
 

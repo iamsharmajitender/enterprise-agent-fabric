@@ -55,16 +55,16 @@ A misroute in production becomes a new case. CI replays the whole active eligibl
 
 ## Task E2: Chat routing golden set
 
-**Description:** Encode labelled chat utterances for the teaching catalogue, starting from today’s DecideService cases and adding enough contestants that a keyword steal is visible.
+**Description:** Encode labelled chat utterances for the catalogue seed, starting from today’s DecideService cases and adding enough contestants that a keyword steal is visible.
 
 **Acceptance criteria:**
 - [x] `agent-data-plane/src/test/resources/eval/routing-golden.json` includes at least: fee utterance → `route:fee_explain`; close match → `clarify`; empty eligible / wrong channel → `abstain`
-- [ ] ≥15 additional chat cases across teaching intents (policy, legal, fraud, chat hello) with claims that match seed `required_claims`
+- [ ] ≥15 additional chat cases across seed intents (policy, legal, fraud, chat hello) with claims that match seed `required_claims`
 - [ ] File header lists the labelled active mix (the board), not an `eval_suite_id`
 - [ ] No expected prose / output schema / memo text
 
 **Verification:**
-- [ ] Manual: every `expected.route_id` exists in the teaching seed
+- [ ] Manual: every `expected.route_id` exists in the catalogue seed
 - [ ] Cases are unique `id`s
 
 **Dependencies:** Task E1
@@ -78,12 +78,12 @@ A misroute in production becomes a new case. CI replays the whole active eligibl
 
 ## Task E3: Parameterized Data Plane tests load the chat golden set
 
-**Description:** One JUnit suite reads `routing-golden.json` and calls `DecideService` against the in-memory teaching catalogue. Existing one-off decide tests may stay as smoke; they must not contradict the golden set.
+**Description:** One JUnit suite reads `routing-golden.json` and calls `DecideService` against the in-memory catalogue seed. Existing one-off decide tests may stay as smoke; they must not contradict the golden set.
 
 **Acceptance criteria:**
 - [ ] Each golden case is a test invocation (parameterized)
 - [ ] Assert `outcome` and, when `route`, `route_id` (and `route_version` if the fixture sets it)
-- [ ] In-memory store used by the suite matches teaching route ids (same names as Flyway seed)
+- [ ] In-memory store used by the suite matches seed route ids (same names as Flyway seed)
 - [ ] `mvn test` in Data Plane is the routing gate; no Compose required
 
 **Verification:**
@@ -95,7 +95,7 @@ A misroute in production becomes a new case. CI replays the whole active eligibl
 **Files likely touched:**
 - `agent-data-plane/src/test/java/**/RoutingEval*`
 - `agent-data-plane/src/test/resources/eval/`
-- Possibly `InMemoryRouteStore` if the demo seed is thinner than teaching
+- Possibly `InMemoryRouteStore` if the demo seed is thinner than the catalogue seed
 
 **Estimated scope:** Medium
 
@@ -136,7 +136,7 @@ A misroute in production becomes a new case. CI replays the whole active eligibl
 
 **Verification:**
 - [ ] Dummy-jobs route ids ⊆ golden positives
-- [ ] Claims match teaching seed `required_claims`
+- [ ] Claims match catalogue seed `required_claims`
 
 **Dependencies:** Task E1
 
@@ -189,7 +189,7 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 
 ## Task E7: Catalogue pin lint
 
-**Description:** Static checks over the in-memory (and/or JDBC test) teaching catalogue so a route that cannot hydrate cannot sit Active.
+**Description:** Static checks over the in-memory (and/or JDBC test) catalogue seed so a route that cannot hydrate cannot sit Active.
 
 **Acceptance criteria:**
 - [ ] For every active route: `prompt_id` / `workflow_id` / `tool_manifest` either empty in the allowed way for that `autonomy_mode`, or resolvable to a seeded artefact
@@ -203,7 +203,7 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 - [ ] `mvn test -Dtest=CataloguePinLint*` passes on current seed
 - [ ] Temporarily set Pattern 0 `tool_manifest` in the in-memory store → lint fails
 
-**Dependencies:** None (can start after E1; needs teaching catalogue in tests). Do not start before slice 1 is the agreed first gate.
+**Dependencies:** None (can start after E1; needs catalogue seed in tests). Do not start before slice 1 is the agreed first gate.
 
 **Files likely touched:**
 - `agent-data-plane/src/test/java/**/CataloguePinLint*`
@@ -219,7 +219,7 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 
 **Acceptance criteria:**
 - [ ] Documented command: `./docs/run/dummy-jobs/run-job.sh --all` with `WAIT=1` (or equivalent) exits non-zero on hydrate/start/loop failure
-- [ ] Smoke is pinned to the route versions in the teaching seed (header or script comment lists them)
+- [ ] Smoke is pinned to the route versions in the catalogue seed (header or script comment lists them)
 - [ ] Default `run-eval.sh` (E9) still runs the **lint** without Compose; `--all` is the Compose confirmation
 - [ ] README/eval README: `--all` is pin/hydrate smoke, not routing labels
 
@@ -241,7 +241,7 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 ## Checkpoint: 2. Pin and hydrate
 
 - [ ] E7 done; E8 fail-closed `--all` documented and proven once on Compose
-- [ ] Teaching seed is lint-clean
+- [ ] Catalogue seed is lint-clean
 - [ ] Human review before treating slices 1–2 as the ship gate
 
 ---
@@ -408,6 +408,6 @@ Do not wait on `output_schema_id`. Structured output is a later contract for job
 **Files likely touched:**
 - `agent-data-plane/src/test/resources/eval/route-quality/card_freeze.json`
 - `agent-runtime` or `agent-data-plane` tests (workflow order)
-- Teaching seed `eval_suite_id` on `card_freeze` only if the id resolves
+- Catalogue seed `eval_suite_id` on `card_freeze` only if the id resolves
 
 **Estimated scope:** Medium

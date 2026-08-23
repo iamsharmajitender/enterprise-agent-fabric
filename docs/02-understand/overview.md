@@ -10,7 +10,7 @@ Five processes. Channels talk only to Front Door.
 | 3008 | Agent Runtime (AR) | Pin the freeze, hydrate, run a linear LangGraph. |
 | 3009 | Agent Capability Registry (ACR) | Published capabilities and manifests. Hydrate once at pin. |
 
-Teaching matrix: [03-catalogue](../03-catalogue/). Box packs: [04-architecture](../04-architecture/). Contracts: [05-reference](../05-reference/).
+Catalogue matrix: [03-catalogue](../03-catalogue/). Box packs: [04-architecture](../04-architecture/). Contracts: [05-reference](../05-reference/).
 
 ## Pin, then hydrate, then linear LangGraph
 

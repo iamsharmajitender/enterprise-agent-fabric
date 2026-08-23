@@ -76,7 +76,7 @@ If Runtime does not return `202`, this box responds **503** and does not invent 
 
 ## Tables / schema
 
-Flyway on `afd` creates schema `frontdoor` (`V1__frontdoor_schema.sql`). Jobs freeze is **`InMemoryFreezeStore`**, keyed by `session_id` = `job:{idempotency_key}`. It is not the catalogue and not the Runtime run pin. A durable freeze table lands with the chat path.
+Flyway on `afd` creates schema `frontdoor` (`V1__frontdoor.sql`). Jobs freeze is **`InMemoryFreezeStore`**, keyed by `session_id` = `job:{idempotency_key}`. It is not the catalogue and not the Runtime run pin. A durable freeze table lands with the chat path.
 
 ## Sibling calls
 

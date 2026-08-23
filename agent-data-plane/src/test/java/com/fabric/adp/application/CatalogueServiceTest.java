@@ -19,7 +19,7 @@ class CatalogueServiceTest {
       new CatalogueService(new InMemoryRouteStore().seedDemo());
 
   @Test
-  void listAllIsTheTeachingCatalogue() {
+  void listAllIsTheCatalogueSeed() {
     assertThat(catalogue.list()).extracting(RouteRow::routeId)
         .contains("fee_explain", "agent-chat", "agent-policy-qa", "contract_review")
         .doesNotContain("agent-research-v0", "agent-payments-v2");

@@ -35,7 +35,7 @@ class RoutingEvalTest {
   }
 
   @Test
-  void goldenCatalogueMatchesInMemoryTeachingMix() {
+  void goldenCatalogueMatchesInMemorySeed() {
     Set<String> labelled =
         FILE.catalogue().stream().map(EvalCataloguePin::routeId).collect(Collectors.toSet());
     Set<String> seeded =

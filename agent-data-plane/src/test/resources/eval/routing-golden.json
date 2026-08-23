@@ -1,5 +1,5 @@
 {
-  "_comment": "Chat routing board for the teaching catalogue. Labels are outcome + route_id, not memos. eval_suite_id is not the key.",
+  "_comment": "Chat routing board for the catalogue seed. Labels are outcome + route_id, not memos. eval_suite_id is not the key.",
   "catalogue": [
     { "route_id": "agent-chat", "route_version": "2026.08.1" },
     { "route_id": "email_summarize", "route_version": "2026.08.1" },

@@ -1,6 +1,6 @@
 # Dummy jobs and chats
 
-Local scripts for every **teaching job route** and every **chat-visible route** in [`../seed/create-seed-data.sql`](../seed/create-seed-data.sql).
+Local scripts for every **seed job route** and every **chat-visible route** in [`../seed/create-seed-data.sql`](../seed/create-seed-data.sql).
 
 Jobs `POST /v1/jobs`. They skip keyword classify. Front Door entitles Layer ① (active catalogue ∩ claims), freezes, starts Runtime, and returns `202 { "correlation_id" }`. `fee_explain` is in both catalogues: jobs (`1-autonomous/fee_explain.sh`) and chat (`chat/1-autonomous/fee_explain.sh`).
 
@@ -45,7 +45,7 @@ Works on any route in this folder. Runtime returns the original id for a duplica
 
 ### Run all jobs / chats
 
-`--all` posts every teaching job in [`jobs.json`](jobs.json) (fresh ids each time). `--mode N` is the same for one autonomy band (`0` single inference, `1` autonomous, `2` deterministic, `3` guided).
+`--all` posts every seed job in [`jobs.json`](jobs.json) (fresh ids each time). `--mode N` is the same for one autonomy band (`0` single inference, `1` autonomous, `2` deterministic, `3` guided).
 
 ```bash
 ./docs/run/dummy-jobs/run-job.sh --all
@@ -87,6 +87,6 @@ Routes that only call domain tools can finish against tool-mock. LLM stages stil
 | [`chat/1-autonomous/`](chat/1-autonomous/) | 1 Autonomous | `search_only`, `research_assistant`, `fee_explain` |
 | [`chat/3-guided/`](chat/3-guided/) | 3 Guided | `product_explain` |
 
-No teaching chat-visible route is autonomy 2. [`chats.json`](chats.json) is the catalogue (route, claims, utterance). Per-route `.sh` files call [`run-chat.sh`](run-chat.sh). `fee_explain` also checks Control Plane, FR-5, the canned fee line, and the four databases.
+No seed chat-visible route is autonomy 2. [`chats.json`](chats.json) is the catalogue (route, claims, utterance). Per-route `.sh` files call [`run-chat.sh`](run-chat.sh). `fee_explain` also checks Control Plane, FR-5, the canned fee line, and the four databases.
 
 APIs: [agent-front-door/README.md](../../../agent-front-door/README.md). Swimlane: [../diagrams/swimlane-jobs-fee-explain.html](../diagrams/swimlane-jobs-fee-explain.html). Docs map: [docs/README.md](../../README.md).

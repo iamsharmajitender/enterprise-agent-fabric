@@ -99,7 +99,7 @@ class CatalogAndDecideControllerTest {
   }
 
   @Test
-  void includeAllSurfacesTeachingRoutesAndDraftCorpus() throws Exception {
+  void includeAllSurfacesSeedRoutesAndDraftCorpus() throws Exception {
     mvc.perform(
             get("/v1/catalog/routes")
                 .queryParam("include", "all")

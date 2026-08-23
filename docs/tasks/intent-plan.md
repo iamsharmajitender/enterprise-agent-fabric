@@ -25,7 +25,7 @@ What v1 already does in `DecideService` / `CatalogueService` / Front Door freeze
 | **② Classifier** | **Stub:** keyword substring count on `RouteRow.keywords`. Unique hit → `route` at hardcoded `0.91`. Tie → `clarify`. Zero → `abstain`. | Small-model / kNN retrieve on the golden set, &lt; 50 ms, per-route risk bands. Confidence must mean something. | Land eval routing cases first. Replace `keywordRetrieve` behind the same outcomes. Do not train on today’s keyword lists. I7–I9. |
 | **③ LLM fallback** | **Absent.** v1 plan: no Layer ③. | Structured JSON over a **fixed eligible `route_id` list**. Rare. Timeout / saturation → `clarify` / `abstain`, never queue behind ②. | Port + hard deadline + default **off**. Only when ② is in the maybe band or the top candidate is high-risk. I10–I12. |
 | **④ Safety** | **Absent** on decide. | Injection, PII, veto on **every** path including jobs. `safety_flags`. | **Out of this plan.** Next follow-on after ①–③. Do not bury vetoes inside ②. |
-| **Outcomes** | `route` / `clarify` / `abstain`. AFD starts AR only on `route`. Jobs never get `clarify`. | Per-route thresholds. Entity-missing clarify (not a hardcoded fee/transactions prompt). `escalate_human` for events with no user. | Thresholds land with ② (I7). Entity clarify and `escalate_human` stay later unless a teaching route needs them. |
+| **Outcomes** | `route` / `clarify` / `abstain`. AFD starts AR only on `route`. Jobs never get `clarify`. | Per-route thresholds. Entity-missing clarify (not a hardcoded fee/transactions prompt). `escalate_human` for events with no user. | Thresholds land with ② (I7). Entity clarify and `escalate_human` stay later unless a seed route needs them. |
 
 ### Stickiness, jobs, trace
 
@@ -69,7 +69,7 @@ One vertical slice at a time. After each slice, existing `DecideServiceTest` (an
 - **② budget &lt; 50 ms.** If it cannot answer, shed to `clarify`/`abstain`. Do not wait on ③.
 - **③ is a separate pool.** Locally: bounded executor + hard timeout. Saturate → `clarify`/`abstain`. Default **off** until ②’s miss rate is measured.
 - **Golden set encodes intent, not keywords.** Cases are `(utterance, claims, channel) → outcome`. ② may change; labels must not.
-- **AFD freeze remains skip-classify** for a live `correlation_id`. Decide-side stickiness is out until a teaching case needs re-entitle on `"yes"` / `"$500"`.
+- **AFD freeze remains skip-classify** for a live `correlation_id`. Decide-side stickiness is out until a seed case needs re-entitle on `"yes"` / `"$500"`.
 - **Chat FR-5 unchanged.** `router_layer` is server-side (decide JSON to AFD, events). Assistant JSON still strips it.
 - **④ Safety is the next plan, not a checkbox here.**
 
@@ -88,7 +88,7 @@ One vertical slice at a time. After each slice, existing `DecideServiceTest` (an
 ## Demo path (definition of done for ① + ②)
 
 ```text
-# still the teaching contest — no Compose required for decide unit tests
+# still the catalogue contest — no Compose required for decide unit tests
 cd agent-data-plane && mvn test -Dtest=DecideServiceTest,RoutingEval*
 
 # Layer ①
@@ -187,6 +187,6 @@ Layer ③ demo is **off** until I12: an ambiguous high-risk utterance either cla
 
 - Where do rule rows live? (Default: `dataplane.intent_rules` in ADP, versioned with the catalogue mix, not hardcoded in `DecideService`.)
 - Java retrieve stack for I8? (Default: in-process embedding index; pick one library in I8, not a new microservice.)
-- How many ② miss cases justify turning ③ on? (Default: measure after I8; keep off for the teaching demo.)
+- How many ② miss cases justify turning ③ on? (Default: measure after I8; keep off for the local demo.)
 - Does a jobs `topic` field exist before Kafka? (Default: I6 skipped until the jobs contract has `topic`.)
 - Layer ④ as `intent-safety-plan.md` next, or fold a thin veto into decide after I9? (Default: separate plan.)

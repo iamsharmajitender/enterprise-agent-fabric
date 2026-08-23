@@ -41,7 +41,7 @@ class PromptServiceTest {
   }
 
   @Test
-  void listPublishedTeachingPrompts() {
+  void listPublishedSeedPrompts() {
     assertThat(prompts.listAll())
         .extracting(PromptPack::promptId)
         .contains("fee_explain", "email_summarize", "due_diligence")

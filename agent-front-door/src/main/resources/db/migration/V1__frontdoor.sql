@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS frontdoor;
+
 CREATE TABLE frontdoor.freeze (
   session_id TEXT PRIMARY KEY,
   idempotency_key TEXT,

@@ -4,7 +4,7 @@
 
 \c acr
 
--- Capabilities: history on teaching ids, plus standalone draft / retired / published.
+-- Capabilities: history on seed ids, plus standalone draft / retired / published.
 INSERT INTO registry.capabilities (
   id, version, kind, description, input_schema, output_schema, invoke, snippet, owner, status
 ) VALUES

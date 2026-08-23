@@ -5,6 +5,7 @@ COPY pyproject.toml uv.lock .python-version ./
 COPY app app
 COPY alembic alembic
 COPY alembic.ini ./
+COPY db db
 COPY tests tests
 RUN uv sync --frozen
 RUN uv run pytest

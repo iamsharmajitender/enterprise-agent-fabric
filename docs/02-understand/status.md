@@ -22,8 +22,8 @@ What the catalogue can name versus what this Runtime does. Present tense on the 
 - **Slots / fill-by-name** — capability input schema does not copy `identity_check` JSON into `freeze_card`. See [data](data.md).
 - **deterministic_prefetch** — `policy_memo` does not POST the corpus gateway. Prefetch `invoke` is empty. See [retrieve](retrieve.md).
 - **branch / human_gate** — linear LangGraph only (`kyc_onboarding` names both). See [patterns](patterns.md).
-- **kind=agent** — child start is AFD `POST /v1/jobs` with a new goal body. Teaching parents: `fraud_investigate` (`start_contract_review` → `contract_review`) and `ops_start_kyc` (`start_kyc_onboarding` → `kyc_onboarding`). Runtime skips that HTTP today. Parent `notes` are not merged. Projection of parent fields into the child goal is not built. See [capabilities](capabilities.md).
+- **kind=agent** — child start is AFD `POST /v1/jobs` with a new goal body. Parent routes: `fraud_investigate` (`start_contract_review` → `contract_review`) and `ops_start_kyc` (`start_kyc_onboarding` → `kyc_onboarding`). Runtime skips that HTTP today. Parent `notes` are not merged. Projection of parent fields into the child goal is not built. See [capabilities](capabilities.md).
 - **conversation / long_term** — flags on `dataplane.memory_profiles`. Not a Shared Memory box. See [memory](memory.md).
 - **loop=checkpoint** — cursor JSON is written. Continuing the graph from `checkpoint.step` after a crash is not wired.
 
-Later work: [dataflow-plan.md](../tasks/dataflow-plan.md). Do not treat dummy `--all` green as dataflow. Teaching matrix: [03-catalogue](../03-catalogue/). Contracts: [05-reference](../05-reference/). Box packs: [04-architecture](../04-architecture/).
+Later work: [dataflow-plan.md](../tasks/dataflow-plan.md). Do not treat dummy `--all` green as dataflow. Catalogue matrix: [03-catalogue](../03-catalogue/). Contracts: [05-reference](../05-reference/). Box packs: [04-architecture](../04-architecture/).

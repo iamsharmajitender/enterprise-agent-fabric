@@ -1,4 +1,4 @@
--- Wipe teaching + lifecycle seed in Capability Registry (acr) and Data Plane (adp).
+-- Wipe catalogue + lifecycle seed in Capability Registry (acr) and Data Plane (adp).
 -- Does not drop schema or model profiles. Flyway corpora are kept; lifecycle corpora are removed.
 
 \c acr

@@ -9,7 +9,7 @@ The registry has **two kinds**. That is the catalog contract. A kind is how Runt
 
 Same `id` + `version` UX for both. Control Plane lists them together. Manifests only store `{capability_id, capability_version}`; `kind` lives on the capability row (`acr.registry.capabilities.kind`).
 
-Teaching `agent` rows: `start_contract_review` → `contract_review`, `start_kyc_onboarding` → `kyc_onboarding`. Parents: `fraud_investigate`, `ops_start_kyc`. Runtime skips that HTTP today; see [status](status.md).
+Seed `agent` rows: `start_contract_review` → `contract_review`, `start_kyc_onboarding` → `kyc_onboarding`. Parents: `fraud_investigate`, `ops_start_kyc`. Runtime skips that HTTP today; see [status](status.md).
 
 ## Do not add a kind for
 
@@ -28,4 +28,4 @@ These already have a home. A new `kind` would split the catalog and confuse hydr
 
 Only if **invoke is a different gate**: not domain HTTP and not AFD jobs. Example: a human work-item API, or a non-HTTP bus. Until then, two kinds.
 
-Register with `PUT` on ACR (port 3009), not Control Plane. After `seed-db.sh`, teaching rows reload from `docs/run/seed/create-seed-data.sql`.
+Register with `PUT` on ACR (port 3009), not Control Plane. After `seed-db.sh`, seed rows reload from `docs/run/seed/create-seed-data.sql`.

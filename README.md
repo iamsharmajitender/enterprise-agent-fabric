@@ -84,14 +84,14 @@ Reload catalogue seed (deletes, then inserts):
 | --- | --- |
 | `./docs/run/scripts/start-app.sh` | Build and start in the background |
 | `./docs/run/scripts/stop-app.sh` | Stop containers (volumes kept) |
-| `./docs/run/scripts/seed-db.sh` | Delete and reload teaching + lifecycle seed |
+| `./docs/run/scripts/seed-db.sh` | Delete and reload catalogue + lifecycle seed |
 | `docker compose -f docs/run/compose/docker-compose.yml ps` | Process status |
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f` | Follow all logs |
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f agent-data-plane` | One service |
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
 | `docker compose -f docs/run/compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images after code or **new** Flyway versions. Do not edit a migration that already ran: Flyway checksum-fails, Data Plane crash-loops, and Control Plane shows `Catalogue read failed (502)`. Recover with `docker compose -f docs/run/compose/docker-compose.yml down -v`, then `./docs/run/scripts/start-app.sh`. To reload seed without a new migration, use `./docs/run/scripts/seed-db.sh`.
+`start-app.sh` rebuilds images after code or **new** Flyway versions. Do not edit a migration that already ran: Flyway checksum-fails, Data Plane crash-loops, and Control Plane shows `Catalogue read failed (502)`. Recover with `docker compose -f docs/run/compose/docker-compose.yml down -v`, then `./docs/run/scripts/start-app.sh`. Squashing Flyway history into a new `V1` is the same: wipe the Postgres volume so `flyway_schema_history` is empty. To reload seed without a new migration, use `./docs/run/scripts/seed-db.sh`.
 
 ### Check it is up
 
@@ -109,7 +109,7 @@ Grafana LGTM can take a minute. Wait until logs print `The OpenTelemetry collect
 
 ### Dummy jobs and chats
 
-Teaching job and chat-visible routes live under [`docs/run/dummy-jobs/`](docs/run/dummy-jobs/). Catalogue and flags: [docs/run/dummy-jobs/README.md](docs/run/dummy-jobs/README.md).
+Seed job and chat-visible routes live under [`docs/run/dummy-jobs/`](docs/run/dummy-jobs/). Catalogue and flags: [docs/run/dummy-jobs/README.md](docs/run/dummy-jobs/README.md).
 
 ```bash
 ./docs/run/dummy-jobs/run-job.sh --list
@@ -130,7 +130,7 @@ One job (polls until done): `./docs/run/dummy-jobs/1-autonomous/fee_explain.sh` 
 
 ## Evals
 
-CI-gated routing and pin checks for the teaching catalogue. They are **not** on decide / pin / start / loop — Jane’s turn does not run them. A failed eval blocks a catalogue change (or a PR), not a live reply.
+CI-gated routing and pin checks for the catalogue seed. They are **not** on decide / pin / start / loop — Jane’s turn does not run them. A failed eval blocks a catalogue change (or a PR), not a live reply.
 
 Golden sets live next to Data Plane tests, not under `docs/` (that tree is the operator scratchpad):
 
@@ -349,8 +349,8 @@ Supporting pieces:
 | [`docs/run/`](docs/run/) | Local run tree — folders only |
 | [`docs/run/compose/`](docs/run/compose/) | Compose file, Postgres image, `.env.example` |
 | [`docs/run/scripts/`](docs/run/scripts/) | start / stop / seed |
-| [`docs/run/dummy-jobs/`](docs/run/dummy-jobs/) | Dummy jobs and chats for every teaching job route and chat-visible route (autonomy 0–3). Fresh ids each run |
-| [`docs/run/seed/`](docs/run/seed/) | Catalogue SQL (teaching + lifecycle) |
+| [`docs/run/dummy-jobs/`](docs/run/dummy-jobs/) | Dummy jobs and chats for every seed job route and chat-visible route (autonomy 0–3). Fresh ids each run |
+| [`docs/run/seed/`](docs/run/seed/) | Catalogue SQL (seed + lifecycle) |
 | [`docs/run/tool-mock/`](docs/run/tool-mock/) | Config-driven domain HTTP doubles. Add a tool in `tools.json` (unique `method`+`path`), point the capability `invoke.url` at `http://tool-mock:3010{path}`, then rebuild |
 | [`docs/README.md`](docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
 | [`docs/04-architecture/`](docs/04-architecture/) | Architecture packs |
@@ -455,7 +455,7 @@ Three routers stay separate: **ADP** picks the workflow/manifest, **AR** picks t
 
 Each route is versioned on its own (`route_id` + `route_version`). One version per route is `active`. Classify uses the active mix. A follow-up pin is that route’s id and version, not a shared table snapshot. A later contest-board snapshot is proposed in [docs/tasks/future-enhancement.md](docs/tasks/future-enhancement.md).
 
-The catalogue seed is the Pattern 0–3 teaching set (31 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. `seed-db.sh` also loads extra published, draft, and retired cuts plus version history. Reload everything in one shot:
+The catalogue seed is the Pattern 0–3 set (31 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. `seed-db.sh` also loads extra published, draft, and retired cuts plus version history. Reload everything in one shot:
 
 ```bash
 ./docs/run/scripts/seed-db.sh
@@ -480,7 +480,7 @@ Data Plane stores both a boolean `active` and a `status`. They stay in lockstep:
 
 `GET /v1/catalog/routes` and `POST /v1/intent/decide` use **active** rows only. `GET /v1/catalog/routes?include=all` lists every cut. Control Plane tabs: Active, Published, Draft, Retired.
 
-The teaching seed ships one `active` version per route (`2026.08.1`). Lifecycle seed adds extra published, draft, and retired cuts, including older versions for History.
+The catalogue seed ships one `active` version per route (`2026.08.1`). Lifecycle seed adds extra published, draft, and retired cuts, including older versions for History.
 
 ### Capabilities, manifests, prompts
 
@@ -636,7 +636,7 @@ Publish is append-only. A second `PUT` of a published version is **409**. Runtim
 
 | `kind` | `invoke` | Local |
 | --- | --- | --- |
-| `domain` | Domain HTTP (`http://tool-mock:3010/fees/explain`) | Teaching tools in [`docs/run/tool-mock/`](docs/run/tool-mock/) |
+| `domain` | Domain HTTP (`http://tool-mock:3010/fees/explain`) | Tools in [`docs/run/tool-mock/`](docs/run/tool-mock/) |
 | `agent` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
 
 Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`docs/02-understand/capabilities.md`](docs/02-understand/capabilities.md).

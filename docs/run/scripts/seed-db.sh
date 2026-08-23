@@ -15,8 +15,8 @@ for sql in "$DELETE_SQL" "$CREATE_SQL" "$LIFECYCLE_SQL"; do
   fi
 done
 
-echo "Deleting then loading teaching seed plus lifecycle cuts in acr and adp..."
+echo "Deleting then loading catalogue seed plus lifecycle cuts in acr and adp..."
 "${COMPOSE[@]}" exec -T postgres psql -U fabric -d afd -v ON_ERROR_STOP=1 -f - < "$DELETE_SQL"
 "${COMPOSE[@]}" exec -T postgres psql -U fabric -d afd -v ON_ERROR_STOP=1 -f - < "$CREATE_SQL"
 "${COMPOSE[@]}" exec -T postgres psql -U fabric -d afd -v ON_ERROR_STOP=1 -f - < "$LIFECYCLE_SQL"
-echo "Teaching and lifecycle seed reloaded."
+echo "Catalogue and lifecycle seed reloaded."

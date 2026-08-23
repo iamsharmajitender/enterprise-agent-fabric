@@ -9,8 +9,8 @@ import org.springframework.util.StreamUtils;
 class SeedChatHiddenRoutesSqlTest {
 
   @Test
-  void flywaySeedAddsJobRoutesThatAreNotChatVisible() throws Exception {
-    String seed = read("/db/migration/V13__seed_chat_hidden_job_routes.sql");
+  void flywayBaselineKeepsJobRoutesOffChat() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
     for (String id :
         new String[] {
           "email_summarize", "contract_investigation", "msa_risk_review", "kyc_onboarding"
@@ -23,20 +23,17 @@ class SeedChatHiddenRoutesSqlTest {
   }
 
   @Test
-  void flywaySeedAddsGuidedContractReview() throws Exception {
-    String seed = read("/db/migration/V19__seed_contract_review.sql");
+  void flywayBaselineIncludesGuidedContractReview() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
     assertThat(seed).contains("'contract_review'");
-    assertThat(seed).contains("'contract_review_v3'");
-    assertThat(seed).contains("'contract_review_staged_v3'");
     assertThat(seed).contains("allowlist");
     assertThat(seed).contains("max_tool_calls");
-    assertThat(seed).contains("keywords, pattern");
-    assertThat(seed).contains("  3\n);");
+    assertThat(seed).contains("autonomy_mode");
   }
 
   @Test
-  void flywaySeedAddsKycRetrieval() throws Exception {
-    String seed = read("/db/migration/V14__kyc_onboarding_retrieval.sql");
+  void flywayBaselineIncludesKycRetrieval() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
     assertThat(seed).contains("'kyc_onboarding'");
     assertThat(seed).contains("'tool'");
     assertThat(seed).contains("sanctions-lists");
@@ -44,26 +41,26 @@ class SeedChatHiddenRoutesSqlTest {
   }
 
   @Test
-  void flywaySeedAddsPolicyQaPrefetchCorpora() throws Exception {
-    String seed = read("/db/migration/V15__policy_qa_prefetch_scope.sql");
-    assertThat(seed).contains("'agent-policy-qa-v1'");
+  void flywayBaselineIncludesPolicyQaPrefetchCorpora() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
+    assertThat(seed).contains("'agent-policy-qa'");
     assertThat(seed).contains("policy-engine");
     assertThat(seed).contains("product-faq");
   }
 
   @Test
-  void flywaySeedAddsWorkflowTableAndKycStages() throws Exception {
-    String seed = read("/db/migration/V16__workflows.sql");
+  void flywayBaselineIncludesWorkflowTableAndKycStages() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
     assertThat(seed).contains("CREATE TABLE dataplane.workflows");
-    assertThat(seed).contains("'kyc_onboarding_v2'");
+    assertThat(seed).contains("'kyc_onboarding'");
     assertThat(seed).contains("doc_intake");
     assertThat(seed).contains("human_gate");
-    assertThat(seed).contains("'msa_risk_review_v1'");
+    assertThat(seed).contains("'msa_risk_review'");
   }
 
   @Test
-  void flywaySeedAddsCorporaCatalog() throws Exception {
-    String seed = read("/db/migration/V18__corpora.sql");
+  void flywayBaselineIncludesCorporaCatalog() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
     assertThat(seed).contains("CREATE TABLE dataplane.corpora");
     assertThat(seed).contains("'policy-engine'");
     assertThat(seed).contains("'clause-index'");
@@ -74,25 +71,13 @@ class SeedChatHiddenRoutesSqlTest {
   }
 
   @Test
-  void flywaySeedAssignsAutonomyPatterns() throws Exception {
-    String seed = read("/db/migration/V17__route_pattern.sql");
-    assertThat(seed).contains("ADD COLUMN pattern");
-    assertThat(seed).contains("pattern BETWEEN 0 AND 3");
+  void flywayBaselineAssignsAutonomyMode() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
+    assertThat(seed).contains("autonomy_mode");
     assertThat(seed).contains("'fee_explain'");
     assertThat(seed).contains("'contract_investigation'");
-    assertThat(seed).contains("'agent-research-v0'");
-    assertThat(seed).contains("'agent-payments-v2'");
     assertThat(seed).contains("'msa_risk_review'");
     assertThat(seed).contains("'kyc_onboarding'");
-  }
-
-  @Test
-  void flywayRenamesPatternToAutonomyModeAndReclassifiesFeeExplain() throws Exception {
-    String seed = read("/db/migration/V20__rename_pattern_to_autonomy_mode.sql");
-    assertThat(seed).contains("RENAME COLUMN pattern TO autonomy_mode");
-    assertThat(seed).contains("routes_autonomy_mode_chk");
-    assertThat(seed).contains("'fee_explain'");
-    assertThat(seed).contains("pattern = 0");
   }
 
   private static int count(String haystack, String needle) {

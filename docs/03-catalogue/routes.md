@@ -1,4 +1,4 @@
-# Teaching routes
+# Catalogue routes
 
 Active Pattern 0–3 rows. Ids and demo paths match [`create-seed-data.sql`](../run/seed/create-seed-data.sql), [`jobs.json`](../run/dummy-jobs/jobs.json), [`chats.json`](../run/dummy-jobs/chats.json), and wrappers under [`dummy-jobs/`](../run/dummy-jobs/README.md). Dummy `completed` ≠ prefetch, slots, branch, or Shared Memory.
 
@@ -57,4 +57,4 @@ Stage allowlists are stored; Runtime still walks a linear graph.
 | <a id="contract_review"></a>`contract_review` | 3 | jobs | `doc_id` | `ocr_extract`, `clause_search`, `policy_search`, `risk_engine`, `draft_memo` · workflow `contract_review` | tool: `clause-index`, `legal-playbook` | conversation=session, working=session, loop=checkpoint, long_term=retrieve_only | `runs` (HTTP goal-only; LLM notes). catalogue-only: conversation, long_term | [`3-guided/contract_review.sh`](../run/dummy-jobs/3-guided/contract_review.sh) |
 | <a id="due_diligence"></a>`due_diligence` | 3 | jobs | `doc_id` | `policy_search`, `clause_search`, `risk_engine`, `draft_memo` · workflow `due_diligence` | tool: `legal-playbook`, `clause-index` | conversation=session, working=session, loop=checkpoint, long_term=retrieve_only | `runs` (HTTP goal-only; LLM notes). catalogue-only: conversation, long_term | [`3-guided/due_diligence.sh`](../run/dummy-jobs/3-guided/due_diligence.sh) |
 
-**31** teaching routes.
+**31** catalogue routes.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start a teaching-catalogue job with a fresh idempotency_key and payload ids.
+# Start a catalogue job with a fresh idempotency_key and payload ids.
 # Usage:
 #   ./run-job.sh --list
 #   ./run-job.sh <route_id>

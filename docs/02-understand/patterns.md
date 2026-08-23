@@ -1,6 +1,6 @@
 # Patterns
 
-The teaching catalogue is autonomy **0–3**. `autonomy_mode` on the route is that integer. Pattern answers who picks the next step inside Runtime. It does not change pin-then-hydrate.
+The catalogue seed is autonomy **0–3**. `autonomy_mode` on the route is that integer. Pattern answers who picks the next step inside Runtime. It does not change pin-then-hydrate.
 
 | Pattern | Mode | What the route points at | What Runtime runs |
 | --- | --- | --- | --- |
@@ -9,7 +9,7 @@ The teaching catalogue is autonomy **0–3**. `autonomy_mode` on the route is th
 | 2 Deterministic | `2` | Workflow required. Manifest when there are tools | Fixed stage list |
 | 3 Guided | `3` | Workflow required; stages may carry an allowlist | Same linear graph. Allowlist is catalogue-only |
 
-Examples: Pattern 0 `email_summarize`; Pattern 1 `fee_explain`; Pattern 2 `card_freeze`, `llm_pipeline`, `policy_memo`. Teaching matrix: [03-catalogue](../03-catalogue/).
+Examples: Pattern 0 `email_summarize`; Pattern 1 `fee_explain`; Pattern 2 `card_freeze`, `llm_pipeline`, `policy_memo`. Catalogue matrix: [03-catalogue](../03-catalogue/).
 
 ## Workflow is a stage list
 

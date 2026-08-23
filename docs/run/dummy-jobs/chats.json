@@ -1,5 +1,5 @@
 {
-  "_source": "Teaching seed chat-visible routes from docs/run/seed/create-seed-data.sql. Keyword classify unless hint_contains is set (overlapping keywords). {id} is replaced per run.",
+  "_source": "Catalogue seed chat-visible routes from docs/run/seed/create-seed-data.sql. Keyword classify unless hint_contains is set (overlapping keywords). {id} is replaced per run.",
   "chats": [
     {
       "route_id": "agent-chat",

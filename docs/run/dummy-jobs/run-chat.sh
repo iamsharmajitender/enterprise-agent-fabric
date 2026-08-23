@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start a teaching-catalogue chat turn. Keyword classify, or a hint chip when keywords collide.
+# Start a catalogue chat turn. Keyword classify, or a hint chip when keywords collide.
 # Usage:
 #   ./run-chat.sh --list
 #   ./run-chat.sh <route_id>

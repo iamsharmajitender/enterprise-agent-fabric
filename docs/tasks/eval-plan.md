@@ -2,7 +2,7 @@
 
 ## Overview
 
-Stand up a **CI-gated eval surface** for the teaching catalogue so a misroute or a broken pin cannot ship unnoticed. Three slices, **in this order**:
+Stand up a **CI-gated eval surface** for the catalogue seed so a misroute or a broken pin cannot ship unnoticed. Three slices, **in this order**:
 
 1. **Routing** (the only eval the architecture requires). Chat is the contest: `(utterance, claims, channel) → route:<id> | clarify | abstain`. Not a memo. Jobs skip classify — thinner suite under this slice: named `route_id` + claims → entitled `route` or fail-closed. A misroute becomes a new case. Release does not ship if “Why was I charged $42?” starts `card_freeze`. `eval_suite_id` on a route is the wrong key; routing is a property of the board. Hold the golden set next to the catalogue (product + cut / labelled mix), not as `fee_explain_golden`.
 2. **Pin and hydrate** (cheap, high signal). For each active route: pointers resolve, manifest refs are published, retrieval scope ids exist, Pattern 0 has no tools/workflow, high-risk routes still have a workflow. Catalogue lint plus dummy jobs `--all` as fail-closed smoke, pinned to route version.
@@ -22,7 +22,7 @@ Target: examiners can show adversarial routing cases pass at 100% before release
 - **Slice 2 is lint + `--all`.** Dummy `--all` is smoke for hydrate/start, fail-closed at the pinned version. It is not the routing golden set.
 - **Empty `output_schema_id` is fine.** Slice 3 asserts tools and citations while the reply is free-form text.
 - **JSON fixtures are the source of truth.** Same shape as pack decide contracts. Unit tests load the files from `agent-data-plane/src/test/resources/eval/` (not `docs/`).
-- **Fast path: in-memory teaching catalogue.** Parameterized Data Plane tests against `InMemoryRouteStore` (must stay aligned with Flyway/SQL seed).
+- **Fast path: in-memory catalogue seed.** Parameterized Data Plane tests against `InMemoryRouteStore` (must stay aligned with Flyway/SQL seed).
 - **Incidents become cases.** CI stays red until the catalogue or classifier is fixed — do not delete the case.
 - **Record the mix.** Each golden file headers `route_id` @ `route_version` it was labelled against. Cheaper than `route_tables` now.
 
@@ -84,7 +84,7 @@ WAIT=1 ./docs/run/dummy-jobs/run-job.sh --all   # fail-closed, pinned route vers
 
 - [ ] Broken `tool_manifest` / Pattern 0-with-tools fails lint
 - [ ] High-risk routes still have a workflow
-- [ ] Teaching seed passes lint; `--all` fail-closed on a running stack
+- [ ] Catalogue seed passes lint; `--all` fail-closed on a running stack
 
 ### Gate packaging (how you run 1 + 2)
 
@@ -117,5 +117,5 @@ WAIT=1 ./docs/run/dummy-jobs/run-job.sh --all   # fail-closed, pinned route vers
 ## Open Questions
 
 - Keep the runner as Data Plane JUnit only, or also POST `/v1/intent/decide` against Compose? (Default: JUnit is the routing gate; E9 wraps `mvn test`. `--all` is slice 2.)
-- How many chat cases in E2 before E3 lands? (Default: existing DecideService cases plus ~15 labelled teaching utterances, including fee ≠ freeze.)
+- How many chat cases in E2 before E3 lands? (Default: existing DecideService cases plus ~15 labelled seed utterances, including fee ≠ freeze.)
 - Should Control Plane show routing-suite status? (Default: no. README + eval script are the operator surface.)

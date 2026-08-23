@@ -1,5 +1,5 @@
 {
-  "_source": "Teaching seed job routes from docs/run/seed/create-seed-data.sql. chat_visible=false plus fee_explain (already a jobs demo). {id} is replaced per run.",
+  "_source": "Catalogue seed job routes from docs/run/seed/create-seed-data.sql. chat_visible=false plus fee_explain (already a jobs demo). {id} is replaced per run.",
   "jobs": [
     {
       "route_id": "email_summarize",

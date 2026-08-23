@@ -5,7 +5,7 @@ Plan: [dataflow-plan.md](./dataflow-plan.md) (includes **Present vs remaining** 
 **Execution order:**
 
 1. **Explore** — D1–D2. Matrix + merge rule. No Runtime behaviour change. **Do this first when you pick the track up.**
-2. **HTTP handoff** — D3–D5. Structured slots, then one teaching chain that fails if the next tool does not see prior JSON.
+2. **HTTP handoff** — D3–D5. Structured slots, then one seed chain that fails if the next tool does not see prior JSON.
 3. **Prefetch pack** — D6–D7. Corpus POST writes a slot; generate/LLM actually uses it.
 4. **Control-flow consumers** — D8–D9. `branch` / `human_gate` read slots.
 5. **Cross-run / resume** — D10–D11. Child projection; checkpoint resume optional.
@@ -19,9 +19,9 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## 0. Explore
 
-## Task D1: Scenario matrix for the teaching catalogue
+## Task D1: Scenario matrix for the catalogue seed
 
-**Description:** Label every Pattern 2/3 (and relevant Pattern 1) teaching route by **how data must move**, using the live seed — not a new abstraction. This is the explore artifact. Runtime stays unchanged.
+**Description:** Label every Pattern 2/3 (and relevant Pattern 1) seed route by **how data must move**, using the live seed — not a new abstraction. This is the explore artifact. Runtime stays unchanged.
 
 **Acceptance criteria:**
 - [ ] Table lives under `docs/tasks/` (this plan) or `docs/dataflow/scenarios.md` listing `route_id`, workflow/manifest, share kind: `goal_only` | `notes_to_llm` | `json_to_http` | `prefetch_pack` | `branch` | `human_gate` | `agent` | `none`
@@ -31,14 +31,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 - [ ] Pick a recommended D5 proof route (default: `card_freeze` if identity → limit → freeze needs a produced id; else `msa_risk_review`)
 
 **Verification:**
-- [ ] Manual: labels match `V16__workflows.sql` / teaching seed, not README wishful tense
+- [ ] Manual: labels match `V1__dataplane.sql` / catalogue seed, not README wishful tense
 - [ ] No code change required to merge D1
 
 **Dependencies:** None
 
 **Files likely touched:**
 - `docs/tasks/dataflow-plan.md` (matrix section) or `docs/dataflow/scenarios.md`
-- Read-only: `agent-data-plane/src/main/resources/db/migration/V16__workflows.sql`, `docs/run/dummy-jobs/jobs.json`, `agent-runtime/app/graph/workflow.py`
+- Read-only: `agent-data-plane/src/main/resources/db/migration/V1__dataplane.sql`, `docs/run/dummy-jobs/jobs.json`, `agent-runtime/app/graph/workflow.py`
 
 **Estimated scope:** Small
 
@@ -72,7 +72,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Checkpoint: Explore
 
-- [ ] Share kinds labelled for the teaching set
+- [ ] Share kinds labelled for the catalogue seed
 - [ ] Merge rule accepted
 - [ ] Human review before Runtime changes
 
@@ -134,7 +134,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ---
 
-## Task D5: Teaching-chain proof (tool-mock or contract test)
+## Task D5: Seed-chain proof (tool-mock or contract test)
 
 **Description:** Pick the D2 route. Make the **second** tool require a field produced by the **first**. Dummy `completed` without that field is a fail.
 
@@ -197,7 +197,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ---
 
-## Task D7: Prefetch teaching routes consume the pack
+## Task D7: Prefetch seed routes consume the pack
 
 **Description:** `policy_memo` / `pack_then_review` (names as seeded) must generate or call tools using packed chunks. A synthesis prompt that says “use packed chunks” is not enough if the slot is empty.
 
@@ -224,7 +224,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 ## Checkpoint: Prefetch
 
 - [ ] Prefetch ≠ `long_term`
-- [ ] Teaching prefetch route uses the slot
+- [ ] Seed prefetch route uses the slot
 - [ ] No retrieval ⇒ empty invoke still no-op
 
 ---
@@ -305,7 +305,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 **Verification:**
 - [ ] Tests with fake AFD jobs client: child body == projection
-- [ ] Manual: teaching parent route in dummy-jobs (if one exists) or unit-only if seed has no parent yet
+- [ ] Manual: seed parent route in dummy-jobs (if one exists) or unit-only if seed has no parent yet
 
 **Dependencies:** Task D3
 

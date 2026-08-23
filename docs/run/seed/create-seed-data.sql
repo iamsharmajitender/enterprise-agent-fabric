@@ -1,4 +1,4 @@
--- One-shot teaching seed: capabilities + manifests (acr), then catalogue (adp).
+-- One-shot catalogue seed: capabilities + manifests (acr), then catalogue (adp).
 -- Run via ./docs/run/scripts/seed-db.sh (deletes first, then loads lifecycle cuts).
 
 \c acr
@@ -512,7 +512,7 @@ INSERT INTO registry.manifests (manifest_id, manifest_version, tools, status) VA
 
 
 \c adp
--- Pattern 0–3 teaching catalogue. Safe to re-run after delete-seed-data.sql.
+-- Pattern 0–3 catalogue seed. Safe to re-run after delete-seed-data.sql.
 
 INSERT INTO dataplane.corpora (
   corpus_id, display_name, url, collection, auth, owner, status, region

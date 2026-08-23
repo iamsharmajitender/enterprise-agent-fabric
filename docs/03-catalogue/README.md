@@ -1,6 +1,6 @@
-# Teaching catalogue matrix
+# Catalogue matrix
 
-How to read [routes.md](routes.md) and [use-cases.md](use-cases.md). This is the **active Pattern 0–3 teaching set** from [`../run/seed/create-seed-data.sql`](../run/seed/create-seed-data.sql) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
+How to read [routes.md](routes.md) and [use-cases.md](use-cases.md). This is the **active Pattern 0–3 seed** from [`../run/seed/create-seed-data.sql`](../run/seed/create-seed-data.sql) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
 
 **31** `route_id`s. Payload files are [`../run/dummy-jobs/jobs.json`](../run/dummy-jobs/jobs.json) and [`../run/dummy-jobs/chats.json`](../run/dummy-jobs/chats.json). Demo wrappers are the `*.sh` files under [`../run/dummy-jobs/`](../run/dummy-jobs/README.md).
 
@@ -46,7 +46,7 @@ Tool-only HTTP paths can finish against tool-mock. LLM stages still need Ollama.
 
 Rewrite these three files when **seed** or **dummy payloads/scripts** change. No generator in this pass. Walk:
 
-1. Active teaching `INSERT`s in [`../run/seed/create-seed-data.sql`](../run/seed/create-seed-data.sql) (`dataplane.routes`, `dataplane.workflows`, `dataplane.retrieval`, `dataplane.memory_profiles`). Skip lifecycle draft/retired cuts in `create-lifecycle-seed-data.sql` unless you add a tiny footnote.
+1. Active seed `INSERT`s in [`../run/seed/create-seed-data.sql`](../run/seed/create-seed-data.sql) (`dataplane.routes`, `dataplane.workflows`, `dataplane.retrieval`, `dataplane.memory_profiles`). Skip lifecycle draft/retired cuts in `create-lifecycle-seed-data.sql` unless you add a tiny footnote.
 2. Payload keys, channels, and **route_id spelling** from `jobs.json` / `chats.json` (source of demo wrappers).
 3. Demo paths from `docs/run/dummy-jobs/**/*.sh`.
 4. Status against Runtime (linear graph, goal-only HTTP, prefetch not packed) — not against dummy `completed`.

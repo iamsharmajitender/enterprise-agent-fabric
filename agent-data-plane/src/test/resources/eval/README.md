@@ -1,6 +1,6 @@
 # Eval fixtures (Data Plane tests)
 
-Golden sets for the teaching catalogue. **CI/platform only** — not decide, pin, start, or loop.
+Golden sets for the catalogue seed. **CI/platform only** — not decide, pin, start, or loop.
 
 Routing is the **board** (this mix of `route_id` @ `route_version`), not `eval_suite_id` on a row. `eval_suite_id` is slice 3 (route quality), later.
 

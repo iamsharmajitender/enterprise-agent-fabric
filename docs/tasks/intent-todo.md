@@ -75,7 +75,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 **Acceptance criteria:**
 - [ ] [intent-plan.md](./intent-plan.md) stickiness row stays the source; ADP README (or I13) states: live `session_id` with `correlation_id` does not call decide
 - [ ] No ADP code reads `frontdoor.freeze`
-- [ ] Decide-side continuation re-entitle is explicitly **out** until a teaching case needs it
+- [ ] Decide-side continuation re-entitle is explicitly **out** until a seed case needs it
 
 **Verification:**
 - [ ] Manual: AssistantService still resumes from freeze without decide (existing tests)
@@ -113,7 +113,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 
 **Verification:**
 - [ ] Tests pass: new DecideService cases for match / not-eligible / non-command
-- [ ] Manual: teaching seed includes the command → route mapping
+- [ ] Manual: catalogue seed includes the command → route mapping
 
 **Dependencies:** Task I1, Task I2
 
@@ -185,12 +185,12 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 
 ## Task I7: Per-route risk bands on the current scorer
 
-**Description:** Stop using a single hardcoded `0.91` / `0.6`. High-risk routes (writes / freeze / pay in the teaching catalogue) need a higher bar or forced `clarify`. Mid-risk may clarify on a close top-2. Still allowed to use keywords. This is calibration, not a new model.
+**Description:** Stop using a single hardcoded `0.91` / `0.6`. High-risk routes (writes / freeze / pay in the catalogue seed) need a higher bar or forced `clarify`. Mid-risk may clarify on a close top-2. Still allowed to use keywords. This is calibration, not a new model.
 
 **Acceptance criteria:**
 - [ ] Route rows (or a small risk map) expose a risk class or threshold
 - [ ] Unique keyword hit on a high-risk route below the bar → `clarify` or `abstain`, not silent `route`
-- [ ] Fee explain teaching path still `route`s the `$42` utterance
+- [ ] Fee explain seed path still `route`s the `$42` utterance
 - [ ] `router_layer` remains `retrieve`
 
 **Verification:**
@@ -230,7 +230,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 - `DecideService`
 - optional embedding/index assets under `agent-data-plane/src/main/resources/`
 
-**Estimated scope:** Large — keep the first landing to in-memory kNN over labelled teaching utterances; do not add training pipelines
+**Estimated scope:** Large — keep the first landing to in-memory kNN over labelled seed utterances; do not add training pipelines
 
 ---
 
@@ -316,7 +316,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 
 ## Task I12: Structured JSON fallback when ② is maybe / high-risk
 
-**Description:** Turn ③ **on** only for ② maybe-band or high-risk top candidate. Prompt (or stub) must return JSON choosing among eligible ids only. Ambiguous → `clarify` with top-k. Invalid id → `abstain`. Teaching demo may keep the flag off.
+**Description:** Turn ③ **on** only for ② maybe-band or high-risk top candidate. Prompt (or stub) must return JSON choosing among eligible ids only. Ambiguous → `clarify` with top-k. Invalid id → `abstain`. Local demo may keep the flag off.
 
 **Acceptance criteria:**
 - [ ] Flag on: ② confident fee utterance still does **not** call ③

@@ -9,22 +9,11 @@ import org.springframework.util.StreamUtils;
 class SeedCapabilitiesSqlTest {
 
   @Test
-  void flywaySeedCoversEveryManifestToolCapability() throws Exception {
-    String seed = read("/db/migration/V3__seed_capabilities.sql")
-        + read("/db/migration/V4__seed_tool_capabilities.sql")
-        + read("/db/migration/V7__seed_job_route_capabilities.sql")
-        + read("/db/migration/V12__seed_agent_start_capabilities.sql")
-        + read("/db/migration/V13__rename_kind_agent_start_to_agent.sql");
+  void flywayBaselineCoversEveryManifestToolCapability() throws Exception {
+    String seed = read("/db/migration/V1__registry.sql");
     for (String id :
         new String[] {
           "account_fee_lookup",
-          "list_accounts",
-          "list_transactions",
-          "lookup_beneficiary",
-          "validate_payment",
-          "initiate_wire",
-          "escalate_to_human",
-          "search_transactions",
           "ocr_extract",
           "start_contract_review",
           "start_kyc_onboarding",
@@ -40,17 +29,18 @@ class SeedCapabilitiesSqlTest {
         }) {
       assertThat(seed).contains("'" + id + "'");
     }
+    assertThat(seed).contains("'agent'");
+    assertThat(seed).doesNotContain("'agent_start'");
   }
 
   @Test
-  void flywaySeedIncludesPublishedCapabilitiesWithNoManifest() throws Exception {
-    String unused = read("/db/migration/V6__seed_unused_capabilities.sql");
+  void flywayBaselineIncludesPublishedCapabilitiesWithNoManifest() throws Exception {
+    String unused = read("/db/migration/V1__registry.sql");
     for (String id :
         new String[] {"kyc_document_verify", "aml_watchlist_screen", "credit_limit_lookup"}) {
       assertThat(unused).contains("'" + id + "'");
     }
     assertThat(unused).contains("'published'");
-    assertThat(unused).doesNotContain("capability_id");
   }
 
   private static String read(String path) throws Exception {

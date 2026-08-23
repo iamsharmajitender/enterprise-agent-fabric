@@ -8,7 +8,7 @@ Documentation for this repository. Behaviour is what Agent Runtime executes afte
 | --- | --- |
 | [01-start](01-start/README.md) | Run the local fabric |
 | [02-understand](02-understand/overview.md) | How this binary works |
-| [03-catalogue](03-catalogue/) | Teaching routes and use cases (generated from the seed) |
+| [03-catalogue](03-catalogue/) | Catalogue routes and use cases (generated from the seed) |
 | [04-architecture](04-architecture/) | Box packs (AFD, ADP, ACR, AR) plus [narrative/](04-architecture/narrative/) |
 | [05-reference](05-reference/) | Frozen JSON contracts |
 
@@ -35,7 +35,7 @@ These directories are not shelves. They do not move.
 
 - [Overview](02-understand/overview.md) — five processes, pin then hydrate then linear LangGraph, jobs vs chat
 - [Capabilities](02-understand/capabilities.md) — two kinds (`domain`, `agent`); do not add kinds for retrieve, prompts, or MCP
-- [Patterns](02-understand/patterns.md) — teaching set 0–3; workflow is a stage list; the graph is linear
+- [Patterns](02-understand/patterns.md) — Pattern 0–3 seed; workflow is a stage list; the graph is linear
 - [Data](02-understand/data.md) — `goal` vs `notes`; HTTP is `dict(goal)` only; slots do not exist
 - [Prompts](02-understand/prompts.md) — `prompt_packs` and `llm_role`
 - [Retrieve](02-understand/retrieve.md) — named retrieve HTTP vs catalogue prefetch (no-op)

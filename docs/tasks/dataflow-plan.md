@@ -13,7 +13,7 @@ Today the run graph has two channels only:
 
 That is enough when every tool already has its ids in the job payload, and later stages are **LLM** readers of prose. It is **not** a general dataflow. Dummy jobs still complete because tool-mock ignores request bodies.
 
-**Do this list later**, after v1 teaching jobs are green. Do not fold it into [todo.md](./todo.md). Do not reopen locked fabric rules (AFD-only start, pin-then-hydrate, chat FR-5, Shared Memory as a fifth store).
+**Do this list later**, after v1 seed jobs are green. Do not fold it into [todo.md](./todo.md). Do not reopen locked fabric rules (AFD-only start, pin-then-hydrate, chat FR-5, Shared Memory as a fifth store).
 
 **Not in this plan:** Pattern 1 ReAct tool choice; `conversation` / `long_term` Shared Memory ([future-enhancement](./future-enhancement.md#shared-memory-conversation-and-long_term)); LLM-as-judge evals ([eval-plan](./eval-plan.md) slice 3); Layer ②/③ classify ([intent-plan](./intent-plan.md)); executing `branch` / `human_gate` as a product UX (this plan only uses them as **consumers** of stage data).
 
@@ -41,7 +41,7 @@ Do **not** add a dataflow DSL on the route row in the first slice. The route alr
 
 1. **`goal` is ingress only.** Job/chat payload. Immutable for the run. Tools that need a caller-supplied id (`card_id`, `doc_id`) keep reading it from `goal`.
 2. **`working` becomes structured.** Persist `{ "notes": [...], "slots": { "<stage_id>": <json> } }` on `ar.runtime.runs.working` when `working=session`. `notes` stays the string list the LLM sees (projection of slots + prose).
-3. **HTTP payload = `goal` ∪ selected slots.** Default for the first teaching proof: merge **prior slots** (not raw `notes` strings) under a namespaced key (e.g. `prior`) **or** a stage-declared `input_from`. D2 must pick one. Unbounded “dump every previous body into every tool” is forbidden (PII / over-wide schema).
+3. **HTTP payload = `goal` ∪ selected slots.** Default for the first seed proof: merge **prior slots** (not raw `notes` strings) under a namespaced key (e.g. `prior`) **or** a stage-declared `input_from`. D2 must pick one. Unbounded “dump every previous body into every tool” is forbidden (PII / over-wide schema).
 4. **Prefetch is a writer of slots**, not `long_term`. Same working blob. Corpus POST is still unpublished until D6; empty `invoke` stays a no-op until then.
 5. **Branch / gate read slots**, they do not invent a second state object.
 6. **Child `agent` does not inherit notes.** Parent must name which slots become the child `goal`. Fail closed if required child fields are missing.
@@ -61,10 +61,10 @@ Do **not** add a dataflow DSL on the route row in the first slice. The route alr
 Explore **before** Runtime changes. Dummy jobs completing is not evidence.
 
 ```text
-D1 scenario matrix (which teaching routes actually need a share)
+D1 scenario matrix (which seed routes actually need a share)
     → D2 lock payload-merge rule (human)
         → D3 structured working slots (persist + reload)
-            → D4 HTTP merge + D5 one teaching proof (card_freeze or msa_risk_review)
+            → D4 HTTP merge + D5 one seed proof (card_freeze or msa_risk_review)
                 → D6–D7 prefetch pack (policy_memo / pack_then_review)
                     → D8 branch, D9 human_gate
                         → D10 parent→child projection
@@ -88,7 +88,7 @@ One vertical slice at a time. After D5, `card_freeze` (or the chosen chain) must
 # no Compose for D1–D2 (docs)
 # D3–D5
 cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests/test_runs.py
-# teaching job whose second tool requires a field the first tool returns
+# seed job whose second tool requires a field the first tool returns
 ./docs/run/dummy-jobs/run-job.sh card_freeze   # or the route D1 picks
 # tool-mock / test asserts body, not only 200
 ```
@@ -97,12 +97,12 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 
 ### Phase 0: Explore (do this first — no Runtime behaviour change)
 
-- [ ] Task D1: Scenario matrix for the teaching catalogue
+- [ ] Task D1: Scenario matrix for the catalogue seed
 - [ ] Task D2: Lock working-slot + HTTP merge rule (human review)
 
 ### Checkpoint: Explore
 
-- [ ] Every Pattern 2/3 teaching route is labelled: `goal_only` / `notes_to_llm` / `json_to_http` / `prefetch_pack` / `branch` / `human_gate` / `agent`
+- [ ] Every Pattern 2/3 seed route is labelled: `goal_only` / `notes_to_llm` / `json_to_http` / `prefetch_pack` / `branch` / `human_gate` / `agent`
 - [ ] Merge rule written; “dump all notes into every tool” is rejected or explicitly scoped
 - [ ] Human review before D3
 
@@ -110,7 +110,7 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 
 - [ ] Task D3: Persist `working.slots` (keep `notes` as LLM projection)
 - [ ] Task D4: HTTP invoke payload includes selected slots
-- [ ] Task D5: One teaching chain proves tool-mock / test sees prior JSON
+- [ ] Task D5: One seed chain proves tool-mock / test sees prior JSON
 
 ### Checkpoint: HTTP handoff
 
@@ -154,7 +154,7 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 - Merge key: namespaced `prior.<stage_id>` vs workflow `input_from: ["ocr"]` vs “last JSON body only”?
 - Slot value: full tool JSON, or only `output_schema` fields?
 - Cap / redaction on slots (size, deny-list keys)?
-- Which teaching route is the D5 proof (`card_freeze` vs `msa_risk_review` vs `claims_adjudicate`)?
+- Which seed route is the D5 proof (`card_freeze` vs `msa_risk_review` vs `claims_adjudicate`)?
 - Is D11 in this plan or a Runtime reliability follow-on?
 
 ## Out of scope (do not sneak in)

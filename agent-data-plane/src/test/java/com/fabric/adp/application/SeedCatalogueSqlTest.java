@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.StreamUtils;
 
-class SeedTeachingCatalogSqlTest {
+class SeedCatalogueSqlTest {
 
   private static final String[] ROUTES = {
     "agent-chat",
@@ -43,11 +43,8 @@ class SeedTeachingCatalogSqlTest {
   };
 
   @Test
-  void flywayReplaceSeedContainsEveryTeachingRoute() throws Exception {
-    String seed =
-        read("/db/migration/V22__unversioned_teaching_catalogue.sql")
-            + read("/db/migration/V23__agent_start_teaching_parents.sql");
-    assertThat(seed).contains("DELETE FROM dataplane.routes");
+  void flywayBaselineContainsEveryCatalogueRoute() throws Exception {
+    String seed = read("/db/migration/V1__dataplane.sql");
     for (String id : ROUTES) {
       assertThat(seed).contains("'" + id + "'");
     }
@@ -57,7 +54,7 @@ class SeedTeachingCatalogSqlTest {
   }
 
   private static String read(String path) throws Exception {
-    try (var in = SeedTeachingCatalogSqlTest.class.getResourceAsStream(path)) {
+    try (var in = SeedCatalogueSqlTest.class.getResourceAsStream(path)) {
       assertThat(in).as(path).isNotNull();
       return StreamUtils.copyToString(in, StandardCharsets.UTF_8);
     }
