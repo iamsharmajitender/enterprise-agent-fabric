@@ -4,18 +4,18 @@
   "description": "Fraud investigate: domain tools plus Legal start",
   "tools": [
     {
-      "name": "search_transactions",
-      "capability_id": "search_transactions",
-      "capability_version": "1.4.0",
-      "pdp_action": "search_transactions",
-      "risk_tier": "low"
-    },
-    {
       "name": "ocr_extract",
       "capability_id": "ocr_extract",
       "capability_version": "1.2.0",
       "pdp_action": "ocr_extract",
       "risk_tier": "low"
+    },
+    {
+      "name": "draft_memo",
+      "capability_id": "draft_memo",
+      "capability_version": "1.0.0",
+      "pdp_action": "draft_memo",
+      "risk_tier": "medium"
     },
     {
       "name": "start_contract_review",

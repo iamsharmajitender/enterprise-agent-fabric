@@ -316,6 +316,30 @@ INSERT INTO registry.capabilities (
   NULL,
   'product',
   'published'
+),
+(
+  'start_contract_review',
+  '1.0.0',
+  'agent',
+  'Start governed Legal MSA review as a jobs run.',
+  '{"type":"object","required":["document_id"],"properties":{"document_id":{"type":"string"},"matter_id":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"contract_review"}}'::jsonb,
+  NULL,
+  'legal-agents',
+  'published'
+),
+(
+  'start_kyc_onboarding',
+  '1.0.0',
+  'agent',
+  'Start governed KYC onboarding as a jobs run.',
+  '{"type":"object","required":["applicant_id"],"properties":{"applicant_id":{"type":"string"},"ticket_id":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"kyc_onboarding"}}'::jsonb,
+  NULL,
+  'kyc-ops',
+  'published'
 );
 
 INSERT INTO registry.manifests (manifest_id, manifest_version, tools, status) VALUES
@@ -467,6 +491,21 @@ INSERT INTO registry.manifests (manifest_id, manifest_version, tools, status) VA
     {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
     {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0","pdp_action":"risk_engine","risk_tier":"medium"},
     {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'fraud_investigate', '2026.08.1', $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"},
+    {"name":"start_contract_review","capability_id":"start_contract_review","capability_version":"1.0.0","pdp_action":"start_contract_review","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'ops_start_kyc', '2026.08.1', $$[
+    {"name":"parse_ticket","capability_id":"parse_ticket","capability_version":"1.0.0","pdp_action":"parse_ticket","risk_tier":"low"},
+    {"name":"start_kyc_onboarding","capability_id":"start_kyc_onboarding","capability_version":"1.0.0","pdp_action":"start_kyc_onboarding","risk_tier":"high"}
   ]$$::jsonb,
   'published'
 );
@@ -653,6 +692,23 @@ INSERT INTO dataplane.manifests (manifest_id, manifest_version, description, too
     {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"}
   ]$$::jsonb,
   'published'
+),
+(
+  'fraud_investigate', '2026.08.1', 'Fraud parent: domain OCR/memo plus Legal agent capability',
+  $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0","pdp_action":"draft_memo","risk_tier":"medium"},
+    {"name":"start_contract_review","capability_id":"start_contract_review","capability_version":"1.0.0","pdp_action":"start_contract_review","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'ops_start_kyc', '2026.08.1', 'Ops parent: parse ticket plus KYC agent capability',
+  $$[
+    {"name":"parse_ticket","capability_id":"parse_ticket","capability_version":"1.0.0","pdp_action":"parse_ticket","risk_tier":"low"},
+    {"name":"start_kyc_onboarding","capability_id":"start_kyc_onboarding","capability_version":"1.0.0","pdp_action":"start_kyc_onboarding","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
 );
 
 INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, stages, status) VALUES
@@ -822,6 +878,8 @@ INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, own
   ('product_explain', '2026.08.1', 'Product terms are already packed. Stay inside the current stage allowlist.', 'published', 'product'),
   ('narrow_review', '2026.08.1', 'Stay inside the current stage. Analyse may use clause_search and risk_engine only.', 'published', 'legal-agents'),
   ('contract_review', '2026.08.1', 'You are counsel''s contract-review worker. Stay inside the current stage. Inside Analyse you may choose among the stage allowlist. Do not invent stages.', 'published', 'legal-agents'),
+  ('fraud_investigate', '2026.08.1', 'Investigate the case with OCR and memo tools. You may propose start_contract_review to hand Legal a separate jobs run. Do not invent tools.', 'published', 'fraud-ops'),
+  ('ops_start_kyc', '2026.08.1', 'Parse the onboarding ticket. You may propose start_kyc_onboarding to hand KYC a separate jobs run. Do not invent tools.', 'published', 'ops'),
   ('due_diligence', '2026.08.1', 'Extract always retrieves the playbook. Inside Analyse you may retrieve again. Do not invent stages.', 'published', 'legal-agents');
 
 INSERT INTO dataplane.prompt_role_templates (prompt_id, prompt_version, llm_role, task_type, "text") VALUES
@@ -921,6 +979,20 @@ INSERT INTO dataplane.routes (
   'http://agent-runtime:3008/v1/runs', 'agent-contract-investigate', 'contract_investigate', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'contract_investigate', 'risk_memo', 'contract_investigate_golden', 12, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
+),
+(
+  'fraud_investigate', '2026.08.1', TRUE, 'active', 'fraud_investigate',
+  'Open loop with domain tools plus one agent capability (start_contract_review → contract_review). Two freezes when Runtime posts jobs; today Runtime skips that HTTP. Prompt, memory, no workflow.',
+  'http://agent-runtime:3008/v1/runs', 'agent-fraud-investigate', 'fraud_investigate', '2026.08.1',
+  'read_only_standard', 'reasoning-standard', NULL, 'fraud_investigate', 'risk_memo', NULL, 8, 'clarify',
+  '["fraud:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
+),
+(
+  'ops_start_kyc', '2026.08.1', TRUE, 'active', 'ops_start_kyc',
+  'Open loop with parse_ticket plus one agent capability (start_kyc_onboarding → kyc_onboarding). Child start is catalogue-only until Runtime posts jobs. Prompt, memory, no workflow.',
+  'http://agent-runtime:3008/v1/runs', 'agent-ops-start-kyc', 'ops_start_kyc', '2026.08.1',
+  'read_only_standard', 'reasoning-standard', NULL, 'ops_start_kyc', NULL, NULL, 6, 'clarify',
+  '["kyc:onboard"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
 ),
 (
   'llm_pipeline', '2026.08.1', TRUE, 'active', 'llm_pipeline',
@@ -1081,6 +1153,8 @@ INSERT INTO dataplane.memory_profiles (
   ('fraud_casefile', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('fee_explain', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('contract_investigation', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
+  ('fraud_investigate', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
+  ('ops_start_kyc', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
   ('dispute_intake', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
   ('pack_then_review', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('msa_risk_review', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),

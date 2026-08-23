@@ -12,7 +12,9 @@ class SeedCapabilitiesSqlTest {
   void flywaySeedCoversEveryManifestToolCapability() throws Exception {
     String seed = read("/db/migration/V3__seed_capabilities.sql")
         + read("/db/migration/V4__seed_tool_capabilities.sql")
-        + read("/db/migration/V7__seed_job_route_capabilities.sql");
+        + read("/db/migration/V7__seed_job_route_capabilities.sql")
+        + read("/db/migration/V12__seed_agent_start_capabilities.sql")
+        + read("/db/migration/V13__rename_kind_agent_start_to_agent.sql");
     for (String id :
         new String[] {
           "account_fee_lookup",
@@ -25,6 +27,7 @@ class SeedCapabilitiesSqlTest {
           "search_transactions",
           "ocr_extract",
           "start_contract_review",
+          "start_kyc_onboarding",
           "clause_search",
           "policy_search",
           "risk_engine",

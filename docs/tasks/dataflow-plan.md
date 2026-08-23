@@ -2,7 +2,7 @@
 
 ## Overview
 
-Explore, then close, the gap between **what a route contract can name** (multi-stage workflow, prefetch, branch, human gate, child `agent_start`) and **what Runtime actually passes between stages**.
+Explore, then close, the gap between **what a route contract can name** (multi-stage workflow, prefetch, branch, human gate, child `agent`) and **what Runtime actually passes between stages**.
 
 Today the run graph has two channels only:
 
@@ -30,7 +30,7 @@ That is enough when every tool already has its ids in the job payload, and later
 | Prefetch pack → generate | `retrieval.mode=deterministic_prefetch`; empty-`invoke` stages | **No-op.** Chunks never packed. | D6–D7. Pack into slots / notes. |
 | Score → next node | Workflow `branch` (`kyc_onboarding`) | Catalogue-only. Graph is linear. | D8. Execute branch from a slot. |
 | Human packet → resume | `type=human_gate` | Catalogue-only. | D9. Pause, merge human payload into slots, resume. |
-| Parent extract → child job | Capability `kind=agent_start` | Child `goal` is a new jobs body; no parent notes. | D10. Explicit projection. |
+| Parent extract → child job | Capability `kind=agent` | Child `goal` is a new jobs body; no parent notes. | D10. Explicit projection. |
 | Crash continue | `loop=checkpoint` | Writes `{step, stage_id, result, goal}`. Resume-from-step **not** wired. | D11. Optional last. |
 | Next chat turn transcript | `conversation=session` | Catalogue-only. `/turns` reloads **notes**, not utterances. | **Out.** Shared Memory. |
 | Facts for a later journey | `long_term=retrieve_only` | Catalogue-only. | **Out.** Shared Memory / RAG. |
@@ -44,7 +44,7 @@ Do **not** add a dataflow DSL on the route row in the first slice. The route alr
 3. **HTTP payload = `goal` ∪ selected slots.** Default for the first teaching proof: merge **prior slots** (not raw `notes` strings) under a namespaced key (e.g. `prior`) **or** a stage-declared `input_from`. D2 must pick one. Unbounded “dump every previous body into every tool” is forbidden (PII / over-wide schema).
 4. **Prefetch is a writer of slots**, not `long_term`. Same working blob. Corpus POST is still unpublished until D6; empty `invoke` stays a no-op until then.
 5. **Branch / gate read slots**, they do not invent a second state object.
-6. **Child `agent_start` does not inherit notes.** Parent must name which slots become the child `goal`. Fail closed if required child fields are missing.
+6. **Child `agent` does not inherit notes.** Parent must name which slots become the child `goal`. Fail closed if required child fields are missing.
 7. **Do not store conversation or long-term facts on the run pin.** Unchanged.
 
 ### Rejected (for now)
@@ -102,7 +102,7 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 
 ### Checkpoint: Explore
 
-- [ ] Every Pattern 2/3 teaching route is labelled: `goal_only` / `notes_to_llm` / `json_to_http` / `prefetch_pack` / `branch` / `human_gate` / `agent_start`
+- [ ] Every Pattern 2/3 teaching route is labelled: `goal_only` / `notes_to_llm` / `json_to_http` / `prefetch_pack` / `branch` / `human_gate` / `agent`
 - [ ] Merge rule written; “dump all notes into every tool” is rejected or explicitly scoped
 - [ ] Human review before D3
 
@@ -130,7 +130,7 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 
 ### Phase 4: Cross-run / resume
 
-- [ ] Task D10: `agent_start` child goal projection
+- [ ] Task D10: `agent` child goal projection
 - [ ] Task D11: Resume graph from `loop=checkpoint` (optional)
 
 ### Packaging

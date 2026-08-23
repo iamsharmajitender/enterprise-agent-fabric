@@ -173,6 +173,17 @@ test("catalogue pages map status through Draft Published Active Retired", () => 
   assert.match(js, /catalogStatusLabel/);
 });
 
+test("capability kind is Agent vs Domain with distinct chips", () => {
+  assert.match(js, /agent: "Agent"/);
+  assert.match(js, /domain: "Domain"/);
+  assert.equal(js.includes('"Agent start"'), false);
+  assert.match(js, /function kindPill/);
+  assert.match(js, /kind-agent/);
+  assert.match(js, /kind-domain/);
+  assert.match(css, /\.chip\.kind-agent/);
+  assert.match(css, /\.chip\.kind-domain/);
+});
+
 test("JSON panel renders a collapsible tree per object and array", () => {
   assert.match(js, /function renderJsonNode/);
   assert.match(js, /el\("details", "json-node"\)/);

@@ -182,6 +182,28 @@ def test_none_without_url_is_noop() -> None:
     assert output["notes"] == ["packed"]
 
 
+def test_agent_kind_skips_http() -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("kind=agent must not POST jobs yet")
+
+    graph = build_tool_graph(
+        [
+            {
+                "id": "start_contract_review",
+                "kind": "agent",
+                "invoke": {
+                    "method": "POST",
+                    "url": "https://api-afd.internal/v1/jobs",
+                },
+            }
+        ],
+        Invoker(),
+    )
+    output = graph.invoke({"result": "", "goal": {"document_id": "doc-1"}, "notes": []})
+    assert "skipped" in output["result"]
+
+
 def test_classify_without_llm_raises() -> None:
     class Invoker:
         def call(self, invoke: dict, payload: dict) -> dict:

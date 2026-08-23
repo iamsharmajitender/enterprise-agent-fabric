@@ -1,7 +1,7 @@
 package com.fabric.afd.bootstrap;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.sdk.resources.Resource;
+import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
@@ -13,22 +13,18 @@ import org.springframework.stereotype.Component;
 @Component
 class StripTelemetrySdkResource implements BeanPostProcessor {
 
-  private static final String[] DROP = {
-    "telemetry.sdk.language",
-    "telemetry.sdk.name",
-    "telemetry.sdk.version",
-    "telemetry.auto.version"
-  };
+  private static final Set<String> DROP =
+      Set.of(
+          "telemetry.sdk.language",
+          "telemetry.sdk.name",
+          "telemetry.sdk.version",
+          "telemetry.auto.version");
 
   @Override
   public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
     if (!(bean instanceof Resource resource)) {
       return bean;
     }
-    var builder = resource.toBuilder();
-    for (String key : DROP) {
-      builder.removeAttribute(AttributeKey.stringKey(key));
-    }
-    return builder.build();
+    return resource.toBuilder().removeIf(key -> DROP.contains(key.getKey())).build();
   }
 }

@@ -73,7 +73,7 @@ Routes that only call domain tools can finish against tool-mock. LLM stages stil
 | Path | Autonomy | Routes |
 | --- | --- | --- |
 | [`0-single-inference/`](0-single-inference/) | 0 Single inference | `email_summarize` |
-| [`1-autonomous/`](1-autonomous/) | 1 Autonomous | `fee_explain`, `fraud_one_tool`, `fraud_casefile`, `contract_investigation` |
+| [`1-autonomous/`](1-autonomous/) | 1 Autonomous | `fee_explain`, `fraud_one_tool`, `fraud_casefile`, `fraud_investigate`, `ops_start_kyc`, `contract_investigation` |
 | [`2-deterministic/`](2-deterministic/) | 2 Deterministic | `llm_pipeline`, `policy_memo`, `account_notify`, `card_freeze`, `dispute_intake`, `pack_then_*`, `clause_lookup`, `template_retrieve`, `msa_risk_review`, `kyc_onboarding`, `claims_adjudicate` |
 | [`3-guided/`](3-guided/) | 3 Guided | `ticket_triage`, `narrow_review`, `contract_review`, `due_diligence` |
 

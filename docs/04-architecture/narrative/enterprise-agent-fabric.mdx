@@ -301,7 +301,7 @@ FRs above are the testable form.
 5. **Clarify / abstain never start NAR.** On `route`: freeze, async-start, `202`.
 6. **One Agent Plane per trust domain.** Control Plane and Data Plane stay separate boxes. Not one mega-agent.
 7. **Three principals.** User, agent, NAR workload. Catalogue `agent_client_id` on the freeze. Pin first, then mint. Dual check in Shared Tools / PEP. Shared NAR is compute, not identity (FR-10).
-8. **Capabilities are references.** Publishers append `id@version` next to Control Plane and Data Plane. Manifests refer. NAR hydrates the whole pinned manifest before the LLM. `kind=agent_start` `invoke` is API NAFD jobs, not the callee NAR.
+8. **Capabilities are references.** Publishers append `id@version` next to Control Plane and Data Plane. Manifests refer. NAR hydrates the whole pinned manifest before the LLM. `kind=agent` `invoke` is API NAFD jobs, not the callee NAR.
 
 ---
 

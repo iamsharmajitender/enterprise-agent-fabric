@@ -1,6 +1,6 @@
 # Task list: Enterprise Agent Fabric v1 (local)
 
-Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md). Plan: [plan.md](./plan.md). Docs map: [docs/README.md](../README.md).
+Plan: [plan.md](./plan.md). Docs map: [docs/README.md](../README.md).
 
 Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane · **3008** AR · **3009** Registry. Control Plane: no database.
 

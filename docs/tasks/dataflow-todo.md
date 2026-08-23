@@ -1,6 +1,6 @@
 # Task list: Route-contract stage data sharing (local Fabric)
 
-Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md). Plan: [dataflow-plan.md](./dataflow-plan.md) (includes **Present vs remaining** and proposed architecture). Docs map: [docs/README.md](../README.md). Architecture: [agent-runtime](../04-architecture/agent-runtime.md). Route contract: [route-contract-reference](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference).
+Plan: [dataflow-plan.md](./dataflow-plan.md) (includes **Present vs remaining** and proposed architecture). Docs map: [docs/README.md](../README.md). Architecture: [agent-runtime](../04-architecture/agent-runtime.md). Route contract: [route-contract-reference](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference).
 
 **Execution order:**
 
@@ -24,8 +24,8 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Label every Pattern 2/3 (and relevant Pattern 1) teaching route by **how data must move**, using the live seed — not a new abstraction. This is the explore artifact. Runtime stays unchanged.
 
 **Acceptance criteria:**
-- [ ] Table lives under `docs/tasks/` (this plan) or `docs/dataflow/scenarios.md` listing `route_id`, workflow/manifest, share kind: `goal_only` | `notes_to_llm` | `json_to_http` | `prefetch_pack` | `branch` | `human_gate` | `agent_start` | `none`
-- [ ] At least `card_freeze`, `msa_risk_review`, `kyc_onboarding`, `policy_memo`, `pack_then_review`, `claims_adjudicate`, `fee_explain`, one `agent_start` parent, and `llm_pipeline` are labelled
+- [ ] Table lives under `docs/tasks/` (this plan) or `docs/dataflow/scenarios.md` listing `route_id`, workflow/manifest, share kind: `goal_only` | `notes_to_llm` | `json_to_http` | `prefetch_pack` | `branch` | `human_gate` | `agent` | `none`
+- [ ] At least `card_freeze`, `msa_risk_review`, `kyc_onboarding`, `policy_memo`, `pack_then_review`, `claims_adjudicate`, `fee_explain`, one `agent` parent, and `llm_pipeline` are labelled
 - [ ] Each `json_to_http` row names the **field** stage N+1 needs that stage N produces (even if tool-mock does not return it today)
 - [ ] `conversation` / `long_term` rows are marked **out of this plan** (Shared Memory)
 - [ ] Pick a recommended D5 proof route (default: `card_freeze` if identity → limit → freeze needs a produced id; else `msa_risk_review`)
@@ -293,7 +293,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## 4. Cross-run / resume
 
-## Task D10: `agent_start` child goal projection
+## Task D10: `agent` child goal projection
 
 **Description:** Parent must not dump `notes` into the child. Project named slots (and/or a subset of parent `goal`) into the child jobs `payload` / Runtime `goal`. LLM never sees `{jobs_url}` or `activation_target`.
 
@@ -301,7 +301,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 - [ ] Projection map documented (capability metadata or workflow stage field — pick the smaller catalogue change)
 - [ ] Missing required child field → parent run fails closed; no child start
 - [ ] Child `goal` JSON contains only projected keys
-- [ ] Existing FR: `kind=agent_start` still POSTs API AFD jobs, not callee AR
+- [ ] Existing FR: `kind=agent` still POSTs API AFD jobs, not callee AR
 
 **Verification:**
 - [ ] Tests with fake AFD jobs client: child body == projection
@@ -310,7 +310,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Dependencies:** Task D3
 
 **Files likely touched:**
-- `agent-runtime` invoke path for `agent_start`
+- `agent-runtime` invoke path for `agent`
 - ACR capability JSON if the map lives there
 - tests for hydrate/invoke
 
@@ -398,5 +398,4 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 - [ ] D3–D5 if you wanted HTTP handoff
 - [ ] D6–D7 if you wanted prefetch
 - [ ] D8–D11 only as D2 scoped
-- [ ] Standing [Definition of Done](../../.cursor/references/definition-of-done.md)
 - [ ] Human review before treating dummy jobs as dataflow-complete

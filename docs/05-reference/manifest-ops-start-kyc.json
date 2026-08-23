@@ -1,0 +1,21 @@
+{
+  "manifest_id": "ops_start_kyc",
+  "manifest_version": "2026.08.1",
+  "description": "Ops parent: parse ticket plus KYC start",
+  "tools": [
+    {
+      "name": "parse_ticket",
+      "capability_id": "parse_ticket",
+      "capability_version": "1.0.0",
+      "pdp_action": "parse_ticket",
+      "risk_tier": "low"
+    },
+    {
+      "name": "start_kyc_onboarding",
+      "capability_id": "start_kyc_onboarding",
+      "capability_version": "1.0.0",
+      "pdp_action": "start_kyc_onboarding",
+      "risk_tier": "high"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Task list: Three-layer observability (local Fabric)
 
-Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md) and [observability checklist](../../.cursor/references/observability-checklist.md). Plan: [observability-plan.md](./observability-plan.md). Docs map: [docs/README.md](../README.md). Blueprint: [Observability: Three Layers, One Graph](https://jitendersharma.dev/blueprints/observability-blueprint).
+Plan: [observability-plan.md](./observability-plan.md). Docs map: [docs/README.md](../README.md). Blueprint: [Observability: Three Layers, One Graph](https://jitendersharma.dev/blueprints/observability-blueprint).
 
 **Execution order:** O1 → O3 (foundation), then O4–O7 (Layer ② path), checkpoint, then O9–O11 (Layer ①), O12–O13 (Layer ③), O14–O16 (intelligence). O8 is optional after O7.
 

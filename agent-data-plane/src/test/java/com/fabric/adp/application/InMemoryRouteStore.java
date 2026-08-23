@@ -76,6 +76,16 @@ public class InMemoryRouteStore implements RouteStore {
         loopMemory(), "read_only_standard", ModelProfile.REASONING_STANDARD, null, "contract_investigate",
         "risk_memo", "contract_investigate_golden", 12, "clarify", List.of("legal:read"), List.of("api"), false,
         List.of());
+    add("fraud_investigate", 1, "fraud_investigate",
+        "Open loop with domain tools plus one agent capability (start_contract_review → contract_review). Child jobs POST is catalogue-only.",
+        RUNS, InMemoryManifestStore.fraudInvestigate(), null, loopMemory(),
+        "read_only_standard", ModelProfile.REASONING_STANDARD, null, "fraud_investigate",
+        "risk_memo", null, 8, "clarify", List.of("fraud:read"), List.of("api"), false, List.of());
+    add("ops_start_kyc", 1, "ops_start_kyc",
+        "Open loop with parse_ticket plus one agent capability (start_kyc_onboarding → kyc_onboarding). Child jobs POST is catalogue-only.",
+        RUNS, InMemoryManifestStore.opsStartKyc(), null, loopMemory("none", 8),
+        "read_only_standard", ModelProfile.REASONING_STANDARD, null, "ops_start_kyc",
+        null, null, 6, "clarify", List.of("kyc:onboard"), List.of("api"), false, List.of());
     add("llm_pipeline", 2, "llm_pipeline",
         "Fixed LLM stages (extract → rewrite → format). Workflow and prompt only. No tools, no prefetch, no retrieve, no memory.",
         RUNS, null, null, null, "read_only_standard", ModelProfile.FAST_CHAT, "llm_pipeline", "llm_pipeline",

@@ -1,6 +1,6 @@
 # Task list: Agent evals (local Fabric)
 
-Standing bar: [Definition of Done](../../.cursor/references/definition-of-done.md). Plan: [eval-plan.md](./eval-plan.md). Docs map: [docs/README.md](../README.md). Architecture: [agent-plane](../04-architecture/agent-plane.md), [Agent evals box](../04-architecture/narrative/enterprise-agent-fabric.mdx).
+Plan: [eval-plan.md](./eval-plan.md). Docs map: [docs/README.md](../README.md). Architecture: [agent-plane](../04-architecture/agent-plane.md), [Agent evals box](../04-architecture/narrative/enterprise-agent-fabric.mdx).
 
 **Execution order (the architecture’s three slices):**
 

@@ -30,4 +30,4 @@ Teaching matrix: [03-catalogue](../03-catalogue/). Box packs: [04-architecture](
 
 Both return `202 { "correlation_id" }`. AFD never mints that id.
 
-What Runtime passes between stages: [data](data.md). Catalogue vs Runtime: [status](status.md).
+What Runtime passes between stages: [data](data.md). Capability kinds (`domain` vs `agent`): [capabilities](capabilities.md). Catalogue vs Runtime: [status](status.md).

@@ -85,7 +85,7 @@ class CapabilityControllerTest {
   }
 
   @Test
-  void putThenGetAgentStartWithoutOutputSchema() throws Exception {
+  void putThenGetAgentWithoutOutputSchema() throws Exception {
     String body =
         StreamUtils.copyToString(
             getClass().getResourceAsStream("/contracts/capability-start-contract-review.json"),
@@ -97,7 +97,7 @@ class CapabilityControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.kind").value("agent_start"))
+        .andExpect(jsonPath("$.kind").value("agent"))
         .andExpect(jsonPath("$.invoke.body.route_id").value("contract_review"))
         .andExpect(jsonPath("$.output_schema").doesNotExist());
 

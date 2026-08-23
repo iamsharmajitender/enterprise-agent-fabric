@@ -22,6 +22,8 @@ public class InMemoryPromptStore implements PromptStore {
     put(host("research_assistant", "Research using only allowed tools. Prefer primary sources. Stop when the brief is evidence-backed or the budget is exhausted."));
     put(host("fraud_one_tool", "The case file is already in context. Draft a memo with draft_memo only.", "fraud-ops"));
     put(host("fraud_casefile", "The case file is already in context. Use OCR, risk, and draft tools. Do not retrieve corpora.", "fraud-ops"));
+    put(host("fraud_investigate", "Investigate the case with OCR and memo tools. You may propose start_contract_review to hand Legal a separate jobs run. Do not invent tools.", "fraud-ops"));
+    put(host("ops_start_kyc", "Parse the onboarding ticket. You may propose start_kyc_onboarding to hand KYC a separate jobs run. Do not invent tools.", "ops"));
     put(feeExplain());
     put(contractInvestigate());
     put(host("llm_pipeline", "Do only the current stage. Do not choose the next stage. No tools."));

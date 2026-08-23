@@ -1,6 +1,6 @@
 # Retrieve
 
-Two modes on `dataplane.retrieval`. Prefetch is not `long_term` and not a tool list. A retrieve **tool** is an ordinary ACR capability.
+Two modes on `dataplane.retrieval`. Prefetch is not `long_term` and not a tool list. A retrieve **tool** is an ordinary ACR `domain` capability. Do not add a retrieve `kind` — [capabilities](capabilities.md).
 
 | `retrieval.mode` | Catalogue | This Runtime |
 | --- | --- | --- |

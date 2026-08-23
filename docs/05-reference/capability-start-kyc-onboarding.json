@@ -1,0 +1,22 @@
+{
+  "id": "start_kyc_onboarding",
+  "version": "1.0.0",
+  "kind": "agent",
+  "description": "Start governed KYC onboarding as a jobs run.",
+  "input_schema": {
+    "type": "object",
+    "required": ["applicant_id"],
+    "properties": {
+      "applicant_id": { "type": "string" },
+      "ticket_id": { "type": "string" }
+    }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api-afd.internal/v1/jobs",
+    "auth": "calling-agent-oauth",
+    "body": { "route_id": "kyc_onboarding" }
+  },
+  "status": "published",
+  "owner": "kyc-ops"
+}

@@ -2,7 +2,7 @@
 
 How to read [routes.md](routes.md) and [use-cases.md](use-cases.md). This is the **active Pattern 0–3 teaching set** from [`../run/seed/create-seed-data.sql`](../run/seed/create-seed-data.sql) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
 
-**29** `route_id`s. Payload files are [`../run/dummy-jobs/jobs.json`](../run/dummy-jobs/jobs.json) and [`../run/dummy-jobs/chats.json`](../run/dummy-jobs/chats.json). Demo wrappers are the `*.sh` files under [`../run/dummy-jobs/`](../run/dummy-jobs/README.md).
+**31** `route_id`s. Payload files are [`../run/dummy-jobs/jobs.json`](../run/dummy-jobs/jobs.json) and [`../run/dummy-jobs/chats.json`](../run/dummy-jobs/chats.json). Demo wrappers are the `*.sh` files under [`../run/dummy-jobs/`](../run/dummy-jobs/README.md).
 
 ## How to read the matrix
 
@@ -23,7 +23,7 @@ Each row is one `route_id`. Columns are facts from seed + dummy payloads, plus a
 **Status vocabulary** (same words as [`../02-understand/status.md`](../02-understand/status.md)):
 
 - **`runs`** — HTTP and/or LLM stages fire as implemented: the graph is **linear**, HTTP bodies are the original **goal** (plus an LLM `query` on `query_formulation` stages), later LLM stages see prior output as **notes** strings.
-- **`catalogue-only`** — the route *names* `branch`, `human_gate`, a prefetch pack, `conversation`, or `long_term`, and Runtime does **not** execute that extra. Dummy `completed` does not prove those extras.
+- **`catalogue-only`** — the route *names* `branch`, `human_gate`, a prefetch pack, `conversation`, `long_term`, or a `kind=agent` child start, and Runtime does **not** execute that extra. Dummy `completed` does not prove those extras. Two kinds only: [capabilities](../02-understand/capabilities.md).
 - **`prefetch not packed`** — on every `deterministic_prefetch` route. Prefetch stages with empty `invoke` skip HTTP. Chunks are not packed into working memory or the prompt.
 
 `working=session` and `loop=checkpoint` are stored on the run pin when the route asks for them. Crash resume-from-step is not wired. A green dummy job is pin/hydrate/HTTP-or-LLM smoke, not “slots, branch, and RAG work.”

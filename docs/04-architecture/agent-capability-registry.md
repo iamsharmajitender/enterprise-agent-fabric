@@ -23,7 +23,7 @@ Teams inline OpenAPI into manifests, or they bind `latest`, or they treat MCP `l
 | ID | Requirement (this box) |
 | --- | --- |
 | Locked-8 | Capabilities are references. Publishers append immutable `id@version`. Manifests refer. AR hydrates the **whole** pinned manifest before the LLM. |
-| Locked-8 | `kind=agent_start` `invoke` is API AFD jobs, not the callee AR. |
+| Locked-8 | `kind=agent` `invoke` is API AFD jobs, not the callee AR. |
 | FR-8 / FR-10 | LLM never sees `{jobs_url}` or `activation_target`. Jobs `Authorization` is the calling agent token. Child mints **its** robot. |
 | — | Route row still has no `tools[]`. Only a `tool_manifest` pointer. |
 | — | Publish is append-only. Overwriting `1.2.0` is not a version. Manifests may reference `published` only. |
@@ -45,7 +45,7 @@ Three objects, two writers. Three moments — only the last is the AR loop.
 | Package versions, not live `list_tools` | Exam and pin need a frozen schema. `1.2.0` never changes once published. |
 | Manifest stores a reference, not "latest" | Publishing `2.0.0` must not move `fraud_investigate_v1`. |
 | Hydrate whole manifest at pin | No mid-loop registry GET. Cache `(manifest_id, manifest_version)`. |
-| Two `kind`s, one catalog | `domain` = governed business API. `agent_start` = start another catalogue row via API AFD. Same `id` + `version` UX for developers. |
+| Two `kind`s, one catalog | `domain` = governed business API. `agent` = start another catalogue row via API AFD. Same `id` + `version` UX. Do not add kinds for retrieve, prompts, workflows, memory, or MCP — [capabilities](../02-understand/capabilities.md). |
 | PEP then invoke | A published capability is not permission. Dual check still runs. Agent-start still entitles at API AFD. |
 | `pdp_action` / `risk_tier` on the manifest | Agent policy, not publisher API contract. |
 | Registry with Agent Plane | Same band as catalogue. Shared stays Memory / RAG / Tools. |
@@ -159,7 +159,7 @@ Treat a capability like a package.
 | --- | --- |
 | `id` | Stable product name: `ocr_extract` or `start_contract_review`. Not vendor. |
 | `version` | Immutable semver. |
-| `kind` | `domain` or `agent_start`. |
+| `kind` | `domain` or `agent`. |
 | `description` | Developer and later the model. |
 | `input_schema` / `output_schema` | JSON Schema → tool schema on the run pin. |
 | `invoke` | After PEP. Domain: method, path, auth to the **governed business API**. Agent-start: `POST` `{jobs_url}` with a **fixed** `route_id`. Not an MCP URL. Not an AR URL. |
@@ -203,7 +203,7 @@ Agent-start example (`route_id` fixed on the capability, not chosen by the model
 {
   "id": "start_contract_review",
   "version": "1.0.0",
-  "kind": "agent_start",
+  "kind": "agent",
   "description": "Start governed Legal MSA review as a jobs run.",
   "input_schema": {
     "type": "object",

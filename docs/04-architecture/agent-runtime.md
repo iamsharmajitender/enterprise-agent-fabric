@@ -78,7 +78,7 @@ Only AFD starts AR. AR reads Agent Data Plane and the Registry at pin, mints fro
 | Registry | Hydrate each `id@version` once at pin. |
 | IdP | Mint downscoped agent token for pinned `agent_client_id`. |
 | Shared Tools / PEP | Dual check, then `invoke`. |
-| API AFD | `kind=agent_start` invoke. Calling-agent bearer. Not Chat AFD. |
+| API AFD | `kind=agent` invoke. Calling-agent bearer. Not Chat AFD. |
 | Channels | **None.** Never dial this URL. |
 
 ---

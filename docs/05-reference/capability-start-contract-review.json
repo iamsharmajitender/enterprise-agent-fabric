@@ -1,7 +1,7 @@
 {
   "id": "start_contract_review",
   "version": "1.0.0",
-  "kind": "agent_start",
+  "kind": "agent",
   "description": "Start governed Legal MSA review as a jobs run.",
   "input_schema": {
     "type": "object",

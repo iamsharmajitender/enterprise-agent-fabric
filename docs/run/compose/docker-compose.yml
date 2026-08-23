@@ -52,7 +52,10 @@ services:
         condition: service_healthy
 
   otel-lgtm:
-    image: grafana/otel-lgtm:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.otel-lgtm
+    image: agent-fabric-otel-lgtm:0.1.0
     ports:
       - "3000:3000"   # Grafana Web UI
       - "4317:4317"   # OTLP gRPC ingestion
@@ -62,7 +65,6 @@ services:
       OTELCOL_EXTRA_ARGS: --config=file:./otelcol-config-fabric.yaml
     volumes:
       - lgtm-data:/data
-      - ./otelcol-fabric.yaml:/otel-lgtm/otelcol-config-fabric.yaml:ro
     restart: unless-stopped
 
   agent-capability-registry:

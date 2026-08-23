@@ -47,7 +47,7 @@ Diagrams are G.A.I.N editorial HTML/SVG in [`diagrams/`](./diagrams/) (not Merma
 5. **Only `route` starts AR.** Clarify / abstain never pin. Default start is async `202`.
 6. **One Agent Plane per trust domain.** Not one mega-agent.
 7. **Three principals.** User ≠ agent ≠ AR workload. Dual check in Shared Tools / PEP.
-8. **Capabilities are references.** AR hydrates the whole pinned manifest before the LLM. `kind=agent_start` invoke is API AFD, not the callee AR.
+8. **Capabilities are references.** AR hydrates the whole pinned manifest before the LLM. `kind=agent` invoke is API AFD, not the callee AR.
 
 ## Naming
 

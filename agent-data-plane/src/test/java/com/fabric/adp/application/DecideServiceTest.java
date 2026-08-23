@@ -46,6 +46,17 @@ class DecideServiceTest {
   }
 
   @Test
+  void hiInsideThisDoesNotClassifyChat() {
+    DecideResult result =
+        decide.decide(
+            chat(
+                "Start KYC onboarding for this applicant",
+                Map.of("sub", "jane", "emts", Map.of("kyc:onboard", true))),
+            "afd");
+    assertThat(result.outcome()).isEqualTo("abstain");
+  }
+
+  @Test
   void explicitRouteIdBindsWithoutKeywords() {
     DecideResult result =
         decide.decide(

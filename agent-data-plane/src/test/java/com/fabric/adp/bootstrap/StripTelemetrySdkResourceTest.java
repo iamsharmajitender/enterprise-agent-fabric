@@ -1,4 +1,4 @@
-package com.fabric.afd.bootstrap;
+package com.fabric.adp.bootstrap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

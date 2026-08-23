@@ -11,7 +11,7 @@ What the catalogue can name versus what this Runtime does. Present tense on the 
 | deterministic_prefetch pack | mode+scope on route | NO (empty invoke) |
 | workflow `branch` | stored | NOT executed |
 | `human_gate` | stored | NOT executed |
-| kind=agent_start child projection | capability kind | jobs POST; no parent notes merge |
+| kind=agent child projection | capability kind | skipped HTTP (no child jobs POST) |
 | conversation=session | flag | NO transcript store |
 | long_term=retrieve_only | flag | NO |
 | loop=checkpoint resume | writes blob | NO resume-from-step |
@@ -22,7 +22,7 @@ What the catalogue can name versus what this Runtime does. Present tense on the 
 - **Slots / fill-by-name** — capability input schema does not copy `identity_check` JSON into `freeze_card`. See [data](data.md).
 - **deterministic_prefetch** — `policy_memo` does not POST the corpus gateway. Prefetch `invoke` is empty. See [retrieve](retrieve.md).
 - **branch / human_gate** — linear LangGraph only (`kyc_onboarding` names both). See [patterns](patterns.md).
-- **kind=agent_start** — child start is AFD `POST /v1/jobs` with a new goal body. Parent `notes` are not merged. Projection of parent fields into the child goal is not built.
+- **kind=agent** — child start is AFD `POST /v1/jobs` with a new goal body. Teaching parents: `fraud_investigate` (`start_contract_review` → `contract_review`) and `ops_start_kyc` (`start_kyc_onboarding` → `kyc_onboarding`). Runtime skips that HTTP today. Parent `notes` are not merged. Projection of parent fields into the child goal is not built. See [capabilities](capabilities.md).
 - **conversation / long_term** — flags on `dataplane.memory_profiles`. Not a Shared Memory box. See [memory](memory.md).
 - **loop=checkpoint** — cursor JSON is written. Continuing the graph from `checkpoint.step` after a crash is not wired.
 

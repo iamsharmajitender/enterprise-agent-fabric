@@ -56,9 +56,11 @@ Docs map: [../README.md](../README.md). Stub headers: [stub-auth.md](stub-auth.m
 | --- | --- |
 | [capability-account-fee-lookup.json](capability-account-fee-lookup.json) | Domain capability `account_fee_lookup` |
 | [capability-ocr-extract.json](capability-ocr-extract.json) | Domain capability `ocr_extract` |
-| [capability-start-contract-review.json](capability-start-contract-review.json) | Agent-start capability |
+| [capability-start-contract-review.json](capability-start-contract-review.json) | Agent-start capability `start_contract_review` → `contract_review` |
+| [capability-start-kyc-onboarding.json](capability-start-kyc-onboarding.json) | Agent-start capability `start_kyc_onboarding` → `kyc_onboarding` |
 | [manifest-fee-explain.json](manifest-fee-explain.json) | Manifest for `fee_explain` |
-| [manifest-fraud-investigate.json](manifest-fraud-investigate.json) | Manifest `fraud_investigate` |
+| [manifest-fraud-investigate.json](manifest-fraud-investigate.json) | Parent manifest `fraud_investigate` (Legal start) |
+| [manifest-ops-start-kyc.json](manifest-ops-start-kyc.json) | Parent manifest `ops_start_kyc` (KYC start) |
 
 ## Prompts and corpora (Data Plane)
 

@@ -8,7 +8,7 @@ One model reply, no tools. [`agent-chat`](routes.md#agent-chat) is a greeting. [
 
 ## Pattern 1 — autonomous
 
-Open lookup loops. [`search_only`](routes.md#search_only) is one web search. [`research_assistant`](routes.md#research_assistant) may search, fetch, note, and draft. [`fee_explain`](routes.md#fee_explain) answers “why was I charged?” via `account_fee_lookup`. [`fraud_one_tool`](routes.md#fraud_one_tool) drafts a memo after a named accounts prefetch (not packed). [`fraud_casefile`](routes.md#fraud_casefile) and [`contract_investigation`](routes.md#contract_investigation) chain OCR, retrieve/score, and memo — each HTTP call still sees goal ids, not extracted clause text.
+Open lookup loops. [`search_only`](routes.md#search_only) is one web search. [`research_assistant`](routes.md#research_assistant) may search, fetch, note, and draft. [`fee_explain`](routes.md#fee_explain) answers “why was I charged?” via `account_fee_lookup`. [`fraud_one_tool`](routes.md#fraud_one_tool) drafts a memo after a named accounts prefetch (not packed). [`fraud_casefile`](routes.md#fraud_casefile) and [`contract_investigation`](routes.md#contract_investigation) chain OCR, retrieve/score, and memo — each HTTP call still sees goal ids, not extracted clause text. [`fraud_investigate`](routes.md#fraud_investigate) and [`ops_start_kyc`](routes.md#ops_start_kyc) name an `agent` tool (`start_contract_review` → `contract_review`, `start_kyc_onboarding` → `kyc_onboarding`). Those are separate catalogue products; Runtime does not POST child jobs yet.
 
 ## Pattern 2 — deterministic
 

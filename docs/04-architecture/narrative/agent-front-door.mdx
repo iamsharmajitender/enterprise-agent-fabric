@@ -70,7 +70,7 @@ Agent Data Plane: eligible / classify / catalogue. Pin and start sit on the AFD 
 
 **Chat AFD** is BFF-shaped: auth, session, hints, SSE/poll. Callers inside Chat/UI: banker, customer, colleague, partner. It does not aggregate domain APIs.
 
-**API AFD** is handler-shaped: `{jobs_url}` plus the Kafka worker that starts a job. Callers inside API: API, MS, SVC, Kafka, and parent **NAR** when a hydrated `kind=agent_start` capability fires ([Agent Capability Registry](/intent/enterprise-agent-fabric/agent-capability-registry#call-another-route)). Same contract, no clarify UX. `{runs_topic}` is return, not entry.
+**API AFD** is handler-shaped: `{jobs_url}` plus the Kafka worker that starts a job. Callers inside API: API, MS, SVC, Kafka, and parent **NAR** when a hydrated `kind=agent` capability fires ([Agent Capability Registry](/intent/enterprise-agent-fabric/agent-capability-registry#call-another-route)). Same contract, no clarify UX. `{runs_topic}` is return, not entry.
 
 **Default start is async.** After `route`, that AFD `POST`s the freeze. NAR returns `202 { "correlation_id" }`. Sync wait is Pattern 0 only.
 

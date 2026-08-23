@@ -1,5 +1,5 @@
 {
-  "_how_to_add": "Append an object under tools with a unique method+path. Point the capability invoke.url at http://tool-mock:3010{path}. Rebuild tool-mock (./docs/run/scripts/start-app.sh). Do not use path /health. Skip agent_start capabilities (those POST Front Door /v1/jobs).",
+  "_how_to_add": "Append an object under tools with a unique method+path. Point the capability invoke.url at http://tool-mock:3010{path}. Rebuild tool-mock (./docs/run/scripts/start-app.sh). Do not use path /health. Skip kind=agent capabilities (those POST Front Door /v1/jobs).",
   "tools": [
     {
       "id": "web_search",

@@ -116,6 +116,14 @@
     {
       "route_id": "due_diligence",
       "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "fraud_investigate",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "ops_start_kyc",
+      "route_version": "2026.08.1"
     }
   ],
   "cases": [
@@ -229,6 +237,74 @@
       "channel": "web",
       "message": null,
       "route_id": "fraud_casefile",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-fraud_investigate-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "fraud_investigate",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "fraud:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "fraud_investigate",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-fraud_investigate-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "fraud_investigate",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-ops_start_kyc-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "ops_start_kyc",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "kyc:onboard": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "ops_start_kyc",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-ops_start_kyc-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "ops_start_kyc",
       "claims": {
         "sub": "jane",
         "emts": {}

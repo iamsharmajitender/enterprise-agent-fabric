@@ -39,6 +39,26 @@
       }
     },
     {
+      "route_id": "fraud_investigate",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["fraud:read"],
+      "payload": {
+        "case_id": "frd-{id}",
+        "doc_id": "doc-{id}"
+      }
+    },
+    {
+      "route_id": "ops_start_kyc",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["kyc:onboard"],
+      "payload": {
+        "ticket_id": "tkt-{id}",
+        "applicant_id": "kyc-{id}"
+      }
+    },
+    {
       "route_id": "contract_investigation",
       "autonomy_mode": 1,
       "label": "Autonomous",

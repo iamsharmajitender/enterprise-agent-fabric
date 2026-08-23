@@ -1,0 +1,2 @@
+FROM grafana/otel-lgtm:latest
+COPY otelcol-fabric.yaml /otel-lgtm/otelcol-config-fabric.yaml

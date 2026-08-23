@@ -37,12 +37,16 @@ class SeedTeachingCatalogSqlTest {
     "product_explain",
     "narrow_review",
     "contract_review",
-    "due_diligence"
+    "due_diligence",
+    "fraud_investigate",
+    "ops_start_kyc"
   };
 
   @Test
   void flywayReplaceSeedContainsEveryTeachingRoute() throws Exception {
-    String seed = read("/db/migration/V22__unversioned_teaching_catalogue.sql");
+    String seed =
+        read("/db/migration/V22__unversioned_teaching_catalogue.sql")
+            + read("/db/migration/V23__agent_start_teaching_parents.sql");
     assertThat(seed).contains("DELETE FROM dataplane.routes");
     for (String id : ROUTES) {
       assertThat(seed).contains("'" + id + "'");

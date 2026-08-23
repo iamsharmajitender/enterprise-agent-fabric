@@ -60,6 +60,8 @@
   --autonomy-autonomous: oklch(0.68 0.13 185);
   --autonomy-deterministic: oklch(0.72 0.14 118);
   --autonomy-guided: oklch(0.72 0.14 48);
+  --kind-domain: var(--accent);
+  --kind-agent: oklch(0.62 0.12 165);
   --surface-shadow:
     0 2px 4px 0 rgba(0, 0, 0, 0.04),
     0 1px 2px 0 rgba(0, 0, 0, 0.06),
@@ -208,6 +210,14 @@ h3 {
 .chip.autonomy-guided {
   background: color-mix(in oklab, var(--autonomy-guided) 15%, transparent);
   color: color-mix(in oklab, var(--autonomy-guided) 80%, var(--foreground) 70%);
+}
+.chip.kind-domain {
+  background: color-mix(in oklab, var(--kind-domain) 15%, transparent);
+  color: color-mix(in oklab, var(--kind-domain) 70%, var(--foreground) 30%);
+}
+.chip.kind-agent {
+  background: color-mix(in oklab, var(--kind-agent) 15%, transparent);
+  color: color-mix(in oklab, var(--kind-agent) 75%, var(--foreground) 25%);
 }
 
 .banner {
@@ -666,6 +676,10 @@ h3 {
   font-size: 0.6875rem;
   font-weight: 500;
   color: var(--muted);
+}
+
+.glossary-table .chip {
+  vertical-align: middle;
 }
 
 .glossary-table {

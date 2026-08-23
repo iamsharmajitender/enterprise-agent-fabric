@@ -34,6 +34,7 @@ These directories are not shelves. They do not move.
 ## How this binary works
 
 - [Overview](02-understand/overview.md) — five processes, pin then hydrate then linear LangGraph, jobs vs chat
+- [Capabilities](02-understand/capabilities.md) — two kinds (`domain`, `agent`); do not add kinds for retrieve, prompts, or MCP
 - [Patterns](02-understand/patterns.md) — teaching set 0–3; workflow is a stage list; the graph is linear
 - [Data](02-understand/data.md) — `goal` vs `notes`; HTTP is `dict(goal)` only; slots do not exist
 - [Prompts](02-understand/prompts.md) — `prompt_packs` and `llm_role`

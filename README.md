@@ -407,7 +407,7 @@ Pack: [agent-plane](docs/04-architecture/agent-plane.md) (Data Plane half; ACP i
 
 1. `PUT /v1/capabilities/{id}/versions/{version}` and `PUT /v1/manifests/...` append a cut. A second `PUT` of a published version is **409**.
 2. Runtime `GET`s the pinned manifest, then each capability ref, **before** the LLM. Mid-loop registry GET is forbidden. If hydrate fails, Runtime returns **422** `HYDRATE_FAILED` and AFD does not invent a run.
-3. Two kinds, one catalog: `domain` (HTTP to tool-mock / a real API) and `agent_start` (child job via AFD, not a POST to the callee AR).
+3. Two kinds, one catalog: `domain` (HTTP to tool-mock / a real API) and `agent` (child job via AFD, not a POST to the callee AR).
 4. Control Plane lists capabilities/manifests for humans. Chat never sees this catalog as JSON.
 5. Status: Runtime may hydrate `published` (and still GET a retired pin). `draft` is not hydratable.
 
@@ -455,7 +455,7 @@ Three routers stay separate: **ADP** picks the workflow/manifest, **AR** picks t
 
 Each route is versioned on its own (`route_id` + `route_version`). One version per route is `active`. Classify uses the active mix. A follow-up pin is that route’s id and version, not a shared table snapshot. A later contest-board snapshot is proposed in [docs/tasks/future-enhancement.md](docs/tasks/future-enhancement.md).
 
-The catalogue seed is the Pattern 0–3 teaching set (29 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. `seed-db.sh` also loads extra published, draft, and retired cuts plus version history. Reload everything in one shot:
+The catalogue seed is the Pattern 0–3 teaching set (31 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. `seed-db.sh` also loads extra published, draft, and retired cuts plus version history. Reload everything in one shot:
 
 ```bash
 ./docs/run/scripts/seed-db.sh
@@ -637,7 +637,9 @@ Publish is append-only. A second `PUT` of a published version is **409**. Runtim
 | `kind` | `invoke` | Local |
 | --- | --- | --- |
 | `domain` | Domain HTTP (`http://tool-mock:3010/fees/explain`) | Teaching tools in [`docs/run/tool-mock/`](docs/run/tool-mock/) |
-| `agent_start` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
+| `agent` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
+
+Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`docs/02-understand/capabilities.md`](docs/02-understand/capabilities.md).
 
 Add a domain tool: unique `method`+`path` in `tools.json`, point the capability `invoke.url` at `http://tool-mock:3010{path}`, rebuild.
 
@@ -657,7 +659,7 @@ Pattern 0 **cannot** take tools. `account_notify` / `card_freeze` take a manifes
 | Prompt-only / LLM pipeline (`email_summarize`, `llm_pipeline`, `policy_memo`) | omit — hydrate from workflow and/or prompt |
 | One tool (`fee_explain`, `account_notify`, `clause_lookup`) | Manifest with one ref |
 | Multi-tool loop or pipeline (`fraud_casefile`, `card_freeze`, `msa_risk_review`) | Manifest with every tool the stages need |
-| Child Legal run | Parent manifest has `kind=agent_start` (`start_contract_review`); do not POST the callee AR |
+| Child Legal run | Parent manifest has `kind=agent` (`start_contract_review`); do not POST the callee AR |
 
 ## Memory
 

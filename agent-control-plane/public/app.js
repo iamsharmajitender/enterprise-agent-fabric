@@ -141,7 +141,14 @@ const POLICY_LABEL = {
 
 const KIND_LABEL = {
   domain: "Domain",
-  agent_start: "Agent start",
+  agent: "Agent",
+  agent_start: "Agent",
+};
+
+const KIND_CLASS = {
+  domain: "kind-domain",
+  agent: "kind-agent",
+  agent_start: "kind-agent",
 };
 
 const CATALOG_PATH = {
@@ -673,6 +680,9 @@ function renderValue(value, key, extra = {}) {
   if (key === "status") {
     return statusPill({ status: value, live: extra.live, active: extra.active });
   }
+  if (key === "kind") {
+    return kindPill(value);
+  }
   if (key === "autonomy_mode") {
     return autonomyPill(value);
   }
@@ -721,6 +731,9 @@ function isRoleSpec(value) {
 }
 
 function renderExpandedValue(key, value, extra) {
+  if (key === "kind") {
+    return kindPill(value);
+  }
   if (key === "ttl_hours" && value != null && value !== "") {
     return document.createTextNode(`${value} hours`);
   }
@@ -1054,6 +1067,20 @@ function kindLabel(kind) {
   return KIND_LABEL[kind] ?? kind ?? "Kind";
 }
 
+function kindClass(kind) {
+  return KIND_CLASS[kind] ?? "";
+}
+
+function kindPill(kind) {
+  return pill(kindLabel(kind), kindClass(kind));
+}
+
+function kindCell(kind) {
+  const td = document.createElement("td");
+  td.append(kindPill(kind));
+  return td;
+}
+
 function listTabStatus() {
   return parseListTabStatus(new URL(location.href).searchParams.get("status"));
 }
@@ -1281,7 +1308,7 @@ async function showCapabilities() {
         : `/capabilities/${encodeURIComponent(item.id)}/${encodeURIComponent(item.version)}`,
     cellsOf: (item) => [
       idHeadCell(item.id),
-      cell(kindLabel(item.kind)),
+      kindCell(item.kind),
       cell(item.description, "clip"),
       cell(item.owner, "mono"),
       cell(item.version, "mono"),
@@ -1318,10 +1345,12 @@ async function showCapability(capabilityId, version) {
   back.type = "button";
   back.addEventListener("click", () => goCapabilities());
 
+  const kicker = el("p", "detail-kicker");
+  kicker.append(kindPill(row.kind));
   const head = el("div", "detail-head");
   head.append(
     back,
-    el("p", "detail-kicker", kindLabel(row.kind)),
+    kicker,
     el("h2", "", row.id),
     el("p", "lead", row.description ?? ""),
   );
@@ -1507,7 +1536,7 @@ async function showCapabilityHistory(capabilityId) {
     tr.append(
       selectCell,
       versionCell,
-      cell(kindLabel(item.kind)),
+      kindCell(item.kind),
       cell(item.owner, "mono"),
       statusCell({
         status: item.status,

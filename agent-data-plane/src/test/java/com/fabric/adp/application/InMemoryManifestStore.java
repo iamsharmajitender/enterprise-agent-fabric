@@ -37,6 +37,8 @@ public class InMemoryManifestStore implements ManifestStore {
     put(contractReview());
     put(dueDiligence());
     put(packThenReview());
+    put(fraudInvestigate());
+    put(opsStartKyc());
     return this;
   }
 
@@ -376,13 +378,6 @@ public class InMemoryManifestStore implements ManifestStore {
         """
         [
           {
-            "name": "search_transactions",
-            "capability_id": "search_transactions",
-            "capability_version": "1.4.0",
-            "pdp_action": "search_transactions",
-            "risk_tier": "low"
-          },
-          {
             "name": "ocr_extract",
             "capability_id": "ocr_extract",
             "capability_version": "1.2.0",
@@ -390,10 +385,42 @@ public class InMemoryManifestStore implements ManifestStore {
             "risk_tier": "low"
           },
           {
+            "name": "draft_memo",
+            "capability_id": "draft_memo",
+            "capability_version": "1.0.0",
+            "pdp_action": "draft_memo",
+            "risk_tier": "medium"
+          },
+          {
             "name": "start_contract_review",
             "capability_id": "start_contract_review",
             "capability_version": "1.0.0",
             "pdp_action": "start_contract_review",
+            "risk_tier": "high"
+          }
+        ]
+        """);
+  }
+
+  public static ToolManifest opsStartKyc() {
+    return parse(
+        "ops_start_kyc",
+        "2026.08.1",
+        "Ops parent: parse ticket plus KYC agent capability",
+        """
+        [
+          {
+            "name": "parse_ticket",
+            "capability_id": "parse_ticket",
+            "capability_version": "1.0.0",
+            "pdp_action": "parse_ticket",
+            "risk_tier": "low"
+          },
+          {
+            "name": "start_kyc_onboarding",
+            "capability_id": "start_kyc_onboarding",
+            "capability_version": "1.0.0",
+            "pdp_action": "start_kyc_onboarding",
             "risk_tier": "high"
           }
         ]

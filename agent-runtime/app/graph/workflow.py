@@ -76,6 +76,10 @@ def _run_stage(
         if llm is None:
             raise RuntimeError("llm required for query_formulation")
         payload["query"] = llm.complete(prompt, _user_blob(goal, notes))
+    if str(pinned.get("kind") or "") == "agent":
+        text = "agent skipped (child jobs POST not wired)"
+        notes.append(text)
+        return {"result": text, "notes": notes}
     url = str(invoke.get("url") or "")
     if not url:
         result = notes[-1] if notes else str(state.get("result") or "")

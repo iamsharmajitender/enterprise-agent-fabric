@@ -78,7 +78,7 @@ Treat a capability like a package, not like a live `list_tools` session.
 | --- | --- |
 | `id` | Stable name: `ocr_extract` or `start_contract_review`. Product, not vendor. |
 | `version` | Immutable semver. `1.2.0` never changes once published. |
-| `kind` | `domain` (business API) or `agent_start` (start another catalogue row). |
+| `kind` | `domain` (business API) or `agent` (start another catalogue row). |
 | `description` | What the agent developer (and later the model) reads. |
 | `input_schema` / `output_schema` | JSON Schema. Becomes the tool schema on the run pin. |
 | `invoke` | How to call after PEP. Domain: method, path, auth to the **governed business API**. Agent-start: `POST` `{jobs_url}` with a fixed `route_id`. Not an MCP server URL. Not a NAR URL. |
@@ -133,7 +133,7 @@ Legal owns this version. Fraud does not invent a Legal URL. `route_id` is fixed 
 {
   "id": "start_contract_review",
   "version": "1.0.0",
-  "kind": "agent_start",
+  "kind": "agent",
   "description": "Start governed Legal MSA review as a jobs run.",
   "input_schema": {
     "type": "object",
@@ -278,7 +278,8 @@ Cache hydrated `(manifest_id, manifest_version)` if many runs share a pin. Do no
 - `latest` as a reference.
 - MCP server per internal API that already has a governed `invoke`.
 - Mixing `retrieval.scope` (corpora) with this catalog.
-- Treating a published capability as permission. Proposal, then PEP, then AFD entitle for `agent_start`.
+- A third capability `kind` for retrieve, prompts, workflow, memory, or MCP. Two kinds only.
+- Treating a published capability as permission. Proposal, then PEP, then AFD entitle for `agent`.
 - User bearer as the jobs `Authorization`, or NAR workload identity as the jobs caller.
 - Copying the parent agent token into the child run.
 

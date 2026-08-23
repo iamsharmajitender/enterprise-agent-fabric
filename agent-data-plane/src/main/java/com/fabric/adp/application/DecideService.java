@@ -104,7 +104,7 @@ public class DecideService {
     for (RouteRow row : eligible) {
       int score = 0;
       for (String keyword : row.keywords()) {
-        if (haystack.contains(keyword.toLowerCase(Locale.ROOT))) {
+        if (containsKeyword(haystack, keyword)) {
           score++;
         }
       }
@@ -130,5 +130,28 @@ public class DecideService {
     }
     return DecideResult.clarify(
         "Did you want a fee explanation or recent transactions?", candidates, eligibleIds);
+  }
+
+  /** Whole-token match so "hi" does not hit "this" while "$42" still hits "42". */
+  static boolean containsKeyword(String haystack, String keyword) {
+    if (keyword == null || keyword.isEmpty()) {
+      return false;
+    }
+    String needle = keyword.toLowerCase(Locale.ROOT);
+    int from = 0;
+    while (from <= haystack.length() - needle.length()) {
+      int at = haystack.indexOf(needle, from);
+      if (at < 0) {
+        return false;
+      }
+      boolean leftOk = at == 0 || !Character.isLetterOrDigit(haystack.charAt(at - 1));
+      int end = at + needle.length();
+      boolean rightOk = end == haystack.length() || !Character.isLetterOrDigit(haystack.charAt(end));
+      if (leftOk && rightOk) {
+        return true;
+      }
+      from = at + 1;
+    }
+    return false;
   }
 }
