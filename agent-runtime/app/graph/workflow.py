@@ -129,3 +129,81 @@ def build_tool_graph(
         previous = name
     builder.add_edge(previous, END)
     return builder.compile()
+
+
+_LOOP_SYSTEM = (
+    "You are an agent with domain tools. Reply with exactly one line:\n"
+    "CALL <tool_id>\n"
+    "or\n"
+    "DONE <answer>\n"
+    "CALL a tool before DONE when tools can answer the goal. "
+    "Do not invent tool results. After a tool output, CALL another tool or DONE. "
+    "When DONE after a tool result, use that tool output as the answer unless the goal needs another tool."
+)
+
+
+def _parse_agent_line(text: str) -> tuple[str, str]:
+    """Parse a CALL <id> or DONE <answer> line from the model."""
+    line = (text or "").strip().splitlines()[0].strip() if text else ""
+    head, _, rest = line.partition(" ")
+    token = head.strip().upper()
+    if token == "CALL":
+        tool_id = rest.strip().split()[0] if rest.strip() else ""
+        if not tool_id:
+            raise RuntimeError("CALL missing tool id")
+        return "call", tool_id
+    if token == "DONE":
+        return "done", rest.strip()
+    return "done", (text or "").strip()
+
+
+def build_agent_loop(
+    tools: list[dict[str, Any]],
+    invoker: ToolInvoker,
+    llm: LlmPort,
+    max_steps: int = 8,
+    on_stage: Callable[[int, str, GraphState], None] | None = None,
+    system: str = "",
+):
+    """Pattern 1: LLM chooses CALL/DONE up to max_steps; CALL runs domain HTTP."""
+    by_id = {str(tool.get("id") or ""): tool for tool in tools if tool.get("id")}
+    catalog = ", ".join(sorted(by_id)) or "(none)"
+    prompt = _LOOP_SYSTEM
+    extra = (system or "").strip()
+    if extra:
+        prompt += f"\n{extra}"
+    prompt += f"\nTools: {catalog}"
+
+    class AgentLoop:
+        def invoke(self, state: GraphState) -> GraphState:
+            """Run the CALL/DONE loop and return the final graph state."""
+            current: GraphState = {
+                "result": str(state.get("result") or ""),
+                "goal": dict(_mapping(state.get("goal"))),
+                "notes": list(state.get("notes") or []),
+            }
+            for step in range(max(1, max_steps)):
+                user = _user_blob(_mapping(current.get("goal")), list(current.get("notes") or []))
+                raw = llm.complete(prompt, user)
+                action, payload = _parse_agent_line(raw)
+                if action == "done":
+                    text = payload or str(current.get("result") or "")
+                    current = {
+                        **current,
+                        "result": text,
+                        "notes": list(current.get("notes") or []) + [text],
+                    }
+                    if on_stage is not None:
+                        on_stage(step, "respond", current)
+                    return current
+                pinned = dict(by_id.get(payload) or {})
+                if not pinned:
+                    raise RuntimeError(f"unknown tool {payload!r}")
+                http = dict(pinned)
+                http["llm_role"] = "none"
+                current = {**current, **_run_stage(http, current, invoker, llm)}
+                if on_stage is not None:
+                    on_stage(step, payload, current)
+            raise RuntimeError(f"agent loop exceeded {max_steps} steps")
+
+    return AgentLoop()

@@ -45,6 +45,9 @@ final class CataloguePinLint {
         continue;
       }
       String id = row.routeId();
+      if (!notBlank(row.promptId())) {
+        errors.add(id + ": every route must have a prompt_id");
+      }
       if (notBlank(row.promptId())
           && prompts.findPublished(row.promptId()).isEmpty()
           && prompts.find(row.promptId(), VERSION).isEmpty()) {

@@ -284,7 +284,8 @@ class CatalogAndDecideControllerTest {
         .andExpect(jsonPath("$.by_llm_role").isEmpty())
         .andExpect(
             jsonPath("$.host")
-                .value("Summarize this email for the banker. No tools. Return short bullets."));
+                .value(
+                    "Pattern 0. One synthesis turn. Summarize this email for the banker. No tools. Return short bullets."));
   }
 
   @Test

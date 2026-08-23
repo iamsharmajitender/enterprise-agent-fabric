@@ -129,13 +129,47 @@ test("capability usage page lists manifests per capability", () => {
   assert.match(js, /use\.route_id/);
 });
 
-test("routes Manifest column shows a tool-count icon from embedded manifest", () => {
+test("prompt detail links related routes", () => {
+  const prompt = js.slice(
+    js.indexOf("async function showPrompt("),
+    js.indexOf("async function showWorkflow("),
+  );
+  assert.match(js, /function promptUses/);
+  assert.equal(js.includes("route.tool_manifest"), false);
+  assert.match(prompt, /fetch\("\/api\/routes"\)/);
+  assert.match(prompt, /afterNodes:/);
+  assert.match(prompt, /buildUsedBySection\(uses/);
+  assert.match(prompt, /Unused by any route/);
+});
+
+test("routes table can sort Autonomy and Description", () => {
+  const routes = js.slice(js.indexOf("async function showRoutes"), js.indexOf("async function showCapabilities"));
+  assert.match(js, /function compareSortValues/);
+  assert.match(js, /function sortMark/);
+  assert.match(js, /aria-sort/);
+  assert.match(js, /className = "sort-btn"/);
+  assert.match(routes, /sortKeys:/);
+  assert.match(routes, /Autonomy:/);
+  assert.match(routes, /Description:/);
+  assert.match(css, /\.sort-btn/);
+  assert.match(css, /aria-sort="ascending"/);
+});
+
+test("routes Manifest column shows API and agent counts from capability kinds", () => {
   const routes = js.slice(js.indexOf("async function showRoutes"), js.indexOf("async function showCapabilities"));
   assert.match(js, /function countIcon/);
   assert.match(js, /function manifestCell/);
-  assert.match(js, /TOOL_COUNT_ICON/);
-  assert.match(routes, /manifestCell\(item\)/);
+  assert.match(js, /function manifestKindCounts/);
+  assert.match(js, /function loadCapabilityKinds/);
+  assert.match(js, /API_COUNT_ICON/);
+  assert.match(js, /AGENT_COUNT_ICON/);
+  assert.match(js, /count-icon--api/);
+  assert.match(js, /count-icon--agent/);
+  assert.match(routes, /manifestCell\(item, kinds\)/);
+  assert.match(routes, /ready: loadCapabilityKinds/);
   assert.match(css, /\.count-icon/);
+  assert.match(css, /\.count-icon--api/);
+  assert.match(css, /\.count-icon--agent/);
   assert.match(css, /\.cell-with-count/);
 });
 

@@ -17,57 +17,64 @@ public class InMemoryWorkflowStore implements WorkflowStore {
   private final Map<String, Workflow> rows = new LinkedHashMap<>();
 
   public InMemoryWorkflowStore seedDemo() {
-    put(parse("llm_pipeline", "2026.08.1", "Fixed LLM stages, no tools",
+    put(parse("llm_pipeline", "2026.08.1", "Pattern 2: three LLM stages (classify then two synthesis). No domain HTTP.",
         """
         [{"id":"extract","llm_role":"classify"},{"id":"rewrite","llm_role":"synthesis"},{"id":"format","llm_role":"synthesis"}]
         """));
-    put(parse("policy_memo", "2026.08.1", "Prefetch then generate, no tools",
+    put(parse("policy_memo", "2026.08.1", "Pattern 2: prefetch placeholder then one synthesis call. No domain HTTP.",
         """
         [{"id":"prefetch","llm_role":"none"},{"id":"generate","llm_role":"synthesis"}]
         """));
-    put(parse("account_notify", "2026.08.1", "One-tool notify",
+    put(parse("account_notify", "2026.08.1", "Pattern 2: one domain HTTP notify, then synthesis confirm.",
         """
-        [{"id":"notify","tool":"notify_customer","llm_role":"none"}]
+        [{"id":"notify","tool":"notify_customer","llm_role":"none"},
+         {"id":"respond","llm_role":"synthesis"}]
         """));
-    put(parse("card_freeze", "2026.08.1", "Multi-tool freeze write path",
+    put(parse("card_freeze", "2026.08.1", "Pattern 2: three domain HTTP writes, then synthesis confirm.",
         """
         [{"id":"identity","tool":"identity_check","llm_role":"none"},
          {"id":"limits","tool":"limit_check","llm_role":"none"},
-         {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true}]
+         {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true},
+         {"id":"respond","llm_role":"synthesis"}]
         """));
-    put(parse("dispute_intake", "2026.08.1", "Multi-tool dispute chain",
+    put(parse("dispute_intake", "2026.08.1", "Pattern 2: two domain HTTP steps, then synthesis on the packet.",
         """
         [{"id":"intake","tool":"doc_intake","llm_role":"none"},
          {"id":"open","tool":"case_open","llm_role":"none"},
          {"id":"summarize","tool":"packet_summarize","llm_role":"synthesis"}]
         """));
-    put(parse("pack_then_notify", "2026.08.1", "Prefetch then one notify tool",
+    put(parse("pack_then_notify", "2026.08.1", "Pattern 2: prefetch placeholder, domain notify, then synthesis confirm.",
         """
-        [{"id":"prefetch","llm_role":"none"},{"id":"notify","tool":"notify_customer","llm_role":"none"}]
+        [{"id":"prefetch","llm_role":"none"},
+         {"id":"notify","tool":"notify_customer","llm_role":"none"},
+         {"id":"respond","llm_role":"synthesis"}]
         """));
-    put(parse("pack_then_freeze", "2026.08.1", "Prefetch then freeze tools",
+    put(parse("pack_then_freeze", "2026.08.1", "Pattern 2: prefetch placeholder, three domain HTTP writes, then synthesis confirm.",
         """
         [{"id":"prefetch","llm_role":"none"},
          {"id":"identity","tool":"identity_check","llm_role":"none"},
          {"id":"limits","tool":"limit_check","llm_role":"none"},
-         {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true}]
+         {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true},
+         {"id":"respond","llm_role":"synthesis"}]
         """));
-    put(parse("pack_then_review", "2026.08.1", "Prefetch playbook then tools then memo",
+    put(parse("pack_then_review", "2026.08.1", "Pattern 2: prefetch placeholder, two domain HTTP tools, then synthesis memo.",
         """
         [{"id":"prefetch","llm_role":"none"},
          {"id":"ocr","tool":"ocr_extract","llm_role":"none"},
          {"id":"score","tool":"risk_engine","llm_role":"none"},
          {"id":"memo","tool":"draft_memo","llm_role":"synthesis"}]
         """));
-    put(parse("clause_lookup", "2026.08.1", "One named retrieve stage",
+    put(parse("clause_lookup", "2026.08.1", "Pattern 2: LLM writes the retrieve query, HTTP search, then synthesis.",
         """
-        [{"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"none"}]
+        [{"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"query_formulation"},
+         {"id":"respond","llm_role":"synthesis"}]
         """));
-    put(parse("template_retrieve", "2026.08.1", "Two named retrieve stages plus score",
+    put(parse("template_retrieve", "2026.08.1", "Pattern 2: two query_formulation retrieves, HTTP score, then synthesis.",
         """
-        [{"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"none"},
-         {"id":"policy_search","tool":"policy_search","corpus":"legal-playbook","llm_role":"none"},
-         {"id":"score","tool":"risk_engine","llm_role":"none"}]
+        [{"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"query_formulation"},
+         {"id":"policy_search","tool":"policy_search","corpus":"legal-playbook","llm_role":"query_formulation"},
+         {"id":"score","tool":"risk_engine","llm_role":"none"},
+         {"id":"respond","llm_role":"synthesis"}]
         """));
     put(msaRiskReview());
     put(kycOnboarding());
@@ -78,17 +85,17 @@ public class InMemoryWorkflowStore implements WorkflowStore {
          {"id":"score","tool":"risk_engine","llm_role":"none"},
          {"id":"memo","tool":"draft_memo","llm_role":"synthesis"}]
         """));
-    put(parse("ticket_triage", "2026.08.1", "Fixed stages, flexible non-retrieve tools in Analyse",
+    put(parse("ticket_triage", "2026.08.1", "Pattern 3: HTTP parse/tag, then synthesis reply. Stage allowlists are catalogue-only.",
         """
-        [{"id":"extract","allowlist":["parse_ticket"],"max_tool_calls":2},
-         {"id":"analyse","allowlist":["parse_ticket","tag_intent"],"max_tool_calls":4},
-         {"id":"reply","allowlist":["draft_reply"],"max_tool_calls":2}]
+        [{"id":"extract","tool":"parse_ticket","llm_role":"none","allowlist":["parse_ticket"],"max_tool_calls":2},
+         {"id":"analyse","tool":"tag_intent","llm_role":"none","allowlist":["parse_ticket","tag_intent"],"max_tool_calls":4},
+         {"id":"reply","tool":"draft_reply","llm_role":"synthesis","allowlist":["draft_reply"],"max_tool_calls":2}]
         """));
-    put(parse("product_explain", "2026.08.1", "Prefetch product terms, no retrieve tools",
+    put(parse("product_explain", "2026.08.1", "Pattern 3: prefetch placeholder, HTTP score/compare, then synthesis. Allowlists are catalogue-only.",
         """
-        [{"id":"extract","allowlist":["score_offer"],"max_tool_calls":2},
-         {"id":"analyse","allowlist":["score_offer","compare_options"],"max_tool_calls":4},
-         {"id":"explain","allowlist":["compare_options"],"max_tool_calls":2}]
+        [{"id":"extract","tool":"score_offer","llm_role":"none","allowlist":["score_offer"],"max_tool_calls":2},
+         {"id":"analyse","tool":"compare_options","llm_role":"none","allowlist":["score_offer","compare_options"],"max_tool_calls":4},
+         {"id":"explain","llm_role":"synthesis","allowlist":["compare_options"],"max_tool_calls":2}]
         """));
     put(parse("narrow_review", "2026.08.1", "Analyse allowlists one retrieve tool",
         """
@@ -110,15 +117,16 @@ public class InMemoryWorkflowStore implements WorkflowStore {
     return parse(
         "kyc_onboarding",
         "2026.08.1",
-        "Fixed KYC onboarding stages with a risk branch and gated activation",
+        "Pattern 2: domain HTTP KYC tools then synthesis packet. branch and human_gate are catalogue-only.",
         """
         [
-          {"id":"collect_docs","tool":"doc_intake"},
-          {"id":"identity_check","tool":"id_verify"},
-          {"id":"sanctions_screen","tool":"sanctions_api"},
-          {"id":"risk_score","tool":"kyc_risk_engine","branch":{"high":"manual_review","low":"activate_account"}},
+          {"id":"collect_docs","tool":"doc_intake","llm_role":"none"},
+          {"id":"identity_check","tool":"id_verify","llm_role":"none"},
+          {"id":"sanctions_screen","tool":"sanctions_api","llm_role":"none"},
+          {"id":"risk_score","tool":"kyc_risk_engine","llm_role":"none","branch":{"high":"manual_review","low":"activate_account"}},
           {"id":"manual_review","type":"human_gate"},
-          {"id":"activate_account","tool":"account_activate","side_effect":true,"requires_approval":true}
+          {"id":"activate_account","tool":"account_activate","llm_role":"none","side_effect":true,"requires_approval":true},
+          {"id":"summarize","llm_role":"synthesis"}
         ]
         """);
   }

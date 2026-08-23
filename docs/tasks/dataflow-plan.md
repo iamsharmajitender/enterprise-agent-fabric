@@ -15,7 +15,7 @@ That is enough when every tool already has its ids in the job payload, and later
 
 **Do this list later**, after v1 seed jobs are green. Do not fold it into [todo.md](./todo.md). Do not reopen locked fabric rules (AFD-only start, pin-then-hydrate, chat FR-5, Shared Memory as a fifth store).
 
-**Not in this plan:** Pattern 1 ReAct tool choice; `conversation` / `long_term` Shared Memory ([future-enhancement](./future-enhancement.md#shared-memory-conversation-and-long_term)); LLM-as-judge evals ([eval-plan](./eval-plan.md) slice 3); Layer ②/③ classify ([intent-plan](./intent-plan.md)); executing `branch` / `human_gate` as a product UX (this plan only uses them as **consumers** of stage data).
+**Not in this plan:** `conversation` / `long_term` Shared Memory ([future-enhancement](./future-enhancement.md#shared-memory-conversation-and-long_term)); LLM-as-judge evals ([eval-plan](./eval-plan.md) slice 3); Layer ②/③ classify ([intent-plan](./intent-plan.md)); executing `branch` / `human_gate` as a product UX (this plan only uses them as **consumers** of stage data).
 
 **Docs map:** [docs/README.md](../README.md). **Behaviour / architecture source:** [agent-runtime](../04-architecture/agent-runtime.md), [route contract](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference), README [Memory](../../README.md#memory) / [Workflows](../../README.md#workflows) / [Retrieve](../../README.md#retrieve). Graph: `agent-runtime/app/graph/workflow.py`. Policy: `dataplane.memory_profiles.working`.
 
@@ -160,7 +160,7 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 ## Out of scope (do not sneak in)
 
 - Shared Memory box; writing transcripts onto `ar.runtime.runs`
-- Replacing Pattern 1 with a real ReAct chooser
+- Replacing Pattern 1’s CALL/DONE loop with a richer planner
 - Output-schema validation of the **assistant** reply (eval slice 3)
 - Moving `working` off the run pin
 - A generic visual dataflow mapper in Control Plane

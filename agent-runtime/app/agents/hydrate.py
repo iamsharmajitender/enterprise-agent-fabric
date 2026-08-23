@@ -40,8 +40,8 @@ def hydrate(
     if manifest_id and manifest_version:
         hydrated = _hydrate_manifest(registry, manifest_id, manifest_version)
         _attach_llm_roles(catalogue, row, hydrated)
-        return hydrated
-    return _hydrate_without_manifest(catalogue, row)
+        return _ensure_llm(catalogue, row, hydrated)
+    return _ensure_llm(catalogue, row, _hydrate_without_manifest(catalogue, row))
 
 
 def _hydrate_manifest(
@@ -147,3 +147,34 @@ def _attach_llm_roles(
         role = roles.get(str(tool.get("id") or ""), "none")
         tool["llm_role"] = role
         tool["llm_prompt"] = prompts.get(role, "")
+
+
+_ANSWER_ROLES = frozenset({"classify", "synthesis"})
+_DEFAULT_SYNTHESIS = (
+    "Write the user-facing answer from the goal and prior stage outputs only. "
+    "Do not invent facts that are not in those outputs."
+)
+
+
+def _has_answer(tools: list[dict[str, Any]]) -> bool:
+    """True when a classify or synthesis node will write the user-facing answer."""
+    return any(str(tool.get("llm_role") or "none") in _ANSWER_ROLES for tool in tools)
+
+
+def _ensure_llm(
+    catalogue: CataloguePort, row: dict[str, Any], tools: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Pattern 2/3 must not be HTTP-only. Pattern 1 is an LLM/tool loop at graph build."""
+    mode = int(row.get("autonomy_mode") or 0)
+    if mode in {0, 1} or _has_answer(tools):
+        return tools
+    prompts, host = _prompt_pack(catalogue, str(row.get("prompt_id") or ""))
+    tools.append(
+        {
+            "id": "respond",
+            "llm_role": "synthesis",
+            "llm_prompt": prompts.get("synthesis") or host or _DEFAULT_SYNTHESIS,
+            "invoke": {},
+        }
+    )
+    return tools

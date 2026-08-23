@@ -7,16 +7,16 @@ Five processes. Channels talk only to Front Door.
 | 3005 | Agent Front Door (AFD) | Only public ingress. Entitle, freeze, start Runtime. Chat and jobs share this process. |
 | 3006 | Agent Control Plane (ACP) | Catalogue UI. No database. Not a Fabric box. |
 | 3007 | Agent Data Plane (ADP) | Catalogue and classify. `POST /v1/intent/decide`. Does not start Runtime. |
-| 3008 | Agent Runtime (AR) | Pin the freeze, hydrate, run a linear LangGraph. |
+| 3008 | Agent Runtime (AR) | Pin the freeze, hydrate, run LangGraph (linear for 0/2/3; CALL/DONE loop for Pattern 1). |
 | 3009 | Agent Capability Registry (ACR) | Published capabilities and manifests. Hydrate once at pin. |
 
 Catalogue matrix: [03-catalogue](../03-catalogue/). Box packs: [04-architecture](../04-architecture/). Contracts: [05-reference](../05-reference/).
 
-## Pin, then hydrate, then linear LangGraph
+## Pin, then hydrate, then LangGraph
 
 1. **Pin.** AFD gets a startable decide outcome (`route`), GETs that catalogue version, `POST /v1/runs` on AR, then writes a freeze (`frontdoor.freeze`). AR copies `route_id` + `route_version` onto a durable run pin. It does not re-read `active`. Hydrate failure is `422`; AR returns `202 { "correlation_id" }`. AFD does not mint that id.
 2. **Hydrate.** `agent-runtime/app/agents/hydrate.py` resolves the pinned row from ADP, then the pinned manifest and each capability from ACR (or a workflow / prompt pack when there is no manifest). It stamps `llm_role` and `llm_prompt` onto each node. `invoke` freezes on the pin. Mid-loop registry GET does not happen.
-3. **Linear LangGraph.** `agent-runtime/app/graph/workflow.py` builds one node per hydrated record, in order. `GraphState` is `result`, `goal`, `notes`. The graph has no branches. `branch` and `human_gate` are stored on ADP and shown in Control Plane; AR does not walk them.
+3. **LangGraph.** `agent-runtime/app/graph/workflow.py` builds the graph from the hydrated list. Pattern 0/2/3 are linear (`START → n0 → n1 → … → END`). Pattern 1 is an LLM `CALL`/`DONE` loop over the manifest tools, up to `max_loop_steps`. `branch` and `human_gate` stay catalogue-only.
 
 ## Jobs vs chat
 

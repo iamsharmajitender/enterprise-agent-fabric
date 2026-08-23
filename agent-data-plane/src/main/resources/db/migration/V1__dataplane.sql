@@ -413,7 +413,7 @@ INSERT INTO dataplane.manifests (manifest_id, manifest_version, description, too
 
 INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, stages, status) VALUES
 (
-  'llm_pipeline', '2026.08.1', 'Fixed LLM stages, no tools',
+  'llm_pipeline', '2026.08.1', 'Pattern 2: three LLM stages (classify then two synthesis). No domain HTTP.',
   $$[
     {"id":"extract","llm_role":"classify"},
     {"id":"rewrite","llm_role":"synthesis"},
@@ -421,26 +421,30 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
   ]$$::jsonb, 'published'
 ),
 (
-  'policy_memo', '2026.08.1', 'Prefetch then generate, no tools',
+  'policy_memo', '2026.08.1', 'Pattern 2: prefetch placeholder then one synthesis call. No domain HTTP.',
   $$[
     {"id":"prefetch","llm_role":"none"},
     {"id":"generate","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
 ),
 (
-  'account_notify', '2026.08.1', 'One-tool notify',
-  '[{"id":"notify","tool":"notify_customer","llm_role":"none"}]'::jsonb, 'published'
-),
-(
-  'card_freeze', '2026.08.1', 'Multi-tool freeze write path',
+  'account_notify', '2026.08.1', 'Pattern 2: one domain HTTP notify, then synthesis confirm.',
   $$[
-    {"id":"identity","tool":"identity_check","llm_role":"none"},
-    {"id":"limits","tool":"limit_check","llm_role":"none"},
-    {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true}
+    {"id":"notify","tool":"notify_customer","llm_role":"none"},
+    {"id":"respond","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
 ),
 (
-  'dispute_intake', '2026.08.1', 'Multi-tool dispute chain',
+  'card_freeze', '2026.08.1', 'Pattern 2: three domain HTTP writes, then synthesis confirm.',
+  $$[
+    {"id":"identity","tool":"identity_check","llm_role":"none"},
+    {"id":"limits","tool":"limit_check","llm_role":"none"},
+    {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true},
+    {"id":"respond","llm_role":"synthesis"}
+  ]$$::jsonb, 'published'
+),
+(
+  'dispute_intake', '2026.08.1', 'Pattern 2: two domain HTTP steps, then synthesis on the packet.',
   $$[
     {"id":"intake","tool":"doc_intake","llm_role":"none"},
     {"id":"open","tool":"case_open","llm_role":"none"},
@@ -448,23 +452,25 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
   ]$$::jsonb, 'published'
 ),
 (
-  'pack_then_notify', '2026.08.1', 'Prefetch then one notify tool',
+  'pack_then_notify', '2026.08.1', 'Pattern 2: prefetch placeholder, domain notify, then synthesis confirm.',
   $$[
     {"id":"prefetch","llm_role":"none"},
-    {"id":"notify","tool":"notify_customer","llm_role":"none"}
+    {"id":"notify","tool":"notify_customer","llm_role":"none"},
+    {"id":"respond","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
 ),
 (
-  'pack_then_freeze', '2026.08.1', 'Prefetch then freeze tools',
+  'pack_then_freeze', '2026.08.1', 'Pattern 2: prefetch placeholder, three domain HTTP writes, then synthesis confirm.',
   $$[
     {"id":"prefetch","llm_role":"none"},
     {"id":"identity","tool":"identity_check","llm_role":"none"},
     {"id":"limits","tool":"limit_check","llm_role":"none"},
-    {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true}
+    {"id":"freeze","tool":"freeze_card","llm_role":"none","side_effect":true,"requires_approval":true},
+    {"id":"respond","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
 ),
 (
-  'pack_then_review', '2026.08.1', 'Prefetch playbook then tools then memo',
+  'pack_then_review', '2026.08.1', 'Pattern 2: prefetch placeholder, two domain HTTP tools, then synthesis memo.',
   $$[
     {"id":"prefetch","llm_role":"none"},
     {"id":"ocr","tool":"ocr_extract","llm_role":"none"},
@@ -473,19 +479,23 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
   ]$$::jsonb, 'published'
 ),
 (
-  'clause_lookup', '2026.08.1', 'One named retrieve stage',
-  '[{"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"none"}]'::jsonb, 'published'
-),
-(
-  'template_retrieve', '2026.08.1', 'Two named retrieve stages plus score',
+  'clause_lookup', '2026.08.1', 'Pattern 2: LLM writes the retrieve query, HTTP search, then synthesis.',
   $$[
-    {"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"none"},
-    {"id":"policy_search","tool":"policy_search","corpus":"legal-playbook","llm_role":"none"},
-    {"id":"score","tool":"risk_engine","llm_role":"none"}
+    {"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"query_formulation"},
+    {"id":"respond","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
 ),
 (
-  'msa_risk_review', '2026.08.1', 'Fixed MSA retrieve stages',
+  'template_retrieve', '2026.08.1', 'Pattern 2: two query_formulation retrieves, HTTP score, then synthesis.',
+  $$[
+    {"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"query_formulation"},
+    {"id":"policy_search","tool":"policy_search","corpus":"legal-playbook","llm_role":"query_formulation"},
+    {"id":"score","tool":"risk_engine","llm_role":"none"},
+    {"id":"respond","llm_role":"synthesis"}
+  ]$$::jsonb, 'published'
+),
+(
+  'msa_risk_review', '2026.08.1', 'Pattern 2: HTTP OCR, two query_formulation retrieves, HTTP score, synthesis memo.',
   $$[
     {"id":"ocr","tool":"ocr_extract","llm_role":"none"},
     {"id":"clause_search","tool":"clause_search","corpus":"clause-index","llm_role":"query_formulation"},
@@ -495,14 +505,15 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
   ]$$::jsonb, 'published'
 ),
 (
-  'kyc_onboarding', '2026.08.1', 'KYC with branch, human gate, gated activate',
+  'kyc_onboarding', '2026.08.1', 'Pattern 2: domain HTTP KYC tools then synthesis packet. branch and human_gate are catalogue-only.',
   $$[
-    {"id":"collect_docs","tool":"doc_intake"},
-    {"id":"identity_check","tool":"id_verify"},
-    {"id":"sanctions_screen","tool":"sanctions_api"},
-    {"id":"risk_score","tool":"kyc_risk_engine","branch":{"high":"manual_review","low":"activate_account"}},
+    {"id":"collect_docs","tool":"doc_intake","llm_role":"none"},
+    {"id":"identity_check","tool":"id_verify","llm_role":"none"},
+    {"id":"sanctions_screen","tool":"sanctions_api","llm_role":"none"},
+    {"id":"risk_score","tool":"kyc_risk_engine","llm_role":"none","branch":{"high":"manual_review","low":"activate_account"}},
     {"id":"manual_review","type":"human_gate"},
-    {"id":"activate_account","tool":"account_activate","side_effect":true,"requires_approval":true}
+    {"id":"activate_account","tool":"account_activate","llm_role":"none","side_effect":true,"requires_approval":true},
+    {"id":"summarize","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
 ),
 (
@@ -515,19 +526,19 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
   ]$$::jsonb, 'published'
 ),
 (
-  'ticket_triage', '2026.08.1', 'Fixed stages, flexible non-retrieve tools in Analyse',
+  'ticket_triage', '2026.08.1', 'Pattern 3: HTTP parse/tag, then synthesis reply. Stage allowlists are catalogue-only.',
   $$[
-    {"id":"extract","allowlist":["parse_ticket"],"max_tool_calls":2},
-    {"id":"analyse","allowlist":["parse_ticket","tag_intent"],"max_tool_calls":4},
-    {"id":"reply","allowlist":["draft_reply"],"max_tool_calls":2}
+    {"id":"extract","tool":"parse_ticket","llm_role":"none","allowlist":["parse_ticket"],"max_tool_calls":2},
+    {"id":"analyse","tool":"tag_intent","llm_role":"none","allowlist":["parse_ticket","tag_intent"],"max_tool_calls":4},
+    {"id":"reply","tool":"draft_reply","llm_role":"synthesis","allowlist":["draft_reply"],"max_tool_calls":2}
   ]$$::jsonb, 'published'
 ),
 (
-  'product_explain', '2026.08.1', 'Prefetch product terms, no retrieve tools',
+  'product_explain', '2026.08.1', 'Pattern 3: prefetch placeholder, HTTP score/compare, then synthesis. Allowlists are catalogue-only.',
   $$[
-    {"id":"extract","allowlist":["score_offer"],"max_tool_calls":2},
-    {"id":"analyse","allowlist":["score_offer","compare_options"],"max_tool_calls":4},
-    {"id":"explain","allowlist":["compare_options"],"max_tool_calls":2}
+    {"id":"extract","tool":"score_offer","llm_role":"none","allowlist":["score_offer"],"max_tool_calls":2},
+    {"id":"analyse","tool":"compare_options","llm_role":"none","allowlist":["score_offer","compare_options"],"max_tool_calls":4},
+    {"id":"explain","llm_role":"synthesis","allowlist":["compare_options"],"max_tool_calls":2}
   ]$$::jsonb, 'published'
 ),
 (
@@ -556,40 +567,59 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
 );
 
 INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, owner) VALUES
-  ('agent-chat', '2026.08.1', 'Be a concise corporate assistant. No tools.', 'published', 'assistant-platform'),
-  ('email_summarize', '2026.08.1', 'Summarize this email for the banker. No tools. Return short bullets.', 'published', 'assistant-platform'),
-  ('chat_session', '2026.08.1', 'Continue the conversation. No tools. Do not invent facts.', 'published', 'assistant-platform'),
-  ('agent-policy-qa', '2026.08.1', 'Answer from retrieved policy text only. Do not invent policy. Cite chunk ids.', 'published', 'assistant-platform'),
-  ('policy_chat', '2026.08.1', 'Answer from prefetched policy chunks. Use session memory. No tools.', 'published', 'assistant-platform'),
-  ('search_only', '2026.08.1', 'Research with web_search only. Stop when the budget is exhausted.', 'published', 'assistant-platform'),
-  ('research_assistant', '2026.08.1', 'Research using only allowed tools. Prefer primary sources. Stop when the brief is evidence-backed or the budget is exhausted.', 'published', 'assistant-platform'),
-  ('fraud_one_tool', '2026.08.1', 'The case file is already in context. Draft a memo with draft_memo only.', 'published', 'fraud-ops'),
-  ('fraud_casefile', '2026.08.1', 'The case file is already in context. Use OCR, risk, and draft tools. Do not retrieve corpora.', 'published', 'fraud-ops'),
-  ('fee_explain', '2026.08.1', 'You explain account fees. Use the fee lookup tool. Do not invent charges.', 'published', 'assistant-platform'),
-  ('contract_investigate', '2026.08.1', 'Investigate the document using only allowed tools. Prefer evidence over speculation. Stop when risk is assessed or budget is exhausted.', 'published', 'legal-agents'),
-  ('llm_pipeline', '2026.08.1', 'Do only the current stage. Do not choose the next stage. No tools.', 'published', 'assistant-platform'),
-  ('policy_memo', '2026.08.1', 'Draft the memo from prefetched policy only. Do not skip retrieve.', 'published', 'assistant-platform'),
-  ('dispute_intake', '2026.08.1', 'Summarize the dispute packet. Do not open extra cases. Do not skip stages.', 'published', 'ops'),
-  ('pack_then_review', '2026.08.1', 'The playbook is already packed. Draft the memo from stage outputs only.', 'published', 'legal-agents'),
-  ('msa_risk_review', '2026.08.1', 'You are counsel''s MSA risk-review worker. Do only the current stage. Do not choose the next stage. Do not invent tools.', 'published', 'legal-agents'),
-  ('kyc_onboarding', '2026.08.1', 'Summarize KYC evidence for a human reviewer. Do not recommend activation. Do not skip stages.', 'published', 'kyc-ops'),
-  ('claims_adjudicate', '2026.08.1', 'Formulate the clause query or draft the memo. Do not reorder stages.', 'published', 'claims-ops'),
-  ('ticket_triage', '2026.08.1', 'Stay inside the current stage. Inside Analyse pick parser/scorer tools. Do not invent stages.', 'published', 'ops'),
-  ('product_explain', '2026.08.1', 'Product terms are already packed. Stay inside the current stage allowlist.', 'published', 'product'),
-  ('narrow_review', '2026.08.1', 'Stay inside the current stage. Analyse may use clause_search and risk_engine only.', 'published', 'legal-agents'),
-  ('contract_review', '2026.08.1', 'You are counsel''s contract-review worker. Stay inside the current stage. Inside Analyse you may choose among the stage allowlist. Do not invent stages.', 'published', 'legal-agents'),
-  ('due_diligence', '2026.08.1', 'Extract always retrieves the playbook. Inside Analyse you may retrieve again. Do not invent stages.', 'published', 'legal-agents');
+  ('agent-chat', '2026.08.1', 'Pattern 0. One synthesis turn. Be a concise corporate assistant. No tools.', 'published', 'assistant-platform'),
+  ('email_summarize', '2026.08.1', 'Pattern 0. One synthesis turn. Summarize this email for the banker. No tools. Return short bullets.', 'published', 'assistant-platform'),
+  ('chat_session', '2026.08.1', 'Pattern 0. One synthesis turn per message. Continue the conversation. No tools. Do not invent facts.', 'published', 'assistant-platform'),
+  ('agent-policy-qa', '2026.08.1', 'Pattern 0. One synthesis turn. Answer from retrieved policy text only. Do not invent policy. Cite chunk ids.', 'published', 'assistant-platform'),
+  ('policy_chat', '2026.08.1', 'Pattern 0. One synthesis turn. Answer from prefetched policy chunks. Use session memory. No tools.', 'published', 'assistant-platform'),
+  ('search_only', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use web_search before DONE when search can answer. Do not invent results.', 'published', 'assistant-platform'),
+  ('research_assistant', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use allowed tools. Prefer primary sources. Do not invent tool results.', 'published', 'assistant-platform'),
+  ('fraud_one_tool', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. The case file is already in context. CALL draft_memo before DONE.', 'published', 'fraud-ops'),
+  ('fraud_casefile', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use OCR, risk, and draft tools. Do not invent tool results.', 'published', 'fraud-ops'),
+  ('fee_explain', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. CALL account_fee_lookup before DONE. Do not invent charges. After a tool result, DONE with that output unless another tool is needed.', 'published', 'assistant-platform'),
+  ('contract_investigate', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use only allowed tools. Prefer evidence. Do not invent tool results.', 'published', 'legal-agents'),
+  ('fraud_investigate', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use OCR and memo tools. You may CALL start_contract_review. Do not invent tools.', 'published', 'fraud-ops'),
+  ('ops_start_kyc', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Parse the ticket. You may CALL start_kyc_onboarding. Do not invent tools.', 'published', 'ops'),
+  ('llm_pipeline', '2026.08.1', 'Pattern 2. Do only the current stage. Do not choose the next stage. No tools.', 'published', 'assistant-platform'),
+  ('policy_memo', '2026.08.1', 'Pattern 2. Do only the current stage. Draft from prefetched policy only.', 'published', 'assistant-platform'),
+  ('account_notify', '2026.08.1', 'Pattern 2. Confirm the notify from stage outputs only. Do not invent send status.', 'published', 'ops'),
+  ('card_freeze', '2026.08.1', 'Pattern 2. Confirm the freeze from identity, limit, and freeze outputs only. Do not invent card state.', 'published', 'ops'),
+  ('dispute_intake', '2026.08.1', 'Pattern 2. Do only the current stage. Do not open extra cases.', 'published', 'ops'),
+  ('pack_then_notify', '2026.08.1', 'Pattern 2. Confirm the notify from stage outputs only. Prefetch chunks may be empty.', 'published', 'ops'),
+  ('pack_then_freeze', '2026.08.1', 'Pattern 2. Confirm the freeze from stage outputs only. Prefetch chunks may be empty.', 'published', 'ops'),
+  ('pack_then_review', '2026.08.1', 'Pattern 2. Do only the current stage. Draft the memo from packed playbook and stage outputs.', 'published', 'legal-agents'),
+  ('clause_lookup', '2026.08.1', 'Pattern 2. Do only the current stage. Do not invent clauses.', 'published', 'legal-agents'),
+  ('template_retrieve', '2026.08.1', 'Pattern 2. Do only the current stage. Write the query for this stage corpus only, or synthesize from notes.', 'published', 'legal-agents'),
+  ('msa_risk_review', '2026.08.1', 'Pattern 2. You are counsel''s MSA risk-review worker. Do only the current stage. Do not invent tools.', 'published', 'legal-agents'),
+  ('kyc_onboarding', '2026.08.1', 'Pattern 2. Summarize KYC evidence for a human reviewer. Do not recommend activation.', 'published', 'kyc-ops'),
+  ('claims_adjudicate', '2026.08.1', 'Pattern 2. Do only the current stage. Do not reorder stages.', 'published', 'claims-ops'),
+  ('ticket_triage', '2026.08.1', 'Pattern 3. Do only the current stage. Draft the reply from parse and tag outputs. Do not invent stages.', 'published', 'ops'),
+  ('product_explain', '2026.08.1', 'Pattern 3. Product terms may already be packed. Explain from score and compare outputs only.', 'published', 'product'),
+  ('narrow_review', '2026.08.1', 'Pattern 3. Do only the current stage. Analyse may use clause_search and risk_engine only.', 'published', 'legal-agents'),
+  ('contract_review', '2026.08.1', 'Pattern 3. Stay inside the current stage. Analyse may choose among the stage allowlist. Do not invent stages.', 'published', 'legal-agents'),
+  ('due_diligence', '2026.08.1', 'Pattern 3. Extract always retrieves the playbook. Analyse may retrieve again. Do not invent stages.', 'published', 'legal-agents');
 
 INSERT INTO dataplane.prompt_role_templates (prompt_id, prompt_version, llm_role, task_type, "text") VALUES
   ('llm_pipeline', '2026.08.1', 'classify', 'classify', 'Extract the requested fields from the input only.'),
   ('llm_pipeline', '2026.08.1', 'synthesis', 'synthesize', 'Rewrite or format using the previous stage output only.'),
   ('policy_memo', '2026.08.1', 'synthesis', 'synthesize', 'Draft the memo from prefetched chunks only. Cite chunk ids.'),
+  ('account_notify', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from the notify tool output only.'),
+  ('card_freeze', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from identity, limit, and freeze outputs only.'),
   ('dispute_intake', '2026.08.1', 'synthesis', 'synthesize', 'Summarize the dispute packet for a human reviewer. Do not recommend a payout.'),
+  ('pack_then_notify', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from the notify tool output only.'),
+  ('pack_then_freeze', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from freeze-path stage outputs only.'),
   ('pack_then_review', '2026.08.1', 'synthesis', 'synthesize', 'Draft the memo from packed playbook and stage outputs only.'),
+  ('clause_lookup', '2026.08.1', 'query_formulation', 'plan', 'Write the clause-index query from the goal only.'),
+  ('clause_lookup', '2026.08.1', 'synthesis', 'synthesize', 'Explain the retrieved clause in plain language. Do not invent text that is not in notes.'),
+  ('template_retrieve', '2026.08.1', 'query_formulation', 'plan', 'Write the search query for this stage''s corpus only. Do not pick a different index.'),
+  ('template_retrieve', '2026.08.1', 'synthesis', 'synthesize', 'Summarize retrieved clauses, playbook hits, and the score. Do not invent sources.'),
   ('msa_risk_review', '2026.08.1', 'query_formulation', 'plan', 'Write the search query for this stage''s corpus only. Do not pick a different index.'),
   ('msa_risk_review', '2026.08.1', 'synthesis', 'synthesize', 'Draft the counsel memo from validated stage outputs only. Ground claims in retrieved clauses and playbook hits.'),
+  ('kyc_onboarding', '2026.08.1', 'synthesis', 'synthesize', 'Summarize KYC stage outputs for a human reviewer. Do not recommend activation.'),
   ('claims_adjudicate', '2026.08.1', 'query_formulation', 'plan', 'Write the clause-index query. Do not skip the forced playbook retrieve.'),
   ('claims_adjudicate', '2026.08.1', 'synthesis', 'synthesize', 'Draft the claims memo from stage outputs only.'),
+  ('ticket_triage', '2026.08.1', 'synthesis', 'synthesize', 'Draft the customer reply from parse and tag outputs only.'),
+  ('product_explain', '2026.08.1', 'synthesis', 'synthesize', 'Explain the offer from score and compare outputs only. Do not invent rates.'),
   ('narrow_review', '2026.08.1', 'synthesis', 'synthesize', 'Draft the memo from Analyse outputs only.'),
   ('contract_review', '2026.08.1', 'synthesis', 'synthesize', 'Draft the counsel memo from validated stage outputs only. Ground claims in retrieved clauses and playbook hits.'),
   ('due_diligence', '2026.08.1', 'synthesis', 'synthesize', 'Draft the diligence memo from Extract and Analyse outputs only.');
@@ -603,203 +633,203 @@ INSERT INTO dataplane.routes (
 ) VALUES
 (
   'agent-chat', '2026.08.1', TRUE, 'active', 'general_chat',
-  'One LLM call. Prompt only. Pattern 0 cannot take tools, retrieve tools, or a workflow. No memory, no retrieval.',
+  'Pattern 0 (single inference): one LLM call from host. No tools, no workflow, no memory, no retrieval.',
   'http://agent-runtime:3008/v1/runs', 'agent-chat', NULL, NULL,
   'low_risk_chat', 'lightweight-chat', NULL, 'agent-chat', NULL, NULL, 1, 'clarify',
   '[]'::jsonb, '["web"]'::jsonb, TRUE, '["hello","hi","chat"]'::jsonb, 0
 ),
 (
   'email_summarize', '2026.08.1', TRUE, 'active', 'summarize_email',
-  'One LLM call. Prompt, output schema, eval. No tools, no workflow, no retrieval, no memory. Summarize the pasted email.',
+  'Pattern 0 (single inference): one LLM call from host. Summarize the pasted email. Prompt plus output schema. No tools, no workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-email-summarize', NULL, NULL,
   'read_only_standard', 'fast-chat', NULL, 'email_summarize', 'exec_bullets', 'email_summarize_golden', 1, 'clarify',
   '[]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 0
 ),
 (
   'chat_session', '2026.08.1', TRUE, 'active', 'chat_session',
-  'One LLM call per turn with session conversation memory. Still no tools, no retrieve, no workflow. Memory is the only extra artefact.',
+  'Pattern 0 (single inference): one LLM call per turn from host. Session conversation memory. No tools, no workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-chat-session', NULL, NULL,
   'low_risk_chat', 'lightweight-chat', NULL, 'chat_session', NULL, NULL, 1, 'clarify',
   '[]'::jsonb, '["web"]'::jsonb, TRUE, '["hello","hi","chat"]'::jsonb, 0
 ),
 (
   'agent-policy-qa', '2026.08.1', TRUE, 'active', 'policy_qa',
-  'App prefetches policy-engine and product-faq, then one grounded answer. No tools, no retrieve tool, no workflow, no memory.',
+  'Pattern 0 (single inference): one LLM call from host after catalogue prefetch of policy-engine and product-faq. Prefetch is not packed today. No tools, no workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-policy-qa', NULL, NULL,
   'read_only_standard', 'fast-chat', NULL, 'agent-policy-qa', 'cited_answer', 'policy_qa_golden', 1, 'clarify',
   '["policy:read"]'::jsonb, '["web"]'::jsonb, TRUE, '["policy","procedure","handbook"]'::jsonb, 0
 ),
 (
   'policy_chat', '2026.08.1', TRUE, 'active', 'policy_chat',
-  'Prefetch of policy-engine plus session memory. Still Pattern 0: one call per turn, no tools, no workflow, no retrieve tool.',
+  'Pattern 0 (single inference): one LLM call per turn from host. Catalogue prefetch of policy-engine plus session memory. No tools, no workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-policy-chat', NULL, NULL,
   'read_only_standard', 'fast-chat', NULL, 'policy_chat', 'cited_answer', 'policy_qa_golden', 1, 'clarify',
   '["policy:read"]'::jsonb, '["web"]'::jsonb, TRUE, '["policy","handbook"]'::jsonb, 0
 ),
 (
   'search_only', '2026.08.1', TRUE, 'active', 'search_only',
-  'Open loop with one tool (web_search). Prompt, memory, max_loop_steps. No workflow. No corpus prefetch and no retrieve tool.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over web_search, up to max_loop_steps. One host prompt reused each turn. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-search-only', 'search_only', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'search_only', NULL, NULL, 8, 'clarify',
   '[]'::jsonb, '["web"]'::jsonb, TRUE, '["search","google"]'::jsonb, 1
 ),
 (
   'research_assistant', '2026.08.1', TRUE, 'active', 'research_topic',
-  'Open loop with multiple tools (web_search, fetch_url, note_store, draft_brief). Prompt and memory. No workflow. No corpus RAG — tools are not retrieve-from-index.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over web_search, fetch_url, note_store, draft_brief. One host prompt reused each turn. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-research-assistant', 'research_assistant', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'research_assistant', 'research_brief', 'research_assistant_golden', 16, 'clarify',
   '[]'::jsonb, '["web"]'::jsonb, TRUE, '["research","sources"]'::jsonb, 1
 ),
 (
   'fraud_one_tool', '2026.08.1', TRUE, 'active', 'fraud_one_tool',
-  'Case file is prefetched, then the model may call one non-retrieve tool (draft_memo). Prompt, memory, no workflow. Retrieval.mode is prefetch.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over draft_memo after catalogue prefetch of accounts. One host prompt reused each turn. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-fraud-one-tool', 'fraud_one_tool', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'fraud_one_tool', 'risk_memo', NULL, 6, 'clarify',
   '["fraud:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
 ),
 (
   'fraud_casefile', '2026.08.1', TRUE, 'active', 'fraud_casefile',
-  'Case file is prefetched, then the model loops across multiple non-retrieve tools (ocr_extract, risk_engine, draft_memo). Prompt, memory, no workflow. No retrieve tool on the manifest.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over ocr_extract, risk_engine, draft_memo after catalogue prefetch. One host prompt reused each turn. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-fraud-casefile', 'fraud_casefile', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'fraud_casefile', 'risk_memo', NULL, 10, 'clarify',
   '["fraud:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
 ),
 (
   'fee_explain', '2026.08.1', TRUE, 'active', 'fee_explain',
-  'Open loop with one retrieve tool (account_fee_lookup) over accounts. Prompt, memory, max_loop_steps. No workflow.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over account_fee_lookup. One host prompt reused each turn. Domain HTTP only on CALL. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-fee-explain', 'fee_explain', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'fee_explain', 'fee_explain_out', 'fee_explain_golden', 6, 'clarify',
   '["accounts:read"]'::jsonb, '["web"]'::jsonb, TRUE, '["fee","charged","charge","42","monthly"]'::jsonb, 1
 ),
 (
   'contract_investigation', '2026.08.1', TRUE, 'active', 'contract_investigate',
-  'Open loop with multiple tools including two retrieve tools (ocr_extract, clause_search, policy_search, risk_engine, draft_memo). Tool-mode over clause-index and legal-playbook. Prompt, memory, no workflow.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over ocr_extract, clause_search, policy_search, risk_engine, draft_memo. One host prompt reused each turn. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-contract-investigate', 'contract_investigate', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'contract_investigate', 'risk_memo', 'contract_investigate_golden', 12, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
 ),
 (
   'llm_pipeline', '2026.08.1', TRUE, 'active', 'llm_pipeline',
-  'Fixed LLM stages (extract → rewrite → format). Workflow and prompt only. No tools, no prefetch, no retrieve, no memory.',
+  'Pattern 2 (deterministic): fixed workflow of three LLM stages. Prompts: host plus classify and synthesis templates. No domain HTTP.',
   'http://agent-runtime:3008/v1/runs', 'agent-llm-pipeline', NULL, NULL,
   'read_only_standard', 'fast-chat', 'llm_pipeline', 'llm_pipeline', NULL, NULL, NULL, 'clarify',
   '[]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'policy_memo', '2026.08.1', TRUE, 'active', 'policy_memo',
-  'Fixed retrieve-then-generate workflow. App prefetches the corpus; generate uses the prompt. No tools, no retrieve tool, no memory. Model cannot skip prefetch.',
+  'Pattern 2 (deterministic): prefetch placeholder then one synthesis call. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-policy-memo', NULL, NULL,
   'read_only_standard', 'reasoning-standard', 'policy_memo', 'policy_memo', 'msa_memo', NULL, NULL, 'clarify',
   '["policy:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'account_notify', '2026.08.1', TRUE, 'active', 'account_notify',
-  'Fixed one-tool write (notify_customer). Workflow and manifest. No prompt, no prefetch, no retrieve, no memory. llm_role none.',
+  'Pattern 2 (deterministic): domain HTTP notify_customer, then synthesis confirm. Prompts: host plus synthesis template.',
   'http://agent-runtime:3008/v1/runs', 'agent-account-notify', 'account_notify', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'account_notify', NULL, NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'account_notify', 'account_notify', NULL, NULL, NULL, 'escalate_human',
   '["notify:send"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'card_freeze', '2026.08.1', TRUE, 'active', 'card_freeze',
-  'Fixed multi-tool write: identity_check → limit_check → freeze_card. Workflow and manifest. No prompt, no prefetch, no retrieve, no memory. Freeze is a gated side effect.',
+  'Pattern 2 (deterministic): domain HTTP identity_check, limit_check, freeze_card, then synthesis confirm. Prompts: host plus synthesis template. Freeze remains a gated side effect in catalogue.',
   'http://agent-runtime:3008/v1/runs', 'agent-card-freeze', 'card_freeze', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'card_freeze', NULL, NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'card_freeze', 'card_freeze', NULL, NULL, NULL, 'escalate_human',
   '["cards:freeze"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'dispute_intake', '2026.08.1', TRUE, 'active', 'dispute_intake',
-  'Fixed multi-tool dispute chain (doc_intake, case_open, packet_summarize). Workflow, prompt on the packet, memory. No prefetch and no retrieve tool.',
+  'Pattern 2 (deterministic): two domain HTTP steps then synthesis on packet_summarize. Prompts: host plus synthesis template.',
   'http://agent-runtime:3008/v1/runs', 'agent-dispute-intake', 'dispute_intake', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'dispute_intake', 'dispute_intake', NULL, NULL, NULL, 'clarify',
   '["disputes:write"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'pack_then_notify', '2026.08.1', TRUE, 'active', 'pack_then_notify',
-  'Prefetch product/limit policy, then one tool (notify_customer). Workflow, no prompt, no retrieve tool, no memory.',
+  'Pattern 2 (deterministic): prefetch placeholder, domain HTTP notify, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-notify', 'account_notify', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'pack_then_notify', NULL, NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'pack_then_notify', 'pack_then_notify', NULL, NULL, NULL, 'escalate_human',
   '["notify:send"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'pack_then_freeze', '2026.08.1', TRUE, 'active', 'pack_then_freeze',
-  'Prefetch product/limit policy, then multiple tool-only stages (identity_check, limit_check, freeze_card). Workflow, no prompt, no retrieve tool, no memory.',
+  'Pattern 2 (deterministic): prefetch placeholder, three domain HTTP writes, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-freeze', 'card_freeze', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'pack_then_freeze', NULL, NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'pack_then_freeze', 'pack_then_freeze', NULL, NULL, NULL, 'escalate_human',
   '["cards:freeze"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'pack_then_review', '2026.08.1', TRUE, 'active', 'pack_then_review',
-  'Prefetch the playbook, then multiple fixed tools, then an LLM memo. Workflow, prompt on memo, memory. Retrieve is not a tool — mode is prefetch.',
+  'Pattern 2 (deterministic): prefetch placeholder, two domain HTTP tools, then synthesis memo. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-review', 'pack_then_review', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'pack_then_review', 'pack_then_review', 'msa_memo', NULL, NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'clause_lookup', '2026.08.1', TRUE, 'active', 'clause_lookup',
-  'One named retrieve stage (clause_search) with a templated query. Workflow and one retrieve tool. No prompt, no prefetch, no memory. llm_role none.',
+  'Pattern 2 (deterministic): LLM query_formulation, HTTP clause_search, then synthesis. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-clause-lookup', 'clause_lookup', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'clause_lookup', NULL, NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'clause_lookup', 'clause_lookup', NULL, NULL, NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'template_retrieve', '2026.08.1', TRUE, 'active', 'template_retrieve',
-  'Two named retrieve stages (clause_search then policy_search) plus score. Multiple retrieve tools, templated queries. Workflow, no prompt, no prefetch, no memory.',
+  'Pattern 2 (deterministic): two query_formulation retrieves, HTTP score, then synthesis. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-template-retrieve', 'template_retrieve', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'template_retrieve', NULL, NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'template_retrieve', 'template_retrieve', NULL, NULL, NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'msa_risk_review', '2026.08.1', TRUE, 'active', 'msa_risk_review',
-  'Fixed OCR → clause_search → policy_search → risk_engine → draft_memo. Multiple tools, two of them retrieve. Workflow, prompt on query/memo, memory. No prefetch — retrieve is named stages.',
+  'Pattern 2 (deterministic): HTTP OCR, two query_formulation retrieves, HTTP score, synthesis memo. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-msa-risk-review', 'msa_risk_review', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'msa_risk_review', 'msa_risk_review', 'msa_memo', 'msa_risk_review_golden', NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'kyc_onboarding', '2026.08.1', TRUE, 'active', 'kyc_onboard',
-  'Fixed KYC: doc_intake, id_verify, sanctions_api, risk, human gate, activate. Multiple tools, tool retrieve over sanctions-lists and kyc-policy. Workflow, prompt on the review packet, memory.',
+  'Pattern 2 (deterministic): domain HTTP KYC tools then synthesis packet. Prompts: host plus synthesis template. branch and human_gate are catalogue-only.',
   'http://agent-runtime:3008/v1/runs', 'agent-kyc-onboarding', 'kyc_onboarding', '2026.08.1',
   'high_risk_step_up', 'reasoning-standard', 'kyc_onboarding', 'kyc_onboarding', 'kyc_result', 'kyc_onboarding_golden', NULL, 'escalate_human',
   '["kyc:onboard"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'claims_adjudicate', '2026.08.1', TRUE, 'active', 'claims_adjudicate',
-  'Workflow with multiple tools. First stage always retrieves legal-playbook (forced pack). Later named stage retrieves clause-index. Prompt on memo, memory. One retrieval.mode (tool); prefetch is a designer-forced retrieve stage, not a second mode.',
+  'Pattern 2 (deterministic): HTTP playbook retrieve, query_formulation clause search, HTTP score, synthesis memo. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-claims-adjudicate', 'claims_adjudicate', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'claims_adjudicate', 'claims_adjudicate', 'msa_memo', NULL, NULL, 'clarify',
   '["claims:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'ticket_triage', '2026.08.1', TRUE, 'active', 'ticket_triage',
-  'Fixed Extract → Analyse → Reply. Multiple allowlisted tools per stage (parse_ticket, tag_intent, draft_reply). Workflow, prompt, memory. No prefetch, no retrieve tool.',
+  'Pattern 3 (guided): HTTP parse and tag, then synthesis reply. Prompts: host plus synthesis template. Stage allowlists are catalogue-only.',
   'http://agent-runtime:3008/v1/runs', 'agent-ticket-triage', 'ticket_triage', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'ticket_triage', 'ticket_triage', NULL, NULL, NULL, 'clarify',
   '[]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 3
 ),
 (
   'product_explain', '2026.08.1', TRUE, 'active', 'product_explain',
-  'Fixed stages. App prefetches product-terms and fee-schedule. Analyse allowlist is multiple non-retrieve tools (score_offer, compare_options). Workflow, prompt, memory. No retrieve tool.',
+  'Pattern 3 (guided): prefetch placeholder, HTTP score/compare, then synthesis. Prompts: host plus synthesis template. Allowlists are catalogue-only. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-product-explain', 'product_explain', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'product_explain', 'product_explain', NULL, NULL, NULL, 'clarify',
   '["policy:read"]'::jsonb, '["web"]'::jsonb, TRUE, '["loan","offer","product"]'::jsonb, 3
 ),
 (
   'narrow_review', '2026.08.1', TRUE, 'active', 'narrow_review',
-  'Fixed Extract → Analyse → Report. Multiple tools overall, but Analyse allowlists one retrieve tool (clause_search) plus risk_engine. Workflow, prompt, memory. Tool-mode, stage-scoped. No prefetch.',
+  'Pattern 3 (guided): HTTP OCR, catalogue allowlist on Analyse, synthesis report. Prompts: host plus synthesis template. Allowlists are catalogue-only.',
   'http://agent-runtime:3008/v1/runs', 'agent-narrow-review', 'narrow_review', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'narrow_review', 'narrow_review', 'counsel_memo', NULL, NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 3
 ),
 (
   'contract_review', '2026.08.1', TRUE, 'active', 'contract_review',
-  'Fixed Extract → Analyse → Report. Multiple tools including multiple retrieve tools (clause_search, policy_search, risk_engine). Workflow, prompt, memory, output, eval. Tool-mode, stage-scoped. No prefetch.',
+  'Pattern 3 (guided): HTTP OCR, catalogue allowlist on Analyse, synthesis report. Prompts: host plus synthesis template. Allowlists are catalogue-only.',
   'http://agent-runtime:3008/v1/runs', 'agent-contract-review', 'contract_review', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'contract_review', 'contract_review', 'counsel_memo', 'contract_review_golden', NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 3
 ),
 (
   'due_diligence', '2026.08.1', TRUE, 'active', 'due_diligence',
-  'Workflow, multiple tools, memory, prompt. Extract always retrieves legal-playbook (forced). Analyse may retrieve again (clause_search, policy_search). One retrieval.mode (tool). This is prefetch-as-a-stage plus retrieve tools.',
+  'Pattern 3 (guided): HTTP playbook extract, catalogue allowlist on Analyse, synthesis report. Prompts: host plus synthesis template. Allowlists are catalogue-only.',
   'http://agent-runtime:3008/v1/runs', 'agent-due-diligence', 'due_diligence', '2026.08.1',
   'read_only_standard', 'reasoning-standard', 'due_diligence', 'due_diligence', 'counsel_memo', NULL, NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 3
@@ -870,8 +900,8 @@ INSERT INTO dataplane.manifests (manifest_id, manifest_version, description, too
 ON CONFLICT (manifest_id, manifest_version) DO NOTHING;
 
 INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, owner) VALUES
-  ('fraud_investigate', '2026.08.1', 'Investigate the case with OCR and memo tools. You may propose start_contract_review to hand Legal a separate jobs run. Do not invent tools.', 'published', 'fraud-ops'),
-  ('ops_start_kyc', '2026.08.1', 'Parse the onboarding ticket. You may propose start_kyc_onboarding to hand KYC a separate jobs run. Do not invent tools.', 'published', 'ops')
+  ('fraud_investigate', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use OCR and memo tools. You may CALL start_contract_review. Do not invent tools.', 'published', 'fraud-ops'),
+  ('ops_start_kyc', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Parse the ticket. You may CALL start_kyc_onboarding. Do not invent tools.', 'published', 'ops')
 ON CONFLICT (prompt_id, prompt_version) DO NOTHING;
 
 INSERT INTO dataplane.routes (
@@ -883,14 +913,14 @@ INSERT INTO dataplane.routes (
 ) VALUES
 (
   'fraud_investigate', '2026.08.1', TRUE, 'active', 'fraud_investigate',
-  'Open loop with domain tools plus one agent capability (start_contract_review → contract_review). Two freezes when Runtime posts jobs; today Runtime skips that HTTP. Prompt, memory, no workflow.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over ocr_extract, draft_memo, start_contract_review. One host prompt reused each turn. kind=agent child start is catalogue-only. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-fraud-investigate', 'fraud_investigate', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'fraud_investigate', 'risk_memo', NULL, 8, 'clarify',
   '["fraud:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
 ),
 (
   'ops_start_kyc', '2026.08.1', TRUE, 'active', 'ops_start_kyc',
-  'Open loop with parse_ticket plus one agent capability (start_kyc_onboarding → kyc_onboarding). Child start is catalogue-only until Runtime posts jobs. Prompt, memory, no workflow.',
+  'Pattern 1 (autonomous): LLM CALL/DONE loop over parse_ticket and start_kyc_onboarding. One host prompt reused each turn. kind=agent child start is catalogue-only. No workflow.',
   'http://agent-runtime:3008/v1/runs', 'agent-ops-start-kyc', 'ops_start_kyc', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'ops_start_kyc', NULL, NULL, 6, 'clarify',
   '["kyc:onboard"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1

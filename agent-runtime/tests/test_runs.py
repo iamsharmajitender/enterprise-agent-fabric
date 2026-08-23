@@ -3,7 +3,15 @@ import json
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from tests.conftest import AFD, CANNED, START_BODY, FakeCatalogue, FakeInvoker, FakeRegistry
+from tests.conftest import (
+    AFD,
+    CANNED,
+    START_BODY,
+    FakeCatalogue,
+    FakeInvoker,
+    FakeLlm,
+    FakeRegistry,
+)
 
 
 def test_first_start_returns_202_with_correlation_id(client: TestClient) -> None:
@@ -208,7 +216,13 @@ def test_dynamic_graph_posts_goal_to_hydrated_tool(store, catalogue: FakeCatalog
             return {"text": CANNED}
 
     client = TestClient(
-        create_app(store=store, catalogue=catalogue, registry=registry, tool_invoker=Invoker())
+        create_app(
+            store=store,
+            catalogue=catalogue,
+            registry=registry,
+            tool_invoker=Invoker(),
+            llm=FakeLlm(),
+        )
     )
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
     correlation_id = started.json()["correlation_id"]
@@ -234,12 +248,18 @@ def test_working_session_saves_notes_on_the_run_pin(
         "memory_profile": {"working": "session", "loop": "none"},
     }
     client = TestClient(
-        create_app(store=store, catalogue=catalogue, registry=registry, tool_invoker=FakeInvoker())
+        create_app(
+            store=store,
+            catalogue=catalogue,
+            registry=registry,
+            tool_invoker=FakeInvoker(),
+            llm=FakeLlm(),
+        )
     )
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
     pin = store.get(started.json()["correlation_id"])
     assert pin is not None
-    assert pin.working == {"notes": [CANNED]}
+    assert pin.working == {"notes": [CANNED, CANNED]}
     assert pin.checkpoint is None
 
 
@@ -251,15 +271,21 @@ def test_loop_checkpoint_saves_step_on_the_run_pin(
         "memory_profile": {"working": "none", "loop": "checkpoint"},
     }
     client = TestClient(
-        create_app(store=store, catalogue=catalogue, registry=registry, tool_invoker=FakeInvoker())
+        create_app(
+            store=store,
+            catalogue=catalogue,
+            registry=registry,
+            tool_invoker=FakeInvoker(),
+            llm=FakeLlm(),
+        )
     )
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
     pin = store.get(started.json()["correlation_id"])
     assert pin is not None
     assert pin.working is None
     assert pin.checkpoint == {
-        "step": 0,
-        "stage_id": "account_fee_lookup",
+        "step": 1,
+        "stage_id": "respond",
         "result": CANNED,
         "goal": {"utterance": "Why was I charged $42?"},
     }
@@ -269,7 +295,13 @@ def test_no_memory_profile_does_not_write_working_or_checkpoint(
     store, catalogue: FakeCatalogue, registry: FakeRegistry
 ) -> None:
     client = TestClient(
-        create_app(store=store, catalogue=catalogue, registry=registry, tool_invoker=FakeInvoker())
+        create_app(
+            store=store,
+            catalogue=catalogue,
+            registry=registry,
+            tool_invoker=FakeInvoker(),
+            llm=FakeLlm(),
+        )
     )
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
     pin = store.get(started.json()["correlation_id"])
@@ -291,14 +323,20 @@ def test_resume_reloads_working_notes(
             return {"text": CANNED}
 
     client = TestClient(
-        create_app(store=store, catalogue=catalogue, registry=registry, tool_invoker=Invoker())
+        create_app(
+            store=store,
+            catalogue=catalogue,
+            registry=registry,
+            tool_invoker=Invoker(),
+            llm=FakeLlm(),
+        )
     )
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
     correlation_id = started.json()["correlation_id"]
     client.post(f"/v1/runs/{correlation_id}/turns", headers=AFD, json={"message": "yes"})
     pin = store.get(correlation_id)
     assert pin is not None
-    assert pin.working == {"notes": [CANNED, CANNED]}
+    assert pin.working == {"notes": [CANNED, CANNED, CANNED]}
 
 
 def test_resume_turn_does_not_start_a_second_run(client: TestClient, store, catalogue: FakeCatalogue) -> None:

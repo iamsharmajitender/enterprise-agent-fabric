@@ -22,7 +22,7 @@ Each row is one `route_id`. Columns are facts from seed + dummy payloads, plus a
 
 **Status vocabulary** (same words as [`../02-understand/status.md`](../02-understand/status.md)):
 
-- **`runs`** — HTTP and/or LLM stages fire as implemented: the graph is **linear**, HTTP bodies are the original **goal** (plus an LLM `query` on `query_formulation` stages), later LLM stages see prior output as **notes** strings.
+- **`runs`** — HTTP and/or LLM stages fire as implemented: Pattern 0/2/3 are a **linear** graph; Pattern 1 is a `CALL`/`DONE` loop. HTTP bodies are the original **goal** (plus an LLM `query` on `query_formulation` stages). Later LLM stages see prior output as **notes** strings. Every route calls the LLM at least once.
 - **`catalogue-only`** — the route *names* `branch`, `human_gate`, a prefetch pack, `conversation`, `long_term`, or a `kind=agent` child start, and Runtime does **not** execute that extra. Dummy `completed` does not prove those extras. Two kinds only: [capabilities](../02-understand/capabilities.md).
 - **`prefetch not packed`** — on every `deterministic_prefetch` route. Prefetch stages with empty `invoke` skip HTTP. Chunks are not packed into working memory or the prompt.
 
@@ -46,7 +46,7 @@ Tool-only HTTP paths can finish against tool-mock. LLM stages still need Ollama.
 
 Rewrite these three files when **seed** or **dummy payloads/scripts** change. No generator in this pass. Walk:
 
-1. Active seed `INSERT`s in [`../run/scripts/create-seed-data.sql`](../run/scripts/create-seed-data.sql) (`dataplane.routes`, `dataplane.workflows`, `dataplane.retrieval`, `dataplane.memory_profiles`). Skip lifecycle draft/retired cuts in the same file unless you add a tiny footnote.
+1. Active seed `INSERT`s in [`../run/scripts/create-seed-data.sql`](../run/scripts/create-seed-data.sql) (`dataplane.routes`, `dataplane.workflows`, `dataplane.prompt_packs`, `dataplane.prompt_role_templates`, `dataplane.retrieval`, `dataplane.memory_profiles`). Skip lifecycle draft/retired cuts in the same file unless you add a tiny footnote.
 2. Payload keys, channels, and **route_id spelling** from `jobs.json` / `chats.json` (source of demo wrappers).
 3. Demo paths from `docs/run/dummy-request/**/*.sh`.
 4. Status against Runtime (linear graph, goal-only HTTP, prefetch not packed) — not against dummy `completed`.

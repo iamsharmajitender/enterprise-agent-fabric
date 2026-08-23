@@ -299,11 +299,44 @@ function linkCell(href, text, extra) {
 
 const COUNT_ICON_SVG =
   'viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
-const TOOL_COUNT_ICON = `<svg ${COUNT_ICON_SVG}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`;
+const API_COUNT_ICON = `<svg ${COUNT_ICON_SVG}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`;
+const AGENT_COUNT_ICON = `<svg ${COUNT_ICON_SVG}><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>`;
+
+function isAgentKind(kind) {
+  return kind === "agent" || kind === "agent_start";
+}
+
+function manifestKindCounts(tools, kinds) {
+  let api = 0;
+  let agent = 0;
+  for (const tool of tools ?? []) {
+    const id = String(tool?.capability_id ?? "").trim();
+    const kind = id ? kinds.get(id) : undefined;
+    if (isAgentKind(kind)) agent += 1;
+    else api += 1;
+  }
+  return { api, agent };
+}
+
+async function loadCapabilityKinds() {
+  const kinds = new Map();
+  try {
+    const res = await fetch("/api/capabilities?include=all");
+    if (!res.ok) return kinds;
+    const payload = await res.json();
+    for (const cap of payload.capabilities ?? []) {
+      const id = String(cap.id ?? "").trim();
+      if (id) kinds.set(id, cap.kind);
+    }
+  } catch {
+    /* Routes still render; unknown tools count as API. */
+  }
+  return kinds;
+}
 
 /** Small count badge (icon + number), same visual weight as History's revision pill. */
-function countIcon(count, { label, svg }) {
-  const node = el("span", "count-icon");
+function countIcon(count, { label, svg, extraClass = "" }) {
+  const node = el("span", extraClass ? `count-icon ${extraClass}` : "count-icon");
   node.title = label;
   node.setAttribute("aria-label", label);
   const glyph = el("span", "count-icon__glyph");
@@ -313,7 +346,7 @@ function countIcon(count, { label, svg }) {
   return node;
 }
 
-function manifestCell(item) {
+function manifestCell(item, kinds = new Map()) {
   const td = document.createElement("td");
   const wrap = el("span", "cell-with-count");
   wrap.append(idLink(catalogHref("tool_manifest", item.tool_manifest), item.tool_manifest, "mono"));
@@ -323,13 +356,25 @@ function manifestCell(item) {
     !isEmpty(item.tool_manifest) &&
     item.tool_manifest !== "none"
   ) {
-    const count = tools.length;
-    wrap.append(
-      countIcon(count, {
-        label: count === 1 ? "1 tool" : `${count} tools`,
-        svg: TOOL_COUNT_ICON,
-      }),
-    );
+    const { api, agent } = manifestKindCounts(tools, kinds);
+    if (api > 0) {
+      wrap.append(
+        countIcon(api, {
+          label: api === 1 ? "1 API" : `${api} APIs`,
+          svg: API_COUNT_ICON,
+          extraClass: "count-icon--api",
+        }),
+      );
+    }
+    if (agent > 0) {
+      wrap.append(
+        countIcon(agent, {
+          label: agent === 1 ? "1 agent" : `${agent} agents`,
+          svg: AGENT_COUNT_ICON,
+          extraClass: "count-icon--agent",
+        }),
+      );
+    }
   }
   td.append(wrap);
   return td;
@@ -402,6 +447,27 @@ function autonomyCell(code) {
   const td = document.createElement("td");
   td.append(autonomyPill(code));
   return td;
+}
+
+const listSortState = Object.create(null);
+
+function compareSortValues(left, right) {
+  const emptyLeft = left == null || left === "" || Number.isNaN(left);
+  const emptyRight = right == null || right === "" || Number.isNaN(right);
+  if (emptyLeft && emptyRight) return 0;
+  if (emptyLeft) return 1;
+  if (emptyRight) return -1;
+  if (typeof left === "number" && typeof right === "number") return left - right;
+  return String(left).localeCompare(String(right), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
+function sortMark(dir) {
+  const mark = el("span", "sort-btn__mark", dir === "desc" ? "↓" : dir === "asc" ? "↑" : "↕");
+  mark.setAttribute("aria-hidden", "true");
+  return mark;
 }
 
 function policyLabel(profile) {
@@ -1259,6 +1325,7 @@ async function showLanding() {
 }
 
 async function showRoutes() {
+  let kinds = new Map();
   return showResourceList({
     bodyClass: "showing-routes",
     title: "Routes",
@@ -1269,6 +1336,9 @@ async function showRoutes() {
     columns: ["Route", "Intent", "Autonomy", "Description", "Model", "Policy", "Manifest", "Prompt", "Retrieval", "Chat"],
     error: "Catalogue read failed ({status}).",
     caption: "Routes in the selected status. Activate a row to open route detail.",
+    ready: loadCapabilityKinds().then((map) => {
+      kinds = map;
+    }),
     statusesOf: (items) =>
       items.map((item) => catalogStatus({ status: item.status, active: item.active })),
     hrefOf: (item) =>
@@ -1282,11 +1352,18 @@ async function showRoutes() {
       cell(item.description, "clip"),
       cell(item.model_profile, "mono"),
       cell(item.policy_profile ? policyLabel(item.policy_profile) : null),
-      manifestCell(item),
+      manifestCell(item, kinds),
       linkCell(catalogHref("prompt_id", item.prompt_id), item.prompt_id, "mono"),
       cell(retrievalListLabel(item.retrieval)),
       cell(item.chat_visible == null ? null : item.chat_visible ? "Yes" : "No"),
     ],
+    sortKeys: {
+      Autonomy: (item) => {
+        const code = Number(item.autonomy_mode);
+        return Number.isFinite(code) ? code : autonomyModeListLabel(item.autonomy_mode);
+      },
+      Description: (item) => item.description ?? "",
+    },
   });
 }
 
@@ -1843,6 +1920,8 @@ async function showResourceList({
   basePath,
   noun,
   statusesOf,
+  sortKeys,
+  ready,
 }) {
   clearError();
   document.body.classList.remove(
@@ -1859,7 +1938,7 @@ async function showResourceList({
   document.title = `${title} · Control Plane`;
   skeletonTable();
   void refreshMeta();
-  const res = await fetch(api);
+  const [res] = await Promise.all([fetch(api), ready]);
   if (!res.ok) {
     pageEl.replaceChildren();
     showError(error.replace("{status}", String(res.status)));
@@ -1871,47 +1950,103 @@ async function showResourceList({
   const statuses = statusesOf ? statusesOf(items) : items.map(() => "active");
   const counts = countResolvedStatuses(statuses);
   const tabs = buildStatusTabs({ basePath, counts, selected });
+  const sortId = basePath ?? title;
+  if (!listSortState[sortId]) listSortState[sortId] = { key: null, dir: "asc" };
   const list = document.createElement("table");
   list.className = "routes-table";
   list.append(el("caption", "sr-only", caption));
   const thead = document.createElement("thead");
-  const headRow = document.createElement("tr");
-  for (const label of columns) headRow.append(el("th", "", label));
-  thead.append(headRow);
-  list.append(thead);
   const tbody = document.createElement("tbody");
-  let visibleCount = 0;
-  for (let index = 0; index < items.length; index += 1) {
-    if (statuses[index] !== selected) continue;
-    visibleCount += 1;
-    const item = items[index];
-    const status = statuses[index];
-    const tr = document.createElement("tr");
-    const href = hrefOf(item, status);
-    tr.tabIndex = 0;
-    tr.setAttribute("role", "link");
-    tr.setAttribute("aria-label", `Open ${href}`);
-    const open = () => go(href);
-    tr.addEventListener("click", open);
-    tr.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        open();
+
+  function visibleRows() {
+    const rows = [];
+    for (let index = 0; index < items.length; index += 1) {
+      if (statuses[index] !== selected) continue;
+      rows.push({ item: items[index], status: statuses[index] });
+    }
+    const state = listSortState[sortId];
+    const sortOf = sortKeys?.[state.key];
+    if (!sortOf) return rows;
+    const dir = state.dir === "desc" ? -1 : 1;
+    return [...rows].sort(
+      (left, right) => dir * compareSortValues(sortOf(left.item), sortOf(right.item)),
+    );
+  }
+
+  function headerRow() {
+    const row = document.createElement("tr");
+    const state = listSortState[sortId];
+    for (const label of columns) {
+      const th = document.createElement("th");
+      const sortable = Boolean(sortKeys?.[label]);
+      if (!sortable) {
+        th.textContent = label;
+        row.append(th);
+        continue;
       }
-    });
-    for (const node of cellsOf(item, status)) tr.append(node);
-    tbody.append(tr);
+      const active = state.key === label;
+      th.setAttribute("aria-sort", active ? (state.dir === "desc" ? "descending" : "ascending") : "none");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "sort-btn";
+      button.dataset.sort = label;
+      button.append(document.createTextNode(label), sortMark(active ? state.dir : null));
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (state.key === label) {
+          state.dir = state.dir === "asc" ? "desc" : "asc";
+        } else {
+          state.key = label;
+          state.dir = "asc";
+        }
+        paint();
+        thead.querySelector(`[data-sort="${CSS.escape(label)}"]`)?.focus();
+      });
+      th.append(button);
+      row.append(th);
+    }
+    return row;
   }
-  if (visibleCount === 0) {
-    const emptyRow = document.createElement("tr");
-    const emptyCell = document.createElement("td");
-    emptyCell.colSpan = columns.length;
-    const label = catalogStatusLabel(selected).toLowerCase();
-    emptyCell.append(el("p", "empty", empty ?? `No ${label} ${noun}.`));
-    emptyRow.append(emptyCell);
-    tbody.append(emptyRow);
+
+  function bodyRows() {
+    const nodes = [];
+    const rows = visibleRows();
+    for (const { item, status } of rows) {
+      const tr = document.createElement("tr");
+      const href = hrefOf(item, status);
+      tr.tabIndex = 0;
+      tr.setAttribute("role", "link");
+      tr.setAttribute("aria-label", `Open ${href}`);
+      const open = () => go(href);
+      tr.addEventListener("click", open);
+      tr.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      });
+      for (const node of cellsOf(item, status)) tr.append(node);
+      nodes.push(tr);
+    }
+    if (nodes.length === 0) {
+      const emptyRow = document.createElement("tr");
+      const emptyCell = document.createElement("td");
+      emptyCell.colSpan = columns.length;
+      const label = catalogStatusLabel(selected).toLowerCase();
+      emptyCell.append(el("p", "empty", empty ?? `No ${label} ${noun}.`));
+      emptyRow.append(emptyCell);
+      nodes.push(emptyRow);
+    }
+    return nodes;
   }
-  list.append(tbody);
+
+  function paint() {
+    thead.replaceChildren(headerRow());
+    tbody.replaceChildren(...bodyRows());
+  }
+
+  paint();
+  list.append(thead, tbody);
   const wrap = el("div", "version-table-wrap");
   wrap.append(list);
   const panel = el("div", "status-tabs__panel");
@@ -2011,8 +2146,8 @@ async function showManifests() {
   });
 }
 
-function usageList(uses) {
-  if (!uses.length) return el("p", "empty", "Unused in latest manifests.");
+function usageList(uses, empty = "Unused in latest manifests.") {
+  if (!uses.length) return el("p", "empty", empty);
   const list = document.createElement("ul");
   list.className = "usage-list";
   for (const use of uses) {
@@ -2023,13 +2158,15 @@ function usageList(uses) {
         ? `${use.route_id}@${use.route_version}`
         : use.route_id;
       item.append(idLink(routeHref, routeLabel, "mono"));
-      item.append(document.createTextNode(" · "));
     }
-    const href = `/manifests/${encodeURIComponent(use.manifest_id)}`;
-    const label = use.manifest_version
-      ? `${use.manifest_id}@${use.manifest_version}`
-      : use.manifest_id;
-    item.append(idLink(href, label, "mono"));
+    if (use.manifest_id) {
+      if (use.route_id) item.append(document.createTextNode(" · "));
+      const href = `/manifests/${encodeURIComponent(use.manifest_id)}`;
+      const label = use.manifest_version
+        ? `${use.manifest_id}@${use.manifest_version}`
+        : use.manifest_id;
+      item.append(idLink(href, label, "mono"));
+    }
     if (use.tool_name) {
       item.append(document.createTextNode(` · ${use.tool_name}`));
     }
@@ -2041,11 +2178,20 @@ function usageList(uses) {
   return list;
 }
 
-function buildUsedBySection(uses) {
+function buildUsedBySection(uses, empty) {
   const block = el("section", "section");
   block.append(el("h3", "", "Used by"));
-  block.append(usageList(uses));
+  block.append(usageList(uses, empty));
   return block;
+}
+
+function promptUses(routes, promptId) {
+  return (routes ?? [])
+    .filter((route) => route.prompt_id === promptId)
+    .map((route) => ({
+      route_id: route.route_id ?? null,
+      route_version: route.route_version ?? null,
+    }));
 }
 
 async function showUsage() {
@@ -2155,6 +2301,7 @@ async function showCatalogDetail({
   jsonId,
   sectionsOf,
   extraNodes,
+  afterNodes,
 }) {
   clearError();
   document.body.classList.remove(
@@ -2215,6 +2362,7 @@ async function showCatalogDetail({
       );
     }
   }
+  if (afterNodes) sections.push(...afterNodes(row));
   const jsonPanel = buildJsonPanel(row, jsonTitle, jsonId);
   jsonPanel.hidden = true;
   jsonBtn.addEventListener("click", () => {
@@ -2231,6 +2379,9 @@ async function showCatalogDetail({
 
 async function showPrompt(promptId, version) {
   resetPromptHistory(promptId);
+  const routesRes = await fetch("/api/routes");
+  const routesPayload = routesRes.ok ? await routesRes.json() : { routes: [] };
+  const uses = promptUses(routesPayload.routes ?? [], promptId);
   return showCatalogDetail({
     id: promptId,
     version,
@@ -2251,6 +2402,7 @@ async function showPrompt(promptId, version) {
     jsonTitle: "Prompt JSON",
     jsonId: "prompt-json",
     sectionsOf: PROMPT_SECTIONS,
+    afterNodes: () => [buildUsedBySection(uses, "Unused by any route.")],
   });
 }
 

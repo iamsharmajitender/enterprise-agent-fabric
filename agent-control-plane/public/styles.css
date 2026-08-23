@@ -787,6 +787,21 @@ h3 {
   color: var(--default-foreground);
 }
 
+.count-icon--api {
+  background: color-mix(in oklab, var(--kind-domain) 15%, transparent);
+  color: color-mix(in oklab, var(--kind-domain) 70%, var(--foreground) 30%);
+}
+
+.count-icon--agent {
+  background: color-mix(in oklab, var(--kind-agent) 15%, transparent);
+  color: color-mix(in oklab, var(--kind-agent) 75%, var(--foreground) 25%);
+}
+
+.count-icon--api .count-icon__value,
+.count-icon--agent .count-icon__value {
+  color: inherit;
+}
+
 .clip {
   display: -webkit-box;
   overflow: hidden;
@@ -1300,6 +1315,45 @@ dd.field-wide {
   font-size: 0.75rem;
   font-weight: 500;
   background: var(--surface-secondary);
+}
+
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.sort-btn:hover,
+.sort-btn:focus-visible {
+  color: var(--foreground);
+}
+
+.sort-btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.sort-btn__mark {
+  font-size: 0.625rem;
+  line-height: 1;
+  opacity: 0.45;
+}
+
+.routes-table thead th[aria-sort="ascending"] .sort-btn__mark,
+.routes-table thead th[aria-sort="descending"] .sort-btn__mark {
+  opacity: 1;
+  color: var(--foreground);
 }
 
 .routes-table tbody th {

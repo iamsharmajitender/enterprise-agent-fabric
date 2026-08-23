@@ -7,7 +7,7 @@ from app.core.execution import GraphPort, run_loop
 from app.core.memory import memory_profile, notes_from_working, persist_stage, save_working
 from app.core.state import RunPin, RunStore
 from app.graph.llm import LlmPort
-from app.graph.workflow import build_tool_graph
+from app.graph.workflow import build_agent_loop, build_tool_graph
 from app.tools.invoker import ToolInvoker
 
 
@@ -35,8 +35,9 @@ class RunService:
         *,
         correlation_id: str,
         profile: dict[str, Any],
+        row: dict[str, Any] | None = None,
     ) -> GraphPort:
-        """Use an injected graph, or build one from the hydrated tool list."""
+        """Use an injected graph, or build a Pattern 1 loop / linear graph."""
         if self._graph is not None:
             return self._graph
         if self._invoker is None:
@@ -45,6 +46,23 @@ class RunService:
         def on_stage(step: int, stage_id: str, state: dict[str, Any]) -> None:
             persist_stage(self._store, correlation_id, profile, step, stage_id, state)
 
+        row = row or {}
+        mode = int(row.get("autonomy_mode") or 0)
+        if mode == 1:
+            if self._llm is None:
+                raise RuntimeError("llm required for autonomy_mode 1")
+            extra = ""
+            prompt_id = str(row.get("prompt_id") or "")
+            if prompt_id:
+                extra = str(self._catalogue.get_prompt(prompt_id).get("host") or "")
+            return build_agent_loop(
+                tools,
+                self._invoker,
+                self._llm,
+                max_steps=int(row.get("max_loop_steps") or 8),
+                on_stage=on_stage,
+                system=extra,
+            )
         return build_tool_graph(tools, self._invoker, llm=self._llm, on_stage=on_stage)
 
     def _route_row(self, route_id: str, route_version: str) -> dict[str, Any]:
@@ -140,6 +158,7 @@ class RunService:
                 saved.hydrated_tools,
                 correlation_id=saved.correlation_id,
                 profile=profile,
+                row=row,
             ),
             self._store,
             saved,
@@ -158,13 +177,15 @@ class RunService:
             route_id=pin.route_id,
             route_version=pin.route_version,
         )
-        profile = memory_profile(self._route_row(pin.route_id, pin.route_version))
+        row = self._route_row(pin.route_id, pin.route_version)
+        profile = memory_profile(row)
         prior_notes = notes_from_working(pin.working) if save_working(profile) else []
         run_loop(
             self._graph_for(
                 pin.hydrated_tools,
                 correlation_id=pin.correlation_id,
                 profile=profile,
+                row=row,
             ),
             self._store,
             pin,

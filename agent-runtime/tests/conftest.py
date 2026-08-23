@@ -35,6 +35,8 @@ CATALOGUE_ROW = {
     "agent_client_id": "fee-explain-v1",
     "tool_manifest": "fee_explain_v1",
     "tool_manifest_version": "2026.08.1",
+    "autonomy_mode": 1,
+    "max_loop_steps": 6,
 }
 
 MANIFEST = {
@@ -139,6 +141,18 @@ class FakeInvoker:
         return {"text": CANNED}
 
 
+class FakeLlm:
+    def __init__(self) -> None:
+        self.turns = 0
+
+    def complete(self, system: str, user: str) -> str:
+        """Pattern 1 stub: CALL the fee tool, then DONE with the canned line."""
+        self.turns += 1
+        if self.turns == 1:
+            return "CALL account_fee_lookup"
+        return f"DONE {CANNED}"
+
+
 @pytest.fixture
 def store() -> InMemoryRunStore:
     return InMemoryRunStore()
@@ -172,5 +186,6 @@ def client(
             catalogue=catalogue,
             registry=registry,
             tool_invoker=invoker,
+            llm=FakeLlm(),
         )
     )

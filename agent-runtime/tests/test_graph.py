@@ -1,4 +1,4 @@
-from app.graph.workflow import build_tool_graph
+from app.graph.workflow import build_agent_loop, build_tool_graph
 
 
 def test_tool_graph_calls_each_hydrated_tool_in_order() -> None:
@@ -238,3 +238,35 @@ def test_on_stage_fires_after_each_tool() -> None:
     graph = build_tool_graph(tools, Invoker(), on_stage=on_stage)
     graph.invoke({"result": "", "goal": {}})
     assert seen == [(0, "a", "from-http://x/a"), (1, "b", "from-http://x/b")]
+
+
+def test_agent_loop_calls_tool_then_done() -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"text": "Fee of $42 is the monthly account charge."}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns == 1:
+                assert "account_fee_lookup" in system
+                return "CALL account_fee_lookup"
+            assert "Fee of $42" in user
+            return "DONE Fee of $42 is the monthly account charge."
+
+    tools = [
+        {
+            "id": "account_fee_lookup",
+            "invoke": {"method": "POST", "url": "http://tool-mock:3010/fees/explain"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm())
+    output = graph.invoke({"result": "", "goal": {"utterance": "Why $42?"}, "notes": []})
+    assert calls == ["http://tool-mock:3010/fees/explain"]
+    assert output["result"] == "Fee of $42 is the monthly account charge."

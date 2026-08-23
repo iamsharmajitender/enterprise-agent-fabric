@@ -50,7 +50,8 @@ class SeedCatalogueSqlTest {
     }
     assertThat(seed).contains("autonomy_mode");
     assertThat(seed).contains("deterministic_prefetch");
-    assertThat(seed).contains("due_diligence");
+    assertThat(seed).doesNotContain("No prompt");
+    assertThat(seed).contains("host plus synthesis");
   }
 
   private static String read(String path) throws Exception {

@@ -439,7 +439,7 @@ Pack: [agent-runtime](docs/04-architecture/agent-runtime.md).
 | [Observability](#observability-grafana-lgtm) | Mints/echoes `X-Request-Id`; `run.accepted`; journey `chat.*` / `job.*` | `intent.decide.*` | Hydrate GETs on the Tempo path | `run.hydrate.*`, `run.started` / `completed`; span attrs `correlation_id` |
 | [Routes](#routes-v1) | Freezes the pin AFD got from decide; jobs name `route_id` | Owns versioned rows; classify = **active** mix | Manifest pointer only — no `tools[]` on the route | Executes the **pinned** version; never re-reads `active` |
 | [Catalogue statuses](#catalogue-statuses) | After `route`, GET that version | `active` vs `published` vs `draft` / `retired` on routes; prompts/workflows/corpora | Capability + manifest `draft` / `published` / `retired`; hydrate `published` | Hydrates the pin; 422 if the cut is missing or still draft |
-| [Workflows](#workflows) | None. Pin already has `workflow_id` on the row | Owns `dataplane.workflows` (stages, `llm_role`, allowlist). Route points at `workflow_id` | None | Hydrate: with a manifest, stamp `llm_role` onto tools; without, one graph node per stage. Graph is still linear — `branch` / `human_gate` are catalogue-only |
+| [Workflows](#workflows) | None. Pin already has `workflow_id` on the row | Owns `dataplane.workflows` (stages, `llm_role`, allowlist). Route points at `workflow_id` | None | Hydrate: with a manifest, stamp `llm_role` onto tools; without, one graph node per stage. Pattern 0/2/3 stay linear; Pattern 1 is CALL/DONE. `branch` / `human_gate` are catalogue-only |
 | [Prompts](#prompts) | None | Owns `dataplane.prompt_packs` + `prompt_role_templates`. Route points at `prompt_id` | None | GET published pack; `host` plus `by_llm_role` text onto each node. LLM stub / Ollama uses that string |
 | [Retrieve](#retrieve) | None | Owns `dataplane.retrieval` (mode + corpus ids) and `dataplane.corpora` (url / collection) | Retrieve tools are ordinary capabilities (`clause_search`, `account_fee_lookup`) | Does **not** POST the corpus gateway yet. Prefetch stages with empty `invoke` are no-ops. Retrieve **tools** HTTP-call tool-mock like any other tool |
 | [Tools](#tools) | None. Does not inline `tools[]` | Route stores `tool_manifest` + version; ADP copy is for the catalogue UI | Source of truth: published manifest + each `id@version` (schema, `invoke.url`, `kind`) | Hydrate whole manifest before the LLM. Loop HTTP-calls `invoke.url` (local: tool-mock). No mid-loop registry GET |
@@ -522,7 +522,7 @@ Seeded examples: `llm_pipeline` (three LLM stages, no tools), `card_freeze` (ide
 
 1. **Route has `tool_manifest`:** ACR hydrates every capability on the manifest. Workflow only **stamps** `llm_role` (and therefore prompt text) onto tools whose id matches `stage.tool`. Graph order is manifest order, not stage order.
 2. **Route has no manifest:** one graph node per stage. `invoke` is empty, so `llm_role=none` stages (typical `prefetch`) skip HTTP; `classify` / `synthesis` call the LLM.
-3. The local LangGraph is **linear**. `branch`, `human_gate`, stage `allowlist`, and approval flags are stored on ADP and shown in Control Plane; AR does not walk them yet.
+3. Pattern 0/2/3 are a **linear** LangGraph. Pattern 1 is an LLM `CALL`/`DONE` loop over the manifest tools. `branch`, `human_gate`, stage `allowlist`, and approval flags are stored on ADP and shown in Control Plane; AR does not walk them yet.
 
 If hydrate finds neither a manifest, a workflow, nor a prompt: **422** `HYDRATE_FAILED`.
 
@@ -565,13 +565,12 @@ Unknown roles fail the run. LLM-only roles need the Runtime LLM (local Ollama). 
 
 | Route kind | Prompt |
 | --- | --- |
-| Prompt-only (`agent-chat`, `email_summarize`, `chat_session`) | Pack with `host`. No role templates required |
-| Prefetch then generate (`policy_memo`, `policy_chat`) | `host` plus `synthesis` template that says to use packed chunks |
-| Open loop with tools (`fee_explain`) | `host` (“use the fee lookup tool; do not invent charges”) |
-| Workflow with mixed stages (`msa_risk_review`) | `host` plus `query_formulation` and `synthesis` templates |
-| Pure write path (`account_notify`, `card_freeze`) | omit — `llm_role` is `none` on every stage |
+| Prompt-only Pattern 0 (`agent-chat`, `email_summarize`, `chat_session`) | One pack. `host` only. One LLM call. |
+| Open loop Pattern 1 (`fee_explain`) | One pack. `host` reused each CALL/DONE turn. |
+| Mixed workflow Pattern 2/3 (`msa_risk_review`, `clause_lookup`, `llm_pipeline`) | One pack. `host` plus a role template for each distinct `llm_role`. Two synthesis stages share one synthesis template. |
+| Write path Pattern 2 (`account_notify`, `card_freeze`) | One pack. `host` plus `synthesis`. Hydrate still appends `respond` if the hydrated tool list has no classify/synthesis node. |
 
-Do not grow the prompt into a transcript. That is [Memory](#memory) `conversation`, not this pack.
+Every active route has a `prompt_id`. Do not grow the prompt into a transcript. That is [Memory](#memory) `conversation`, not this pack.
 
 ## Retrieve
 
@@ -647,7 +646,7 @@ Add a domain tool: unique `method`+`path` in `tools.json`, point the capability 
 3. `invoke.url` set + `llm_role=none` → HTTP. `query_formulation` → LLM then HTTP. `classify` / `synthesis` → LLM, skip HTTP even if a url exists.
 4. Telemetry: span `tool.invoke` (no tokens, no claims). Tempo path includes ACR on hydrate and tool-mock on invoke.
 
-Pattern 0 **cannot** take tools. `account_notify` / `card_freeze` take a manifest **and** a workflow (`llm_role=none`). Pattern 1 takes a manifest and `max_loop_steps`, no workflow.
+Pattern 0 **cannot** take tools. Pattern 1 takes a manifest and `max_loop_steps`, no workflow; Runtime runs a `CALL`/`DONE` loop. `account_notify` / `card_freeze` take a manifest **and** a workflow (`llm_role=none` on the HTTP stages); hydrate appends a `respond` synthesis node so the route is not HTTP-only.
 
 ### What manifest to put on a route
 

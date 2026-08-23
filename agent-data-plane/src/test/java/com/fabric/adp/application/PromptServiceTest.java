@@ -15,7 +15,7 @@ class PromptServiceTest {
   @Test
   void msaPackHasTwoRoleTemplates() {
     PromptPack pack = prompts.get("msa_risk_review", "2026.08.1");
-    assertThat(pack.host()).startsWith("You are counsel's MSA risk-review worker.");
+    assertThat(pack.host()).contains("MSA risk-review worker.");
     assertThat(pack.status()).isEqualTo("published");
     assertThat(pack.owner()).isEqualTo("legal-agents");
     assertThat(pack.roles())
@@ -28,9 +28,19 @@ class PromptServiceTest {
   @Test
   void patternZeroChatIsHostOnly() {
     PromptPack pack = prompts.get("email_summarize", "2026.08.1");
-    assertThat(pack.host()).isEqualTo("Summarize this email for the banker. No tools. Return short bullets.");
+    assertThat(pack.host()).isEqualTo(
+        "Pattern 0. One synthesis turn. Summarize this email for the banker. No tools. Return short bullets.");
     assertThat(pack.owner()).isEqualTo("assistant-platform");
     assertThat(pack.roles()).isEmpty();
+  }
+
+  @Test
+  void multiLlmRoutePackHasHostPlusRoleTemplates() {
+    PromptPack pack = prompts.get("clause_lookup", "2026.08.1");
+    assertThat(pack.host()).startsWith("Pattern 2.");
+    assertThat(pack.roles())
+        .extracting(PromptRoleTemplate::llmRole)
+        .containsExactly("query_formulation", "synthesis");
   }
 
   @Test
