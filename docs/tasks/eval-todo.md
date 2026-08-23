@@ -126,10 +126,10 @@ A misroute in production becomes a new case. CI replays the whole active eligibl
 
 ## Task E5: Jobs entitle golden set (thinner suite)
 
-**Description:** Jobs skip classify. Label named `route_id` + claims only. Positive rows from [dummy-jobs/jobs.json](../run/dummy-jobs/jobs.json); negatives omit the required claim.
+**Description:** Jobs skip classify. Label named `route_id` + claims only. Positive rows from [dummy-request/job/jobs.json](../run/dummy-request/job/jobs.json); negatives omit the required claim.
 
 **Acceptance criteria:**
-- [ ] `agent-data-plane/src/test/resources/eval/jobs-entitle-golden.json` covers every dummy-jobs `route_id` with its seed claims → `route`
+- [ ] `agent-data-plane/src/test/resources/eval/jobs-entitle-golden.json` covers every dummy-request `route_id` with its seed claims → `route`
 - [ ] Each of those has a sibling case with empty/wrong claims → `abstain`
 - [ ] Unknown `route_id` → `abstain` (or documented deny)
 - [ ] `ingress` is `jobs`; `message` is null; no `clarify` expected
@@ -215,10 +215,10 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 
 ## Task E8: Dummy `--all` fail-closed smoke
 
-**Description:** Turn [run-job.sh --all](../run/dummy-jobs/run-job.sh) into the Compose half of slice 2: every dummy job must complete (or fail controlled) at the pinned route version. Not the routing golden set.
+**Description:** Turn [run-job.sh --all](../run/dummy-request/run-job.sh) into the Compose half of slice 2: every dummy job must complete (or fail controlled) at the pinned route version. Not the routing golden set.
 
 **Acceptance criteria:**
-- [ ] Documented command: `./docs/run/dummy-jobs/run-job.sh --all` with `WAIT=1` (or equivalent) exits non-zero on hydrate/start/loop failure
+- [ ] Documented command: `./docs/run/dummy-request/run-job.sh --all` with `WAIT=1` (or equivalent) exits non-zero on hydrate/start/loop failure
 - [ ] Smoke is pinned to the route versions in the catalogue seed (header or script comment lists them)
 - [ ] Default `run-eval.sh` (E9) still runs the **lint** without Compose; `--all` is the Compose confirmation
 - [ ] README/eval README: `--all` is pin/hydrate smoke, not routing labels
@@ -230,7 +230,7 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 **Dependencies:** Task E7
 
 **Files likely touched:**
-- `docs/run/dummy-jobs/run-job.sh` (fail-closed / WAIT default for eval)
+- `docs/run/dummy-request/run-job.sh` (fail-closed / WAIT default for eval)
 - `agent-data-plane/run-eval.sh`
 - `agent-data-plane/src/test/resources/eval/README.md`
 
@@ -280,7 +280,7 @@ Not a fourth eval slice.
 **Description:** A misroute becomes a golden row. The gate stays red until the catalogue or classifier is fixed.
 
 **Acceptance criteria:**
-- [ ] `docs/run/runbooks/eval-incident.md` (or a section in `agent-data-plane/src/test/resources/eval/README.md`) lists: capture utterance + claims + actual outcome; add case; run `run-eval.sh`; do not “fix” by deleting the case
+- [ ] A section in `agent-data-plane/src/test/resources/eval/README.md` lists: capture utterance + claims + actual outcome; add case; run `run-eval.sh`; do not “fix” by deleting the case
 - [ ] States jobs vs chat (jobs are entitle, not classify)
 - [ ] Links examiner questions from the plan
 
@@ -291,7 +291,6 @@ Not a fourth eval slice.
 **Dependencies:** Task E9
 
 **Files likely touched:**
-- `docs/run/runbooks/eval-incident.md`
 - `agent-data-plane/src/test/resources/eval/README.md`
 
 **Estimated scope:** Small
@@ -328,7 +327,7 @@ Not a fourth eval slice.
 **Acceptance criteria:**
 - [ ] README links [eval-plan.md](./eval-plan.md) and [eval-todo.md](./eval-todo.md)
 - [ ] Routing command: `./agent-data-plane/run-eval.sh`
-- [ ] Pin/hydrate smoke: dummy-jobs `--all` (fail-closed)
+- [ ] Pin/hydrate smoke: dummy-request `--all` (fail-closed)
 - [ ] Explicit: not on the hot path; `--all` is not the routing golden set
 
 **Verification:**

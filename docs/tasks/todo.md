@@ -510,7 +510,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** Scripted jobs proof on the same Front Door process. Chat demo stays Task 23 and is chat-only. Document jobs APIs now; root README covering both route families is Task 24 after chat.
 
 **Acceptance criteria:**
-- [x] `docs/run/dummy-jobs/1-autonomous/fee_explain.sh` proves `POST /v1/jobs` for `fee_explain` and GET until the canned fee message
+- [x] `docs/run/dummy-request/job/1-autonomous/fee_explain.sh` proves `POST /v1/jobs` for `fee_explain` and GET until the canned fee message
 - [x] Front Door README documents `POST /v1/jobs` and `GET /v1/jobs/{correlation_id}`; Layer ①; still one process, no second fleet
 - [x] Demo is idempotent (same jobs key twice still exits 0)
 
@@ -521,7 +521,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Dependencies:** Task 18, Task 30
 
 **Files likely touched:**
-- `docs/run/dummy-jobs/1-autonomous/fee_explain.sh`
+- `docs/run/dummy-request/job/1-autonomous/fee_explain.sh`
 - `agent-front-door/README.md`
 
 **Estimated scope:** Small
@@ -790,7 +790,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 ## Checkpoint: Complete
 
-- [ ] `./docs/run/dummy-jobs/run-job.sh fee_explain` and `./docs/run/dummy-jobs/run-chat.sh fee_explain` pass on a clean compose
+- [ ] `./docs/run/dummy-request/run-job.sh fee_explain` and `./docs/run/dummy-request/run-chat.sh fee_explain` pass on a clean compose
 - [ ] Per-service tests pass
 - [ ] Each of the five service `README.md` files matches running APIs and schemas
 - [ ] Out of scope still out (no Kafka, no second AFD fleet, no real model)

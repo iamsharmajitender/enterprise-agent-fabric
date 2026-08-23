@@ -536,7 +536,7 @@ INSERT INTO registry.capabilities (
 )
 ON CONFLICT (id, version) DO NOTHING;
 
--- Agent-start capabilities. seed-db.sh also reloads docs/run/seed.
+-- Agent-start capabilities. seed-db.sh also reloads docs/run/scripts.
 INSERT INTO registry.capabilities (
   id, version, kind, description, input_schema, output_schema, invoke, snippet, owner, status
 ) VALUES

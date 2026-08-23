@@ -18,7 +18,7 @@ These directories are not shelves. They do not move.
 
 | Path | Role |
 | --- | --- |
-| [run/](run/) | Operator scratchpad: Compose, start/stop/seed scripts, dummy jobs, tool-mock, runbooks |
+| [run/](run/) | Operator scratchpad: Compose, start/stop/seed scripts, dummy requests, tool-mock |
 | [tasks/](tasks/) | Engineering plans and todos |
 | [intent/](intent/) | v1 lock: what to build. Not how a box works today |
 

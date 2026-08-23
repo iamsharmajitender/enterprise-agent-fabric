@@ -388,7 +388,6 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 
 **Files likely touched:**
 - `docs/tasks/intent-plan.md` demo path
-- optional `docs/run/runbooks/` only if a runbook already exists for decide
 
 **Estimated scope:** Small
 

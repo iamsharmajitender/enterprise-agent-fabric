@@ -38,7 +38,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 **Files likely touched:**
 - `docs/tasks/dataflow-plan.md` (matrix section) or `docs/dataflow/scenarios.md`
-- Read-only: `agent-data-plane/src/main/resources/db/migration/V1__dataplane.sql`, `docs/run/dummy-jobs/jobs.json`, `agent-runtime/app/graph/workflow.py`
+- Read-only: `agent-data-plane/src/main/resources/db/migration/V1__dataplane.sql`, `docs/run/dummy-request/job/jobs.json`, `agent-runtime/app/graph/workflow.py`
 
 **Estimated scope:** Small
 
@@ -141,18 +141,18 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Acceptance criteria:**
 - [ ] Tool-mock (or a Runtime contract test with a fake invoker) asserts request JSON for stage N+1
 - [ ] If the catalogue tool still returns only `{ "text": "..." }`, extend **that** mock with a typed field the next stage needs (keep canned `text` for LLM notes)
-- [ ] README dummy-jobs blurb for that route says which field is handed off
+- [ ] README dummy-request blurb for that route says which field is handed off
 - [ ] Seed/workflow order matches the proof (no hidden “all ids were in the job payload”)
 
 **Verification:**
-- [ ] `./docs/run/dummy-jobs/run-job.sh <proof-route>` completes **and** mock/tests saw the derived field
+- [ ] `./docs/run/dummy-request/run-job.sh <proof-route>` completes **and** mock/tests saw the derived field
 - [ ] Break the first tool’s extra field → job or test fails
 
 **Dependencies:** Task D4
 
 **Files likely touched:**
 - `docs/run/tool-mock/` (or equivalent mock)
-- `docs/run/dummy-jobs/jobs.json` / route README
+- `docs/run/dummy-request/job/jobs.json` / route README
 - `agent-runtime/tests/` or mock tests
 - Possibly capability `output_schema` in ACR seed if the field is now real
 
@@ -207,14 +207,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 - [ ] README Retrieve section tense matches: prefetch POSTs (or “stub gateway”) rather than “designed, not in this Runtime”
 
 **Verification:**
-- [ ] `./docs/run/dummy-jobs/run-job.sh policy_memo` (or the D1 prefetch id) plus test assertions
+- [ ] `./docs/run/dummy-request/run-job.sh policy_memo` (or the D1 prefetch id) plus test assertions
 - [ ] Empty pack → fail or skip HTTP generate, per D2 (pick fail-closed)
 
 **Dependencies:** Task D6
 
 **Files likely touched:**
 - `README.md` Retrieve / Memory
-- dummy-jobs / graph tests
+- dummy-request / graph tests
 - prompt pack text only if the blob key name must be documented
 
 **Estimated scope:** Small
@@ -305,7 +305,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 **Verification:**
 - [ ] Tests with fake AFD jobs client: child body == projection
-- [ ] Manual: seed parent route in dummy-jobs (if one exists) or unit-only if seed has no parent yet
+- [ ] Manual: seed parent route in dummy-request (if one exists) or unit-only if seed has no parent yet
 
 **Dependencies:** Task D3
 
@@ -348,7 +348,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Task D12: README — goal vs slots vs notes
 
-**Description:** Memory, Workflows, Retrieve, and dummy-jobs must describe the real assembly. No “designed, not in this Runtime” for items D3–D7 (and D8–D10 if done).
+**Description:** Memory, Workflows, Retrieve, and dummy-request must describe the real assembly. No “designed, not in this Runtime” for items D3–D7 (and D8–D10 if done).
 
 **Acceptance criteria:**
 - [ ] Memory table: `working` blob includes `slots`; `notes` is the LLM projection
@@ -364,7 +364,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 **Files likely touched:**
 - `README.md`
-- `docs/run/dummy-jobs/README.md`
+- `docs/run/dummy-request/README.md`
 - `docs/tasks/dataflow-plan.md`
 
 **Estimated scope:** Small

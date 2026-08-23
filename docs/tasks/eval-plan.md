@@ -5,7 +5,7 @@
 Stand up a **CI-gated eval surface** for the catalogue seed so a misroute or a broken pin cannot ship unnoticed. Three slices, **in this order**:
 
 1. **Routing** (the only eval the architecture requires). Chat is the contest: `(utterance, claims, channel) → route:<id> | clarify | abstain`. Not a memo. Jobs skip classify — thinner suite under this slice: named `route_id` + claims → entitled `route` or fail-closed. A misroute becomes a new case. Release does not ship if “Why was I charged $42?” starts `card_freeze`. `eval_suite_id` on a route is the wrong key; routing is a property of the board. Hold the golden set next to the catalogue (product + cut / labelled mix), not as `fee_explain_golden`.
-2. **Pin and hydrate** (cheap, high signal). For each active route: pointers resolve, manifest refs are published, retrieval scope ids exist, Pattern 0 has no tools/workflow, high-risk routes still have a workflow. Catalogue lint plus dummy jobs `--all` as fail-closed smoke, pinned to route version.
+2. **Pin and hydrate** (cheap, high signal). For each active route: pointers resolve, manifest refs are published, retrieval scope ids exist, Pattern 0 has no tools/workflow, high-risk routes still have a workflow. Catalogue lint plus dummy-request `--all` as fail-closed smoke, pinned to route version.
 3. **Route quality** (later, only where it pays). This is what `eval_suite_id` is for. Deterministic / jobs: same payload → expected tool sequence, not prose (`card_freeze` must be identity → limit → freeze). Grounded Q&A: citation from scoped corpus, or abstain. No LLM-as-judge. Free-form (`agent-chat`): skip — empty `eval_suite_id` is correct. Do not wait on `output_schema_id`; the reply can stay `{ "message": "…" }`.
 
 Target: examiners can show adversarial routing cases pass at 100% before release, and that a routing incident was added to the golden set and blocked in CI ([enterprise-agent-fabric](../04-architecture/narrative/enterprise-agent-fabric.mdx)).
@@ -50,7 +50,7 @@ cd agent-data-plane && mvn test -Dtest=RoutingEval*,JobsEntitleEval*,CataloguePi
 # inject a bad label → gate fails; restore → passes
 
 # pin/hydrate smoke — Compose
-WAIT=1 ./docs/run/dummy-jobs/run-job.sh --all   # fail-closed, pinned route versions
+WAIT=1 ./docs/run/dummy-request/run-job.sh --all   # fail-closed, pinned route versions
 ```
 
 ## Task List

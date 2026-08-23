@@ -4,14 +4,12 @@ Local fabric that **classifies a chat turn onto a route**, then runs that route.
 
 Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1` → `"Fee of $42 is the monthly account charge."`
 
-Jobs path swimlane: [docs/run/diagrams/swimlane-jobs-fee-explain.html](docs/run/diagrams/swimlane-jobs-fee-explain.html) (`./docs/run/dummy-jobs/1-autonomous/fee_explain.sh`).
-
 ## Contents
 
 - [Prerequisites](#prerequisites)
 - [Run](#run)
   - [Check it is up](#check-it-is-up)
-  - [Dummy jobs and chats](#dummy-jobs-and-chats)
+  - [Dummy requests](#dummy-requests)
 - [Evals](#evals)
 - [Ports and URLs](#ports-and-urls)
 - [Observability (Grafana LGTM)](#observability-grafana-lgtm)
@@ -84,7 +82,7 @@ Reload catalogue seed (deletes, then inserts):
 | --- | --- |
 | `./docs/run/scripts/start-app.sh` | Build and start in the background |
 | `./docs/run/scripts/stop-app.sh` | Stop containers (volumes kept) |
-| `./docs/run/scripts/seed-db.sh` | Delete and reload catalogue + lifecycle seed |
+| `./docs/run/scripts/seed-db.sh` | Delete and reload catalogue seed |
 | `docker compose -f docs/run/compose/docker-compose.yml ps` | Process status |
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f` | Follow all logs |
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f agent-data-plane` | One service |
@@ -107,26 +105,26 @@ Control Plane has no `/health`; open [http://localhost:3006](http://localhost:30
 
 Grafana LGTM can take a minute. Wait until logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.`, then open [http://localhost:3000](http://localhost:3000) (`admin` / `admin`).
 
-### Dummy jobs and chats
+### Dummy requests
 
-Seed job and chat-visible routes live under [`docs/run/dummy-jobs/`](docs/run/dummy-jobs/). Catalogue and flags: [docs/run/dummy-jobs/README.md](docs/run/dummy-jobs/README.md).
+Seed job and chat-visible routes live under [`docs/run/dummy-request/`](docs/run/dummy-request/). Catalogue and flags: [docs/run/dummy-request/README.md](docs/run/dummy-request/README.md).
 
 ```bash
-./docs/run/dummy-jobs/run-job.sh --list
-./docs/run/dummy-jobs/run-job.sh --all
-./docs/run/dummy-jobs/run-job.sh --mode 2
-./docs/run/dummy-jobs/run-chat.sh --list
-./docs/run/dummy-jobs/run-chat.sh --all
+./docs/run/dummy-request/run-job.sh --list
+./docs/run/dummy-request/run-job.sh --all
+./docs/run/dummy-request/run-job.sh --mode 2
+./docs/run/dummy-request/run-chat.sh --list
+./docs/run/dummy-request/run-chat.sh --all
 ```
 
 `--all` posts every row in `jobs.json` / `chats.json`. `--mode N` is one band (`0`–`3`). Both **only POST** unless you poll:
 
 ```bash
-WAIT=1 ./docs/run/dummy-jobs/run-job.sh --all
-WAIT=1 ./docs/run/dummy-jobs/run-chat.sh --all
+WAIT=1 ./docs/run/dummy-request/run-job.sh --all
+WAIT=1 ./docs/run/dummy-request/run-chat.sh --all
 ```
 
-One job (polls until done): `./docs/run/dummy-jobs/1-autonomous/fee_explain.sh` or `./docs/run/dummy-jobs/run-job.sh claims_adjudicate`. One chat: `./docs/run/dummy-jobs/chat/1-autonomous/fee_explain.sh`.
+One job (polls until done): `./docs/run/dummy-request/job/1-autonomous/fee_explain.sh` or `./docs/run/dummy-request/run-job.sh claims_adjudicate`. One chat: `./docs/run/dummy-request/chat/1-autonomous/fee_explain.sh`.
 
 ## Evals
 
@@ -167,7 +165,7 @@ Flip one `expected.route_id` in `routing-golden.json` and the gate must go red. 
 Dummy `--all` needs a running stack. It is pin/hydrate smoke, **not** the routing labels.
 
 ```bash
-WAIT=1 ./docs/run/dummy-jobs/run-job.sh --all
+WAIT=1 ./docs/run/dummy-request/run-job.sh --all
 ```
 
 `WAIT=1` polls until `completed` and exits non-zero on `failed` or timeout.
@@ -200,7 +198,7 @@ Compose includes [`grafana/otel-lgtm`](https://hub.docker.com/r/grafana/otel-lgt
 
 **App services export OTLP** (Compose sets `OTEL_*` and Spring `MANAGEMENT_OTLP_*`). Service names: `agent-front-door`, `agent-data-plane`, `agent-runtime`, `agent-capability-registry`, `agent-control-plane`, `tool-mock`. Each depends on `otel-lgtm`.
 
-Three-layer plan and tasks: [docs/tasks/observability-plan.md](docs/tasks/observability-plan.md), [docs/tasks/observability-todo.md](docs/tasks/observability-todo.md). Runbooks: [docs/run/runbooks/observability.md](docs/run/runbooks/observability.md).
+Three-layer plan and tasks: [docs/tasks/observability-plan.md](docs/tasks/observability-plan.md), [docs/tasks/observability-todo.md](docs/tasks/observability-todo.md).
 
 Run Grafana with the fabric, or only the backend:
 
@@ -245,7 +243,7 @@ Do not put utterance text, tokens, or stub claims in metric labels or span attri
 
 Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.` Generate a `fee_explain` turn, then confirm signals in Grafana ([http://localhost:3000](http://localhost:3000), `admin` / `admin`):
 
-1. `./docs/run/dummy-jobs/1-autonomous/fee_explain.sh` or `./docs/run/dummy-jobs/chat/1-autonomous/fee_explain.sh`
+1. `./docs/run/dummy-request/job/1-autonomous/fee_explain.sh` or `./docs/run/dummy-request/chat/1-autonomous/fee_explain.sh`
 2. Explore → **Loki**: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="sess-…"` (field filter — the line body is only `run.accepted`, so `|= "sess-…"` is empty). Look for `run.accepted` / `intent.decide`
 3. Explore → **Tempo**: `{.service.name="agent-front-door"}` — children include `agent-data-plane` and `agent-runtime` (Registry on hydrate; `tool-mock` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
 4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-front-door`
@@ -348,9 +346,8 @@ Supporting pieces:
 | --- | --- |
 | [`docs/run/`](docs/run/) | Local run tree — folders only |
 | [`docs/run/compose/`](docs/run/compose/) | Compose file, Postgres image, `.env.example` |
-| [`docs/run/scripts/`](docs/run/scripts/) | start / stop / seed |
-| [`docs/run/dummy-jobs/`](docs/run/dummy-jobs/) | Dummy jobs and chats for every seed job route and chat-visible route (autonomy 0–3). Fresh ids each run |
-| [`docs/run/seed/`](docs/run/seed/) | Catalogue SQL (seed + lifecycle) |
+| [`docs/run/scripts/`](docs/run/scripts/) | start / stop / catalogue seed SQL |
+| [`docs/run/dummy-request/`](docs/run/dummy-request/) | Dummy job and chat requests for every seed job route and chat-visible route (autonomy 0–3). Fresh ids each run |
 | [`docs/run/tool-mock/`](docs/run/tool-mock/) | Config-driven domain HTTP doubles. Add a tool in `tools.json` (unique `method`+`path`), point the capability `invoke.url` at `http://tool-mock:3010{path}`, then rebuild |
 | [`docs/README.md`](docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
 | [`docs/04-architecture/`](docs/04-architecture/) | Architecture packs |
@@ -455,7 +452,7 @@ Three routers stay separate: **ADP** picks the workflow/manifest, **AR** picks t
 
 Each route is versioned on its own (`route_id` + `route_version`). One version per route is `active`. Classify uses the active mix. A follow-up pin is that route’s id and version, not a shared table snapshot. A later contest-board snapshot is proposed in [docs/tasks/future-enhancement.md](docs/tasks/future-enhancement.md).
 
-The catalogue seed is the Pattern 0–3 set (31 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. `seed-db.sh` also loads extra published, draft, and retired cuts plus version history. Reload everything in one shot:
+The catalogue seed is the Pattern 0–3 set (31 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. The same file also has extra published, draft, and retired cuts plus version history. Reload everything in one shot:
 
 ```bash
 ./docs/run/scripts/seed-db.sh

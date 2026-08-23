@@ -6,7 +6,7 @@ From the repository root:
 ./docs/run/scripts/start-app.sh
 ```
 
-That builds and starts Compose in the background. Dummy jobs and chats: [dummy-jobs/README.md](../run/dummy-jobs/README.md).
+That builds and starts Compose in the background. Dummy requests: [dummy-request/README.md](../run/dummy-request/README.md).
 
 | Port | Process |
 | --- | --- |

@@ -354,7 +354,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 
 **Acceptance criteria:**
 - [x] Alerts cover: decide 5xx/error rate, hydrate failure rate, journey completion drop — not raw CPU pages
-- [x] Each alert links to a runbook snippet under `docs/run/runbooks/` or README
+- [x] Each alert links to a runbook snippet in the README
 - [x] Two severities only if alerting is enabled locally; otherwise document “ticket vs page” intent for when a real Alertmanager exists
 
 **Verification:**
@@ -363,7 +363,6 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 **Dependencies:** Task O10, Task O11
 
 **Files likely touched:**
-- `docs/run/runbooks/*.md`
 - Grafana alert provisioning or README
 
 **Estimated scope:** Small

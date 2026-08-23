@@ -89,7 +89,7 @@ One vertical slice at a time. After D5, `card_freeze` (or the chosen chain) must
 # D3–D5
 cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests/test_runs.py
 # seed job whose second tool requires a field the first tool returns
-./docs/run/dummy-jobs/run-job.sh card_freeze   # or the route D1 picks
+./docs/run/dummy-request/run-job.sh card_freeze   # or the route D1 picks
 # tool-mock / test asserts body, not only 200
 ```
 
