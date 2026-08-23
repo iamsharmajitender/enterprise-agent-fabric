@@ -53,6 +53,12 @@ Jobs vs chat is ingress only: same pin, same node, same call. Data that moves: t
 
 This Runtime: prefetch does not POST corpora; `conversation=session` has no transcript store. Gaps: [status](../02-understand/status.md). How this binary hydrates: [patterns](../02-understand/patterns.md).
 
+## Swimlane
+
+![Pattern 0 swimlane](diagrams/pattern-0-swimlane.svg)
+
+Front Door starts. Runtime pins. Data Plane returns the pack. Runtime makes **one** synthesis call. [Open as a page](diagrams/pattern-0-swimlane.html).
+
 ## How the LLM is called
 
 Exactly **one** `llm.complete(system, user)` in `_run_stage` (`agent-runtime/app/graph/workflow.py`). Never `CALL` / `DONE`. Never a second generate.

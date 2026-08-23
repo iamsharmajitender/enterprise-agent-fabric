@@ -50,6 +50,12 @@ Front Door POST /v1/runs
 
 How this binary hydrates: [patterns](../02-understand/patterns.md). Gaps: [status](../02-understand/status.md). Data channels: HTTP is `dict(goal)`; the LLM reads `notes`. See [data](../02-understand/data.md).
 
+## Swimlane
+
+![Pattern 3 swimlane](diagrams/pattern-3-swimlane.svg)
+
+Intended: designer owns **outer** stages; the LLM **CALL**s inside an allowlist. This Runtime still walks the Pattern 2 linear graph — the inner loop is catalogue-only. [Open as a page](diagrams/pattern-3-swimlane.html).
+
 ## How the LLM is called
 
 **Intended — two kinds of `llm.complete` on the same run**

@@ -49,6 +49,12 @@ Data that moves: every HTTP body is `dict(goal)`. `query_formulation` then sets 
 
 This Runtime: prefetch invoke is empty (no pack); slots do not copy tool JSON into the next HTTP body; `branch` / `human_gate` / child start are not executed. Gaps: [status](../02-understand/status.md).
 
+## Swimlane
+
+![Pattern 2 swimlane](diagrams/pattern-2-swimlane.svg)
+
+Front Door starts. Runtime pins a workflow. Catalogue stamps `llm_role`. Runtime walks a **linear** graph: each stage completes with the LLM or calls domain HTTP. [Open as a page](diagrams/pattern-2-swimlane.html).
+
 ## How the LLM is called
 
 The designer does not “call the model.” Each stage’s `llm_role` does. `_run_stage` (`agent-runtime/app/graph/workflow.py`) runs `llm.complete(system, user)` **per LLM stage**, with domain HTTP **between** those calls when the stage has a url.

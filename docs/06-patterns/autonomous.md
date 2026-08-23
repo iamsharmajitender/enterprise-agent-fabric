@@ -52,6 +52,12 @@ Data that moves: HTTP payload is `dict(goal)` only. Tool `text` / `message` appe
 
 This Runtime: prefetch is a no-op; `kind=agent` HTTP is skipped; `conversation` / `long_term` are catalogue-only. Gaps: [status](../02-understand/status.md).
 
+## Swimlane
+
+![Pattern 1 swimlane](diagrams/pattern-1-swimlane.svg)
+
+Front Door starts. Runtime pins (no workflow). Catalogue hydrates the manifest. The LLM **CALL**s or **DONE**s; CALL hits domain HTTP and notes loop back. [Open as a page](diagrams/pattern-1-swimlane.html).
+
 ## How the LLM is called
 
 Every loop step is one `llm.complete(system, user)` inside `build_agent_loop` (`agent-runtime/app/graph/workflow.py`). Domain HTTP runs **between** those calls, never instead of them.

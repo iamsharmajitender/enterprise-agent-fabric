@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern 0 — pin, one synthesis, return</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f8fafc;
+      --color-ink: #1e293b;
+      --color-muted: #64748b;
+      --color-accent: #3b82f6;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Swimlane · Pattern hook-up</p>
+    <h1>Pattern 0 — pin, one synthesis, return</h1>
+    <svg viewBox="0 0 1080 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="p0-title p0-desc">
+      <title id="p0-title">Pattern 0 — pin, one synthesis, return</title>
+      <desc id="p0-desc">Front Door starts the run. Runtime pins the route. Data Plane returns the prompt pack. Runtime makes one synthesis LLM call and returns.</desc>
+      <defs>
+        <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap');</style>
+        <marker id="p0-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
+        <marker id="p0-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/></marker>
+        <marker id="p0-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2563eb"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+      <line x1="40" y1="64" x2="1040" y2="64" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
+      <line x1="40" y1="384" x2="1040" y2="384" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
+      <line x1="168" y1="64" x2="168" y2="384" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
+      <line x1="40" y1="144" x2="1040" y2="144" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
+      <line x1="40" y1="224" x2="1040" y2="224" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
+      <line x1="40" y1="304" x2="1040" y2="304" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
+      <text x="52" y="108" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">FRONT DOOR</text>
+      <text x="52" y="188" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">RUNTIME</text>
+      <text x="52" y="268" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">DATA PLANE</text>
+      <text x="52" y="348" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LLM</text>
+      <path d="M 312,104 H 328 Q 336,104 336,112 V 176 Q 336,184 344,184 H 360" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#p0-arrow)"/>
+      <rect x="312" y="132" width="48" height="12" rx="2" fill="#f8fafc"/>
+      <text x="336" y="142" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">PIN</text>
+      <path d="M 496,184 H 512 Q 520,184 520,192 V 256 Q 520,264 528,264 H 544" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#p0-arrow-link)"/>
+      <rect x="496" y="212" width="48" height="12" rx="2" fill="#f8fafc"/>
+      <text x="520" y="222" fill="#2563eb" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">GET</text>
+      <path d="M 680,264 H 696 Q 704,264 704,272 V 336 Q 704,344 712,344 H 728" fill="none" stroke="#3b82f6" stroke-width="1.4" marker-end="url(#p0-arrow-accent)"/>
+      <rect x="680" y="292" width="64" height="12" rx="2" fill="#f8fafc"/>
+      <text x="712" y="302" fill="#3b82f6" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">COMPLETE</text>
+      <path d="M 864,344 H 972 Q 980,344 980,336 V 128" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#p0-arrow)"/>
+      <rect x="984" y="220" width="56" height="12" rx="2" fill="#f8fafc"/>
+      <text x="1012" y="230" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">RESULT</text>
+      <rect x="176" y="80" width="136" height="48" rx="6" fill="#f8fafc"/>
+      <rect x="176" y="80" width="136" height="48" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="102" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Start run</text>
+      <text x="244" y="116" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">POST /v1/runs</text>
+      <rect x="360" y="160" width="136" height="48" rx="6" fill="#f8fafc"/>
+      <rect x="360" y="160" width="136" height="48" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="428" y="182" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Pin</text>
+      <text x="428" y="196" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">route + goal</text>
+      <rect x="544" y="240" width="136" height="48" rx="6" fill="#f8fafc"/>
+      <rect x="544" y="240" width="136" height="48" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="612" y="262" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Prompt pack</text>
+      <text x="612" y="276" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">host only</text>
+      <rect x="728" y="320" width="136" height="48" rx="6" fill="#f8fafc"/>
+      <rect x="728" y="320" width="136" height="48" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="796" y="342" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">One complete</text>
+      <text x="796" y="356" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">synthesis</text>
+      <rect x="912" y="80" width="136" height="48" rx="6" fill="#f8fafc"/>
+      <rect x="912" y="80" width="136" height="48" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="980" y="102" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Return</text>
+      <text x="980" y="116" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">result + notes</text>
+      <line x1="40" y1="416" x2="1040" y2="416" stroke="rgba(30,41,59,0.08)" stroke-width="0.8"/>
+      <text x="40" y="432" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LEGEND</text>
+      <rect x="40" y="444" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="60" y="452" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Step</text>
+      <rect x="132" y="444" width="14" height="10" rx="2" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="152" y="452" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">LLM call</text>
+      <line x1="268" y1="449" x2="296" y2="449" stroke="#64748b" stroke-width="1.2" marker-end="url(#p0-arrow)"/>
+      <text x="304" y="452" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Handoff</text>
+      <line x1="404" y1="449" x2="432" y2="449" stroke="#2563eb" stroke-width="1.2" marker-end="url(#p0-arrow-link)"/>
+      <text x="440" y="452" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Catalogue GET</text>
+      <line x1="560" y1="449" x2="588" y2="449" stroke="#3b82f6" stroke-width="1.4" marker-end="url(#p0-arrow-accent)"/>
+      <text x="596" y="452" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">The one LLM call</text>
+    </svg>
+  </div>
+</body>
+</html>
