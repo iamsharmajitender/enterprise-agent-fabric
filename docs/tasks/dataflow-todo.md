@@ -5,7 +5,7 @@ Plan: [dataflow-plan.md](./dataflow-plan.md) (includes **Present vs remaining** 
 **Execution order:**
 
 1. **Explore** — D1–D2. Matrix + merge rule. No Runtime behaviour change. **Do this first when you pick the track up.**
-2. **HTTP handoff** — D3–D5. Structured slots, then one seed chain that fails if the next tool does not see prior JSON.
+2. **HTTP handoff** — D3–D5. Structured slots, schema-validate the hop (D4a), then one seed chain that fails if the next tool does not see prior JSON.
 3. **Prefetch pack** — D6–D7. Corpus POST writes a slot; generate/LLM actually uses it.
 4. **Control-flow consumers** — D8–D9. `branch` / `human_gate` read slots.
 5. **Cross-run / resume** — D10–D11. Child projection; checkpoint resume optional.
@@ -51,6 +51,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Acceptance criteria:**
 - [ ] Written rule: `goal` immutable; `slots[stage_id] =` (full JSON | output_schema subset)
 - [ ] Written rule: HTTP payload = `goal` ∪ **selected** slots (namespaced `prior.<id>` **or** workflow `input_from` **or** last JSON only). “All notes into every tool” is explicitly rejected or tightly scoped
+- [ ] Written rule: a pinned route is **not** a trust boundary between tools. Before invoke, the assembled payload must match the next capability `input_schema` (fail closed). Slot store is `output_schema` subset or full JSON (pick one). LLM-written fields (`query_formulation`), OCR/prefetch text, and human-gate packets are untrusted. Domain HTTP is projected/validated JSON — not HTML-sanitised strings. PEP is authorisation, not a payload contract
 - [ ] Cap or deny-list for slot size / keys stated (even if “none in first slice”)
 - [ ] D5 proof `route_id` confirmed
 - [ ] D11 (checkpoint resume) in or out of this track
@@ -134,6 +135,33 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ---
 
+## Task D4a: Validate and constrain tool-to-tool payloads
+
+**Description:** Pinning freezes which tools and versions run. It does not make tool A’s JSON trusted input for tool B. After D4 merge, Runtime must fail closed on a hop that does not match the next capability contract, and must not dump unbounded prior JSON (PII, secrets such as `doc_url`, OCR/LLM text) into the next HTTP body.
+
+**Acceptance criteria:**
+- [ ] Before each domain (and `kind=agent`) invoke, the assembled payload is validated against that capability’s `input_schema`; mismatch fails the stage (no invoke)
+- [ ] Slot write stores only the D2-chosen projection (`output_schema` subset **or** full JSON). Extra keys are stripped or rejected per that rule
+- [ ] Size cap and/or deny-list from D2 applied on slot write (and on merge if D2 says so)
+- [ ] `notes` strings are never used as the next HTTP JSON; `query_formulation` / OCR / prefetch fields are treated as untrusted (type + length only; no HTML-sanitise-as-security)
+- [ ] Unit tests: extra field from stage N does not reach stage N+1 unless selected; missing required `input_schema` field fails closed; `notes` prose is absent from the next POST body
+
+**Verification:**
+- [ ] Tests pass: `cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py`
+- [ ] Flip: valid merge that fails `input_schema` → no HTTP call
+
+**Dependencies:** Task D2 (rule), Task D4 (merge exists to validate)
+
+**Files likely touched:**
+- `agent-runtime/app/graph/workflow.py`
+- `agent-runtime/app/tools/invoker.py` (only if a validate seam belongs there)
+- `agent-runtime/tests/test_graph.py`
+- capability `input_schema` / `output_schema` on the hydrated pin (read-only unless seed schemas are too empty to test)
+
+**Estimated scope:** Medium
+
+---
+
 ## Task D5: Seed-chain proof (tool-mock or contract test)
 
 **Description:** Pick the D2 route. Make the **second** tool require a field produced by the **first**. Dummy `completed` without that field is a fail.
@@ -148,7 +176,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 - [ ] `./docs/run/dummy-request/run-job.sh <proof-route>` completes **and** mock/tests saw the derived field
 - [ ] Break the first tool’s extra field → job or test fails
 
-**Dependencies:** Task D4
+**Dependencies:** Task D4, Task D4a
 
 **Files likely touched:**
 - `docs/run/tool-mock/` (or equivalent mock)
@@ -164,6 +192,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 - [ ] LLM paths unchanged (`notes` + `query_formulation`)
 - [ ] `goal` still ingress-only on pin/checkpoint
+- [ ] Hop validated against next `input_schema`; unbounded slot dump rejected
 - [ ] Proof route fails closed without the derived field
 
 ---
@@ -395,7 +424,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 ## Checkpoint: Track complete (for the phases you chose)
 
 - [ ] D1–D2 always
-- [ ] D3–D5 if you wanted HTTP handoff
+- [ ] D3–D5 (including D4a hop validation) if you wanted HTTP handoff
 - [ ] D6–D7 if you wanted prefetch
 - [ ] D8–D11 only as D2 scoped
 - [ ] Human review before treating dummy jobs as dataflow-complete

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You are here — Agent Data Plane</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #f8fafc;
+      --color-ink:    #1e293b;
+      --color-muted:  #64748b;
+      --color-accent: #3b82f6;
+      --font-sans:    'Inter', system-ui, sans-serif;
+      --font-serif:   'Instrument Serif', serif;
+      --font-mono:    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · Agent Data Plane</p>
+    <h1>You are here. Channels never dial this process.</h1>
+    <svg viewBox="0 0 960 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="adp-here-title adp-here-desc">
+      <title id="adp-here-title">You are here. Channels never dial this process.</title>
+      <desc id="adp-here-desc">Jane talks to Front Door on a channel bearer. Only Front Door may POST decide to Data Plane. Runtime and Control Plane may GET catalogue rows. Data Plane never starts Runtime. Jane cannot reach Data Plane.</desc>
+      <defs>
+        <marker id="adp-here-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
+        <marker id="adp-here-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3b82f6"/></marker>
+        <marker id="adp-here-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2563eb"/></marker>
+      </defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      <!-- Zones -->
+      <rect x="32" y="72" width="200" height="280" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="88" y="76" width="88" height="12" rx="2" fill="#f8fafc"/>
+      <text x="132" y="85" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">CHANNEL</text>
+
+      <rect x="248" y="56" width="680" height="360" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="544" y="60" width="88" height="12" rx="2" fill="#f8fafc"/>
+      <text x="588" y="69" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">FABRIC</text>
+
+      <!-- Connectors (behind nodes) -->
+      <line x1="204" y1="208" x2="280" y2="208" stroke="#2563eb" stroke-width="1.2" marker-end="url(#adp-here-arrow-link)"/>
+      <line x1="432" y1="208" x2="500" y2="208" stroke="#3b82f6" stroke-width="1.4" marker-end="url(#adp-here-arrow-accent)"/>
+      <line x1="684" y1="208" x2="736" y2="208" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#adp-here-arrow-link)"/>
+      <line x1="356" y1="240" x2="356" y2="320" stroke="#64748b" stroke-width="1.2" marker-end="url(#adp-here-arrow)"/>
+      <path d="M 432,340 H 456 V 280 H 592 V 248" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#adp-here-arrow-link)"/>
+      <line x1="432" y1="364" x2="500" y2="364" stroke="#64748b" stroke-width="1.2" marker-end="url(#adp-here-arrow)"/>
+      <path d="M 132,176 V 120 H 248" fill="none" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="242" y="114" width="12" height="12" fill="#f8fafc" stroke="#1e293b" stroke-width="1.2"/>
+      <line x1="245" y1="117" x2="251" y2="123" stroke="#1e293b" stroke-width="1.2"/>
+      <line x1="251" y1="117" x2="245" y2="123" stroke="#1e293b" stroke-width="1.2"/>
+
+      <!-- Arrow labels -->
+      <rect x="220" y="188" width="44" height="12" rx="2" fill="#f8fafc"/>
+      <text x="242" y="197" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HTTPS</text>
+      <rect x="444" y="188" width="48" height="12" rx="2" fill="#f8fafc"/>
+      <text x="468" y="197" fill="#3b82f6" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">DECIDE</text>
+      <rect x="688" y="188" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="704" y="197" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">GET</text>
+      <rect x="364" y="268" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="384" y="277" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">START</text>
+      <rect x="500" y="260" width="52" height="12" rx="2" fill="#f8fafc"/>
+      <text x="526" y="269" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">GET PIN</text>
+      <rect x="444" y="344" width="52" height="12" rx="2" fill="#f8fafc"/>
+      <text x="470" y="353" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
+      <rect x="148" y="96" width="44" height="12" rx="2" fill="#f8fafc"/>
+      <text x="170" y="105" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">NEVER</text>
+
+      <!-- Jane -->
+      <rect x="60" y="176" width="144" height="64" rx="6" fill="#f8fafc"/>
+      <rect x="60" y="176" width="144" height="64" rx="6" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
+      <rect x="68" y="184" width="28" height="12" rx="2" fill="transparent" stroke="rgba(148,163,184,0.50)" stroke-width="0.8"/>
+      <text x="82" y="193" fill="#94a3b8" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">EXT</text>
+      <text x="132" y="212" fill="#1e293b" font-size="12" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">Jane</text>
+      <text x="132" y="228" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">Bearer stub</text>
+
+      <!-- Front Door -->
+      <rect x="280" y="176" width="152" height="64" rx="6" fill="#f8fafc"/>
+      <rect x="280" y="176" width="152" height="64" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="288" y="184" width="32" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="304" y="193" fill="#1e293b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AFD</text>
+      <text x="356" y="212" fill="#1e293b" font-size="12" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">Front Door</text>
+      <text x="356" y="228" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">:3005 · gate</text>
+
+      <!-- Data Plane (focal) -->
+      <rect x="500" y="168" width="184" height="80" rx="6" fill="#f8fafc"/>
+      <rect x="500" y="168" width="184" height="80" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <rect x="508" y="176" width="32" height="12" rx="2" fill="transparent" stroke="rgba(59,130,246,0.50)" stroke-width="0.8"/>
+      <text x="524" y="185" fill="#3b82f6" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ADP</text>
+      <text x="592" y="208" fill="#1e293b" font-size="12" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">Data Plane</text>
+      <text x="592" y="224" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">:3007 · catalogue</text>
+      <text x="592" y="236" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">you are here</text>
+
+      <!-- Control Plane -->
+      <rect x="736" y="176" width="160" height="64" rx="6" fill="#f8fafc"/>
+      <rect x="736" y="176" width="160" height="64" rx="6" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.20)" stroke-dasharray="4,3" stroke-width="1"/>
+      <rect x="744" y="184" width="32" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.30)" stroke-width="0.8"/>
+      <text x="760" y="193" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ACP</text>
+      <text x="816" y="212" fill="#1e293b" font-size="12" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">Control Plane</text>
+      <text x="816" y="228" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">GET only · no decide</text>
+
+      <!-- Runtime -->
+      <rect x="280" y="320" width="152" height="64" rx="6" fill="#f8fafc"/>
+      <rect x="280" y="320" width="152" height="64" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="288" y="328" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="302" y="337" fill="#1e293b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AR</text>
+      <text x="356" y="356" fill="#1e293b" font-size="12" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">Runtime</text>
+      <text x="356" y="372" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">:3008 · kitchen</text>
+
+      <!-- Registry -->
+      <rect x="500" y="320" width="184" height="64" rx="6" fill="#f8fafc"/>
+      <rect x="500" y="320" width="184" height="64" rx="6" fill="rgba(30,41,59,0.03)" stroke="rgba(30,41,59,0.30)" stroke-width="1"/>
+      <rect x="508" y="328" width="32" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.30)" stroke-width="0.8"/>
+      <text x="524" y="337" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ACR</text>
+      <text x="592" y="356" fill="#1e293b" font-size="12" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">Registry</text>
+      <text x="592" y="372" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">:3009 · pantry</text>
+
+      <!-- Callout -->
+      <text x="928" y="112" fill="#1e293b" font-size="14" font-style="italic" font-family="'Instrument Serif', serif" text-anchor="end">does not start Runtime</text>
+      <path d="M 820,120 Q 720,140 640,176" fill="none" stroke="rgba(30,41,59,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+      <circle cx="640" cy="176" r="2" fill="#1e293b"/>
+
+      <!-- Legend -->
+      <line x1="32" y1="444" x2="928" y2="444" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="32" y="464" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.18em">LEGEND</text>
+      <rect x="32" y="480" width="14" height="10" rx="2" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="52" y="488" fill="#64748b" font-size="8" font-family="Inter, sans-serif">This process</text>
+      <line x1="168" y1="484" x2="196" y2="484" stroke="#3b82f6" stroke-width="1.4" marker-end="url(#adp-here-arrow-accent)"/>
+      <text x="204" y="488" fill="#64748b" font-size="8" font-family="Inter, sans-serif">Decide (AFD only)</text>
+      <line x1="340" y1="484" x2="368" y2="484" stroke="#2563eb" stroke-width="1.2" marker-end="url(#adp-here-arrow-link)"/>
+      <text x="376" y="488" fill="#64748b" font-size="8" font-family="Inter, sans-serif">HTTP</text>
+      <line x1="436" y1="484" x2="464" y2="484" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#adp-here-arrow)"/>
+      <text x="472" y="488" fill="#64748b" font-size="8" font-family="Inter, sans-serif">GET / async</text>
+      <rect x="568" y="478" width="12" height="12" fill="#f8fafc" stroke="#1e293b" stroke-width="1.2"/>
+      <text x="588" y="488" fill="#64748b" font-size="8" font-family="Inter, sans-serif">Blocked at the fabric edge</text>
+    </svg>
+  </div>
+</body>
+</html>

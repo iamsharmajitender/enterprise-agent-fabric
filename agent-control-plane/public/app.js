@@ -803,6 +803,12 @@ function renderExpandedValue(key, value, extra) {
   if (key === "ttl_hours" && value != null && value !== "") {
     return document.createTextNode(`${value} hours`);
   }
+  if (key === "eval_suite_id" && isEmpty(value)) {
+    const dash = el("span", "empty", "—");
+    dash.title =
+      "No per-route quality suite. Empty is correct for free-form chat. Routing labels are the Data Plane golden set, not this field.";
+    return dash;
+  }
   if (key && Object.hasOwn(CATALOG_PATH, key)) {
     if (isEmpty(value)) return el("span", "empty", "—");
     return idLink(catalogHref(key, value), fieldLabel(String(value)));

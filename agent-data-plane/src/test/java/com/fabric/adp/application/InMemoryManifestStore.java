@@ -232,48 +232,6 @@ public class InMemoryManifestStore implements ManifestStore {
         """);
   }
 
-  public static ToolManifest researchDraft() {
-    return parse(
-        "research_tools",
-        "2026.08.1",
-        "Draft research tools, not live",
-        "[]",
-        "draft");
-  }
-
-  public static ToolManifest faxLookupRetired() {
-    return parse(
-        "fax_lookup",
-        "2026.04.1",
-        "Retired fax lookup tools",
-        "[]",
-        "retired");
-  }
-
-  public static ToolManifest accountBalance() {
-    return parse(
-        "account-balance-v1",
-        "2026.08.1",
-        "List accounts to answer a cleared-balance question",
-        """
-        [{"name":"list_accounts","capability_id":"list_accounts","capability_version":"1.0.0",
-          "pdp_action":"list_accounts","risk_tier":"low"}]
-        """);
-  }
-
-  public static ToolManifest accountStatement() {
-    return parse(
-        "account-statement-v1",
-        "2026.08.1",
-        "List accounts and transactions for a statement pack",
-        """
-        [{"name":"list_accounts","capability_id":"list_accounts","capability_version":"1.0.0",
-          "pdp_action":"list_accounts","risk_tier":"low"},
-         {"name":"list_transactions","capability_id":"list_transactions","capability_version":"1.0.0",
-          "pdp_action":"list_transactions","risk_tier":"low"}]
-        """);
-  }
-
   public static ToolManifest contractInvestigate() {
     return parse(
         "contract_investigate",
@@ -327,48 +285,9 @@ public class InMemoryManifestStore implements ManifestStore {
         "pdp_action":"policy_search","risk_tier":"low"},
        {"name":"risk_engine","capability_id":"risk_engine","capability_version":"1.0.0",
         "pdp_action":"risk_engine","risk_tier":"medium"},
-       {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0",
+        {"name":"draft_memo","capability_id":"draft_memo","capability_version":"1.0.0",
         "pdp_action":"draft_memo","risk_tier":"medium"}]
       """;
-
-  public static ToolManifest accountsReadonly() {
-    return parse(
-        "accounts-readonly-v2",
-        "2026.08.1",
-        "Read-only account and transaction lookup",
-        """
-        [{"name":"list_accounts","capability_id":"list_accounts","capability_version":"1.0.0",
-          "pdp_action":"list_accounts","risk_tier":"low"},
-         {"name":"list_transactions","capability_id":"list_transactions","capability_version":"1.0.0",
-          "pdp_action":"list_transactions","risk_tier":"low"}]
-        """);
-  }
-
-  public static ToolManifest paymentsReadwrite() {
-    return parse(
-        "payments-readwrite-v3",
-        "2026.07.1",
-        "Lookup, validate, and initiate outbound wires",
-        """
-        [{"name":"lookup_beneficiary","capability_id":"lookup_beneficiary","capability_version":"1.0.0",
-          "pdp_action":"lookup_beneficiary","risk_tier":"low"},
-         {"name":"validate_payment","capability_id":"validate_payment","capability_version":"1.0.0",
-          "pdp_action":"validate_payment","risk_tier":"medium"},
-         {"name":"initiate_wire","capability_id":"initiate_wire","capability_version":"1.0.0",
-          "pdp_action":"initiate_wire","risk_tier":"high"}]
-        """);
-  }
-
-  public static ToolManifest handoff() {
-    return parse(
-        "handoff-v1",
-        "2026.08.1",
-        "Hand off the conversation to a human agent",
-        """
-        [{"name":"escalate_to_human","capability_id":"escalate_to_human","capability_version":"1.0.0",
-          "pdp_action":"escalate_to_human","risk_tier":"medium"}]
-        """);
-  }
 
   public static ToolManifest fraudInvestigate() {
     return parse(

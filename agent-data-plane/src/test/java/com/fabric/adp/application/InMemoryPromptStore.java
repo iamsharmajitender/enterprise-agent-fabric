@@ -195,36 +195,6 @@ public class InMemoryPromptStore implements PromptStore {
         List.of());
   }
 
-  private static PromptPack feeExplainPrior() {
-    return new PromptPack(
-        "fee_explain",
-        "2026.07.1",
-        "You explain account fees. Use the fee lookup tool.",
-        "published",
-        "assistant-platform",
-        List.of());
-  }
-
-  private static PromptPack researchDraft() {
-    return new PromptPack(
-        "research",
-        "2026.08.1",
-        "Draft research host. Not published.",
-        "draft",
-        "assistant-platform",
-        List.of());
-  }
-
-  private static PromptPack feeExplainV0() {
-    return new PromptPack(
-        "fee_explain",
-        "2026.04.1",
-        "Look up why an account fee posted.",
-        "deprecated",
-        "assistant-platform",
-        List.of());
-  }
-
   private static PromptPack contractInvestigate() {
     return new PromptPack(
         "contract_investigate",
@@ -263,46 +233,6 @@ public class InMemoryPromptStore implements PromptStore {
                 "Summarize KYC stage outputs for a human reviewer. Do not recommend activation.")));
   }
 
-  private static PromptPack accountBalance() {
-    return new PromptPack(
-        "account_balance",
-        "2026.08.1",
-        "Answer cleared-balance questions. Use list_accounts only.",
-        "published",
-        "assistant-platform",
-        List.of());
-  }
-
-  private static PromptPack accountStatement() {
-    return new PromptPack(
-        "account_statement",
-        "2026.08.1",
-        "Assemble a statement pack. Use list_accounts and list_transactions. Do not initiate payments.",
-        "published",
-        "assistant-platform",
-        List.of());
-  }
-
-  private static PromptPack accountHistory() {
-    return new PromptPack(
-        "account_history",
-        "2026.08.1",
-        "Answer account and transaction history questions. Read-only tools only.",
-        "published",
-        "assistant-platform",
-        List.of());
-  }
-
-  private static PromptPack payments() {
-    return new PromptPack(
-        "payments",
-        "2026.08.1",
-        "Help initiate an outbound payment. Do not skip validation.",
-        "published",
-        "payments-agents",
-        List.of());
-  }
-
   private static PromptPack policyQa() {
     return new PromptPack(
         "agent-policy-qa",
@@ -318,16 +248,6 @@ public class InMemoryPromptStore implements PromptStore {
         "agent-chat",
         "2026.08.1",
         "Pattern 0. One synthesis turn. Be a concise corporate assistant. No tools.",
-        "published",
-        "assistant-platform",
-        List.of());
-  }
-
-  private static PromptPack escalate() {
-    return new PromptPack(
-        "escalate",
-        "2026.08.1",
-        "Hand the conversation to a human agent. Do not continue the task.",
         "published",
         "assistant-platform",
         List.of());

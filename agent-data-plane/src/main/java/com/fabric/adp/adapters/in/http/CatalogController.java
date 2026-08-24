@@ -98,21 +98,13 @@ public class CatalogController {
   }
 
   private static Map<String, Object> retrievalBody(Retrieval retrieval) {
-    if (retrieval == null || !hasRetrievalMode(retrieval.mode())) {
+    if (retrieval == null || !Retrieval.hasMode(retrieval.mode())) {
       return null;
     }
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("mode", retrieval.mode());
     body.put("scope", retrieval.scope());
     return body;
-  }
-
-  private static boolean hasRetrievalMode(String mode) {
-    if (mode == null || mode.isBlank()) {
-      return false;
-    }
-    String normalized = mode.trim();
-    return !"none".equalsIgnoreCase(normalized) && !"omit".equalsIgnoreCase(normalized);
   }
 
   private static Map<String, Object> memoryBody(MemoryProfile memory) {

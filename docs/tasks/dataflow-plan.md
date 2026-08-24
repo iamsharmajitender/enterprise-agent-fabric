@@ -42,6 +42,7 @@ Do **not** add a dataflow DSL on the route row in the first slice. The route alr
 1. **`goal` is ingress only.** Job/chat payload. Immutable for the run. Tools that need a caller-supplied id (`card_id`, `doc_id`) keep reading it from `goal`.
 2. **`working` becomes structured.** Persist `{ "notes": [...], "slots": { "<stage_id>": <json> } }` on `ar.runtime.runs.working` when `working=session`. `notes` stays the string list the LLM sees (projection of slots + prose).
 3. **HTTP payload = `goal` ∪ selected slots.** Default for the first seed proof: merge **prior slots** (not raw `notes` strings) under a namespaced key (e.g. `prior`) **or** a stage-declared `input_from`. D2 must pick one. Unbounded “dump every previous body into every tool” is forbidden (PII / over-wide schema).
+3a. **Validate at the hop (D4a).** A pinned route is not a trust boundary between tools. Before invoke, the assembled body must match the next capability `input_schema` (fail closed). Slot store is an `output_schema` subset unless D2 chooses full JSON. LLM-written fields, OCR/prefetch text, and human-gate packets are untrusted. Domain HTTP is projected/validated JSON — not HTML-sanitised strings. PEP is authorisation, not a payload contract.
 4. **Prefetch is a writer of slots**, not `long_term`. Same working blob. Corpus POST is still unpublished until D6; empty `invoke` stays a no-op until then.
 5. **Branch / gate read slots**, they do not invent a second state object.
 6. **Child `agent` does not inherit notes.** Parent must name which slots become the child `goal`. Fail closed if required child fields are missing.
@@ -64,7 +65,7 @@ Explore **before** Runtime changes. Dummy jobs completing is not evidence.
 D1 scenario matrix (which seed routes actually need a share)
     → D2 lock payload-merge rule (human)
         → D3 structured working slots (persist + reload)
-            → D4 HTTP merge + D5 one seed proof (card_freeze or msa_risk_review)
+            → D4 HTTP merge → D4a validate hop against `input_schema` + D5 one seed proof (card_freeze or msa_risk_review)
                 → D6–D7 prefetch pack (policy_memo / pack_then_review)
                     → D8 branch, D9 human_gate
                         → D10 parent→child projection
@@ -110,12 +111,14 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 
 - [ ] Task D3: Persist `working.slots` (keep `notes` as LLM projection)
 - [ ] Task D4: HTTP invoke payload includes selected slots
+- [ ] Task D4a: Validate assembled payload against next `input_schema`; constrain slot store
 - [ ] Task D5: One seed chain proves tool-mock / test sees prior JSON
 
 ### Checkpoint: HTTP handoff
 
 - [ ] LLM stages still see `notes` strings
 - [ ] `goal` in the run pin / checkpoint is still the ingress payload
+- [ ] Hop validated against next `input_schema`; unbounded slot dump rejected
 - [ ] A test fails if the second tool is called with `goal` only
 
 ### Phase 2: Prefetch pack
@@ -143,7 +146,8 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Treat dummy `--all` green as “dataflow works” | High | D5/D7 require body assertions; tool-mock must validate or tests stub the body |
-| Merge entire history into every HTTP call | High (PII, schema) | D2 names selected slots; default is not “all notes” |
+| Merge entire history into every HTTP call | High (PII, schema) | D2 names selected slots; default is not “all notes”; D4a schema-validates the hop |
+| Treat pin as making tool JSON trusted | High | D4a: next `input_schema` fail-closed; OCR/LLM/prefetch untrusted |
 | Slots become a mini Shared Memory | Med | TTL = run; `conversation` / `long_term` stay out |
 | Branch/gate scope explodes into a workflow engine | Med | D8–D9 only consume slots already written; no new catalogue DSL |
 | Prefetch implemented as `long_term` | Med | Pack writes `working.slots` only |
@@ -153,7 +157,8 @@ cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py tests
 
 - Merge key: namespaced `prior.<stage_id>` vs workflow `input_from: ["ocr"]` vs “last JSON body only”?
 - Slot value: full tool JSON, or only `output_schema` fields?
-- Cap / redaction on slots (size, deny-list keys)?
+- Cap / redaction on slots (size, deny-list keys)? Extra keys: strip vs reject?
+- Validate next `input_schema` on every hop (yes — D4a); any exception for LLM-only stages?
 - Which seed route is the D5 proof (`card_freeze` vs `msa_risk_review` vs `claims_adjudicate`)?
 - Is D11 in this plan or a Runtime reliability follow-on?
 

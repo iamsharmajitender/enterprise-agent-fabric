@@ -91,4 +91,6 @@ Routes that only call domain tools can finish against tool-mock. LLM stages stil
 
 The `fee_explain` chat wrapper also checks Control Plane, FR-5, the canned fee line, and the four databases.
 
+`--all` with `WAIT=1` is pin/hydrate smoke. It is **not** the routing golden set. Routing labels: `./agent-data-plane/run-eval.sh` ([eval fixtures](../../../agent-data-plane/src/test/resources/eval/README.md)).
+
 APIs: [agent-front-door/README.md](../../../agent-front-door/README.md). Docs map: [docs/README.md](../../README.md).

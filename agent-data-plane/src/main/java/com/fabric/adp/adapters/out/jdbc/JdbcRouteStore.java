@@ -113,11 +113,8 @@ public class JdbcRouteStore implements RouteStore {
   }
 
   private RouteRow mapRow(java.sql.ResultSet rs) throws java.sql.SQLException {
-    String retrievalMode = rs.getString("retrieval_mode");
     Retrieval retrieval =
-        hasRetrievalMode(retrievalMode)
-            ? new Retrieval(retrievalMode, strings(rs.getString("retrieval_scope")))
-            : null;
+        Retrieval.fromMode(rs.getString("retrieval_mode"), strings(rs.getString("retrieval_scope")));
     String conversation = rs.getString("mem_conversation");
     String working = rs.getString("mem_working");
     String loop = rs.getString("mem_loop");
@@ -160,14 +157,6 @@ public class JdbcRouteStore implements RouteStore {
         strings(rs.getString("keywords")),
         AutonomyPattern.fromCode(rs.getInt("autonomy_mode")),
         rs.getString("status"));
-  }
-
-  private static boolean hasRetrievalMode(String mode) {
-    if (mode == null || mode.isBlank()) {
-      return false;
-    }
-    String normalized = mode.trim();
-    return !"none".equalsIgnoreCase(normalized) && !"omit".equalsIgnoreCase(normalized);
   }
 
   private List<String> strings(String json) {

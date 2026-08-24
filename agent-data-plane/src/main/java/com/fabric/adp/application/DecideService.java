@@ -26,31 +26,28 @@ public class DecideService {
     if (!"afd".equals(workload)) {
       throw new ForbiddenException("only afd may call decide");
     }
-    DecideResult result;
-    if ("jobs".equals(request.ingress()) && request.hasRouteId()) {
-      result = entitleJob(request);
-    } else {
-      List<RouteRow> eligible = catalogue.eligible(request.channel(), request.entitledClaims());
-      List<String> eligibleIds = eligible.stream().map(RouteRow::routeId).toList();
-      if (eligible.isEmpty()) {
-        result = DecideResult.abstain(eligibleIds);
-      } else if (request.hasRouteId()) {
-        result =
-            eligible.stream()
-                .filter(row -> row.routeId().equals(request.routeId()))
-                .findFirst()
-                .map(row -> DecideResult.route(row, 1.0, eligibleIds))
-                .orElseGet(() -> DecideResult.abstain(eligibleIds));
-      } else {
-        result = keywordRetrieve(request.message(), eligible, eligibleIds);
-      }
-    }
+    DecideResult result = resolve(request);
     emitDecide(request, result);
     TraceIds.put("session_id", request.sessionId());
     TraceIds.put("outcome", result.outcome());
     TraceIds.put("route_id", result.routeId());
     TraceIds.put("route_version", result.routeVersion());
     return result;
+  }
+
+  private DecideResult resolve(DecideRequest request) {
+    if ("jobs".equals(request.ingress()) && request.hasRouteId()) {
+      return entitleJob(request);
+    }
+    List<RouteRow> eligible = catalogue.eligible(request.channel(), request.entitledClaims());
+    List<String> eligibleIds = eligible.stream().map(RouteRow::routeId).toList();
+    if (eligible.isEmpty()) {
+      return DecideResult.abstain(eligibleIds);
+    }
+    if (request.hasRouteId()) {
+      return bindOrAbstain(eligible, request.routeId(), eligibleIds);
+    }
+    return keywordRetrieve(request.message(), eligible, eligibleIds);
   }
 
   private void emitDecide(DecideRequest request, DecideResult result) {
@@ -90,11 +87,16 @@ public class DecideService {
             .filter(row -> request.entitledClaims().containsAll(row.requiredClaims()))
             .toList();
     List<String> entitledIds = entitled.stream().map(RouteRow::routeId).toList();
-    return entitled.stream()
-        .filter(row -> row.routeId().equals(request.routeId()))
+    return bindOrAbstain(entitled, request.routeId(), entitledIds);
+  }
+
+  private static DecideResult bindOrAbstain(
+      List<RouteRow> rows, String routeId, List<String> eligibleIds) {
+    return rows.stream()
+        .filter(row -> row.routeId().equals(routeId))
         .findFirst()
-        .map(row -> DecideResult.route(row, 1.0, entitledIds))
-        .orElseGet(() -> DecideResult.abstain(entitledIds));
+        .map(row -> DecideResult.route(row, 1.0, eligibleIds))
+        .orElseGet(() -> DecideResult.abstain(eligibleIds));
   }
 
   private DecideResult keywordRetrieve(String message, List<RouteRow> eligible, List<String> eligibleIds) {

@@ -12,6 +12,7 @@ Documentation for this repository. Behaviour is what Agent Runtime executes afte
 | [04-architecture](04-architecture/) | Box packs (AFD, ADP, ACR, AR) plus [narrative/](04-architecture/narrative/) |
 | [05-reference](05-reference/) | Frozen JSON contracts |
 | [06-patterns](06-patterns/) | Intended Pattern 0–3 compositions (what is possible) |
+| [07-usecases](07-usecases/) | Intended caller shapes (documents via DMS vs byte upload). Add files as we evolve |
 
 ## Stays where it is
 
@@ -28,9 +29,10 @@ These directories are not shelves. They do not move.
 | You want | Start here |
 | --- | --- |
 | New you | [01-start](01-start/README.md), then [overview](02-understand/overview.md) |
-| What can it do | [06-patterns](06-patterns/), then [03-catalogue](03-catalogue/) |
+| What can it do | [06-patterns](06-patterns/), then [03-catalogue](03-catalogue/), then [07-usecases](07-usecases/) |
 | How a box works | [04-architecture](04-architecture/), then [02-understand](02-understand/overview.md) |
 | Enhance later | [tasks/](tasks/), especially [dataflow-plan.md](tasks/dataflow-plan.md) |
+| Routing eval gate | [eval-plan.md](tasks/eval-plan.md), [eval fixtures](../agent-data-plane/src/test/resources/eval/README.md) |
 
 ## How this binary works
 

@@ -10,6 +10,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class JdbcManifestStore implements ManifestStore {
 
+  private static final String SELECT =
+      """
+      SELECT manifest_id, manifest_version, description, tools::text, status
+        FROM dataplane.manifests
+      """;
+
   private final NamedParameterJdbcTemplate jdbc;
   private final ManifestMapper manifests;
 
@@ -22,21 +28,14 @@ public class JdbcManifestStore implements ManifestStore {
   public Optional<ToolManifest> find(String manifestId, String manifestVersion) {
     return jdbc
         .query(
-            """
-            SELECT manifest_id, manifest_version, description, tools::text, status
-              FROM dataplane.manifests
-             WHERE manifest_id = :id AND manifest_version = :version
-            """,
+            SELECT
+                + """
+                 WHERE manifest_id = :id AND manifest_version = :version
+                """,
             new MapSqlParameterSource()
                 .addValue("id", manifestId)
                 .addValue("version", manifestVersion),
-            (rs, n) ->
-                manifests.parse(
-                    rs.getString("manifest_id"),
-                    rs.getString("manifest_version"),
-                    rs.getString("description"),
-                    rs.getString("tools"),
-                    rs.getString("status")))
+            (rs, n) -> mapRow(rs))
         .stream()
         .findFirst();
   }
@@ -54,48 +53,37 @@ public class JdbcManifestStore implements ManifestStore {
           ) latest
          ORDER BY manifest_id
         """,
-        (rs, n) ->
-            manifests.parse(
-                rs.getString("manifest_id"),
-                rs.getString("manifest_version"),
-                rs.getString("description"),
-                rs.getString("tools"),
-                rs.getString("status")));
+        (rs, n) -> mapRow(rs));
   }
 
   @Override
   public List<ToolManifest> listAll() {
     return jdbc.query(
-        """
-        SELECT manifest_id, manifest_version, description, tools::text, status
-          FROM dataplane.manifests
-         ORDER BY manifest_id, string_to_array(manifest_version, '.')::int[] DESC
-        """,
-        (rs, n) ->
-            manifests.parse(
-                rs.getString("manifest_id"),
-                rs.getString("manifest_version"),
-                rs.getString("description"),
-                rs.getString("tools"),
-                rs.getString("status")));
+        SELECT
+            + """
+             ORDER BY manifest_id, string_to_array(manifest_version, '.')::int[] DESC
+            """,
+        (rs, n) -> mapRow(rs));
   }
 
   @Override
   public List<ToolManifest> listVersions(String manifestId) {
     return jdbc.query(
-        """
-        SELECT manifest_id, manifest_version, description, tools::text, status
-          FROM dataplane.manifests
-         WHERE manifest_id = :id
-         ORDER BY string_to_array(manifest_version, '.')::int[] DESC
-        """,
+        SELECT
+            + """
+             WHERE manifest_id = :id
+             ORDER BY string_to_array(manifest_version, '.')::int[] DESC
+            """,
         new MapSqlParameterSource("id", manifestId),
-        (rs, n) ->
-            manifests.parse(
-                rs.getString("manifest_id"),
-                rs.getString("manifest_version"),
-                rs.getString("description"),
-                rs.getString("tools"),
-                rs.getString("status")));
+        (rs, n) -> mapRow(rs));
+  }
+
+  private ToolManifest mapRow(java.sql.ResultSet rs) throws java.sql.SQLException {
+    return manifests.parse(
+        rs.getString("manifest_id"),
+        rs.getString("manifest_version"),
+        rs.getString("description"),
+        rs.getString("tools"),
+        rs.getString("status"));
   }
 }

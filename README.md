@@ -89,7 +89,7 @@ Reload catalogue seed (deletes, then inserts):
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
 | `docker compose -f docs/run/compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images after code or **new** Flyway versions. Do not edit a migration that already ran: Flyway checksum-fails, Data Plane crash-loops, and Control Plane shows `Catalogue read failed (502)`. Recover with `docker compose -f docs/run/compose/docker-compose.yml down -v`, then `./docs/run/scripts/start-app.sh`. Squashing Flyway history into a new `V1` is the same: wipe the Postgres volume so `flyway_schema_history` is empty. To reload seed without a new migration, use `./docs/run/scripts/seed-db.sh`.
+`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Do not edit a migration that already ran: Flyway checksum-fails, Data Plane crash-loops, and Control Plane shows `Catalogue read failed (502)`. `start-app.sh` exits non-zero in that case. Recover with `docker compose -f docs/run/compose/docker-compose.yml down -v`, then `./docs/run/scripts/start-app.sh`. Squashing Flyway history into a new `V1` is the same: wipe the Postgres volume so `flyway_schema_history` is empty. To reload seed without a new migration, use `./docs/run/scripts/seed-db.sh`.
 
 ### Check it is up
 
@@ -158,7 +158,7 @@ There is no GitHub Actions workflow in this repo yet. The hook is Data Plane `mv
 cd agent-data-plane && mvn test -Dtest=RoutingEvalTest,JobsEntitleEvalTest,CataloguePinLintTest
 ```
 
-Flip one `expected.route_id` in `routing-golden.json` and the gate must go red. Restore it. Do not delete an incident case to go green.
+Playbook (add an incident, do not delete a case to go green) and the break-a-label checklist: [agent-data-plane/src/test/resources/eval/README.md](agent-data-plane/src/test/resources/eval/README.md). Flip one `expected.route_id` in `routing-golden.json` and the gate must go red. Restore it.
 
 ### What CI does not run
 
@@ -394,7 +394,7 @@ Pack: [agent-front-door](docs/04-architecture/agent-front-door.md). Service note
 
 **Database `adp`.** Schema `dataplane`. Policy lives here; memories do not. A down catalogue fails closed (no new starts). A down Runtime does not stop classify.
 
-Pack: [agent-plane](docs/04-architecture/agent-plane.md) (Data Plane half; ACP is the UI + future audit).
+Pack: [agent-plane](docs/04-architecture/agent-plane.md) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-data-plane/README.md`](agent-data-plane/README.md).
 
 ### ACR — Agent Capability Registry (`acr`, :3009)
 
