@@ -181,6 +181,15 @@ public class InMemoryRouteStore implements RouteStore {
     return this;
   }
 
+  public InMemoryRouteStore replace(RouteRow row) {
+    routes.removeIf(
+        existing ->
+            existing.routeId().equals(row.routeId())
+                && existing.routeVersion().equals(row.routeVersion()));
+    routes.add(row);
+    return this;
+  }
+
   private void add(
       String id,
       int pattern,

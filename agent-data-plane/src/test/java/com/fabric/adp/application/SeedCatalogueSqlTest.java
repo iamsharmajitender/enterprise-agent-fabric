@@ -54,6 +54,17 @@ class SeedCatalogueSqlTest {
     assertThat(seed).contains("host plus synthesis");
   }
 
+  @Test
+  void flywayIntentRulesSeedSlashCommands() throws Exception {
+    String seed = read("/db/migration/V2__intent_rules.sql");
+    assertThat(seed).contains("dataplane.intent_rules");
+    assertThat(seed).contains("'/hr'");
+    assertThat(seed).contains("'agent-chat'");
+    assertThat(seed).contains("'talk to a human'");
+    assertThat(seed).contains("'/freeze'");
+    assertThat(seed).contains("'card_freeze'");
+  }
+
   private static String read(String path) throws Exception {
     try (var in = SeedCatalogueSqlTest.class.getResourceAsStream(path)) {
       assertThat(in).as(path).isNotNull();

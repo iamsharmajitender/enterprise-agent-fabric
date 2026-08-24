@@ -10,6 +10,7 @@ import com.fabric.adp.application.CatalogueService;
 import com.fabric.adp.application.CorpusService;
 import com.fabric.adp.application.DecideService;
 import com.fabric.adp.application.InMemoryCorpusStore;
+import com.fabric.adp.application.InMemoryIntentRuleStore;
 import com.fabric.adp.application.InMemoryManifestStore;
 import com.fabric.adp.application.InMemoryPromptStore;
 import com.fabric.adp.application.InMemoryRouteStore;
@@ -409,7 +410,28 @@ class CatalogAndDecideControllerTest {
                     """))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.outcome").value("route"))
-        .andExpect(jsonPath("$.route_id").value("fee_explain"));
+        .andExpect(jsonPath("$.route_id").value("fee_explain"))
+        .andExpect(jsonPath("$.router_layer").value("retrieve"))
+        .andExpect(jsonPath("$.latency_ms").isNumber());
+  }
+
+  @Test
+  void decideSlashHrUsesRulesLayer() throws Exception {
+    mvc.perform(
+            post("/v1/intent/decide")
+                .header("Authorization", "Bearer fabric-internal")
+                .header("X-Workload", "afd")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"ingress":"chat","channel":"web","session_id":"sess-88",
+                     "message":"/hr","route_id":null,
+                     "claims":{"sub":"jane","emts":{"accounts:read":true}}}
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.outcome").value("route"))
+        .andExpect(jsonPath("$.route_id").value("agent-chat"))
+        .andExpect(jsonPath("$.router_layer").value("rules"));
   }
 
   @Test
@@ -461,7 +483,11 @@ class CatalogAndDecideControllerTest {
 
     @Bean
     DecideService decideService(CatalogueService catalogue) {
-      return new DecideService(catalogue, new com.fabric.adp.application.BusinessEvents(new io.micrometer.core.instrument.simple.SimpleMeterRegistry()));
+      return new DecideService(
+          catalogue,
+          new com.fabric.adp.application.BusinessEvents(
+              new io.micrometer.core.instrument.simple.SimpleMeterRegistry()),
+          new InMemoryIntentRuleStore().seedDemo());
     }
   }
 }

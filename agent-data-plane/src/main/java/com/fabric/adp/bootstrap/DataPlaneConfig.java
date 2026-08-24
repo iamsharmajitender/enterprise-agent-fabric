@@ -1,6 +1,7 @@
 package com.fabric.adp.bootstrap;
 
 import com.fabric.adp.adapters.out.jdbc.JdbcCorpusStore;
+import com.fabric.adp.adapters.out.jdbc.JdbcIntentRuleStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcManifestStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcPromptStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcRouteStore;
@@ -11,6 +12,7 @@ import com.fabric.adp.application.CorpusService;
 import com.fabric.adp.application.CorpusStore;
 import com.fabric.adp.application.DecideService;
 import com.fabric.adp.application.HealthService;
+import com.fabric.adp.application.IntentRuleStore;
 import com.fabric.adp.application.ManifestService;
 import com.fabric.adp.application.ManifestStore;
 import com.fabric.adp.application.PromptService;
@@ -18,11 +20,15 @@ import com.fabric.adp.application.PromptStore;
 import com.fabric.adp.application.RouteStore;
 import com.fabric.adp.application.WorkflowService;
 import com.fabric.adp.application.WorkflowStore;
+import com.fabric.adp.application.layers.LlmFallbackPool;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
+import java.util.concurrent.ExecutorService;
 
 @Configuration
 public class DataPlaneConfig {
@@ -88,7 +94,23 @@ public class DataPlaneConfig {
   }
 
   @Bean
-  DecideService decideService(CatalogueService catalogue, BusinessEvents events) {
-    return new DecideService(catalogue, events);
+  IntentRuleStore intentRuleStore(NamedParameterJdbcTemplate jdbc) {
+    return new JdbcIntentRuleStore(jdbc);
+  }
+
+  @Bean(destroyMethod = "shutdownNow")
+  ExecutorService llmFallbackPool() {
+    return LlmFallbackPool.create();
+  }
+
+  @Bean
+  DecideService decideService(
+      CatalogueService catalogue,
+      BusinessEvents events,
+      IntentRuleStore rules,
+      ExecutorService llmFallbackPool,
+      @Value("${fabric.decide.llm.enabled:false}") boolean llmEnabled,
+      @Value("${fabric.decide.llm.timeout-ms:500}") long llmTimeoutMs) {
+    return new DecideService(catalogue, events, rules, llmEnabled, llmFallbackPool, llmTimeoutMs);
   }
 }

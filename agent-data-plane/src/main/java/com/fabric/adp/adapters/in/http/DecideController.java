@@ -23,11 +23,8 @@ public class DecideController {
   public Map<String, Object> decide(@RequestBody Map<String, Object> body, HttpServletRequest request) {
     String workload = (String) request.getAttribute(WorkloadAuthFilter.ATTR_WORKLOAD);
     @SuppressWarnings("unchecked")
-    Map<String, Object> claims =
-        body.get("claims") instanceof Map<?, ?> m ? (Map<String, Object>) m : Map.of();
-    DecideResult result =
-        decide.decide(
-            new DecideRequest(
+    Map<String, Object> claims = body.get("claims") instanceof Map<?, ?> m ? (Map<String, Object>) m : Map.of();
+    DecideResult result = decide.decide(new DecideRequest(
                 string(body.get("ingress")),
                 string(body.get("channel")),
                 string(body.get("session_id")),
@@ -42,6 +39,10 @@ public class DecideController {
     response.put("route_version", result.routeVersion());
     response.put("confidence", result.confidence());
     response.put("eligible_routes", result.eligibleRoutes());
+    if (result.routerLayer() != null) {
+      response.put("router_layer", result.routerLayer());
+    }
+    response.put("latency_ms", result.latencyMs());
     if (result.clarifyPrompt() != null) {
       response.put("clarify_prompt", result.clarifyPrompt());
     }

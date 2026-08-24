@@ -78,4 +78,8 @@ public record RouteRow(
         autonomyMode,
         active ? "active" : "published");
   }
+
+  public RiskClass riskClass() {
+    return RiskClass.fromPolicy(policyProfile);
+  }
 }

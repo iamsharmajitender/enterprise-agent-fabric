@@ -11,7 +11,13 @@ public record DecideResult(
     Double confidence,
     String clarifyPrompt,
     List<Map<String, Object>> candidates,
-    List<String> eligibleRoutes) {
+    List<String> eligibleRoutes,
+    String routerLayer,
+    Long latencyMs) {
+
+  public static final String LAYER_RULES = "rules";
+  public static final String LAYER_RETRIEVE = "retrieve";
+  public static final String LAYER_LLM = "llm";
 
   public static DecideResult route(RouteRow row, double confidence, List<String> eligible) {
     return new DecideResult(
@@ -22,15 +28,46 @@ public record DecideResult(
         confidence,
         null,
         null,
-        eligible);
+        eligible,
+        null,
+        null);
   }
 
   public static DecideResult clarify(
       String prompt, List<Map<String, Object>> candidates, List<String> eligible) {
-    return new DecideResult("clarify", null, null, null, null, prompt, candidates, eligible);
+    return new DecideResult(
+        "clarify", null, null, null, null, prompt, candidates, eligible, null, null);
   }
 
   public static DecideResult abstain(List<String> eligible) {
-    return new DecideResult("abstain", null, null, null, null, null, null, eligible);
+    return new DecideResult("abstain", null, null, null, null, null, null, eligible, null, null);
+  }
+
+  public DecideResult withRouterLayer(String layer) {
+    return new DecideResult(
+        outcome,
+        intentLabel,
+        routeId,
+        routeVersion,
+        confidence,
+        clarifyPrompt,
+        candidates,
+        eligibleRoutes,
+        layer,
+        latencyMs);
+  }
+
+  public DecideResult withLatencyMs(long ms) {
+    return new DecideResult(
+        outcome,
+        intentLabel,
+        routeId,
+        routeVersion,
+        confidence,
+        clarifyPrompt,
+        candidates,
+        eligibleRoutes,
+        routerLayer,
+        ms);
   }
 }
