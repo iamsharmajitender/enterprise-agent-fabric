@@ -1,0 +1,50 @@
+{
+  "_comment": "Assert ordered workflow stages/tools after start. Not reply prose. Not the intent-router board.",
+  "suite_id": "claims_adjudicate_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "claims-adjudicate-happy",
+      "route_id": "claims_adjudicate",
+      "ingress": "jobs",
+      "channel": "api",
+      "goal": {
+        "claim_id": "clm-eval-1"
+      },
+      "claims": {
+        "sub": "eval",
+        "emts": {
+          "claims:read": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "pack_playbook",
+            "tool": "policy_search",
+            "llm_role": "none"
+          },
+          {
+            "id": "clause_search",
+            "tool": "clause_search",
+            "llm_role": "query_formulation"
+          },
+          {
+            "id": "score",
+            "tool": "risk_engine",
+            "llm_role": "none"
+          },
+          {
+            "id": "memo",
+            "tool": "draft_memo",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence",
+        "pattern-2"
+      ]
+    }
+  ]
+}

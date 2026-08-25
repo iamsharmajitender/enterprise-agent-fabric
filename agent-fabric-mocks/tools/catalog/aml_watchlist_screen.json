@@ -1,0 +1,10 @@
+{
+  "id": "aml_watchlist_screen",
+  "method": "POST",
+  "path": "/aml/screen",
+  "status": 200,
+  "response": {
+    "hits": [],
+    "text": "AML screen: no hits."
+  }
+}

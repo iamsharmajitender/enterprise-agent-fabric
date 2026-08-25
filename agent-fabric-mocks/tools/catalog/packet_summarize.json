@@ -1,0 +1,9 @@
+{
+  "id": "packet_summarize",
+  "method": "POST",
+  "path": "/disputes/summarize",
+  "status": 200,
+  "response": {
+    "text": "Packet: customer disputes a posted fee; no payout recommended."
+  }
+}

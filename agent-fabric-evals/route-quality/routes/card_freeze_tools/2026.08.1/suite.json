@@ -1,0 +1,7 @@
+{
+  "suite_id": "card_freeze_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "card_freeze",
+  "description": "Pattern 2: identity_check \u2192 limit_check \u2192 freeze_card \u2192 synthesis. E14 first suite."
+}

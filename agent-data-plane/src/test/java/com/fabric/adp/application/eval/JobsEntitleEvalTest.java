@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JobsEntitleEvalTest {
 
-  private static final EvalFile FILE = EvalJson.load("/eval/jobs-entitle-golden.json");
+  private static final EvalFile FILE = EvalJson.loadActive("jobs-entitle");
 
   private DecideService decide;
 

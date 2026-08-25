@@ -1,0 +1,9 @@
+{
+  "id": "case_open",
+  "method": "POST",
+  "path": "/disputes/open",
+  "status": 200,
+  "response": {
+    "text": "Dispute case opened."
+  }
+}

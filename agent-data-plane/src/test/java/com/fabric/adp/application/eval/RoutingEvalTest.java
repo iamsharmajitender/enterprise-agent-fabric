@@ -23,7 +23,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class RoutingEvalTest {
 
-  private static final EvalFile FILE = EvalJson.load("/eval/routing-golden.json");
+  private static final EvalFile FILE = EvalJson.loadActive("routing");
 
   private DecideService decide;
   private CatalogueService catalogue;

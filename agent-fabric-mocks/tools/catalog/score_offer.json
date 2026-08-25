@@ -1,0 +1,9 @@
+{
+  "id": "score_offer",
+  "method": "POST",
+  "path": "/product/score",
+  "status": 200,
+  "response": {
+    "text": "Offer score 0.72 (eligible)."
+  }
+}

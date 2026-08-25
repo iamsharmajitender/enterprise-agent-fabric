@@ -1,0 +1,22 @@
+{
+  "_comment": "Unknown route_id \u2192 abstain.",
+  "cases": [
+    {
+      "id": "jobs-unknown-route-abstains",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "no_such_route",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "accounts:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    }
+  ]
+}

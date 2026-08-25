@@ -1,0 +1,52 @@
+{
+  "_comment": "Ambiguous / close-match utterances \u2192 clarify.",
+  "cases": [
+    {
+      "id": "chat-hello-clarifies",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "hello",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "clarify"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-hi-clarifies",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "hi there",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "clarify"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-policy-handbook-clarifies",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "policy handbook",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "policy:read": true
+        }
+      },
+      "expected": {
+        "outcome": "clarify"
+      },
+      "tags": []
+    }
+  ]
+}

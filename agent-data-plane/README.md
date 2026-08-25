@@ -322,11 +322,12 @@ Tests seed **in-memory** twins of the Flyway demo. Keep them aligned; `Catalogue
 Image build runs `mvn test`. No Compose required for the routing gate:
 
 ```bash
-./agent-data-plane/run-eval.sh
+./agent-fabric-evals/intent-router-evals/run.sh
+# or ./agent-data-plane/run-eval.sh
 # RoutingEvalTest + JobsEntitleEvalTest + CataloguePinLintTest
 ```
 
-Playbook (add an incident, do not delete a case to go green): [src/test/resources/eval/README.md](src/test/resources/eval/README.md).
+Playbook (add an incident, do not delete a case to go green): [../agent-fabric-evals/intent-router-evals/README.md](../agent-fabric-evals/intent-router-evals/README.md).
 
 ---
 

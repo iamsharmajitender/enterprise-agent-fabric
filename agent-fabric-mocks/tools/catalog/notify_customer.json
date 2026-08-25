@@ -1,0 +1,9 @@
+{
+  "id": "notify_customer",
+  "method": "POST",
+  "path": "/notify",
+  "status": 200,
+  "response": {
+    "text": "Notification queued for the account holder."
+  }
+}

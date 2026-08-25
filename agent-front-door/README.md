@@ -67,6 +67,28 @@ Decide body this box sends ([`05-reference/decide-jobs-route.json`](../docs/05-r
 
 If Runtime does not return `202`, this box responds **503** and does not invent a `correlation_id`. Retry with the same idempotency key.
 
+## Business events
+
+Front Door emits **only** these, from `BusinessEvents.emit`. Not Kafka. No utterance, tokens, or claims. Decide outcomes are Data Plane; hydrate/complete are Runtime.
+
+### Chat (`AssistantService`)
+
+| Event | When |
+| --- | --- |
+| `chat.turn.received` | Jane posts a turn (before decide) |
+| `chat.run.accepted` | Freeze + Runtime start succeeded |
+| `chat.events.delivered` | Poll/SSE sees run completed |
+
+### Jobs (`JobsService`)
+
+| Event | When |
+| --- | --- |
+| `job.entitle.accepted` | Job POST accepted for entitle |
+| `job.entitle.rejected` | Decide did not return `route` |
+| `job.run.accepted` | Runtime start succeeded |
+
+Full journey list: [root README — Business events](../README.md#business-events).
+
 ## Contracts
 
 - [`05-reference/jobs-start.json`](../docs/05-reference/jobs-start.json)

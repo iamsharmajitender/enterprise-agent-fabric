@@ -1,0 +1,7 @@
+{
+  "suite_id": "llm_pipeline_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "llm_pipeline",
+  "description": "Pattern 2: fixed LLM stage order (classify \u2192 synthesis \u2192 synthesis)."
+}

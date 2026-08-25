@@ -1,0 +1,9 @@
+{
+  "id": "compare_options",
+  "method": "POST",
+  "path": "/product/compare",
+  "status": 200,
+  "response": {
+    "text": "Compared options: standard checking vs fee-free bundle."
+  }
+}

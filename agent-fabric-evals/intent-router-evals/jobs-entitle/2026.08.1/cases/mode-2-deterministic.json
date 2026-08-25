@@ -1,0 +1,430 @@
+{
+  "_comment": "Pattern 2 deterministic jobs entitle + fail-closed.",
+  "cases": [
+    {
+      "id": "jobs-llm_pipeline-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "llm_pipeline",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "llm_pipeline",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-policy_memo-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "policy_memo",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "policy:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "policy_memo",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-policy_memo-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "policy_memo",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-account_notify-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "account_notify",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "notify:send": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "account_notify",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-account_notify-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "account_notify",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-card_freeze-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "card_freeze",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "cards:freeze": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "card_freeze",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-card_freeze-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "card_freeze",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-dispute_intake-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "dispute_intake",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "disputes:write": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "dispute_intake",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-dispute_intake-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "dispute_intake",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-pack_then_notify-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "pack_then_notify",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "notify:send": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "pack_then_notify",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-pack_then_notify-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "pack_then_notify",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-pack_then_freeze-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "pack_then_freeze",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "cards:freeze": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "pack_then_freeze",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-pack_then_freeze-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "pack_then_freeze",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-pack_then_review-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "pack_then_review",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "legal:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "pack_then_review",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-pack_then_review-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "pack_then_review",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-clause_lookup-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "clause_lookup",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "legal:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "clause_lookup",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-clause_lookup-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "clause_lookup",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-template_retrieve-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "template_retrieve",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "legal:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "template_retrieve",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-template_retrieve-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "template_retrieve",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-msa_risk_review-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "msa_risk_review",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "legal:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "msa_risk_review",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-msa_risk_review-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "msa_risk_review",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-kyc_onboarding-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "kyc_onboarding",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "kyc:onboard": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "kyc_onboarding",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-kyc_onboarding-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "kyc_onboarding",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-claims_adjudicate-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "claims_adjudicate",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "claims:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "claims_adjudicate",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-claims_adjudicate-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "claims_adjudicate",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    }
+  ]
+}

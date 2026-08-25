@@ -1,0 +1,10 @@
+{
+  "id": "validate_payment",
+  "method": "POST",
+  "path": "/payments/validate",
+  "status": 200,
+  "response": {
+    "ok": true,
+    "text": "Payment pre-auth passed."
+  }
+}

@@ -20,9 +20,11 @@ These directories are not shelves. They do not move.
 
 | Path | Role |
 | --- | --- |
-| [run/](run/) | Operator scratchpad: Compose, start/stop/seed scripts, dummy requests, tool-mock |
+| [run/](run/) | Operator scratchpad: Compose, start/stop/seed scripts, dummy requests |
 | [tasks/](tasks/) | Engineering plans and todos |
 | [intent/](intent/) | v1 lock: what to build. Not how a box works today |
+
+Domain HTTP doubles live at repo root: [`agent-fabric-mocks/tools/`](../agent-fabric-mocks/tools/).
 
 ## Reader paths
 
@@ -31,8 +33,9 @@ These directories are not shelves. They do not move.
 | New you | [01-start](01-start/README.md), then [overview](02-understand/overview.md) |
 | What can it do | [06-patterns](06-patterns/), then [03-catalogue](03-catalogue/), then [07-usecases](07-usecases/) |
 | How a box works | [04-architecture](04-architecture/), then [02-understand](02-understand/overview.md) |
-| Enhance later | [tasks/](tasks/), especially [dataflow-plan.md](tasks/dataflow-plan.md) |
-| Routing eval gate | [eval-plan.md](tasks/eval-plan.md), [eval fixtures](../agent-data-plane/src/test/resources/eval/README.md) |
+| Enhance later | [tasks/](tasks/), especially [dataflow-plan.md](tasks/dataflow-plan.md), [intent-plan.md](tasks/intent-plan.md) |
+| Routing eval gate | [eval-plan.md](tasks/eval-plan.md), [agent-fabric-evals](../agent-fabric-evals/intent-router-evals/README.md) |
+| Intent router (①–③) | [intent-plan.md](tasks/intent-plan.md) (operator checklist in the demo path) |
 
 ## How this binary works
 

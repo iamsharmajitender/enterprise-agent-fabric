@@ -1,0 +1,9 @@
+{
+  "id": "policy_search",
+  "method": "POST",
+  "path": "/legal/playbook/search",
+  "status": 200,
+  "response": {
+    "text": "Playbook: deny when exclusion 4.2 applies to water damage after 72 hours."
+  }
+}

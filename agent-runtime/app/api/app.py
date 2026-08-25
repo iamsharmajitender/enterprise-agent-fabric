@@ -11,7 +11,7 @@ from app.api.routes.runs import router as runs_router
 from app.core.agent_core import RunService
 from app.core.db import engine
 from app.core.run_store import PersistentRunStore
-from app.graph.llm import LangChainChat
+from app.graph.llm import llm_from_env
 from app.tools.invoker import HttpToolClient
 
 WORKLOADS = frozenset({"afd", "adp", "acp", "ar", "acr"})
@@ -75,7 +75,7 @@ def build_app() -> FastAPI:
         catalogue=HttpCatalogueClient(data_plane) if data_plane else None,
         registry=HttpRegistryClient(registry_url) if registry_url else None,
         tool_invoker=HttpToolClient(),
-        llm=LangChainChat(),
+        llm=llm_from_env(),
     )
 
 

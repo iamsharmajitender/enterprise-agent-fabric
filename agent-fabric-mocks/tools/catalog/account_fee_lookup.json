@@ -1,0 +1,9 @@
+{
+  "id": "account_fee_lookup",
+  "method": "POST",
+  "path": "/fees/explain",
+  "status": 200,
+  "response": {
+    "text": "Fee of $42 is the monthly account charge."
+  }
+}

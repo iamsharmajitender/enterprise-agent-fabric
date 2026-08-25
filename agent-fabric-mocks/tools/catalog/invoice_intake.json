@@ -1,0 +1,12 @@
+{
+  "id": "invoice_intake",
+  "method": "POST",
+  "path": "/invoices/intake",
+  "status": 200,
+  "response": {
+    "fields": {
+      "invoice_id": "inv-1"
+    },
+    "text": "Invoice intake extracted."
+  }
+}

@@ -1,0 +1,7 @@
+# Tool doubles (catalog)
+
+One JSON file per capability id. Unique `method` + `path` across files.
+
+Point the capability `invoke.url` at `http://tool-mock:3010{path}`. Rebuild (`./docs/run/scripts/start-app.sh`).
+
+Do not use path `/health`. Skip `kind=agent` capabilities (those POST Front Door `/v1/jobs`).

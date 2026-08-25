@@ -92,8 +92,8 @@ services:
 
   agent-data-plane:
     build:
-      context: ../../../agent-data-plane
-      dockerfile: Dockerfile
+      context: ../../..
+      dockerfile: agent-data-plane/Dockerfile
     image: agent-fabric-data-plane:0.1.0
     labels:
       fabric.service: agent-data-plane
@@ -140,7 +140,7 @@ services:
 
   tool-mock:
     build:
-      context: ../tool-mock
+      context: ../../../agent-fabric-mocks/tools
       dockerfile: Dockerfile
     image: agent-fabric-tool-mock:0.1.0
     labels:
@@ -148,7 +148,7 @@ services:
     environment:
       <<: *otel-env
       OTEL_SERVICE_NAME: tool-mock
-      TOOLS_JSON: /app/tools.json
+      TOOLS_DIR: /app/catalog
     ports:
       - "3010:3010"
     healthcheck:
@@ -181,6 +181,8 @@ services:
       DATA_PLANE_URL: http://agent-data-plane:3007
       REGISTRY_URL: http://agent-capability-registry:3009
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      # Set FABRIC_LLM_STUB=1 for SeedStubLlm (no Ollama). Default 0 = ProviderLlm.
+      FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

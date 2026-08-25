@@ -124,7 +124,7 @@ public class AssistantService {
             row.agentClientId(),
             correlationId));
     events.emit(
-        "run.accepted",
+        "chat.run.accepted",
         journeyId,
         BusinessEvents.fields(
             "session_id",

@@ -21,7 +21,7 @@ Target: examiners can show adversarial routing cases pass at 100% before release
 - **Jobs live under slice 1.** They do not get their own numbered slice. Chat is the real contest.
 - **Slice 2 is lint + `--all`.** Dummy `--all` is smoke for hydrate/start, fail-closed at the pinned version. It is not the routing golden set.
 - **Empty `output_schema_id` is fine.** Slice 3 asserts tools and citations while the reply is free-form text.
-- **JSON fixtures are the source of truth.** Same shape as pack decide contracts. Unit tests load the files from `agent-data-plane/src/test/resources/eval/` (not `docs/`).
+- **JSON fixtures are the source of truth.** Same shape as pack decide contracts. Unit tests load versioned suites from `agent-fabric-evals/intent-router-evals/` (not `docs/`). `active.json` selects the cut.
 - **Fast path: in-memory catalogue seed.** Parameterized Data Plane tests against `InMemoryRouteStore` (must stay aligned with Flyway/SQL seed).
 - **Incidents become cases.** CI stays red until the catalogue or classifier is fixed — do not delete the case.
 - **Record the mix.** Each golden file headers `route_id` @ `route_version` it was labelled against. Cheaper than `route_tables` now.
@@ -45,8 +45,8 @@ Target: examiners can show adversarial routing cases pass at 100% before release
 
 ```text
 # routing gate — no Compose
-cd agent-data-plane && mvn test -Dtest=RoutingEval*,JobsEntitleEval*,CataloguePinLint*
-./agent-data-plane/run-eval.sh
+./agent-fabric-evals/intent-router-evals/run.sh
+# or ./agent-data-plane/run-eval.sh
 # inject a bad label → gate fails; restore → passes
 
 # pin/hydrate smoke — Compose
@@ -57,7 +57,7 @@ WAIT=1 ./docs/run/dummy-request/run-job.sh --all   # fail-closed, pinned route v
 
 ### Phase 0: Foundation (fixtures)
 
-- [x] Task E1: Eval fixture schema and `agent-data-plane/src/test/resources/eval/` layout
+- [x] Task E1: Eval fixture schema and `agent-fabric-evals/intent-router-evals/` layout
 
 ### 1. Routing (do this first)
 
@@ -69,11 +69,11 @@ WAIT=1 ./docs/run/dummy-request/run-job.sh --all   # fail-closed, pinned route v
 
 ### Checkpoint: 1. Routing
 
-- [ ] “Why was I charged $42?” → `route:fee_explain`, never `card_freeze`
-- [ ] Clarify and abstain covered
-- [ ] Jobs entitle with claims, fail closed without
-- [ ] Golden set sits next to the catalogue mix, not on `eval_suite_id`
-- [ ] Human review before pin lint
+- [x] “Why was I charged $42?” → `route:fee_explain`, never `card_freeze`
+- [x] Clarify and abstain covered
+- [x] Jobs entitle with claims, fail closed without
+- [x] Golden set sits next to the catalogue mix, not on `eval_suite_id`
+- [x] Human review before pin lint
 
 ### 2. Pin and hydrate
 
@@ -82,26 +82,27 @@ WAIT=1 ./docs/run/dummy-request/run-job.sh --all   # fail-closed, pinned route v
 
 ### Checkpoint: 2. Pin and hydrate
 
-- [ ] Broken `tool_manifest` / Pattern 0-with-tools fails lint
-- [ ] High-risk routes still have a workflow
-- [ ] Catalogue seed passes lint; `--all` fail-closed on a running stack
+- [x] Broken `tool_manifest` / Pattern 0-with-tools fails lint
+- [x] High-risk routes still have a workflow
+- [x] Catalogue seed passes lint
+- [x] `--all` fail-closed proven once on a running stack
 
 ### Gate packaging (how you run 1 + 2)
 
 - [x] Task E9: `agent-data-plane/run-eval.sh`
-- [ ] Task E10: Incident-to-case playbook
-- [ ] Task E11: Glossary / Control Plane: `eval_suite_id` is slice 3, not routing
-- [ ] Task E12: README eval notes
-- [ ] Task E13: Verification checklist (break a label, watch the gate fail)
+- [x] Task E10: Incident-to-case playbook
+- [x] Task E11: Glossary / Control Plane: `eval_suite_id` is slice 3, not routing
+- [x] Task E12: README eval notes
+- [x] Task E13: Verification checklist (break a label, watch the gate fail)
 
 ### Checkpoint: slices 1–2 complete
 
-- [ ] All E1–E13 acceptance criteria in [eval-todo.md](./eval-todo.md) met
-- [ ] Human review before slice 3
+- [x] E1–E13 done (see [eval-todo.md](./eval-todo.md))
+- [x] Human review before slice 3
 
 ### 3. Route quality (later, only where it pays)
 
-- [ ] Task E14: Deterministic tool sequence (`card_freeze` identity → limit → freeze); first real `eval_suite_id`; no output schema; no LLM-as-judge; skip `agent-chat`; grounded Q&A only after this
+- [x] Task E14: Deterministic tool sequence (`card_freeze` identity → limit → freeze); first real `eval_suite_id`; no output schema; no LLM-as-judge; skip `agent-chat`; grounded Q&A only after this
 
 ## Risks and Mitigations
 

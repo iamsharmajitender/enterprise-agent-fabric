@@ -179,7 +179,7 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Dependencies:** Task D4, Task D4a
 
 **Files likely touched:**
-- `docs/run/tool-mock/` (or equivalent mock)
+- `agent-fabric-mocks/tools/` (or equivalent mock)
 - `docs/run/dummy-request/job/jobs.json` / route README
 - `agent-runtime/tests/` or mock tests
 - Possibly capability `output_schema` in ACR seed if the field is now real

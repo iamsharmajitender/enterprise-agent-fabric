@@ -1,25 +1,40 @@
 #!/usr/bin/env bash
-# Routing + pin-lint gate (Data Plane JUnit). No Compose. No LLM.
+# Eval wrappers. Default = intent-router only (E1–E13). --quality = E14. --all = both.
 set -euo pipefail
-cd "$(dirname "$0")"
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
 
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+usage() {
   cat <<'EOF'
-In-process routing + pin-lint gate. Jane's turn does not run this.
+Eval gates (in-process ADP JUnit). Jane's turn does not run these.
 
-  ./agent-data-plane/run-eval.sh
+  ./agent-data-plane/run-eval.sh              intent-router (routing / jobs-entitle / pin)
+  ./agent-data-plane/run-eval.sh --quality   route-quality (tool-sequence / E14)
+  ./agent-data-plane/run-eval.sh --all       both, sequentially
 
-Runs:
-  RoutingEvalTest          chat golden set
-  JobsEntitleEvalTest      jobs entitle golden set
-  CataloguePinLintTest     catalogue pin lint
-
-Fixtures and playbook: src/test/resources/eval/README.md
-
-Dummy --all is slice-2 Compose smoke (pin/hydrate), not this gate:
-  WAIT=1 ./docs/run/dummy-request/run-job.sh --all
+Direct:
+  ./agent-fabric-evals/intent-router-evals/run.sh
+  ./agent-fabric-evals/route-quality/run.sh
 EOF
-  exit 0
-fi
+}
 
-exec mvn test -Dtest=RoutingEvalTest,JobsEntitleEvalTest,CataloguePinLintTest
+case "${1:-}" in
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  --quality)
+    exec "$REPO/agent-fabric-evals/route-quality/run.sh"
+    ;;
+  --all)
+    "$REPO/agent-fabric-evals/intent-router-evals/run.sh"
+    exec "$REPO/agent-fabric-evals/route-quality/run.sh"
+    ;;
+  "")
+    exec "$REPO/agent-fabric-evals/intent-router-evals/run.sh"
+    ;;
+  *)
+    echo "unknown option: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

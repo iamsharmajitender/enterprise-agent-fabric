@@ -42,7 +42,7 @@ public class JobsService {
     TraceIds.put("route_id", routeId);
     TraceIds.put("journey_id", journeyId);
     events.emit(
-        "job.accepted",
+        "job.entitle.accepted",
         journeyId,
         BusinessEvents.fields(
             "session_id",
@@ -58,7 +58,7 @@ public class JobsService {
     TraceIds.put("outcome", outcome.outcome());
     if (!outcome.routed()) {
       events.emit(
-          "job.rejected",
+          "job.entitle.rejected",
           journeyId,
           BusinessEvents.fields("route_id", routeId, "outcome", outcome.outcome()));
       events.countOutcome(journeyId, "rejected", "web");
@@ -79,7 +79,7 @@ public class JobsService {
             row.agentClientId(),
             correlationId));
     events.emit(
-        "run.accepted",
+        "job.run.accepted",
         journeyId,
         BusinessEvents.fields(
             "session_id",

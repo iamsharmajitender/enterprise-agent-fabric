@@ -74,23 +74,24 @@ Runtime returns the original id for a duplicate `idempotency_key`; Front Door do
 ./docs/run/dummy-request/run-chat.sh --mode 0
 ```
 
-By default `--all` and `--mode` **only POST** and do not wait for completion. Poll each until `completed`. `WAIT=1` is fail-closed (non-zero on `failed` or timeout):
+By default `--all` and `--mode` **only POST** and do not wait for completion. Poll each until `completed`. `WAIT=1` is fail-closed (non-zero on `failed` or timeout — pin/hydrate smoke). Stub reply text may drift; set `STRICT_MESSAGE=1` to require an exact `expected_message` match:
 
 ```bash
 WAIT=1 ./docs/run/dummy-request/run-job.sh --all
 WAIT=1 ./docs/run/dummy-request/run-job.sh --mode 2
 WAIT=1 ./docs/run/dummy-request/run-chat.sh --all
 WAIT=1 ./docs/run/dummy-request/run-chat.sh --mode 0
+STRICT_MESSAGE=1 WAIT=1 ./docs/run/dummy-request/run-job.sh fee_explain
 ```
 
 Single-route scripts always poll until `completed` / `failed` (or timeout). Override Front Door with `AFD_URL` (default `http://localhost:3005`).
 
 Stub user `jane`. Required claims come from the channel JSON (`accounts:read` for `fee_explain`, `claims:read` for `claims_adjudicate`, …). Missing claims → **403**, Runtime is not started. Chat turns that classify to nothing return `abstain` / `clarify`, not 403.
 
-Routes that only call domain tools can finish against tool-mock. LLM stages still need Ollama.
+Routes that only call domain tools can finish against tool-mock. Pattern 1 CALL/DONE and synthesis use host Ollama by default (`FABRIC_LLM_STUB=0`). Set `FABRIC_LLM_STUB=1` for deterministic stub replies without a model.
 
 The `fee_explain` chat wrapper also checks Control Plane, FR-5, the canned fee line, and the four databases.
 
-`--all` with `WAIT=1` is pin/hydrate smoke. It is **not** the routing golden set. Routing labels: `./agent-data-plane/run-eval.sh` ([eval fixtures](../../../agent-data-plane/src/test/resources/eval/README.md)).
+`--all` with `WAIT=1` is pin/hydrate smoke. It is **not** the routing golden set. Routing labels: `./agent-fabric-evals/intent-router-evals/run.sh` ([agent-fabric-evals](../../../agent-fabric-evals/intent-router-evals/README.md)).
 
 APIs: [agent-front-door/README.md](../../../agent-front-door/README.md). Docs map: [docs/README.md](../../README.md).

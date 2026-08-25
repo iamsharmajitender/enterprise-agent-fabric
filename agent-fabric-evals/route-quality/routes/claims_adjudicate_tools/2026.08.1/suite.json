@@ -1,0 +1,7 @@
+{
+  "suite_id": "claims_adjudicate_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "claims_adjudicate",
+  "description": "Pattern 2: policy_search \u2192 clause_search \u2192 risk_engine \u2192 draft_memo."
+}

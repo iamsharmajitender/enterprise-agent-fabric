@@ -1,0 +1,7 @@
+{
+  "suite_id": "pack_then_notify_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "pack_then_notify",
+  "description": "Pattern 2: prefetch \u2192 notify_customer \u2192 synthesis."
+}

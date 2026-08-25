@@ -1,0 +1,7 @@
+{
+  "suite_id": "account_notify_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "account_notify",
+  "description": "Pattern 2: notify_customer then synthesis confirm."
+}

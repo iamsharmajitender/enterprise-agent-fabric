@@ -1,0 +1,92 @@
+{
+  "_comment": "Other seed intents (policy, search, research, product).",
+  "cases": [
+    {
+      "id": "chat-handbook-procedure",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "What is the handbook procedure?",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "policy:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "agent-policy-qa",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-search-google",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "search google for overdraft fees",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "search_only",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-research-sources",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "research sources for topic overdraft",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "research_assistant",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-loan-offer",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "Explain this loan offer",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "policy:read": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "product_explain",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-procedure-without-policy-read-abstains",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "What is the handbook procedure?",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    }
+  ]
+}

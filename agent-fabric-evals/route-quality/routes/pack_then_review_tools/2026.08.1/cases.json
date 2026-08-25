@@ -1,0 +1,49 @@
+{
+  "_comment": "Assert ordered workflow stages/tools after start. Not reply prose. Not the intent-router board.",
+  "suite_id": "pack_then_review_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "pack-then-review-happy",
+      "route_id": "pack_then_review",
+      "ingress": "jobs",
+      "channel": "api",
+      "goal": {
+        "doc_id": "doc-eval-1"
+      },
+      "claims": {
+        "sub": "eval",
+        "emts": {
+          "legal:read": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "prefetch",
+            "llm_role": "none"
+          },
+          {
+            "id": "ocr",
+            "tool": "ocr_extract",
+            "llm_role": "none"
+          },
+          {
+            "id": "score",
+            "tool": "risk_engine",
+            "llm_role": "none"
+          },
+          {
+            "id": "memo",
+            "tool": "draft_memo",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence",
+        "pattern-2"
+      ]
+    }
+  ]
+}

@@ -89,68 +89,68 @@ public class InMemoryRouteStore implements RouteStore {
     add("llm_pipeline", 2, "llm_pipeline",
         "Pattern 2 (deterministic): fixed workflow of three LLM stages. Prompts: host plus classify and synthesis templates. No domain HTTP.",
         RUNS, null, null, null, "read_only_standard", ModelProfile.FAST_CHAT, "llm_pipeline", "llm_pipeline",
-        null, null, null, "clarify", List.of(), List.of("api"), false, List.of());
+        null, "llm_pipeline_tools", null, "clarify", List.of(), List.of("api"), false, List.of());
     add("policy_memo", 2, "policy_memo",
         "Pattern 2 (deterministic): prefetch placeholder then one synthesis call. Prompts: host plus synthesis template. Prefetch is not packed today.",
         RUNS, null, new Retrieval("deterministic_prefetch", List.of("policy-engine")), null,
         "read_only_standard", ModelProfile.REASONING_STANDARD, "policy_memo", "policy_memo",
-        "msa_memo", null, null, "clarify", List.of("policy:read"), List.of("api"), false, List.of());
+        "msa_memo", "policy_memo_tools", null, "clarify", List.of("policy:read"), List.of("api"), false, List.of());
     add("account_notify", 2, "account_notify",
         "Pattern 2 (deterministic): domain HTTP notify_customer, then synthesis confirm. Prompts: host plus synthesis template.",
         RUNS, InMemoryManifestStore.accountNotify(), null, null, "high_risk_step_up", ModelProfile.REASONING_STANDARD,
-        "account_notify", "account_notify", null, null, null, "escalate_human", List.of("notify:send"), List.of("api"), false,
+        "account_notify", "account_notify", null, "account_notify_tools", null, "escalate_human", List.of("notify:send"), List.of("api"), false,
         List.of());
     add("card_freeze", 2, "card_freeze",
         "Pattern 2 (deterministic): domain HTTP identity_check, limit_check, freeze_card, then synthesis confirm. Prompts: host plus synthesis template. Freeze remains a gated side effect in catalogue.",
         RUNS, InMemoryManifestStore.cardFreeze(), null, null, "high_risk_step_up", ModelProfile.REASONING_STANDARD,
-        "card_freeze", "card_freeze", null, null, null, "escalate_human", List.of("cards:freeze"), List.of("api"), false,
+        "card_freeze", "card_freeze", null, "card_freeze_tools", null, "escalate_human", List.of("cards:freeze"), List.of("api"), false,
         List.of());
     add("dispute_intake", 2, "dispute_intake",
         "Pattern 2 (deterministic): two domain HTTP steps then synthesis on packet_summarize. Prompts: host plus synthesis template.",
         RUNS, InMemoryManifestStore.disputeIntake(), null, loopMemory("none", 8), "read_only_standard",
         ModelProfile.REASONING_STANDARD, "dispute_intake", "dispute_intake",
-        null, null, null, "clarify", List.of("disputes:write"), List.of("api"), false, List.of());
+        null, "dispute_intake_tools", null, "clarify", List.of("disputes:write"), List.of("api"), false, List.of());
     add("pack_then_notify", 2, "pack_then_notify",
         "Pattern 2 (deterministic): prefetch placeholder, domain HTTP notify, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.",
         RUNS, InMemoryManifestStore.accountNotify(), new Retrieval("deterministic_prefetch", List.of("product-terms")),
         null, "high_risk_step_up", ModelProfile.REASONING_STANDARD, "pack_then_notify", "pack_then_notify",
-        null, null, null, "escalate_human", List.of("notify:send"), List.of("api"), false, List.of());
+        null, "pack_then_notify_tools", null, "escalate_human", List.of("notify:send"), List.of("api"), false, List.of());
     add("pack_then_freeze", 2, "pack_then_freeze",
         "Pattern 2 (deterministic): prefetch placeholder, three domain HTTP writes, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.",
         RUNS, InMemoryManifestStore.cardFreeze(), new Retrieval("deterministic_prefetch", List.of("product-terms")),
         null, "high_risk_step_up", ModelProfile.REASONING_STANDARD, "pack_then_freeze", "pack_then_freeze",
-        null, null, null, "escalate_human", List.of("cards:freeze"), List.of("api"), false, List.of());
+        null, "pack_then_freeze_tools", null, "escalate_human", List.of("cards:freeze"), List.of("api"), false, List.of());
     add("pack_then_review", 2, "pack_then_review",
         "Pattern 2 (deterministic): prefetch placeholder, two domain HTTP tools, then synthesis memo. Prompts: host plus synthesis template. Prefetch is not packed today.",
         RUNS, InMemoryManifestStore.packThenReview(), new Retrieval("deterministic_prefetch", List.of("legal-playbook")),
         loopMemory(), "read_only_standard", ModelProfile.REASONING_STANDARD, "pack_then_review", "pack_then_review",
-        "msa_memo", null, null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
+        "msa_memo", "pack_then_review_tools", null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
     add("clause_lookup", 2, "clause_lookup",
         "Pattern 2 (deterministic): LLM query_formulation, HTTP clause_search, then synthesis. Prompts: host plus query_formulation and synthesis templates.",
         RUNS, InMemoryManifestStore.clauseLookup(), new Retrieval("tool", List.of("clause-index")), null,
         "read_only_standard", ModelProfile.REASONING_STANDARD, "clause_lookup", "clause_lookup",
-        null, null, null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
+        null, "clause_lookup_tools", null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
     add("template_retrieve", 2, "template_retrieve",
         "Pattern 2 (deterministic): two query_formulation retrieves, HTTP score, then synthesis. Prompts: host plus query_formulation and synthesis templates.",
         RUNS, InMemoryManifestStore.templateRetrieve(), new Retrieval("tool", List.of("clause-index", "legal-playbook")),
         null, "read_only_standard", ModelProfile.REASONING_STANDARD, "template_retrieve", "template_retrieve",
-        null, null, null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
+        null, "template_retrieve_tools", null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
     add("msa_risk_review", 2, "msa_risk_review",
         "Pattern 2 (deterministic): HTTP OCR, two query_formulation retrieves, HTTP score, synthesis memo. Prompts: host plus query_formulation and synthesis templates.",
         RUNS, InMemoryManifestStore.msaRiskReview(), new Retrieval("tool", List.of("clause-index", "legal-playbook")),
         loopMemory(), "read_only_standard", ModelProfile.REASONING_STANDARD, "msa_risk_review", "msa_risk_review",
-        "msa_memo", "msa_risk_review_golden", null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
+        "msa_memo", "msa_risk_review_tools", null, "clarify", List.of("legal:read"), List.of("api"), false, List.of());
     add("kyc_onboarding", 2, "kyc_onboard",
         "Pattern 2 (deterministic): domain HTTP KYC tools then synthesis packet. Prompts: host plus synthesis template. branch and human_gate are catalogue-only.",
         RUNS, InMemoryManifestStore.kycOnboarding(), new Retrieval("tool", List.of("sanctions-lists", "kyc-policy")),
         loopMemory("none", 8), "high_risk_step_up", ModelProfile.REASONING_STANDARD, "kyc_onboarding",
-        "kyc_onboarding", "kyc_result", "kyc_onboarding_golden", null, "escalate_human",
+        "kyc_onboarding", "kyc_result", "kyc_onboarding_tools", null, "escalate_human",
         List.of("kyc:onboard"), List.of("api"), false, List.of());
     add("claims_adjudicate", 2, "claims_adjudicate",
         "Pattern 2 (deterministic): HTTP playbook retrieve, query_formulation clause search, HTTP score, synthesis memo. Prompts: host plus query_formulation and synthesis templates.",
         RUNS, InMemoryManifestStore.claimsAdjudicate(), new Retrieval("tool", List.of("legal-playbook", "clause-index")),
         loopMemory(), "read_only_standard", ModelProfile.REASONING_STANDARD, "claims_adjudicate",
-        "claims_adjudicate", "msa_memo", null, null, "clarify", List.of("claims:read"), List.of("api"), false,
+        "claims_adjudicate", "msa_memo", "claims_adjudicate_tools", null, "clarify", List.of("claims:read"), List.of("api"), false,
         List.of());
     add("ticket_triage", 3, "ticket_triage",
         "Pattern 3 (guided): HTTP parse and tag, then synthesis reply. Prompts: host plus synthesis template. Stage allowlists are catalogue-only.",

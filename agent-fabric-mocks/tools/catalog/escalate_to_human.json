@@ -1,0 +1,10 @@
+{
+  "id": "escalate_to_human",
+  "method": "POST",
+  "path": "/handoff/escalate",
+  "status": 200,
+  "response": {
+    "handoff_id": "hof-1",
+    "text": "Handoff opened: hof-1."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "lookup_beneficiary",
+  "method": "POST",
+  "path": "/payments/beneficiaries/lookup",
+  "status": 200,
+  "response": {
+    "beneficiary_id": "ben-1",
+    "text": "Beneficiary resolved: ben-1."
+  }
+}

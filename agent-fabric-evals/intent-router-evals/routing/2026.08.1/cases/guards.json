@@ -1,0 +1,120 @@
+{
+  "_comment": "Wrong channel, empty utterance, chat must not bind hidden jobs.",
+  "cases": [
+    {
+      "id": "chat-sms-abstains",
+      "ingress": "chat",
+      "channel": "sms",
+      "message": "Why was I charged $42?",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "accounts:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-empty-utterance-abstains",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "accounts:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-voice-channel-abstains",
+      "ingress": "chat",
+      "channel": "voice",
+      "message": "hello",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-fraud-case-does-not-bind-hidden-job",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "Open the fraud casefile and draft a memo",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "fraud:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-legal-msa-does-not-bind-hidden-job",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "Run MSA risk review on this contract",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "legal:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-claims-adjudicate-phrase-does-not-bind",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "Adjudicate this claim against the playbook",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "claims:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-ticket-triage-phrase-does-not-bind",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "Triage this support ticket",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    }
+  ]
+}

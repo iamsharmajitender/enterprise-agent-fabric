@@ -1,0 +1,9 @@
+{
+  "id": "kyc_risk_engine",
+  "method": "POST",
+  "path": "/kyc/risk",
+  "status": 200,
+  "response": {
+    "text": "KYC risk: low."
+  }
+}

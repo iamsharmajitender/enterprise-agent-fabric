@@ -1,0 +1,9 @@
+{
+  "id": "fax_ocr_legacy",
+  "method": "POST",
+  "path": "/ocr/fax",
+  "status": 200,
+  "response": {
+    "text": "Fax OCR: page captured."
+  }
+}

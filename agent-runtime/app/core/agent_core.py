@@ -110,7 +110,7 @@ class RunService:
                     telemetry.record_error(span, exc)
                     raise
             telemetry.emit(
-                "run.hydrate.ok",
+                "run.hydrate.succeeded",
                 journey_id=journey_id,
                 route_id=route_id,
                 route_version=route_version,

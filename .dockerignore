@@ -1,0 +1,22 @@
+# Repo-root context for agent-data-plane/Dockerfile
+.git
+.cursor
+**/target
+**/.venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.idea
+**/*.iml
+**/.DS_Store
+.env
+.env.*
+!.env.example
+agent-front-door
+agent-runtime
+agent-control-plane
+agent-capability-registry
+docs
+*.md
+!agent-fabric-evals/**/*.md
+!agent-data-plane/**/*.md

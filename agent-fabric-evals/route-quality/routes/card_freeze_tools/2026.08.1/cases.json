@@ -1,0 +1,50 @@
+{
+  "_comment": "Assert ordered workflow stages/tools after start. Not reply prose. Not the intent-router board.",
+  "suite_id": "card_freeze_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "card-freeze-happy",
+      "route_id": "card_freeze",
+      "ingress": "jobs",
+      "channel": "api",
+      "goal": {
+        "card_id": "crd-eval-1",
+        "account_id": "acc-eval-1"
+      },
+      "claims": {
+        "sub": "eval",
+        "emts": {
+          "cards:freeze": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "identity",
+            "tool": "identity_check",
+            "llm_role": "none"
+          },
+          {
+            "id": "limits",
+            "tool": "limit_check",
+            "llm_role": "none"
+          },
+          {
+            "id": "freeze",
+            "tool": "freeze_card",
+            "llm_role": "none"
+          },
+          {
+            "id": "respond",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence",
+        "pattern-2"
+      ]
+    }
+  ]
+}

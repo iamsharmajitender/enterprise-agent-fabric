@@ -1,0 +1,6 @@
+{
+  "suite_id": "pin",
+  "suite_version": "2026.08.1",
+  "kind": "pin",
+  "description": "Catalogue pin lint (Data Plane JUnit) + optional Compose WAIT=1 --all smoke for this catalogue cut."
+}

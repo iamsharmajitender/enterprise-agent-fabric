@@ -1,0 +1,7 @@
+{
+  "suite_id": "pack_then_freeze_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "pack_then_freeze",
+  "description": "Pattern 2: prefetch then identity \u2192 limit \u2192 freeze \u2192 synthesis."
+}

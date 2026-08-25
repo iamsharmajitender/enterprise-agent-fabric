@@ -1,0 +1,9 @@
+{
+  "id": "id_verify",
+  "method": "POST",
+  "path": "/kyc/id-verify",
+  "status": 200,
+  "response": {
+    "text": "ID documents match the applicant."
+  }
+}

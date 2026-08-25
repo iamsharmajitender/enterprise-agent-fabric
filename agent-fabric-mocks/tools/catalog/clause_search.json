@@ -1,0 +1,9 @@
+{
+  "id": "clause_search",
+  "method": "POST",
+  "path": "/legal/clauses/search",
+  "status": 200,
+  "response": {
+    "text": "Clause 4.2: water damage excluded unless reported within 72 hours of incident."
+  }
+}

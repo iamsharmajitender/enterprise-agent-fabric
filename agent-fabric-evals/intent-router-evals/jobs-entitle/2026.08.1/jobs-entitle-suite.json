@@ -1,0 +1,6 @@
+{
+  "suite_id": "jobs-entitle",
+  "suite_version": "2026.08.1",
+  "kind": "jobs-entitle",
+  "description": "Jobs skip classify. Named route_id + claims \u2192 route or fail-closed abstain."
+}

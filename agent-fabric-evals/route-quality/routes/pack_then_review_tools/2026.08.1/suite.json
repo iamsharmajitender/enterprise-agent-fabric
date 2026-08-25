@@ -1,0 +1,7 @@
+{
+  "suite_id": "pack_then_review_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "pack_then_review",
+  "description": "Pattern 2: prefetch \u2192 ocr_extract \u2192 risk_engine \u2192 draft_memo."
+}

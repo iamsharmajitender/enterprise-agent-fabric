@@ -1,0 +1,45 @@
+{
+  "_comment": "Assert ordered workflow stages/tools after start. Not reply prose. Not the intent-router board.",
+  "suite_id": "dispute_intake_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "dispute-intake-happy",
+      "route_id": "dispute_intake",
+      "ingress": "jobs",
+      "channel": "api",
+      "goal": {
+        "dispute_id": "dsp-eval-1"
+      },
+      "claims": {
+        "sub": "eval",
+        "emts": {
+          "disputes:write": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "intake",
+            "tool": "doc_intake",
+            "llm_role": "none"
+          },
+          {
+            "id": "open",
+            "tool": "case_open",
+            "llm_role": "none"
+          },
+          {
+            "id": "summarize",
+            "tool": "packet_summarize",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence",
+        "pattern-2"
+      ]
+    }
+  ]
+}

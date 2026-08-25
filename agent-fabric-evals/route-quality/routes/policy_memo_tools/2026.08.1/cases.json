@@ -1,0 +1,38 @@
+{
+  "_comment": "Assert ordered workflow stages/tools after start. Not reply prose. Not the intent-router board.",
+  "suite_id": "policy_memo_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "policy-memo-happy",
+      "route_id": "policy_memo",
+      "ingress": "jobs",
+      "channel": "api",
+      "goal": {
+        "topic": "overdraft-fee-eval-1"
+      },
+      "claims": {
+        "sub": "eval",
+        "emts": {
+          "policy:read": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "prefetch",
+            "llm_role": "none"
+          },
+          {
+            "id": "generate",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence",
+        "pattern-2"
+      ]
+    }
+  ]
+}

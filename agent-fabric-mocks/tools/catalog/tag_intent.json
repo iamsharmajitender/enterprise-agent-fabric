@@ -1,0 +1,9 @@
+{
+  "id": "tag_intent",
+  "method": "POST",
+  "path": "/tickets/tag",
+  "status": 200,
+  "response": {
+    "text": "Intent tagged: fee_explain."
+  }
+}

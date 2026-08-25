@@ -15,6 +15,7 @@ Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1`
 - [Observability (Grafana LGTM)](#observability-grafana-lgtm)
   - [Send OpenTelemetry signals](#send-opentelemetry-signals)
   - [Correlation](#correlation)
+  - [Business events](#business-events)
   - [Layer map (local)](#layer-map-local)
   - [See a journey](#see-a-journey)
   - [Explore in Grafana](#explore-in-grafana)
@@ -130,17 +131,24 @@ One job (polls until done): `./docs/run/dummy-request/job/1-autonomous/fee_expla
 
 CI-gated routing and pin checks for the catalogue seed. They are **not** on decide / pin / start / loop — Jane’s turn does not run them. A failed eval blocks a catalogue change (or a PR), not a live reply.
 
-Golden sets live next to Data Plane tests, not under `docs/` (that tree is the operator scratchpad):
+Fixtures live in [`agent-fabric-evals/`](agent-fabric-evals/README.md). Intent-router suites (routing / jobs entitle / pin) are grouped under [`intent-router-evals/`](agent-fabric-evals/intent-router-evals/README.md); each suite is **versioned** and `active.json` selects the cut:
 
 ```text
-agent-data-plane/src/test/resources/eval/
-  routing-golden.json       # chat contest + adversarial rows
-  jobs-entitle-golden.json  # named route_id + claims (no classify)
-  case.schema.json
-  example-chat-route.json
+agent-fabric-evals/
+  intent-router-evals/
+    active.json
+    routing/2026.08.1/cases/fee.json   # + clarify, adversarial, seed-intents, guards
+    routing/2026.08.1/route-catalogue.json
+    routing/2026.08.1/route-case-manifest.json
+    jobs-entitle/2026.08.1/cases/mode-*.json
+    jobs-entitle/2026.08.1/jobs-entitle-catalogue.json
+    pin/2026.08.1/pin-suite.json
+    schemas/
+    run.sh
+  route-quality/          # Pattern 2 *_tools suites; harness E14
 ```
 
-`eval_suite_id` on a route is slice 3 (route quality, not landed). Empty is correct for free-form chat. Routing is the **board** (the labelled mix in the JSON header), not a pointer on one row.
+`eval_suite_id` on a route is slice 3 (route quality). Pattern 2 fixtures live under [`agent-fabric-evals/route-quality/routes/`](agent-fabric-evals/route-quality/README.md) as `{route_id}_tools`. Empty is correct for free-form chat. Routing is the **board** (the labelled mix in the JSON header), not a pointer on one row.
 
 ### What CI runs
 
@@ -153,12 +161,12 @@ There is no GitHub Actions workflow in this repo yet. The hook is Data Plane `mv
 | `CataloguePinLintTest` | Every active row can pin: pointers resolve, Pattern 0 has no tools/workflow, high-risk writes still have a workflow |
 
 ```bash
-./agent-data-plane/run-eval.sh
+./agent-fabric-evals/intent-router-evals/run.sh
 # same as:
-cd agent-data-plane && mvn test -Dtest=RoutingEvalTest,JobsEntitleEvalTest,CataloguePinLintTest
+./agent-data-plane/run-eval.sh
 ```
 
-Playbook (add an incident, do not delete a case to go green) and the break-a-label checklist: [agent-data-plane/src/test/resources/eval/README.md](agent-data-plane/src/test/resources/eval/README.md). Flip one `expected.route_id` in `routing-golden.json` and the gate must go red. Restore it.
+Playbook (add an incident, do not delete a case to go green) and the break-a-label checklist: [agent-fabric-evals/intent-router-evals/README.md](agent-fabric-evals/intent-router-evals/README.md). Flip one `expected.route_id` in active `routing/<version>/cases/fee.json` and the gate must go red. Restore it.
 
 ### What CI does not run
 
@@ -170,7 +178,7 @@ WAIT=1 ./docs/run/dummy-request/run-job.sh --all
 
 `WAIT=1` polls until `completed` and exits non-zero on `failed` or timeout.
 
-Plan / task list: [docs/tasks/eval-plan.md](docs/tasks/eval-plan.md), [docs/tasks/eval-todo.md](docs/tasks/eval-todo.md). Slice 3 (`eval_suite_id` tool-order / citations) is later.
+Plan / task list: [docs/tasks/eval-plan.md](docs/tasks/eval-plan.md), [docs/tasks/eval-todo.md](docs/tasks/eval-todo.md). Slice 3 route-quality: `./agent-fabric-evals/route-quality/run.sh` or `./agent-data-plane/run-eval.sh --quality`.
 
 ## Ports and URLs
 
@@ -231,11 +239,57 @@ OpenTelemetry defaults to a 60s export interval. Compose sets `OTEL_METRIC_EXPOR
 
 Do not put utterance text, tokens, or stub claims in metric labels or span attributes.
 
+### Business events
+
+Allowlisted journey breadcrumbs for Loki (line body is the event name; ids live in fields / MDC). Not Kafka. Not an audit store. No utterance, tokens, or claims.
+
+Java AFD / ADP: `BusinessEvents.emit`. Python AR: `telemetry.emit`. Same contract: structured log + a journey outcome counter.
+
+Chat sequence: `chat.turn.received` → `intent.decide.*` → `chat.run.accepted` → `run.hydrate.*` / `run.started` / `run.completed` → `chat.events.delivered`.
+
+#### Front Door — chat (`AssistantService`)
+
+| Event | When |
+| --- | --- |
+| `chat.turn.received` | Jane posts a turn (before decide) |
+| `chat.run.accepted` | Freeze + Runtime start succeeded |
+| `chat.events.delivered` | Poll/SSE sees run completed |
+
+#### Front Door — jobs (`JobsService`)
+
+| Event | When |
+| --- | --- |
+| `job.entitle.accepted` | Job POST accepted for entitle |
+| `job.entitle.rejected` | Decide did not return `route` |
+| `job.run.accepted` | Runtime start succeeded |
+
+#### Data Plane (`DecideService`)
+
+| Event | When |
+| --- | --- |
+| `intent.decide.routed` | Outcome is `route` |
+| `intent.decide.clarified` | Outcome is `clarify` |
+| `intent.decide.abstained` | Outcome is `abstain` |
+
+#### Runtime (`telemetry.emit`)
+
+| Event | When |
+| --- | --- |
+| `run.hydrate.succeeded` | Catalogue + registry hydrate succeeded |
+| `run.hydrate.failed` | Hydrate failed |
+| `run.started` | Pin saved, graph about to run |
+| `run.completed` | Graph finished |
+| `run.failed` | Graph threw |
+
+ADP `journey_id` is `chat.{route_id}` / `job.{route_id}`, or `chat.decide` / `job.decide` if nothing bound. AR uses `chat.{route_id}` / `job.{route_id}` (or `chat.turn` / `job.turn`). Control Plane and Registry do not emit this family.
+
+Box READMEs: [Front Door](agent-front-door/README.md#business-events), [Data Plane](agent-data-plane/README.md#business-events). Loki: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"}` then filter `event` or `session_id` / `correlation_id`. Plan: [docs/tasks/observability-todo.md](docs/tasks/observability-todo.md) task O9.
+
 ### Layer map (local)
 
 | Layer | What to look for |
 | --- | --- |
-| ① Business | JSON logs with `event` (`intent.decide.*`, `run.accepted`, `run.hydrate.*`, `run.completed`); counter `fabric_journey_outcome_total` |
+| ① Business | Events in the table above; counter `fabric_journey_outcome_total` |
 | ② Service | Unbroken Tempo path AFD → ADP → AR → ACR → tool-mock; HTTP RED via Micrometer/OTel |
 | ③ Infrastructure | Hikari/SQLAlchemy pool metrics; Compose labels `fabric.service` / `fabric.db` (`afd`/`adp`/`ar`/`acr`). Postgres exporter/cAdvisor deferred. |
 
@@ -244,7 +298,7 @@ Do not put utterance text, tokens, or stub claims in metric labels or span attri
 Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.` Generate a `fee_explain` turn, then confirm signals in Grafana ([http://localhost:3000](http://localhost:3000), `admin` / `admin`):
 
 1. `./docs/run/dummy-request/job/1-autonomous/fee_explain.sh` or `./docs/run/dummy-request/chat/1-autonomous/fee_explain.sh`
-2. Explore → **Loki**: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="sess-…"` (field filter — the line body is only `run.accepted`, so `|= "sess-…"` is empty). Look for `run.accepted` / `intent.decide`
+2. Explore → **Loki**: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitle.accepted` → `intent.decide.*` → `chat.run.accepted` / `job.run.accepted` → `run.hydrate.*` / `run.started` / `run.completed`)
 3. Explore → **Tempo**: `{.service.name="agent-front-door"}` — children include `agent-data-plane` and `agent-runtime` (Registry on hydrate; `tool-mock` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
 4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-front-door`
 
@@ -299,7 +353,7 @@ fabric_journey_outcome_total
 ```
 
 ```logql
-{service_name="agent-front-door"} |= "run.accepted"
+{service_name="agent-front-door"} |= "chat.run.accepted"
 ```
 
 ```logql
@@ -335,7 +389,7 @@ What each box owns, how a turn/job flows, and how [Routes](#routes-v1), [Catalog
 | Folder | Job | Stack | Database |
 | --- | --- | --- | --- |
 | [`agent-front-door`](agent-front-door/) | Channel ingress. Accepts the user turn, calls decide, starts the runtime. Chat JSON does not include `route_id` or `run_id`. | Java 21, Spring Boot, hexagonal | `afd` |
-| [`agent-data-plane`](agent-data-plane/) | Routes, eligibility, keyword classify (`/v1/intent/*`), catalogue (`/v1/catalog/*`). Owns the route rows. Does **not** store decision audit. Only Front Door may call decide. | Java 21, Spring Boot, hexagonal | `adp` |
+| [`agent-data-plane`](agent-data-plane/) | Routes, eligibility, decide (`/v1/intent/*`: eligible → ① rules → ② retrieve → ③ **off**), catalogue (`/v1/catalog/*`). Owns the route rows. Does **not** store decision audit. Only Front Door may call decide. | Java 21, Spring Boot, hexagonal | `adp` |
 | [`agent-runtime`](agent-runtime/) | Executes the chosen route (hydrate tools, LangGraph loop). Nodes are built from the pinned tools and HTTP-call the mock. | Python 3.12, FastAPI, uv, LangGraph | `ar` |
 | [`agent-capability-registry`](agent-capability-registry/) | Published capabilities and manifests (`id@version`). Runtime hydrates from here at pin. | Java 21, Spring Boot, hexagonal | `acr` |
 | [`agent-control-plane`](agent-control-plane/) | Catalogue browser only. Lists routes, capabilities, prompts, manifests. **No** decide API, **no** database. | TypeScript, Node 22 | none |
@@ -348,7 +402,8 @@ Supporting pieces:
 | [`docs/run/compose/`](docs/run/compose/) | Compose file, Postgres image, `.env.example` |
 | [`docs/run/scripts/`](docs/run/scripts/) | start / stop / catalogue seed SQL |
 | [`docs/run/dummy-request/`](docs/run/dummy-request/) | Dummy job and chat requests for every seed job route and chat-visible route (autonomy 0–3). Fresh ids each run |
-| [`docs/run/tool-mock/`](docs/run/tool-mock/) | Config-driven domain HTTP doubles. Add a tool in `tools.json` (unique `method`+`path`), point the capability `invoke.url` at `http://tool-mock:3010{path}`, then rebuild |
+| [`agent-fabric-evals/`](agent-fabric-evals/) | CI eval fixtures: `intent-router-evals/` + `route-quality/` |
+| [`agent-fabric-mocks/`](agent-fabric-mocks/) | Local doubles — today [`tool-mock/`](agent-fabric-mocks/tools/) (domain HTTP `:3010`) |
 | [`docs/README.md`](docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
 | [`docs/04-architecture/`](docs/04-architecture/) | Architecture packs |
 | [`docs/05-reference/`](docs/05-reference/) | Frozen request/response fixtures and [stub auth](docs/05-reference/stub-auth.md) |
@@ -369,8 +424,8 @@ How the later README topics land on each box is summarized at the end of this se
 **How.**
 
 1. Channel auth: `Authorization: Bearer stub` + `X-Stub-Claims`. Missing bearer → 401.
-2. **Jobs:** `POST /v1/jobs` with explicit `route_id` + `idempotency_key`. Skip keyword classify and `clarify`. Still call Data Plane decide (`ingress: "jobs"`) so entitle + record happen. Missing claims / unknown route → **403**, do not start Runtime.
-3. **Chat:** `POST /v1/assistant/turns` with a message (or opaque `hint_id` / `option_id`). Data Plane classifies. Only `outcome=route` freezes and starts. `clarify` / `abstain` never pin.
+2. **Jobs:** `POST /v1/jobs` with explicit `route_id` + `idempotency_key`. Skip retrieve and `clarify` (Layer ① only). Still call Data Plane decide (`ingress: "jobs"`) so entitle + record happen. Missing claims / unknown route → **403**, do not start Runtime.
+3. **Chat:** `POST /v1/assistant/turns` with a message (or opaque `hint_id` / `option_id`). Data Plane classifies (① command, else ② retrieve). Only `outcome=route` freezes and starts. `clarify` / `abstain` never pin. Assistant JSON stays FR-5 slim (no `route_id`, `router_layer`, …).
 4. On `route`, AFD GETs the pinned catalogue row, writes a **freeze** keyed by `session_id` (`sess-*` for chat, `job:{idempotency_key}` for jobs), then `POST /v1/runs` on Runtime. Returns `202 { "correlation_id" }`. AFD never mints that id — if Runtime fails, AFD returns **503**.
 5. Status: `GET /v1/jobs/{correlation_id}` (or chat events) polls Runtime HTTP. **No** Data Plane call on the poll path.
 6. Follow-up chat turns reuse the freeze (same pin, skip classify). Duplicate job keys return the original `correlation_id`.
@@ -381,13 +436,13 @@ Pack: [agent-front-door](docs/04-architecture/agent-front-door.md). Service note
 
 ### ADP — Agent Data Plane (`adp`, :3007)
 
-**What.** Catalogue and classify. Owns route rows, eligibility, keyword decide, prompts, workflows, corpora, and **memory_profile policy**. Serves `GET /v1/catalog/*` and `POST /v1/intent/decide`. Does **not** pin, start Runtime, mint `correlation_id`, store decision audit, or hold transcripts.
+**What.** Catalogue and classify. Owns route rows, eligibility, layered decide (① rules → ② retrieve → ③ **off**), prompts, workflows, corpora, and **memory_profile policy**. Serves `GET /v1/catalog/*` and `POST /v1/intent/decide`. Does **not** pin, start Runtime, mint `correlation_id`, store decision audit, or hold transcripts.
 
 **How.**
 
 1. Only AFD may call decide. Control Plane and Runtime must not.
-2. Decide = **active** routes ∩ `required_claims` ∩ channel, then layers. Chat may keyword-classify (Layer ②). Jobs bind Layer ① (`route_id` already set) — they still entitle; they never get `clarify`.
-3. Outcomes: `route` / `clarify` / `abstain`. Only `route` is startable, and **AFD** starts AR.
+2. Decide = **active** ∩ claims ∩ channel, then ① rules → ② retrieve → ③ (flag **off**). Chat may retrieve-classify. Jobs bind Layer ① (`route_id` already set) — they still entitle; they never get `clarify`.
+3. Outcomes: `route` / `clarify` / `abstain`. Only `route` is startable, and **AFD** starts AR. Decide JSON may include `router_layer`; chat JSON must not (FR-5).
 4. Catalogue APIs return pointers at a version: `tool_manifest`, policy, model, `memory_profile`, `activation_target`, `agent_client_id`. Classify uses the **active** mix. A follow-up pin is that route’s `route_id` + `route_version`, not “whatever is live now.”
 5. Runtime (and AFD after `route`) **GET** the pinned row. Runtime does not load `active` and does not classify.
 6. `memory_profiles` and `retrieval` are sibling tables on the route. Retrieval/prefetch is **not** `long_term`.
@@ -436,7 +491,7 @@ Pack: [agent-runtime](docs/04-architecture/agent-runtime.md).
 | Topic in this README | AFD | ADP | ACR | AR |
 | --- | --- | --- | --- | --- |
 | [Ports](#ports-and-urls) | `:3005` public chat + jobs | `:3007` private | `:3009` private | `:3008` private |
-| [Observability](#observability-grafana-lgtm) | Mints/echoes `X-Request-Id`; `run.accepted`; journey `chat.*` / `job.*` | `intent.decide.*` | Hydrate GETs on the Tempo path | `run.hydrate.*`, `run.started` / `completed`; span attrs `correlation_id` |
+| [Observability](#observability-grafana-lgtm) | Mints/echoes `X-Request-Id`; `chat.turn.received` / `job.entitle.accepted`; `chat.run.accepted` / `job.run.accepted` | `intent.decide.*` | Hydrate GETs on the Tempo path | `run.hydrate.*`, `run.started` / `run.completed`; span attrs `correlation_id` |
 | [Routes](#routes-v1) | Freezes the pin AFD got from decide; jobs name `route_id` | Owns versioned rows; classify = **active** mix | Manifest pointer only — no `tools[]` on the route | Executes the **pinned** version; never re-reads `active` |
 | [Catalogue statuses](#catalogue-statuses) | After `route`, GET that version | `active` vs `published` vs `draft` / `retired` on routes; prompts/workflows/corpora | Capability + manifest `draft` / `published` / `retired`; hydrate `published` | Hydrates the pin; 422 if the cut is missing or still draft |
 | [Workflows](#workflows) | None. Pin already has `workflow_id` on the row | Owns `dataplane.workflows` (stages, `llm_role`, allowlist). Route points at `workflow_id` | None | Hydrate: with a manifest, stamp `llm_role` onto tools; without, one graph node per stage. Pattern 0/2/3 stay linear; Pattern 1 is CALL/DONE. `branch` / `human_gate` are catalogue-only |
@@ -632,12 +687,12 @@ Publish is append-only. A second `PUT` of a published version is **409**. Runtim
 
 | `kind` | `invoke` | Local |
 | --- | --- | --- |
-| `domain` | Domain HTTP (`http://tool-mock:3010/fees/explain`) | Tools in [`docs/run/tool-mock/`](docs/run/tool-mock/) |
+| `domain` | Domain HTTP (`http://tool-mock:3010/fees/explain`) | Tools in [`agent-fabric-mocks/tools/`](agent-fabric-mocks/tools/) |
 | `agent` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
 
 Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`docs/02-understand/capabilities.md`](docs/02-understand/capabilities.md).
 
-Add a domain tool: unique `method`+`path` in `tools.json`, point the capability `invoke.url` at `http://tool-mock:3010{path}`, rebuild.
+Add a domain tool: add `agent-fabric-mocks/tools/tools/<id>.json` with unique `method`+`path`, point the capability `invoke.url` at `http://tool-mock:3010{path}`, rebuild.
 
 ### How the loop calls them
 
@@ -742,6 +797,6 @@ Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of 
 - [Architecture packs](docs/04-architecture/README.md)
 - [Plan](docs/tasks/plan.md)
 - [Evals](#evals) — [eval-plan.md](docs/tasks/eval-plan.md) / [eval-todo.md](docs/tasks/eval-todo.md) (routing golden set — not on the hot path)
-- [Intent router](docs/tasks/intent-plan.md) / [intent-todo.md](docs/tasks/intent-todo.md) (layered classifier ①–③)
+- [Intent router](docs/tasks/intent-plan.md) / [intent-todo.md](docs/tasks/intent-todo.md) (① rules, ② retrieve, ③ **off**; chat JSON still FR-5 slim)
 - [Observability](docs/tasks/observability-plan.md) / [observability-todo.md](docs/tasks/observability-todo.md)
 - [Future enhancements](docs/tasks/future-enhancement.md) (route table, Shared Memory)

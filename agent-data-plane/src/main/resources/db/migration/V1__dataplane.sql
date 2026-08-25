@@ -712,91 +712,91 @@ INSERT INTO dataplane.routes (
   'llm_pipeline', '2026.08.1', TRUE, 'active', 'llm_pipeline',
   'Pattern 2 (deterministic): fixed workflow of three LLM stages. Prompts: host plus classify and synthesis templates. No domain HTTP.',
   'http://agent-runtime:3008/v1/runs', 'agent-llm-pipeline', NULL, NULL,
-  'read_only_standard', 'fast-chat', 'llm_pipeline', 'llm_pipeline', NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'fast-chat', 'llm_pipeline', 'llm_pipeline', NULL, 'llm_pipeline_tools', NULL, 'clarify',
   '[]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'policy_memo', '2026.08.1', TRUE, 'active', 'policy_memo',
   'Pattern 2 (deterministic): prefetch placeholder then one synthesis call. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-policy-memo', NULL, NULL,
-  'read_only_standard', 'reasoning-standard', 'policy_memo', 'policy_memo', 'msa_memo', NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'policy_memo', 'policy_memo', 'msa_memo', 'policy_memo_tools', NULL, 'clarify',
   '["policy:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'account_notify', '2026.08.1', TRUE, 'active', 'account_notify',
   'Pattern 2 (deterministic): domain HTTP notify_customer, then synthesis confirm. Prompts: host plus synthesis template.',
   'http://agent-runtime:3008/v1/runs', 'agent-account-notify', 'account_notify', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'account_notify', 'account_notify', NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'account_notify', 'account_notify', NULL, 'account_notify_tools', NULL, 'escalate_human',
   '["notify:send"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'card_freeze', '2026.08.1', TRUE, 'active', 'card_freeze',
   'Pattern 2 (deterministic): domain HTTP identity_check, limit_check, freeze_card, then synthesis confirm. Prompts: host plus synthesis template. Freeze remains a gated side effect in catalogue.',
   'http://agent-runtime:3008/v1/runs', 'agent-card-freeze', 'card_freeze', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'card_freeze', 'card_freeze', NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'card_freeze', 'card_freeze', NULL, 'card_freeze_tools', NULL, 'escalate_human',
   '["cards:freeze"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'dispute_intake', '2026.08.1', TRUE, 'active', 'dispute_intake',
   'Pattern 2 (deterministic): two domain HTTP steps then synthesis on packet_summarize. Prompts: host plus synthesis template.',
   'http://agent-runtime:3008/v1/runs', 'agent-dispute-intake', 'dispute_intake', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'dispute_intake', 'dispute_intake', NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'dispute_intake', 'dispute_intake', NULL, 'dispute_intake_tools', NULL, 'clarify',
   '["disputes:write"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'pack_then_notify', '2026.08.1', TRUE, 'active', 'pack_then_notify',
   'Pattern 2 (deterministic): prefetch placeholder, domain HTTP notify, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-notify', 'account_notify', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'pack_then_notify', 'pack_then_notify', NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'pack_then_notify', 'pack_then_notify', NULL, 'pack_then_notify_tools', NULL, 'escalate_human',
   '["notify:send"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'pack_then_freeze', '2026.08.1', TRUE, 'active', 'pack_then_freeze',
   'Pattern 2 (deterministic): prefetch placeholder, three domain HTTP writes, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-freeze', 'card_freeze', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'pack_then_freeze', 'pack_then_freeze', NULL, NULL, NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'pack_then_freeze', 'pack_then_freeze', NULL, 'pack_then_freeze_tools', NULL, 'escalate_human',
   '["cards:freeze"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'pack_then_review', '2026.08.1', TRUE, 'active', 'pack_then_review',
   'Pattern 2 (deterministic): prefetch placeholder, two domain HTTP tools, then synthesis memo. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-review', 'pack_then_review', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'pack_then_review', 'pack_then_review', 'msa_memo', NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'pack_then_review', 'pack_then_review', 'msa_memo', 'pack_then_review_tools', NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'clause_lookup', '2026.08.1', TRUE, 'active', 'clause_lookup',
   'Pattern 2 (deterministic): LLM query_formulation, HTTP clause_search, then synthesis. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-clause-lookup', 'clause_lookup', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'clause_lookup', 'clause_lookup', NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'clause_lookup', 'clause_lookup', NULL, 'clause_lookup_tools', NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'template_retrieve', '2026.08.1', TRUE, 'active', 'template_retrieve',
   'Pattern 2 (deterministic): two query_formulation retrieves, HTTP score, then synthesis. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-template-retrieve', 'template_retrieve', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'template_retrieve', 'template_retrieve', NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'template_retrieve', 'template_retrieve', NULL, 'template_retrieve_tools', NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'msa_risk_review', '2026.08.1', TRUE, 'active', 'msa_risk_review',
   'Pattern 2 (deterministic): HTTP OCR, two query_formulation retrieves, HTTP score, synthesis memo. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-msa-risk-review', 'msa_risk_review', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'msa_risk_review', 'msa_risk_review', 'msa_memo', 'msa_risk_review_golden', NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'msa_risk_review', 'msa_risk_review', 'msa_memo', 'msa_risk_review_tools', NULL, 'clarify',
   '["legal:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'kyc_onboarding', '2026.08.1', TRUE, 'active', 'kyc_onboard',
   'Pattern 2 (deterministic): domain HTTP KYC tools then synthesis packet. Prompts: host plus synthesis template. branch and human_gate are catalogue-only.',
   'http://agent-runtime:3008/v1/runs', 'agent-kyc-onboarding', 'kyc_onboarding', '2026.08.1',
-  'high_risk_step_up', 'reasoning-standard', 'kyc_onboarding', 'kyc_onboarding', 'kyc_result', 'kyc_onboarding_golden', NULL, 'escalate_human',
+  'high_risk_step_up', 'reasoning-standard', 'kyc_onboarding', 'kyc_onboarding', 'kyc_result', 'kyc_onboarding_tools', NULL, 'escalate_human',
   '["kyc:onboard"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'claims_adjudicate', '2026.08.1', TRUE, 'active', 'claims_adjudicate',
   'Pattern 2 (deterministic): HTTP playbook retrieve, query_formulation clause search, HTTP score, synthesis memo. Prompts: host plus query_formulation and synthesis templates.',
   'http://agent-runtime:3008/v1/runs', 'agent-claims-adjudicate', 'claims_adjudicate', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'claims_adjudicate', 'claims_adjudicate', 'msa_memo', NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'claims_adjudicate', 'claims_adjudicate', 'msa_memo', 'claims_adjudicate_tools', NULL, 'clarify',
   '["claims:read"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (

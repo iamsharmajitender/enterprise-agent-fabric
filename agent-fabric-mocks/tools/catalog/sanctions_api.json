@@ -1,0 +1,9 @@
+{
+  "id": "sanctions_api",
+  "method": "POST",
+  "path": "/kyc/sanctions",
+  "status": 200,
+  "response": {
+    "text": "Sanctions screen: no hits."
+  }
+}
