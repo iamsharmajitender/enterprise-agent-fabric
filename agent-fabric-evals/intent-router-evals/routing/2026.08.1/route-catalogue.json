@@ -72,6 +72,10 @@
       "route_version": "2026.08.1"
     },
     {
+      "route_id": "purchase_refund",
+      "route_version": "2026.08.1"
+    },
+    {
       "route_id": "pack_then_notify",
       "route_version": "2026.08.1"
     },

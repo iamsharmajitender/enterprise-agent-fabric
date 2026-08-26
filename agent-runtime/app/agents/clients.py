@@ -80,6 +80,17 @@ class HttpCatalogueClient:
             "prompt",
         )
 
+    def get_corpus(self, corpus_id: str) -> dict[str, Any]:
+        """Fetch a corpus row; fail closed when missing."""
+        if not corpus_id:
+            raise HydrateError("corpus id required")
+        response = self._http.get(f"/v1/catalog/corpora/{corpus_id}")
+        return _json_or_miss(
+            response,
+            f"corpus miss {corpus_id}",
+            f"corpus error {response.status_code}",
+        )
+
 
 class HttpRegistryClient:
     def __init__(self, base_url: str) -> None:

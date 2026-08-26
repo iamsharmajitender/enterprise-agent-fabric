@@ -161,7 +161,7 @@ Treat a capability like a package.
 | `version` | Immutable semver. |
 | `kind` | `domain` or `agent`. |
 | `description` | Developer and later the model. |
-| `input_schema` / `output_schema` | JSON Schema → tool schema on the run pin. |
+| `input_schema` / `output_schema` | JSON Schema → tool schema on the run pin. LLM stages bind `output_schema`: [schemas](../02-understand/schemas.md). |
 | `invoke` | After PEP. Domain: method, path, auth to the **governed business API**. Agent-start: `POST` `{jobs_url}` with a **fixed** `route_id`. Not an MCP URL. Not an AR URL. |
 | `snippet` | Documentation, not runtime. |
 | `owner` | Team that may publish the next version. |

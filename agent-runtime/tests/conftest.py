@@ -61,7 +61,7 @@ CAPABILITY = {
     "status": "published",
     "input_schema": {"type": "object"},
     "output_schema": {"type": "object"},
-    "invoke": {"method": "POST", "url": "http://tool-mock:3010/fees/explain"},
+    "invoke": {"method": "POST", "url": "http://agent-mocks:3010/fees/explain"},
 }
 
 
@@ -75,6 +75,14 @@ class FakeCatalogue:
         self.prompt_calls: list[str] = []
         self.workflow: dict[str, Any] = {}
         self.prompt: dict[str, Any] = {}
+        self.corpora: dict[str, dict[str, Any]] = {}
+
+    def get_corpus(self, corpus_id: str) -> dict[str, Any]:
+        from app.agents.hydrate import HydrateError
+
+        if corpus_id not in self.corpora:
+            raise HydrateError(f"corpus miss {corpus_id}")
+        return self.corpora[corpus_id]
 
     def get_route(self, route_id: str, route_version: str) -> dict[str, Any]:
         from app.agents.hydrate import HydrateError

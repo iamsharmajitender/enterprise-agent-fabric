@@ -1,7 +1,7 @@
 {
   "corpus_id": "policy-engine",
   "display_name": "Policy engine",
-  "url": "https://retrieve.internal/v1/search",
+  "url": "http://agent-mocks:3010/v1/search/assistant",
   "collection": "policy-engine",
   "auth": "workload-oauth",
   "owner": "policy-ops",

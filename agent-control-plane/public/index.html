@@ -83,7 +83,7 @@
                 </tr>
                 <tr>
                   <th scope="row">Autonomy<span class="glossary-key">autonomy_mode</span></th>
-                  <td>Who chooses the next step inside the run: 0 single inference, 1 autonomous, 2 deterministic, 3 guided. Patterns 0–3. Does not choose how the run is started.</td>
+                  <td>Who chooses the next step inside the run after the route is chosen. Not classify. Options below. Does not choose how the run is started.</td>
                 </tr>
                 <tr>
                   <th scope="row">Route version<span class="glossary-key">route_version</span></th>
@@ -92,6 +92,31 @@
                 <tr>
                   <th scope="row">Description</th>
                   <td>Human summary of what the route does. Shown on the list and detail. Not sent to the model as the prompt; that is the prompt pack.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Autonomy options</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Autonomy mode values</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Single inference<span class="glossary-key">0</span></th>
+                  <td>One LLM call. Prompt only. Cannot take tools, retrieve tools, a workflow, memory, or retrieval. Pattern 0 may return the inference body synchronously.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Autonomous<span class="glossary-key">1</span></th>
+                  <td>The model chooses tools from the hydrated manifest in a loop, up to max loop steps. No workflow stages.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Deterministic<span class="glossary-key">2</span></th>
+                  <td>Workflow stages run in a fixed order. The model does not pick the next tool. Prefetch can be a forced retrieve stage.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Guided<span class="glossary-key">3</span></th>
+                  <td>A workflow frames the run; the model may still choose within that frame. Use when some steps are fixed and some are judged.</td>
                 </tr>
               </tbody>
             </table>
@@ -121,15 +146,21 @@
               <tbody>
                 <tr>
                   <th scope="row">Policy<span class="glossary-key">policy_profile</span></th>
-                  <td>Policy profile copied onto the run pin. UI labels: High risk, Read only, Low risk. Runtime enforces it on tool calls; a published capability is still not permission.</td>
+                  <td>Policy profile copied onto the run pin. Runtime enforces it on tool calls; a published capability is still not permission.
+                    <span class="mono">high_risk_step_up</span> (High risk) — higher bar when the route can take costly or irreversible actions.
+                    <span class="mono">read_only_standard</span> (Read only) — default for most catalogue routes.
+                    <span class="mono">low_risk_chat</span> (Low risk) — cheap chat / single-inference with no tools.</td>
                 </tr>
                 <tr>
                   <th scope="row">Model<span class="glossary-key">model_profile</span></th>
-                  <td>Which model profile the runtime uses for this route. Pointer only. Changing model is a catalogue edit, not a runtime flag.</td>
+                  <td>Pointer into <span class="mono">dataplane.model_profiles</span>. Changing model is a catalogue edit, not a runtime flag.
+                    <span class="mono">reasoning-standard</span> — plan / multi-step / high-stakes synthesis.
+                    <span class="mono">fast-chat</span> — cheap synthesize / classify.
+                    <span class="mono">lightweight-chat</span> — no-tools / cheap chat.</td>
                 </tr>
                 <tr>
                   <th scope="row">Fallback<span class="glossary-key">fallback</span></th>
-                  <td>What to do if the primary path fails, commonly clarify. Does not start a different route by itself.</td>
+                  <td>What to do if the primary path fails. Seed value: <span class="mono">clarify</span>. Does not start a different route by itself.</td>
                 </tr>
                 <tr>
                   <th scope="row">Max loop steps<span class="glossary-key">max_loop_steps</span></th>
@@ -146,11 +177,13 @@
               <tbody>
                 <tr>
                   <th scope="row">Manifest<span class="glossary-key">tool_manifest</span></th>
-                  <td>Pointer to the tool list. The route has no inlined <span class="mono">tools[]</span>. Runtime hydrates the whole pinned manifest before the LLM. <span class="mono">none</span> means no tools (typical for single inference).</td>
+                  <td>Pointer to the tool list. The route has no inlined <span class="mono">tools[]</span>. Runtime hydrates the whole pinned manifest before the LLM. Empty / omitted means no tools (typical for single inference).</td>
                 </tr>
                 <tr>
                   <th scope="row">Retrieval<span class="glossary-key">retrieval</span></th>
-                  <td>How the route searches corpora. <strong>Tool</strong> lets the model retrieve. <strong>Prefetch</strong> is a designer-forced retrieve before or as a stage. Scope is corpus ids, not the capability catalog.</td>
+                  <td>How the route searches corpora. Omit the row when there is no index. Scope is corpus ids, not the capability catalog.
+                    <span class="mono">tool</span> (UI: Tool) — model or stage retrieves via a normal domain capability over the scope.
+                    <span class="mono">deterministic_prefetch</span> (UI: Prefetch) — designer-forced pack before generate; prefetch stage invoke is empty today.</td>
                 </tr>
               </tbody>
             </table>
@@ -163,7 +196,7 @@
               <tbody>
                 <tr>
                   <th scope="row">Memory profile<span class="glossary-key">memory_profile</span></th>
-                  <td>What the run may keep: conversation, working, loop checkpoint, and long-term. TTL is hours. Isolation is tenant / user / session. Empty on routes that must not remember.</td>
+                  <td>What the run may keep. Fields: <span class="mono">conversation</span>, <span class="mono">working</span>, <span class="mono">loop</span>, <span class="mono">long_term</span>. Field values: <span class="mono">session</span>, <span class="mono">checkpoint</span>, <span class="mono">none</span>, <span class="mono">retrieve_only</span>. TTL is hours. Isolation options: <span class="mono">tenant</span>, <span class="mono">user</span>, <span class="mono">session</span>. Empty on routes that must not remember. Runtime honors working and loop today.</td>
                 </tr>
               </tbody>
             </table>
@@ -205,11 +238,11 @@
                 </tr>
                 <tr>
                   <th scope="row">Channels<span class="glossary-key">channels</span></th>
-                  <td>Where this route is eligible, for example web chat or api jobs. A route can be jobs-only.</td>
+                  <td>Where this route is eligible. Options: <span class="mono">web</span>, <span class="mono">api</span>. A route can be api-only (jobs) or web-only (chat).</td>
                 </tr>
                 <tr>
                   <th scope="row">Chat<span class="glossary-key">chat_visible</span></th>
-                  <td>Whether the route appears as a chat option. False means event-only or jobs-only; decide still entitles it when the caller sends the route id.</td>
+                  <td>Whether the route appears as a chat option. Options: <span class="mono">true</span>, <span class="mono">false</span>. False means event-only or jobs-only; decide still entitles it when the caller sends the route id.</td>
                 </tr>
               </tbody>
             </table>
@@ -231,7 +264,9 @@
                 </tr>
                 <tr>
                   <th scope="row">Kind<span class="glossary-key">kind</span></th>
-                  <td><span class="chip kind-domain">Domain</span> is a governed business API. <span class="chip kind-agent">Agent</span> starts another catalogue route via jobs, with a fixed route id. Same id + version UX for both. Two kinds only.</td>
+                  <td>Two kinds only. Do not add kinds for retrieve, prompts, workflows, memory, or MCP.
+                    <span class="chip kind-domain">Domain</span> <span class="mono">domain</span> — governed business API (method, path, auth).
+                    <span class="chip kind-agent">Agent</span> <span class="mono">agent</span> — starts another catalogue route via API Front Door jobs with a fixed route id. Not a direct Agent Runtime URL.</td>
                 </tr>
                 <tr>
                   <th scope="row">Owner</th>
@@ -243,7 +278,7 @@
                 </tr>
                 <tr>
                   <th scope="row">Status</th>
-                  <td>Draft, published, or deprecated. Manifests may only refer to published. Deprecated shows as Retired in this UI.</td>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. Manifests may only refer to published. Deprecated shows as Retired in this UI.</td>
                 </tr>
                 <tr>
                   <th scope="row">Description</th>
@@ -264,6 +299,69 @@
                 <tr>
                   <th scope="row">Snippet</th>
                   <td>Developer documentation on the capability. Not used at runtime and not sent to the model.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Corpus</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">A retrieve index row in Data Plane. Routes name corpus ids in <span class="mono">retrieval.scope</span>; workflow stages may pin one id in <span class="mono">stage.corpus</span>. Runtime looks up each id and POSTs to that row’s gateway <span class="mono">url</span> — the route never stores a retrieve URL. Not a capability kind and not <span class="mono">long_term</span> memory.</p>
+            <table class="glossary-table">
+              <caption class="sr-only">Corpus fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Corpus<span class="glossary-key">corpus_id</span></th>
+                  <td>Stable index name, for example <span class="mono">policy-engine</span> or <span class="mono">clause-index</span>. Appears in route <span class="mono">retrieval.scope</span> and on named retrieve stages. Two ids in scope are two lookups and two POSTs, then merge — never two indexes in one search call.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Display name</th>
+                  <td>Human label for operators and this Control Plane. Not sent to the model as a prompt.</td>
+                </tr>
+                <tr>
+                  <th scope="row">URL<span class="glossary-key">url</span></th>
+                  <td>Retrieve gateway endpoint. Agent Runtime POSTs <span class="mono">{collection, goal}</span> (and merged pack fields on prefetch routes). Local Compose uses agent-fabric-mocks <span class="mono">POST /v1/search</span>.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Collection<span class="glossary-key">collection</span></th>
+                  <td>Index or collection name when several corpora share one gateway host. Required on shared gateways; may match <span class="mono">corpus_id</span> when each index has its own row.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Auth<span class="glossary-key">auth</span></th>
+                  <td>How Runtime authenticates to the gateway, for example <span class="mono">workload-oauth</span>. Distinct from capability invoke auth on retrieve tools.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Owner</th>
+                  <td>Team that owns the index and may publish the next row cut.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. Runtime must POST only <span class="mono">published</span> rows. Unpublished or missing corpus → fail closed on prefetch. Deprecated shows as Retired in this UI.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Region<span class="glossary-key">region</span></th>
+                  <td>Optional residency or region hint for the index. Empty when not pinned.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Retrieval modes</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">How routes use corpora</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Prefetch<span class="glossary-key">deterministic_prefetch</span></th>
+                  <td>Route <span class="mono">retrieval.mode</span>. App packs every id in <span class="mono">scope</span> before generate. Empty-invoke prefetch stages write <span class="mono">working.slots.prefetch</span>; the model cannot skip search.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Retrieve tool<span class="glossary-key">tool</span></th>
+                  <td>Route <span class="mono">retrieval.mode</span>. Named retrieve capability over <span class="mono">scope</span>. Workflow <span class="mono">stage.corpus</span> picks which scoped id that stage uses. Still a normal domain capability HTTP call.</td>
                 </tr>
               </tbody>
             </table>
@@ -293,7 +391,7 @@
                 </tr>
                 <tr>
                   <th scope="row">Status</th>
-                  <td>Draft, published, or retired. New pins use the live published pack when the route points at it.</td>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. New pins use the live published pack when the route points at it. Deprecated shows as Retired in this UI.</td>
                 </tr>
                 <tr>
                   <th scope="row">Host<span class="glossary-key">host</span></th>
@@ -301,7 +399,11 @@
                 </tr>
                 <tr>
                   <th scope="row">Roles<span class="glossary-key">by_llm_role</span></th>
-                  <td>Optional fragments keyed by LLM role. Empty when the host text is enough.</td>
+                  <td>Optional fragments keyed by LLM role. Empty when the host text is enough. Each fragment has <span class="mono">task_type</span>: <span class="mono">plan</span>, <span class="mono">synthesize</span>, or <span class="mono">classify</span>. Pack keys exclude <span class="mono">none</span>.
+                    <span class="mono">classify</span> — LLM only; skip HTTP; bindable <span class="mono">output_schema</span> validated.
+                    <span class="mono">synthesis</span> — LLM only; user-facing answer or memo; Pattern 0 host node.
+                    <span class="mono">query_formulation</span> — LLM writes the retrieve query, then HTTP.
+                    Stage-only <span class="mono">none</span> — HTTP if invoke url is set; otherwise no-op (not a pack key).</td>
                 </tr>
               </tbody>
             </table>
@@ -310,7 +412,8 @@
         <details class="glossary__section">
           <summary>Workflow</summary>
           <div class="glossary__section-body">
-            <p class="glossary__intro">Ordered stages for deterministic or guided runs. The route stores a workflow id pointer. Autonomous routes leave this empty so the model picks tools from the manifest. A stage is not a capability by itself; it names a tool or an LLM step.</p>
+            <p class="glossary__intro">Ordered stages for deterministic or guided runs. The route stores a workflow id pointer. Autonomous routes leave this empty so the model picks tools from the manifest. A stage is not a capability by itself; it names a tool or an LLM step. Control Plane columns: Stage, Tool, Type, LLM role, Corpus, Branch, Gates. Pattern 2/3 run stages in order today; <span class="mono">branch</span> and <span class="mono">human_gate</span> are catalogue-only until dataflow D8–D9.</p>
+            <h4>Identity</h4>
             <table class="glossary-table">
               <caption class="sr-only">Workflow fields</caption>
               <thead>
@@ -327,11 +430,56 @@
                 </tr>
                 <tr>
                   <th scope="row">Status</th>
-                  <td>Draft, published, or retired. Deterministic routes should pin a published workflow.</td>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. Deterministic routes should pin a published workflow. Deprecated shows as Retired in this UI.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Stage fields</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Workflow stage fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Stage<span class="glossary-key">id</span></th>
+                  <td>Stable step name inside the workflow, for example <span class="mono">ocr</span> or <span class="mono">manual_review</span>.</td>
                 </tr>
                 <tr>
-                  <th scope="row">Stages</th>
-                  <td>Ordered steps. A stage names a tool (capability on the manifest) or an LLM step. Prefetch can be a designer-forced retrieve stage, not a second retrieval mode.</td>
+                  <th scope="row">Tool<span class="glossary-key">tool</span></th>
+                  <td>Capability name on the route manifest. Empty on LLM-only, prefetch placeholder, or human_gate stages.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Type<span class="glossary-key">type</span></th>
+                  <td>Optional. Omitted = ordinary tool / LLM stage. Seed option: <span class="mono">human_gate</span> (pause for a human; no tool URL). Seed: <span class="mono">purchase_refund</span>, <span class="mono">kyc_onboarding</span>. Not executed in this Runtime yet.</td>
+                </tr>
+                <tr>
+                  <th scope="row">LLM role<span class="glossary-key">llm_role</span></th>
+                  <td>Options: <span class="mono">none</span> (HTTP if url set, else no-op), <span class="mono">classify</span>, <span class="mono">synthesis</span>, <span class="mono">query_formulation</span>. Same values as prompt pack roles (pack keys exclude <span class="mono">none</span>).</td>
+                </tr>
+                <tr>
+                  <th scope="row">Corpus<span class="glossary-key">corpus</span></th>
+                  <td>Optional corpus id for a retrieve stage, for example <span class="mono">clause-index</span>. Route retrieval scope is the full list; this names one corpus on the stage.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Branch<span class="glossary-key">branch</span></th>
+                  <td>Map from a slot value to the next stage id, for example <span class="mono">high → manual_review</span>, <span class="mono">low → activate_account</span>. Catalogue-only; Runtime stays linear today.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Side effect<span class="glossary-key">side_effect</span></th>
+                  <td>Set <span class="mono">true</span> for a write / money / freeze step. Gate chip: Side effect.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Approval<span class="glossary-key">requires_approval</span></th>
+                  <td>Set <span class="mono">true</span> to latch the write until a human packet exists. Pair with <span class="mono">human_gate</span>. Gate chip: Approval. Catalogue-only today.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Allowlist<span class="glossary-key">allowlist</span></th>
+                  <td>Guided (pattern 3) tool names the model may choose within this stage. Catalogue-only; Runtime does not enforce the list yet.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Max tool calls<span class="glossary-key">max_tool_calls</span></th>
+                  <td>Guided cap on tool calls inside the stage. Catalogue-only today.</td>
                 </tr>
               </tbody>
             </table>
@@ -360,6 +508,10 @@
                   <td>Human summary of what this tool set is for. Not sent to the model as a prompt.</td>
                 </tr>
                 <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">retired</span>. Routes should pin a published manifest.</td>
+                </tr>
+                <tr>
                   <th scope="row">Tools</th>
                   <td>Rows the model may call. Each has a name, capability id, capability version, policy action, and risk tier. No inlined OpenAPI; schemas come from hydrate.</td>
                 </tr>
@@ -369,7 +521,10 @@
                 </tr>
                 <tr>
                   <th scope="row">Risk<span class="glossary-key">risk_tier</span></th>
-                  <td>Risk tier on the manifest tool row. Used by agent policy when the model proposes that tool.</td>
+                  <td>Risk tier on the manifest tool row. Checked with <span class="mono">pdp_action</span> before invoke.
+                    <span class="mono">low</span> — read or low-impact (search, OCR, confirm).
+                    <span class="mono">medium</span> — draft, score, match, or notify.
+                    <span class="mono">high</span> — side-effect or money-moving (freeze, post refund, activate, start child agent).</td>
                 </tr>
               </tbody>
             </table>
@@ -400,36 +555,6 @@
                 <tr>
                   <th scope="row">Retired</th>
                   <td>Deprecated or withdrawn. Kept for history. New manifests must not refer to retired capabilities.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </details>
-        <details class="glossary__section">
-          <summary>Autonomy</summary>
-          <div class="glossary__section-body">
-            <p class="glossary__intro">Who decides the next step inside Agent Runtime after the route is already chosen. This is not classify. Dummy jobs in this repo are grouped the same way: 0 single inference, 1 autonomous, 2 deterministic, 3 guided.</p>
-            <table class="glossary-table">
-              <caption class="sr-only">Autonomy modes</caption>
-              <thead>
-                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">Single inference<span class="glossary-key">0</span></th>
-                  <td>One LLM call. Prompt only. Cannot take tools, retrieve tools, a workflow, memory, or retrieval. Pattern 0 may return the inference body synchronously.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Autonomous<span class="glossary-key">1</span></th>
-                  <td>The model chooses tools from the hydrated manifest in a loop, up to max loop steps. No workflow stages.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Deterministic<span class="glossary-key">2</span></th>
-                  <td>Workflow stages run in a fixed order. The model does not pick the next tool. Prefetch can be a forced retrieve stage.</td>
-                </tr>
-                <tr>
-                  <th scope="row">Guided<span class="glossary-key">3</span></th>
-                  <td>A workflow frames the run; the model may still choose within that frame. Use when some steps are fixed and some are judged.</td>
                 </tr>
               </tbody>
             </table>

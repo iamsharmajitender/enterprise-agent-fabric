@@ -3,9 +3,18 @@ from uuid import uuid4
 
 from app import telemetry
 from app.agents.hydrate import CataloguePort, HydrateError, RegistryPort, hydrate
+from app.agents.jobs_client import JobsPort
+from app.agents.prefetch import PrefetchPort
+from app.core.checkpoint import (
+    checkpoint_goal,
+    checkpoint_resume_index,
+    loop_resume_step,
+    parse_checkpoint_resume,
+)
 from app.core.execution import GraphPort, run_loop
-from app.core.memory import memory_profile, notes_from_working, persist_stage, save_working
+from app.core.memory import memory_profile, notes_from_working, persist_stage, save_loop, save_working, slots_from_working, working_payload
 from app.core.state import RunPin, RunStore
+from app.graph.human_gate import parse_gate_packet
 from app.graph.llm import LlmPort
 from app.graph.workflow import build_agent_loop, build_tool_graph
 from app.tools.invoker import ToolInvoker
@@ -20,6 +29,8 @@ class RunService:
         graph: GraphPort | None = None,
         invoker: ToolInvoker | None = None,
         llm: LlmPort | None = None,
+        prefetch: PrefetchPort | None = None,
+        jobs: JobsPort | None = None,
     ) -> None:
         """Hold store, catalogue, registry, and optional graph/tool/LLM ports."""
         self._store = store
@@ -28,6 +39,8 @@ class RunService:
         self._graph = graph
         self._invoker = invoker
         self._llm = llm
+        self._prefetch = prefetch
+        self._jobs = jobs
 
     def _graph_for(
         self,
@@ -36,6 +49,7 @@ class RunService:
         correlation_id: str,
         profile: dict[str, Any],
         row: dict[str, Any] | None = None,
+        start_index: int = 0,
     ) -> GraphPort:
         """Use an injected graph, or build a Pattern 1 loop / linear graph."""
         if self._graph is not None:
@@ -44,10 +58,20 @@ class RunService:
             raise RuntimeError("tool invoker required when no graph is injected")
 
         def on_stage(step: int, stage_id: str, state: dict[str, Any]) -> None:
-            persist_stage(self._store, correlation_id, profile, step, stage_id, state)
+            persist_stage(
+                self._store,
+                correlation_id,
+                profile,
+                step,
+                stage_id,
+                state,
+                tools=tools,
+            )
 
         row = row or {}
         mode = int(row.get("autonomy_mode") or 0)
+        retrieval = row.get("retrieval") if isinstance(row.get("retrieval"), dict) else None
+        sliced = tools[start_index:] if start_index else tools
         if mode == 1:
             if self._llm is None:
                 raise RuntimeError("llm required for autonomy_mode 1")
@@ -56,14 +80,28 @@ class RunService:
             if prompt_id:
                 extra = str(self._catalogue.get_prompt(prompt_id).get("host") or "")
             return build_agent_loop(
-                tools,
+                sliced,
                 self._invoker,
                 self._llm,
                 max_steps=int(row.get("max_loop_steps") or 8),
                 on_stage=on_stage,
                 system=extra,
+                retrieval=retrieval,
+                prefetch=self._prefetch,
+                catalogue=self._catalogue,
+                jobs=self._jobs,
             )
-        return build_tool_graph(tools, self._invoker, llm=self._llm, on_stage=on_stage)
+        return build_tool_graph(
+            tools,
+            self._invoker,
+            llm=self._llm,
+            on_stage=on_stage,
+            retrieval=retrieval,
+            prefetch=self._prefetch,
+            catalogue=self._catalogue,
+            start_index=start_index,
+            jobs=self._jobs,
+        )
 
     def _route_row(self, route_id: str, route_version: str) -> dict[str, Any]:
         """Load the pinned catalogue row for hydrate and memory flags."""
@@ -163,6 +201,7 @@ class RunService:
             self._store,
             saved,
             goal=body.get("goal") if isinstance(body.get("goal"), dict) else {},
+            profile=profile,
         )
         return saved.correlation_id
 
@@ -180,6 +219,85 @@ class RunService:
         row = self._route_row(pin.route_id, pin.route_version)
         profile = memory_profile(row)
         prior_notes = notes_from_working(pin.working) if save_working(profile) else []
+        prior_slots = slots_from_working(pin.working) if save_working(profile) else {}
+
+        if pin.status == "waiting":
+            checkpoint = pin.checkpoint if isinstance(pin.checkpoint, dict) else {}
+            packet = parse_gate_packet(body if isinstance(body, dict) else {})
+            if packet is None:
+                raise ValueError("human_gate resume packet required")
+            stage_id = str(checkpoint.get("stage_id") or "")
+            if not stage_id:
+                raise ValueError("human_gate checkpoint missing stage_id")
+            decision = str(packet.get("decision") or "").strip().lower()
+            if decision == "reject":
+                failed = self._store.fail(
+                    correlation_id,
+                    {"message": str(packet.get("comment") or "human_gate rejected")},
+                )
+                return failed.slim_status()
+            resume_index = int(checkpoint.get("resume_index") or checkpoint.get("step", -1) + 1)
+            goal = checkpoint.get("goal") if isinstance(checkpoint.get("goal"), dict) else {}
+            merged_slots = dict(prior_slots)
+            merged_slots[stage_id] = packet
+            if save_working(profile):
+                self._store.save_progress(
+                    correlation_id,
+                    working=working_payload(prior_notes, merged_slots),
+                )
+            pin = self._store.mark_running(correlation_id)
+            run_loop(
+                self._graph_for(
+                    pin.hydrated_tools,
+                    correlation_id=pin.correlation_id,
+                    profile=profile,
+                    row=row,
+                    start_index=resume_index,
+                ),
+                self._store,
+                pin,
+                goal=goal,
+                notes=prior_notes,
+                slots=merged_slots,
+                profile=profile,
+            )
+            return self.status(correlation_id)
+
+        if pin.status == "failed":
+            if not save_loop(profile):
+                raise ValueError("checkpoint resume not enabled for this route")
+            checkpoint = pin.checkpoint if isinstance(pin.checkpoint, dict) else {}
+            if not parse_checkpoint_resume(body if isinstance(body, dict) else {}):
+                raise ValueError("checkpoint resume requires {} or resume=true")
+            resume_index = checkpoint_resume_index(
+                checkpoint,
+                pin.hydrated_tools,
+                prior_slots,
+            )
+            if resume_index is None:
+                raise ValueError("checkpoint resume not available")
+            goal = checkpoint_goal(checkpoint)
+            row_mode = int(row.get("autonomy_mode") or 0)
+            resume_loop = loop_resume_step(checkpoint) if row_mode == 1 else None
+            pin = self._store.mark_running(correlation_id)
+            run_loop(
+                self._graph_for(
+                    pin.hydrated_tools,
+                    correlation_id=pin.correlation_id,
+                    profile=profile,
+                    row=row,
+                    start_index=resume_index,
+                ),
+                self._store,
+                pin,
+                goal=goal,
+                notes=prior_notes,
+                slots=prior_slots,
+                profile=profile,
+                resume_loop_step=resume_loop,
+            )
+            return self.status(correlation_id)
+
         run_loop(
             self._graph_for(
                 pin.hydrated_tools,
@@ -191,6 +309,8 @@ class RunService:
             pin,
             goal=body if isinstance(body, dict) else {},
             notes=prior_notes,
+            slots=prior_slots,
+            profile=profile,
         )
         return self.status(correlation_id)
 

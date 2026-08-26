@@ -48,9 +48,9 @@ Front Door POST /v1/runs
             kind=agent: CALL starts another catalogue product (new freeze)
 ```
 
-Data that moves: HTTP payload is `dict(goal)` only. Tool `text` / `message` appends to `notes`. The next decide reads those notes. HTTP never reads `notes`. See [data](../02-understand/data.md).
+Data that moves: HTTP payload is `dict(goal)` ∪ schema-selected **slots**; LLM reads **notes**. See [data](../02-understand/data.md).
 
-This Runtime: prefetch is a no-op; `kind=agent` HTTP is skipped; `conversation` / `long_term` are catalogue-only. Gaps: [status](../02-understand/status.md).
+This Runtime: `deterministic_prefetch` packs when the workflow has a prefetch stage; Pattern 1 without that stage does not pack. `kind=agent` POSTs API AFD child jobs with projected payload. `conversation` / `long_term` are catalogue-only.
 
 ## Swimlane
 

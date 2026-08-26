@@ -84,7 +84,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 
 - [x] O1–O3 done
 - [x] Stack boots; JSON logs from at least AFD and AR
-- [ ] Human review before SDK dependency work
+- [x] Human review before SDK dependency work
 
 ---
 
@@ -218,7 +218,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 - [x] Unbroken Tempo path for `fee_explain` (jobs or chat): AFD → ADP → AR → ACR
 - [x] RED/latency for decide and runs queryable in Prometheus
 - [x] Spot-check: no PII/secrets in span attributes
-- [ ] Human review before business-event work
+- [x] Human review before business-event work
 
 ---
 
@@ -402,7 +402,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 
 **Verification:**
 - [x] Run the checklist once; all boxes pass
-- [ ] Human sign-off
+- [x] Human sign-off (2026-08-26)
 
 **Dependencies:** Task O9, Task O10, Task O7
 
@@ -419,4 +419,4 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 - [x] O1–O7, O9–O16 done (O8 done or cancelled)
 - [x] L3 narrative works for `fee_explain` in Grafana
 - [x] Out of scope still out (L5, all journeys, production retention)
-- [ ] Human approves before starting Phase 0 implementation in a build session
+- [x] Human sign-off — observability track complete (2026-08-26)

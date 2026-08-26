@@ -15,7 +15,7 @@ class CorpusServiceTest {
   void publishedLookupReturnsSearchEndpointNotRouteUrl() {
     Corpus row = corpora.get("policy-engine");
     assertThat(row.displayName()).isEqualTo("Policy engine");
-    assertThat(row.url()).isEqualTo("https://retrieve.internal/v1/search");
+    assertThat(row.url()).isEqualTo(CorpusGatewayUrls.ASSISTANT);
     assertThat(row.collection()).isEqualTo("policy-engine");
     assertThat(row.auth()).isEqualTo("workload-oauth");
     assertThat(row.owner()).isEqualTo("policy-ops");
@@ -31,6 +31,14 @@ class CorpusServiceTest {
     assertThat(clauses.collection()).isEqualTo("clause-index");
     assertThat(playbook.collection()).isEqualTo("legal-playbook");
     assertThat(clauses.corpusId()).isNotEqualTo(playbook.corpusId());
+  }
+
+  @Test
+  void policyAndLegalCorporaUseDifferentGatewayHosts() {
+    assertThat(corpora.get("policy-engine").url()).isEqualTo(CorpusGatewayUrls.ASSISTANT);
+    assertThat(corpora.get("clause-index").url()).isEqualTo(CorpusGatewayUrls.LEGAL);
+    assertThat(corpora.get("research-index").url())
+        .isEqualTo(CorpusGatewayUrls.dedicated("research-index"));
   }
 
   @Test

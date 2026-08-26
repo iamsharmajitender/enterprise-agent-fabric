@@ -116,6 +116,17 @@
       }
     },
     {
+      "route_id": "purchase_refund",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["refunds:write"],
+      "payload": {
+        "doc_id": "dms:receipt-{id}",
+        "account_id": "acc-{id}",
+        "reason": "item damaged"
+      }
+    },
+    {
       "route_id": "pack_then_notify",
       "autonomy_mode": 2,
       "label": "Deterministic",

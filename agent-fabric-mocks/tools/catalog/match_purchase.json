@@ -1,0 +1,9 @@
+{
+  "id": "match_purchase",
+  "method": "POST",
+  "path": "/receipts/match",
+  "status": 200,
+  "response": {
+    "text": "Matched purchase txn-8812 on 2026-08-12 for 45.36 USD."
+  }
+}

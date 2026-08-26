@@ -112,6 +112,13 @@ async function handle(
         await client.getManifest(manifestId, url.searchParams.get("version") ?? undefined),
       );
     }
+    if (req.method === "GET" && url.pathname === "/api/corpora") {
+      return proxy(res, await client.listCorpora(url.searchParams.get("include") ?? undefined));
+    }
+    if (req.method === "GET" && url.pathname.startsWith("/api/corpora/")) {
+      const corpusId = decodeURIComponent(url.pathname.slice("/api/corpora/".length));
+      return proxy(res, await client.getCorpus(corpusId));
+    }
     if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
       return file(res, "index.html", "text/html; charset=utf-8");
     }
@@ -139,6 +146,12 @@ async function handle(
     if (
       req.method === "GET" &&
       (url.pathname === "/manifests" || url.pathname.startsWith("/manifests/"))
+    ) {
+      return file(res, "index.html", "text/html; charset=utf-8");
+    }
+    if (
+      req.method === "GET" &&
+      (url.pathname === "/corpora" || url.pathname.startsWith("/corpora/"))
     ) {
       return file(res, "index.html", "text/html; charset=utf-8");
     }

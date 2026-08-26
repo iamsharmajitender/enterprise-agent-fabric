@@ -8,6 +8,7 @@ import os
 from typing import Any, Protocol
 
 from app import telemetry
+from app.graph.llm.schema import dump_structured, model_from_json_schema
 from app.graph.llm.text import plain_text
 
 _DEFAULT_MODEL = "ollama:qwen3:8b"
@@ -25,19 +26,36 @@ class ProviderLlm:
         """Use an injected backend, or build the default provider from env."""
         self._backend = backend if backend is not None else _build_default_backend()
 
-    def complete(self, system: str, user: str) -> str:
-        """Run one completion and return plain text."""
+    def complete(self, system: str, user: str, schema: dict[str, Any] | None = None) -> str:
+        """Run one completion. With schema, bind structured output and return JSON."""
         with telemetry.tracer().start_as_current_span("llm.complete") as span:
             span.set_attribute("llm.system", "provider")
             model = os.environ.get("OLLAMA_MODEL") or os.environ.get("FABRIC_LLM_MODEL") or _DEFAULT_MODEL
             span.set_attribute("llm.model", model)
-            message = self._backend.invoke(
-                [
-                    ("system", system or _DEFAULT_SYSTEM),
-                    ("human", user),
-                ]
-            )
+            span.set_attribute("llm.structured", bool(schema))
+            messages = [
+                ("system", system or _DEFAULT_SYSTEM),
+                ("human", user),
+            ]
+            if schema:
+                return dump_structured(_structured_invoke(self._backend, schema, messages), schema)
+            message = self._backend.invoke(messages)
             return plain_text(getattr(message, "content", message))
+
+
+def _structured_invoke(backend: Any, schema: dict[str, Any], messages: list) -> Any:
+    """Bind the backend with with_structured_output; fail if the backend cannot.
+
+    ChatOllama default method is json_schema (Ollama structured outputs), not an
+    OpenAI-only API. Do not pass method= so the provider keeps its default.
+    Source: https://reference.langchain.com/python/langchain-ollama/chat_models/ChatOllama/with_structured_output
+    """
+    bind = getattr(backend, "with_structured_output", None)
+    if bind is None:
+        raise RuntimeError("llm backend does not support structured output")
+    title = str(schema.get("title") or "StageOutput")
+    structured = bind(model_from_json_schema(schema, name=title))
+    return structured.invoke(messages)
 
 
 def _build_default_backend() -> _ChatBackend:

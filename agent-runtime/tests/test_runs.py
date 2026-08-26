@@ -2,6 +2,11 @@ import json
 
 from fastapi.testclient import TestClient
 
+from app.core.agent_core import RunService
+from app.core.execution import run_loop
+from app.core.memory import persist_stage
+from app.core.state import RunPin
+from app.graph.workflow import build_tool_graph
 from app.main import create_app
 from tests.conftest import (
     AFD,
@@ -67,7 +72,7 @@ def test_successful_start_writes_hydrated_tools(client: TestClient, store) -> No
     assert pin is not None
     assert pin.hydrated_tools
     assert pin.hydrated_tools[0]["id"] == "account_fee_lookup"
-    assert pin.hydrated_tools[0]["invoke"]["url"] == "http://tool-mock:3010/fees/explain"
+    assert pin.hydrated_tools[0]["invoke"]["url"] == "http://agent-mocks:3010/fees/explain"
 
 
 def test_catalogue_get_uses_pinned_version_never_active(
@@ -228,7 +233,7 @@ def test_dynamic_graph_posts_goal_to_hydrated_tool(store, catalogue: FakeCatalog
     correlation_id = started.json()["correlation_id"]
     assert calls == [
         (
-            {"method": "POST", "url": "http://tool-mock:3010/fees/explain"},
+            {"method": "POST", "url": "http://agent-mocks:3010/fees/explain"},
             {"utterance": "Why was I charged $42?"},
         )
     ]
@@ -259,7 +264,10 @@ def test_working_session_saves_notes_on_the_run_pin(
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
     pin = store.get(started.json()["correlation_id"])
     assert pin is not None
-    assert pin.working == {"notes": [CANNED, CANNED]}
+    assert pin.working == {
+        "notes": [CANNED, CANNED],
+        "slots": {"account_fee_lookup": {"text": CANNED}},
+    }
     assert pin.checkpoint is None
 
 
@@ -288,6 +296,7 @@ def test_loop_checkpoint_saves_step_on_the_run_pin(
         "stage_id": "respond",
         "result": CANNED,
         "goal": {"utterance": "Why was I charged $42?"},
+        "resume_index": 2,
     }
 
 
@@ -336,7 +345,10 @@ def test_resume_reloads_working_notes(
     client.post(f"/v1/runs/{correlation_id}/turns", headers=AFD, json={"message": "yes"})
     pin = store.get(correlation_id)
     assert pin is not None
-    assert pin.working == {"notes": [CANNED, CANNED, CANNED]}
+    assert pin.working == {
+        "notes": [CANNED, CANNED, CANNED],
+        "slots": {"account_fee_lookup": {"text": CANNED}},
+    }
 
 
 def test_resume_turn_does_not_start_a_second_run(client: TestClient, store, catalogue: FakeCatalogue) -> None:
@@ -357,3 +369,300 @@ def test_resume_turn_does_not_start_a_second_run(client: TestClient, store, cata
 def test_resume_unknown_run_is_404(client: TestClient) -> None:
     response = client.post("/v1/runs/corr-missing/turns", headers=AFD, json={"message": "yes"})
     assert response.status_code == 404
+
+
+def _purchase_refund_tools() -> list[dict]:
+    return [
+        {
+            "id": "ocr_extract",
+            "workflow_stage_id": "ocr",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/ocr"},
+        },
+        {
+            "id": "refund_eligibility",
+            "workflow_stage_id": "eligibility",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/refund/eligibility"},
+        },
+        {
+            "id": "manual_review",
+            "workflow_stage_id": "manual_review",
+            "stage_type": "human_gate",
+            "llm_role": "none",
+            "invoke": {},
+        },
+        {
+            "id": "post_refund",
+            "workflow_stage_id": "post_refund",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/refund/post"},
+        },
+        {
+            "id": "refund_confirm",
+            "workflow_stage_id": "respond",
+            "llm_role": "synthesis",
+            "llm_prompt": "Confirm refund",
+            "invoke": {},
+        },
+    ]
+
+
+def test_human_gate_run_pauses_then_resumes_with_approve(store) -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(str(invoke.get("url") or ""))
+            return {"text": "stage ok"}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema=None) -> str:
+            return "Refund confirmed."
+
+    tools = _purchase_refund_tools()
+    profile = {"working": "session", "loop": "checkpoint"}
+    pin = RunPin(
+        correlation_id="corr-gate-approve",
+        idempotency_key="job-gate-approve",
+        session_id="job:refund-gate",
+        route_id="purchase_refund",
+        route_version="2026.08.1",
+        activation_target=None,
+        agent_client_id=None,
+        hydrated_tools=tools,
+        status="running",
+    )
+    store.insert(pin)
+    paused = run_loop(
+        build_tool_graph(tools, Invoker(), llm=Llm()),
+        store,
+        pin,
+        goal={"doc_id": "doc-1"},
+        profile=profile,
+    )
+    assert paused.status == "waiting"
+    assert calls == [
+        "http://agent-mocks:3010/ocr",
+        "http://agent-mocks:3010/refund/eligibility",
+    ]
+
+    service = RunService(
+        store,
+        FakeCatalogue(
+            {
+                "route_id": "purchase_refund",
+                "route_version": "2026.08.1",
+                "memory_profile": {"working": "session", "loop": "checkpoint"},
+            }
+        ),
+        FakeRegistry(),
+        invoker=Invoker(),
+        llm=Llm(),
+    )
+    service._graph = None  # noqa: SLF001
+
+    def graph_for(hydrated_tools, **kwargs):  # type: ignore[no-untyped-def]
+        return build_tool_graph(
+            tools,
+            Invoker(),
+            llm=Llm(),
+            start_index=kwargs.get("start_index", 0),
+        )
+
+    service._graph_for = graph_for  # type: ignore[method-assign]
+    body = service.resume(
+        "corr-gate-approve",
+        {"decision": "approve", "reviewer_id": "ops-1"},
+    )
+    assert body is not None
+    assert body["status"] == "completed"
+    assert calls == [
+        "http://agent-mocks:3010/ocr",
+        "http://agent-mocks:3010/refund/eligibility",
+        "http://agent-mocks:3010/refund/post",
+    ]
+    updated = store.get("corr-gate-approve")
+    assert updated is not None
+    assert updated.working["slots"]["manual_review"]["decision"] == "approve"
+
+
+def test_human_gate_resume_without_packet_stays_waiting(store, catalogue: FakeCatalogue) -> None:
+    tools = _purchase_refund_tools()
+    pin = RunPin(
+        correlation_id="corr-gate-no-packet",
+        idempotency_key="job-gate-no-packet",
+        session_id="job:refund-no-packet",
+        route_id="purchase_refund",
+        route_version="2026.08.1",
+        activation_target=None,
+        agent_client_id=None,
+        hydrated_tools=tools,
+        status="waiting",
+        checkpoint={
+            "stage_id": "manual_review",
+            "resume_index": 3,
+            "goal": {"doc_id": "doc-2"},
+        },
+        working={"notes": ["prior"], "slots": {}},
+    )
+    store.insert(pin)
+    client = TestClient(create_app(store=store, catalogue=catalogue, registry=FakeRegistry()))
+    bad = client.post(
+        "/v1/runs/corr-gate-no-packet/turns",
+        headers=AFD,
+        json={"message": "not a gate packet"},
+    )
+    assert bad.status_code == 400
+    assert store.get("corr-gate-no-packet").status == "waiting"
+
+
+def _linear_checkpoint_tools() -> list[dict]:
+    return [
+        {
+            "id": "stage_a",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/a"},
+        },
+        {
+            "id": "stage_b",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/b"},
+        },
+        {
+            "id": "stage_c",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/c"},
+        },
+    ]
+
+
+def test_checkpoint_failure_then_resume_skips_completed_stages(store) -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(str(invoke.get("url") or ""))
+            return {"text": f"ok-{len(calls)}"}
+
+    tools = _linear_checkpoint_tools()
+    profile = {"working": "session", "loop": "checkpoint"}
+    goal = {"job_id": "job-1"}
+    pin = RunPin(
+        correlation_id="corr-checkpoint-resume",
+        idempotency_key="job-checkpoint-resume",
+        session_id="job:checkpoint",
+        route_id="generic_job",
+        route_version="2026.08.1",
+        activation_target=None,
+        agent_client_id=None,
+        hydrated_tools=tools,
+        status="running",
+    )
+    store.insert(pin)
+
+    def on_stage(step: int, stage_id: str, state: dict) -> None:
+        persist_stage(store, pin.correlation_id, profile, step, stage_id, state, tools=tools)
+        if step == 0:
+            raise RuntimeError("crash after stage 0")
+
+    failed = run_loop(
+        build_tool_graph(tools, Invoker(), on_stage=on_stage),
+        store,
+        pin,
+        goal=goal,
+        profile=profile,
+    )
+    assert failed.status == "failed"
+    assert calls == ["http://agent-mocks:3010/a"]
+    assert failed.checkpoint is not None
+    assert failed.checkpoint["step"] == 0
+    assert failed.checkpoint["resume_index"] == 1
+    assert failed.checkpoint["goal"] == goal
+
+    service = RunService(
+        store,
+        FakeCatalogue(
+            {
+                "route_id": "generic_job",
+                "route_version": "2026.08.1",
+                "autonomy_mode": 2,
+                "memory_profile": profile,
+            }
+        ),
+        FakeRegistry(),
+        invoker=Invoker(),
+    )
+    service._graph = None  # noqa: SLF001
+
+    def on_stage_resume(step: int, stage_id: str, state: dict) -> None:
+        persist_stage(store, pin.correlation_id, profile, step, stage_id, state, tools=tools)
+
+    def graph_for(hydrated_tools, **kwargs):  # type: ignore[no-untyped-def]
+        return build_tool_graph(
+            tools,
+            Invoker(),
+            on_stage=on_stage_resume,
+            start_index=kwargs.get("start_index", 0),
+        )
+
+    service._graph_for = graph_for  # type: ignore[method-assign]
+    body = service.resume("corr-checkpoint-resume", {"resume": True})
+    assert body is not None
+    assert body["status"] == "completed"
+    assert calls == [
+        "http://agent-mocks:3010/a",
+        "http://agent-mocks:3010/b",
+        "http://agent-mocks:3010/c",
+    ]
+
+
+def test_loop_none_failure_is_not_recoverable(store) -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise RuntimeError("boom")
+
+    tools = _linear_checkpoint_tools()[:1]
+    pin = RunPin(
+        correlation_id="corr-no-checkpoint",
+        idempotency_key="job-no-checkpoint",
+        session_id="job:no-checkpoint",
+        route_id="generic_job",
+        route_version="2026.08.1",
+        activation_target=None,
+        agent_client_id=None,
+        hydrated_tools=tools,
+        status="running",
+    )
+    store.insert(pin)
+    try:
+        run_loop(
+            build_tool_graph(tools, Invoker()),
+            store,
+            pin,
+            goal={"job_id": "job-2"},
+            profile={"working": "none", "loop": "none"},
+        )
+    except RuntimeError:
+        pass
+    updated = store.get("corr-no-checkpoint")
+    assert updated is not None
+    assert updated.status == "failed"
+    assert updated.checkpoint is None
+
+    client = TestClient(
+        create_app(
+            store=store,
+            catalogue=FakeCatalogue(
+                {
+                    "route_id": "generic_job",
+                    "route_version": "2026.08.1",
+                    "memory_profile": {"loop": "none"},
+                }
+            ),
+            registry=FakeRegistry(),
+            tool_invoker=Invoker(),
+        )
+    )
+    response = client.post("/v1/runs/corr-no-checkpoint/turns", headers=AFD, json={"resume": True})
+    assert response.status_code == 400

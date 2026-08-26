@@ -55,13 +55,49 @@ def match_tool(method: str, path: str, tools: list[dict[str, Any]]) -> dict[str,
     return None
 
 
-app = FastAPI(title="tool-mock")
+app = FastAPI(title="agent-mocks")
 otel.setup()
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "UP"}
+
+
+def _prefetch_chunks(collection: str) -> dict[str, Any]:
+    return {
+        "chunks": [
+            {
+                "id": f"{collection}-1",
+                "text": f"Packed chunk from {collection}.",
+            }
+        ]
+    }
+
+
+async def _search_body(request: Request) -> dict[str, Any]:
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    return body if isinstance(body, dict) else {}
+
+
+@app.post("/v1/search")
+@app.post("/v1/search/{gateway}")
+async def prefetch_search(request: Request, gateway: str = "") -> JSONResponse:
+    """Stub corpus gateway: shared host with optional gateway segment."""
+    body = await _search_body(request)
+    collection = str(body.get("collection") or gateway or "unknown")
+    return JSONResponse(status_code=200, content=_prefetch_chunks(collection))
+
+
+@app.post("/corpora/{corpus_id}/search")
+async def prefetch_corpus_search(corpus_id: str, request: Request) -> JSONResponse:
+    """Stub dedicated corpus gateway (path mirrors Control Plane /corpora/{id})."""
+    body = await _search_body(request)
+    collection = str(body.get("collection") or corpus_id)
+    return JSONResponse(status_code=200, content=_prefetch_chunks(collection))
 
 
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])

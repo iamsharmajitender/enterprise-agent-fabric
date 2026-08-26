@@ -1,5 +1,6 @@
 from typing import Any
 
+from app.core.checkpoint import next_stage_index
 from app.core.state import RunStore
 
 
@@ -19,9 +20,17 @@ def save_loop(profile: dict[str, Any]) -> bool:
     return str(profile.get("loop") or "").strip() == "checkpoint"
 
 
-def working_payload(notes: list[str] | None) -> dict[str, Any]:
+def working_payload(
+    notes: list[str] | None,
+    slots: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """JSON stored in `runtime.runs.working`."""
-    return {"notes": list(notes or [])}
+    blob: dict[str, Any] = {"notes": list(notes or [])}
+    if isinstance(slots, dict) and slots:
+        blob["slots"] = {str(key): value for key, value in slots.items()}
+    else:
+        blob["slots"] = {}
+    return blob
 
 
 def checkpoint_payload(
@@ -38,15 +47,20 @@ def persist_stage(
     step: int,
     stage_id: str,
     state: dict[str, Any],
+    *,
+    tools: list[dict[str, Any]] | None = None,
 ) -> None:
     """Flush working notes and/or loop checkpoint after one graph stage."""
     notes = list(state.get("notes") or [])
+    slots = state.get("slots") if isinstance(state.get("slots"), dict) else {}
     result = str(state.get("result") or "")
     goal = state.get("goal") if isinstance(state.get("goal"), dict) else {}
-    working = working_payload(notes) if save_working(profile) else None
-    checkpoint = (
-        checkpoint_payload(step, stage_id, result, goal) if save_loop(profile) else None
-    )
+    working = working_payload(notes, slots) if save_working(profile) else None
+    checkpoint = None
+    if save_loop(profile):
+        checkpoint = checkpoint_payload(step, stage_id, result, goal)
+        if tools:
+            checkpoint["resume_index"] = next_stage_index(tools, step, slots)
     if working is None and checkpoint is None:
         return
     store.save_progress(correlation_id, working=working, checkpoint=checkpoint)
@@ -60,3 +74,13 @@ def notes_from_working(working: dict[str, Any] | None) -> list[str]:
     if not isinstance(notes, list):
         return []
     return [str(note) for note in notes]
+
+
+def slots_from_working(working: dict[str, Any] | None) -> dict[str, Any]:
+    """Reload persisted stage slots for the next invoke or turn."""
+    if not isinstance(working, dict):
+        return {}
+    slots = working.get("slots")
+    if not isinstance(slots, dict):
+        return {}
+    return {str(key): value for key, value in slots.items()}

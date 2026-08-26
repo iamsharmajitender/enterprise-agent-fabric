@@ -6,6 +6,12 @@ Front Door is the door. Runtime is the kitchen. Registry is the pantry. **Data P
 
 Channels never dial this process. Jane talks to Front Door. Front Door (and, after a pin, Runtime / Control Plane) talks to **:3007**.
 
+## Job
+
+Own the versioned catalogue and classify/entitle (`POST /v1/intent/decide`). Return `route` / `clarify` / `abstain`. Do **not** start Runtime, store decision audit, or hydrate tool schemas.
+
+## Port / stack
+
 | | |
 | --- | --- |
 | Port | **3007** |
@@ -15,7 +21,7 @@ Channels never dial this process. Jane talks to Front Door. Front Door (and, aft
 | Auth | Workload only. `Authorization: Bearer fabric-internal` + `X-Workload` |
 | Decide caller | **`afd` only.** Anyone else → **403**. Channel bearer → **401**. |
 
-Docs map: [docs/README.md](../docs/README.md). Frozen decide bodies: [docs/05-reference/](../docs/05-reference/README.md). Box pack (may be ahead of this binary): [docs/04-architecture/agent-plane.md](../docs/04-architecture/agent-plane.md).
+Docs map: [docs/README.md](../docs/README.md). Frozen decide bodies: [docs/05-reference/](../docs/05-reference/README.md). Box pack (may be ahead of this binary): [docs/04-architecture/agent-plane.md](../docs/04-architecture/agent-plane.md). Intent track: [docs/tasks/intent-plan.md](../docs/tasks/intent-plan.md) (Layer ③ **on** is [I12 future enhancement](../docs/tasks/future-enhancement.md#i12-layer-3-llm-fallback)).
 
 ---
 
@@ -251,7 +257,7 @@ Wrappers: `{ "manifests": […] }`, `{ "prompts": […] }`, `{ "workflows": […
 | Resource | Body highlights |
 | --- | --- |
 | Manifest | `manifest_id`, `manifest_version`, `description`, `status`, `tools[]` (`name`, `capability_id`, `capability_version`, `pdp_action`, `risk_tier`) |
-| Prompt | `prompt_id`, `prompt_version`, `host`, `status`, `owner`, `by_llm_role` |
+| Prompt | `prompt_id`, `prompt_version`, `host`, `status`, `owner`, `by_llm_role` (`{llm_role: {task_type, text}}`). One pack per `prompt_id`. Runtime sends **one** system string per LLM step: role `text` if present, else `host` — not both. `task_type` is not sent. |
 | Workflow | `workflow_id`, `workflow_version`, `description`, `status`, `stages[]` (`id`, `tool`, `type`, `llm_role`, `corpus`, `side_effect`, `requires_approval`, `branch`, `allowlist`, `max_tool_calls`) |
 
 Prompt `GET /{id}` prefers the latest **published** pack, then any version. Manifest/workflow `GET /{id}` is the latest version on file.
@@ -267,6 +273,8 @@ No version path. One row per index. Runtime looks up each `retrieval.scope` id, 
 
 Body: `corpus_id`, `display_name`, `url`, `collection`, `auth`, `owner`, `status`, `region`, `updated_at`.
 
+Each row’s `url` is an independent POST target (shared gateways like `/v1/search/legal` or dedicated `/corpora/{corpus_id}/search`). Local seed uses three shared hosts plus per-corpus paths on agent-fabric-mocks; browse values at Control Plane `http://localhost:3006/corpora`. Override by updating `dataplane.corpora.url` or re-running `create-seed-data.sql` (includes `UPDATE` for Flyway baseline rows).
+
 ### Errors
 
 | Status | When |
@@ -276,6 +284,30 @@ Body: `corpus_id`, `display_name`, `url`, `collection`, `auth`, `owner`, `status
 | **404** | Unknown id/version `{ "error": { "code": "NOT_FOUND", "message": "…" } }` |
 
 Unknown jobs `route_id` is **200 `abstain`**, not 404. Catalogue miss is 404.
+
+---
+
+## Contracts
+
+- [`docs/05-reference/decide-chat-request.json`](../docs/05-reference/decide-chat-request.json)
+- [`docs/05-reference/decide-chat-route.json`](../docs/05-reference/decide-chat-route.json)
+- [`docs/05-reference/decide-jobs-route.json`](../docs/05-reference/decide-jobs-route.json)
+- [`docs/05-reference/stub-auth.md`](../docs/05-reference/stub-auth.md)
+
+## Tables / schema
+
+Flyway on `adp` creates schema `dataplane`. Catalogue tables only — routes, memory profiles, retrieval, corpora, prompt packs, workflows, intent rules, and related pointers. **No** `decisions` / audit table and **no** `GET`/`POST /v1/decisions`.
+
+Operational seed: `./docs/run/scripts/seed-db.sh`. Pin lint / routing evals use in-memory twins of that seed.
+
+## Sibling calls
+
+| Direction | Who | Notes |
+| --- | --- | --- |
+| In | Front Door (`afd`) | Decide + catalogue GET + eligible |
+| In | Runtime (`ar`) | Catalogue GET for pinned row / workflow / prompt / corpora — **not** decide |
+| In | Control Plane (`acp`) | Eligible + catalogue GET — **not** decide (403) |
+| Out | — | Does not call AR, ACR, or AFD |
 
 ---
 
@@ -304,7 +336,7 @@ Control Plane browse: same URLs, `X-Workload: acp`. Swap `afd` → `ar` on decid
 
 ---
 
-## Hexagon
+## Hexagonal layout
 
 | Package | Role |
 | --- | --- |
@@ -317,7 +349,7 @@ Tests seed **in-memory** twins of the Flyway demo. Keep them aligned; `Catalogue
 
 ---
 
-## Tests / eval gate
+## Tests
 
 Image build runs `mvn test`. No Compose required for the routing gate:
 
@@ -336,7 +368,7 @@ Playbook (add an incident, do not delete a case to go green): [../agent-fabric-e
 - A public URL or channel `Bearer stub` on these APIs
 - Pin, freeze, `correlation_id`, or `POST` to Runtime
 - Copying `frontdoor.freeze` into decide / re-entitle on `"yes"` / `"$500"` (Front Door skip-classify owns that)
-- LLM classify (Layer ③). Keywords are the classifier in this binary
+- Layer ③ LLM classify **on** ([I12 future enhancement](../docs/tasks/future-enhancement.md#i12-layer-3-llm-fallback); flag stays off)
 - Decision audit store / `GET /v1/decisions`
 - Hydrating tool schemas (Registry) or executing a workflow (Runtime)
 - Serving Jane a `route_id` on the chat JSON (Front Door strips it)

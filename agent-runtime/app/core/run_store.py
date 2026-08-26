@@ -120,6 +120,57 @@ class PersistentRunStore:
             raise KeyError(correlation_id)
         return pin
 
+    def pause(
+        self,
+        correlation_id: str,
+        *,
+        working: dict[str, Any] | None = None,
+        checkpoint: dict[str, Any] | None = None,
+    ) -> RunPin:
+        """Mark the pin waiting for a human_gate resume packet."""
+        now = datetime.now(timezone.utc)
+        values: dict[str, Any] = {"status": "waiting", "updated_at": now}
+        if working is not None:
+            values["working"] = working
+        if checkpoint is not None:
+            values["checkpoint"] = checkpoint
+        with self._engine.begin() as conn:
+            conn.execute(
+                runs.update().where(runs.c.correlation_id == correlation_id).values(**values)
+            )
+        pin = self.get(correlation_id)
+        if pin is None:
+            raise KeyError(correlation_id)
+        return pin
+
+    def fail(self, correlation_id: str, result: dict[str, Any]) -> RunPin:
+        """Mark the pin failed and persist the result payload."""
+        now = datetime.now(timezone.utc)
+        with self._engine.begin() as conn:
+            conn.execute(
+                runs.update()
+                .where(runs.c.correlation_id == correlation_id)
+                .values(status="failed", result=result, updated_at=now)
+            )
+        pin = self.get(correlation_id)
+        if pin is None:
+            raise KeyError(correlation_id)
+        return pin
+
+    def mark_running(self, correlation_id: str) -> RunPin:
+        """Clear a terminal status so the graph can continue."""
+        now = datetime.now(timezone.utc)
+        with self._engine.begin() as conn:
+            conn.execute(
+                runs.update()
+                .where(runs.c.correlation_id == correlation_id)
+                .values(status="running", result=None, updated_at=now)
+            )
+        pin = self.get(correlation_id)
+        if pin is None:
+            raise KeyError(correlation_id)
+        return pin
+
     def save_progress(
         self,
         correlation_id: str,

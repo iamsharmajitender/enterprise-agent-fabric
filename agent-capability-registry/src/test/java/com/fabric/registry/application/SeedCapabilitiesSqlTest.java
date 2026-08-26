@@ -25,12 +25,19 @@ class SeedCapabilitiesSqlTest {
           "id_verify",
           "sanctions_api",
           "kyc_risk_engine",
-          "account_activate"
+          "account_activate",
+          "extract_fields",
+          "match_purchase",
+          "refund_eligibility",
+          "post_refund",
+          "refund_confirm"
         }) {
       assertThat(seed).contains("'" + id + "'");
     }
     assertThat(seed).contains("'agent'");
     assertThat(seed).doesNotContain("'agent_start'");
+    assertThat(seed).contains("\"missing_information\"");
+    assertThat(seed).contains("human_review_required");
   }
 
   @Test

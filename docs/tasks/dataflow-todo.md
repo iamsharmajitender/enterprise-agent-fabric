@@ -24,15 +24,15 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Label every Pattern 2/3 (and relevant Pattern 1) seed route by **how data must move**, using the live seed — not a new abstraction. This is the explore artifact. Runtime stays unchanged.
 
 **Acceptance criteria:**
-- [ ] Table lives under `docs/tasks/` (this plan) or `docs/dataflow/scenarios.md` listing `route_id`, workflow/manifest, share kind: `goal_only` | `notes_to_llm` | `json_to_http` | `prefetch_pack` | `branch` | `human_gate` | `agent` | `none`
-- [ ] At least `card_freeze`, `msa_risk_review`, `kyc_onboarding`, `policy_memo`, `pack_then_review`, `claims_adjudicate`, `fee_explain`, one `agent` parent, and `llm_pipeline` are labelled
-- [ ] Each `json_to_http` row names the **field** stage N+1 needs that stage N produces (even if tool-mock does not return it today)
-- [ ] `conversation` / `long_term` rows are marked **out of this plan** (Shared Memory)
-- [ ] Pick a recommended D5 proof route (default: `card_freeze` if identity → limit → freeze needs a produced id; else `msa_risk_review`)
+- [x] Table lives under `docs/tasks/` (this plan) or `docs/dataflow/scenarios.md` listing `route_id`, workflow/manifest, share kind: `goal_only` | `notes_to_llm` | `json_to_http` | `prefetch_pack` | `branch` | `human_gate` | `agent` | `none`
+- [x] At least `card_freeze`, `msa_risk_review`, `kyc_onboarding`, `policy_memo`, `pack_then_review`, `claims_adjudicate`, `fee_explain`, one `agent` parent, and `llm_pipeline` are labelled
+- [x] Each `json_to_http` row names the **field** stage N+1 needs that stage N produces (even if agent-fabric-mocks does not return it today)
+- [x] `conversation` / `long_term` rows are marked **out of this plan** (Shared Memory)
+- [x] Pick a recommended D5 proof route (default: `card_freeze` if identity → limit → freeze needs a produced id; else `msa_risk_review`)
 
 **Verification:**
-- [ ] Manual: labels match `V1__dataplane.sql` / catalogue seed, not README wishful tense
-- [ ] No code change required to merge D1
+- [x] Manual: labels match `V1__dataplane.sql` / catalogue seed, not README wishful tense
+- [x] No code change required to merge D1
 
 **Dependencies:** None
 
@@ -49,17 +49,17 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Human decision before any Runtime merge. Close the open questions in [dataflow-plan.md](./dataflow-plan.md). Write the rule so D3–D4 do not invent a DSL on the fly.
 
 **Acceptance criteria:**
-- [ ] Written rule: `goal` immutable; `slots[stage_id] =` (full JSON | output_schema subset)
-- [ ] Written rule: HTTP payload = `goal` ∪ **selected** slots (namespaced `prior.<id>` **or** workflow `input_from` **or** last JSON only). “All notes into every tool” is explicitly rejected or tightly scoped
-- [ ] Written rule: a pinned route is **not** a trust boundary between tools. Before invoke, the assembled payload must match the next capability `input_schema` (fail closed). Slot store is `output_schema` subset or full JSON (pick one). LLM-written fields (`query_formulation`), OCR/prefetch text, and human-gate packets are untrusted. Domain HTTP is projected/validated JSON — not HTML-sanitised strings. PEP is authorisation, not a payload contract
-- [ ] Cap or deny-list for slot size / keys stated (even if “none in first slice”)
-- [ ] D5 proof `route_id` confirmed
-- [ ] D11 (checkpoint resume) in or out of this track
-- [ ] Plan “Architecture decisions” section updated from proposed → accepted (or a short ADR under `docs/decisions/` if you prefer)
+- [x] Written rule: `goal` immutable; `slots[stage_id] =` (full JSON | output_schema subset)
+- [x] Written rule: HTTP payload = `goal` ∪ **selected** slots (namespaced `prior.<id>` **or** workflow `input_from` **or** last JSON only). “All notes into every tool” is explicitly rejected or tightly scoped
+- [x] Written rule: a pinned route is **not** a trust boundary between tools. Before invoke, the assembled payload must match the next capability `input_schema` (fail closed). Slot store is `output_schema` subset or full JSON (pick one). LLM-written fields (`query_formulation`), OCR/prefetch text, and human-gate packets are untrusted. Domain HTTP is projected/validated JSON — not HTML-sanitised strings. PEP is authorisation, not a payload contract
+- [x] Cap or deny-list for slot size / keys stated (even if “none in first slice”)
+- [x] D5 proof `route_id` confirmed
+- [x] D11 (checkpoint resume) in or out of this track
+- [x] Plan “Architecture decisions” section updated from proposed → accepted (or a short ADR under `docs/decisions/` if you prefer)
 
 **Verification:**
-- [ ] Manual: D4 can be implemented from the rule without a new design debate
-- [ ] Human review of the rule before D3
+- [x] Manual: D4 can be implemented from the rule without a new design debate
+- [x] Human review of the rule before D3
 
 **Dependencies:** Task D1
 
@@ -73,9 +73,9 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Checkpoint: Explore
 
-- [ ] Share kinds labelled for the catalogue seed
-- [ ] Merge rule accepted
-- [ ] Human review before Runtime changes
+- [x] Share kinds labelled for the catalogue seed
+- [x] Merge rule accepted
+- [x] Human review before Runtime changes
 
 ---
 
@@ -86,15 +86,15 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Extend the working blob so stage outputs can be JSON, not only strings. Keep `notes` as the LLM-facing projection so existing `/turns` and `_user_blob` behaviour stays. Honor `working=session` vs omit/`none` as today.
 
 **Acceptance criteria:**
-- [ ] `working` JSON shape `{ "notes": [str], "slots": { "<stage_id>": object } }` (empty `slots` ok)
-- [ ] After each graph stage, if `working=session`, flush notes **and** that stage’s slot (HTTP JSON body or parsed object; LLM-only stages may slot `{ "text": ... }`)
-- [ ] `/v1/runs/{id}/turns` still reloads `notes` for the LLM blob; slots reload for the next invoke
-- [ ] `working` omitted/`none`: in-run slots still flow inside one `graph.invoke`; nothing written to `ar.runtime.runs.working`
-- [ ] Old `{ "notes": [...] }` rows still load (missing `slots` → `{}`)
+- [x] `working` JSON shape `{ "notes": [str], "slots": { "<stage_id>": object } }` (empty `slots` ok)
+- [x] After each graph stage, if `working=session`, flush notes **and** that stage’s slot (HTTP JSON body or parsed object; LLM-only stages may slot `{ "text": ... }`)
+- [x] `/v1/runs/{id}/turns` still reloads `notes` for the LLM blob; slots reload for the next invoke
+- [x] `working` omitted/`none`: in-run slots still flow inside one `graph.invoke`; nothing written to `ar.runtime.runs.working`
+- [x] Old `{ "notes": [...] }` rows still load (missing `slots` → `{}`)
 
 **Verification:**
-- [ ] Tests pass: `cd agent-runtime && uv run pytest tests/test_memory.py tests/test_runs.py`
-- [ ] Resume/turns test: two invokes with `working=session` see prior slot ids, not only note strings
+- [x] Tests pass: `cd agent-runtime && uv run pytest tests/test_memory.py tests/test_runs.py`
+- [x] Resume/turns test: two invokes with `working=session` see prior slot ids, not only note strings
 
 **Dependencies:** Task D2
 
@@ -114,15 +114,15 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Domain HTTP (and only as D2 specified) receives derived data, not just ingress `goal`. LLM blob still uses `notes` strings. Do not mutate `goal`.
 
 **Acceptance criteria:**
-- [ ] `llm_role=none` (and `query_formulation` after `query` is set) POST body matches D2 (`goal` ∪ selected slots)
-- [ ] A stage listed with no `input_from` / no prior slots still POSTs `goal` only (plus `query` when formulated)
-- [ ] `classify` / `synthesis` still skip HTTP; they still see `_user_blob(goal, notes)`
-- [ ] Empty `invoke.url` remains a no-op (prefetch still D6)
-- [ ] Unit test: second tool’s invoker payload contains a field that existed only in the first tool’s JSON response, not in `goal`
+- [x] `llm_role=none` (and `query_formulation` after `query` is set) POST body matches D2 (`goal` ∪ selected slots)
+- [x] A stage listed with no `input_from` / no prior slots still POSTs `goal` only (plus `query` when formulated)
+- [x] `classify` / `synthesis` still skip HTTP; they still see `_user_blob(goal, notes)`
+- [x] Empty `invoke.url` remains a no-op (prefetch still D6)
+- [x] Unit test: second tool’s invoker payload contains a field that existed only in the first tool’s JSON response, not in `goal`
 
 **Verification:**
-- [ ] Tests pass: `cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py`
-- [ ] Flip the test so the first tool returns no field → second payload must not magically contain it
+- [x] Tests pass: `cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py`
+- [x] Flip the test so the first tool returns no field → second payload must not magically contain it
 
 **Dependencies:** Task D3
 
@@ -140,15 +140,15 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Pinning freezes which tools and versions run. It does not make tool A’s JSON trusted input for tool B. After D4 merge, Runtime must fail closed on a hop that does not match the next capability contract, and must not dump unbounded prior JSON (PII, secrets such as `doc_url`, OCR/LLM text) into the next HTTP body.
 
 **Acceptance criteria:**
-- [ ] Before each domain (and `kind=agent`) invoke, the assembled payload is validated against that capability’s `input_schema`; mismatch fails the stage (no invoke)
-- [ ] Slot write stores only the D2-chosen projection (`output_schema` subset **or** full JSON). Extra keys are stripped or rejected per that rule
-- [ ] Size cap and/or deny-list from D2 applied on slot write (and on merge if D2 says so)
-- [ ] `notes` strings are never used as the next HTTP JSON; `query_formulation` / OCR / prefetch fields are treated as untrusted (type + length only; no HTML-sanitise-as-security)
-- [ ] Unit tests: extra field from stage N does not reach stage N+1 unless selected; missing required `input_schema` field fails closed; `notes` prose is absent from the next POST body
+- [x] Before each domain (and `kind=agent`) invoke, the assembled payload is validated against that capability’s `input_schema`; mismatch fails the stage (no invoke)
+- [x] Slot write stores only the D2-chosen projection (`output_schema` subset **or** full JSON). Extra keys are stripped or rejected per that rule
+- [x] Size cap and/or deny-list from D2 applied on slot write (and on merge if D2 says so)
+- [x] `notes` strings are never used as the next HTTP JSON; `query_formulation` / OCR / prefetch fields are treated as untrusted (type + length only; no HTML-sanitise-as-security)
+- [x] Unit tests: extra field from stage N does not reach stage N+1 unless selected; missing required `input_schema` field fails closed; `notes` prose is absent from the next POST body
 
 **Verification:**
-- [ ] Tests pass: `cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py`
-- [ ] Flip: valid merge that fails `input_schema` → no HTTP call
+- [x] Tests pass: `cd agent-runtime && uv run pytest tests/test_graph.py tests/test_memory.py`
+- [x] Flip: valid merge that fails `input_schema` → no HTTP call
 
 **Dependencies:** Task D2 (rule), Task D4 (merge exists to validate)
 
@@ -162,19 +162,19 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ---
 
-## Task D5: Seed-chain proof (tool-mock or contract test)
+## Task D5: Seed-chain proof (agent-fabric-mocks or contract test)
 
 **Description:** Pick the D2 route. Make the **second** tool require a field produced by the **first**. Dummy `completed` without that field is a fail.
 
 **Acceptance criteria:**
-- [ ] Tool-mock (or a Runtime contract test with a fake invoker) asserts request JSON for stage N+1
-- [ ] If the catalogue tool still returns only `{ "text": "..." }`, extend **that** mock with a typed field the next stage needs (keep canned `text` for LLM notes)
-- [ ] README dummy-request blurb for that route says which field is handed off
-- [ ] Seed/workflow order matches the proof (no hidden “all ids were in the job payload”)
+- [x] Tool-mock (or a Runtime contract test with a fake invoker) asserts request JSON for stage N+1
+- [x] If the catalogue tool still returns only `{ "text": "..." }`, extend **that** mock with a typed field the next stage needs (keep canned `text` for LLM notes)
+- [x] README dummy-request blurb for that route says which field is handed off
+- [x] Seed/workflow order matches the proof (no hidden “all ids were in the job payload”)
 
 **Verification:**
-- [ ] `./docs/run/dummy-request/run-job.sh <proof-route>` completes **and** mock/tests saw the derived field
-- [ ] Break the first tool’s extra field → job or test fails
+- [x] `./docs/run/dummy-request/run-job.sh <proof-route>` completes **and** mock/tests saw the derived field
+- [x] Break the first tool’s extra field → job or test fails
 
 **Dependencies:** Task D4, Task D4a
 
@@ -190,10 +190,10 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Checkpoint: HTTP handoff
 
-- [ ] LLM paths unchanged (`notes` + `query_formulation`)
-- [ ] `goal` still ingress-only on pin/checkpoint
-- [ ] Hop validated against next `input_schema`; unbounded slot dump rejected
-- [ ] Proof route fails closed without the derived field
+- [x] LLM paths unchanged (`notes` + `query_formulation`)
+- [x] `goal` still ingress-only on pin/checkpoint
+- [x] Hop validated against next `input_schema`; unbounded slot dump rejected
+- [x] Proof route fails closed without the derived field
 
 ---
 
@@ -204,15 +204,15 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** `retrieval.mode=deterministic_prefetch` actually packs. Empty-`invoke` placeholder stages become writers of `working.slots` (e.g. `prefetch` / `packed_chunks`), not HTTP no-ops. This is **not** `long_term`.
 
 **Acceptance criteria:**
-- [ ] Runtime resolves catalogue corpus `url` + `collection` for the route’s `retrieval.scope` (published only)
-- [ ] POST (or documented stub) returns chunks; writer stores them in a named slot; `notes` gets a short packed string for the LLM
-- [ ] Gateway down / unpublished corpus → run fails closed (no fake pack)
-- [ ] Routes without retrieval are unchanged
-- [ ] Tests cover “empty invoke + prefetch mode ⇒ slot filled” vs “empty invoke + no retrieval ⇒ still no-op”
+- [x] Runtime resolves catalogue corpus `url` + `collection` for the route’s `retrieval.scope` (published only)
+- [x] POST (or documented stub) returns chunks; writer stores them in a named slot; `notes` gets a short packed string for the LLM
+- [x] Gateway down / unpublished corpus → run fails closed (no fake pack)
+- [x] Routes without retrieval are unchanged
+- [x] Tests cover “empty invoke + prefetch mode ⇒ slot filled” vs “empty invoke + no retrieval ⇒ still no-op”
 
 **Verification:**
-- [ ] Tests pass: hydrate/graph/memory tests for prefetch
-- [ ] Manual or stub: slot non-empty after prefetch stage
+- [x] Tests pass: hydrate/graph/memory tests for prefetch
+- [x] Manual or stub: slot non-empty after prefetch stage
 
 **Dependencies:** Task D5 (or D3 if you explicitly skip the HTTP proof; default is D5)
 
@@ -231,13 +231,13 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** `policy_memo` / `pack_then_review` (names as seeded) must generate or call tools using packed chunks. A synthesis prompt that says “use packed chunks” is not enough if the slot is empty.
 
 **Acceptance criteria:**
-- [ ] LLM user blob or next HTTP payload contains packed text from D6
-- [ ] Dummy job or graph test for at least one prefetch route asserts non-empty pack
-- [ ] README Retrieve section tense matches: prefetch POSTs (or “stub gateway”) rather than “designed, not in this Runtime”
+- [x] LLM user blob or next HTTP payload contains packed text from D6
+- [x] Dummy job or graph test for at least one prefetch route asserts non-empty pack
+- [x] README Retrieve section tense matches: prefetch POSTs (or “stub gateway”) rather than “designed, not in this Runtime”
 
 **Verification:**
-- [ ] `./docs/run/dummy-request/run-job.sh policy_memo` (or the D1 prefetch id) plus test assertions
-- [ ] Empty pack → fail or skip HTTP generate, per D2 (pick fail-closed)
+- [x] `./docs/run/dummy-request/run-job.sh policy_memo` (or the D1 prefetch id) plus test assertions
+- [x] Empty pack → fail or skip HTTP generate, per D2 (pick fail-closed)
 
 **Dependencies:** Task D6
 
@@ -252,9 +252,9 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Checkpoint: Prefetch
 
-- [ ] Prefetch ≠ `long_term`
-- [ ] Seed prefetch route uses the slot
-- [ ] No retrieval ⇒ empty invoke still no-op
+- [x] Prefetch ≠ `long_term`
+- [x] Seed prefetch route uses the slot
+- [x] No retrieval ⇒ empty invoke still no-op
 
 ---
 
@@ -265,15 +265,15 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Catalogue `branch` is no longer documentation-only. Next node is chosen from a **slot** (e.g. risk `high` / `low`), not from a hardcoded linear list. Stay minimal: two outgoing edges, unknown value fails closed.
 
 **Acceptance criteria:**
-- [ ] Seeded `kyc_onboarding` (or D1 branch route) graph is not purely linear when `branch` is set
-- [ ] Slot value maps through `branch` keys to the next stage id
-- [ ] Missing slot / unknown key → fail closed (or documented `human_gate` / abstain — pick one in the task and test it)
-- [ ] Linear workflows without `branch` unchanged
-- [ ] README Workflows: `branch` is executed
+- [x] Seeded `kyc_onboarding` (or D1 branch route) graph is not purely linear when `branch` is set
+- [x] Slot value maps through `branch` keys to the next stage id
+- [x] Missing slot / unknown key → fail closed (or documented `human_gate` / abstain — pick fail-closed)
+- [x] Linear workflows without `branch` unchanged
+- [x] README Workflows: `branch` is executed
 
 **Verification:**
-- [ ] Graph tests: high → manual path; low → activate path; garbage → fail
-- [ ] `cd agent-runtime && uv run pytest tests/test_graph.py`
+- [x] Graph tests: high → manual path; low → activate path; garbage → fail
+- [x] `cd agent-runtime && uv run pytest tests/test_graph.py`
 
 **Dependencies:** Task D3 (slots). Prefer after D5 so HTTP stages still write slots.
 
@@ -292,14 +292,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** `type=human_gate` pauses the run. Resume merges the human payload into slots (D2 shape), then continues. No AFD chat UX required — Runtime API + tests are enough.
 
 **Acceptance criteria:**
-- [ ] Hitting a human_gate stage sets run status to a documented paused/waiting value; does not invoke a domain URL
-- [ ] Resume endpoint (existing `/turns` or a dedicated resume) accepts a JSON packet, writes a slot, continues the graph
-- [ ] Without a packet, the gated side-effect stage does not run
-- [ ] README Workflows: `human_gate` is no longer “catalogue-only”
+- [x] Hitting a human_gate stage sets run status to a documented paused/waiting value; does not invoke a domain URL
+- [x] Resume endpoint (existing `/turns` or a dedicated resume) accepts a JSON packet, writes a slot, continues the graph
+- [x] Without a packet, the gated side-effect stage does not run
+- [x] README Workflows: `human_gate` is no longer “catalogue-only”
 
 **Verification:**
-- [ ] Tests: pause → resume with packet → later stage sees slot; resume without packet fails or stays paused
-- [ ] `uv run pytest tests/test_runs.py tests/test_graph.py`
+- [x] Tests: pause → resume with packet → later stage sees slot; resume without packet fails or stays paused
+- [x] `uv run pytest tests/test_runs.py tests/test_graph.py`
 
 **Dependencies:** Task D8 (or D3 if you implement pause without branch; default D8)
 
@@ -315,8 +315,9 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Checkpoint: Control flow
 
-- [ ] Linear routes unaffected
-- [ ] Branch and gate consume slots, they do not add a second state store
+- [x] Linear routes unaffected
+- [x] Branch consumes slots
+- [x] Gate pause + resume merges human packet
 
 ---
 
@@ -327,14 +328,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Parent must not dump `notes` into the child. Project named slots (and/or a subset of parent `goal`) into the child jobs `payload` / Runtime `goal`. LLM never sees `{jobs_url}` or `activation_target`.
 
 **Acceptance criteria:**
-- [ ] Projection map documented (capability metadata or workflow stage field — pick the smaller catalogue change)
-- [ ] Missing required child field → parent run fails closed; no child start
-- [ ] Child `goal` JSON contains only projected keys
-- [ ] Existing FR: `kind=agent` still POSTs API AFD jobs, not callee AR
+- [x] Projection map documented (capability metadata or workflow stage field — pick the smaller catalogue change)
+- [x] Missing required child field → parent run fails closed; no child start
+- [x] Child `goal` JSON contains only projected keys
+- [x] Existing FR: `kind=agent` still POSTs API AFD jobs, not callee AR
 
 **Verification:**
-- [ ] Tests with fake AFD jobs client: child body == projection
-- [ ] Manual: seed parent route in dummy-request (if one exists) or unit-only if seed has no parent yet
+- [x] Tests with fake AFD jobs client: child body == projection
+- [x] Manual: seed parent route in dummy-request (if one exists) or unit-only if seed has no parent yet
 
 **Dependencies:** Task D3
 
@@ -352,14 +353,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Only if D2 kept this in-track. Writes already happen (`step`, `stage_id`, `result`, `goal`). Continue from the next stage after a crash **without** re-running completed HTTP side effects.
 
 **Acceptance criteria:**
-- [ ] On restart/resume, graph skips completed steps per checkpoint
-- [ ] `goal` remains original ingress; slots reload from `working` if `working=session`
-- [ ] Side-effect stages already done are not invoked again (test with a counting fake invoker)
-- [ ] `loop=none` still fail-the-run on death
+- [x] On restart/resume, graph skips completed steps per checkpoint
+- [x] `goal` remains original ingress; slots reload from `working` if `working=session`
+- [x] Side-effect stages already done are not invoked again (test with a counting fake invoker)
+- [x] `loop=none` still fail-the-run on death
 
 **Verification:**
-- [ ] Tests: kill after stage 0 → resume starts at stage 1; invoker call count == remaining stages
-- [ ] README Memory: resume-from-step is wired
+- [x] Tests: kill after stage 0 → resume starts at stage 1; invoker call count == remaining stages
+- [x] README Memory: resume-from-step is wired
 
 **Dependencies:** Task D3; D2 must have kept D11 in scope
 
@@ -373,6 +374,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ---
 
+## Checkpoint: Crash resume
+
+- [x] `resume_index` persisted after each completed stage
+- [x] Failed `loop=checkpoint` run resumes via `/turns`; completed stages not re-invoked
+- [x] `loop=none` failures are not recoverable
+
+---
+
 ## 5. Packaging
 
 ## Task D12: README — goal vs slots vs notes
@@ -380,14 +389,14 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Memory, Workflows, Retrieve, and dummy-request must describe the real assembly. No “designed, not in this Runtime” for items D3–D7 (and D8–D10 if done).
 
 **Acceptance criteria:**
-- [ ] Memory table: `working` blob includes `slots`; `notes` is the LLM projection
-- [ ] Workflows: linear vs branch/gate matches what shipped
-- [ ] Retrieve: prefetch pack vs retrieve tools vs `long_term` still distinct
-- [ ] Dummy-jobs README: which proof route asserts a derived field
-- [ ] [dataflow-plan.md](./dataflow-plan.md) present-vs-remaining table updated
+- [x] Memory table: `working` blob includes `slots`; `notes` is the LLM projection
+- [x] Workflows: linear vs branch/gate matches what shipped
+- [x] Retrieve: prefetch pack vs retrieve tools vs `long_term` still distinct
+- [x] Dummy-jobs README: which proof route asserts a derived field
+- [x] [dataflow-plan.md](./dataflow-plan.md) present-vs-remaining table updated
 
 **Verification:**
-- [ ] Manual: a new session can answer “how does stage 2 get stage 1’s JSON?” from README + this plan
+- [x] Manual: a new session can answer “how does stage 2 get stage 1’s JSON?” from README + this plan
 
 **Dependencies:** D5; D7/D8/D10 if those phases shipped in the same slice
 
@@ -405,12 +414,12 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 **Description:** Examiner path: break the derived field, watch the proof fail; restore, watch it pass. Same spirit as eval E13.
 
 **Acceptance criteria:**
-- [ ] Short checklist at the end of [dataflow-plan.md](./dataflow-plan.md) or `docs/dataflow/README.md`: commands to run D5 (and D7 if shipped)
-- [ ] Explicit “`completed` on dummy `--all` is not sufficient”
-- [ ] Lists what is still catalogue-only (`conversation`, `long_term`, and any skipped D8–D11)
+- [x] Short checklist at the end of [dataflow-plan.md](./dataflow-plan.md) or `docs/dataflow/README.md`: commands to run D5 (and D7 if shipped)
+- [x] Explicit “`completed` on dummy `--all` is not sufficient”
+- [x] Lists what is still catalogue-only (`conversation`, `long_term`, and any skipped D8–D11)
 
 **Verification:**
-- [ ] Manual: follow the checklist once on a clean compose
+- [x] Manual: follow the checklist once on a clean compose
 
 **Dependencies:** Task D12
 
@@ -423,8 +432,9 @@ Dummy jobs returning `completed` is **not** acceptance. Tool-mock today ignores 
 
 ## Checkpoint: Track complete (for the phases you chose)
 
-- [ ] D1–D2 always
-- [ ] D3–D5 (including D4a hop validation) if you wanted HTTP handoff
-- [ ] D6–D7 if you wanted prefetch
-- [ ] D8–D11 only as D2 scoped
-- [ ] Human review before treating dummy jobs as dataflow-complete
+- [x] D1–D2 always
+- [x] D3–D5 (including D4a hop validation) if you wanted HTTP handoff
+- [x] D6–D7 if you wanted prefetch
+- [x] D8–D11 only as D2 scoped
+- [x] D12–D13 packaging
+- [x] Human review before treating dummy jobs as dataflow-complete ([sign-off](./dataflow-plan.md#human-review-track-sign-off))

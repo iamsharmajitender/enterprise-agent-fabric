@@ -1,0 +1,66 @@
+{
+  "_comment": "Assert ordered workflow stages/tools after start. Not reply prose. Not JSON parse of classify. Not the intent-router board.",
+  "suite_id": "purchase_refund_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "purchase-refund-happy",
+      "route_id": "purchase_refund",
+      "ingress": "jobs",
+      "channel": "api",
+      "goal": {
+        "doc_id": "dms:receipt-eval-1",
+        "account_id": "acc-eval-1",
+        "reason": "item damaged"
+      },
+      "claims": {
+        "sub": "eval",
+        "emts": {
+          "refunds:write": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "ocr",
+            "tool": "ocr_extract",
+            "llm_role": "none"
+          },
+          {
+            "id": "extract_fields",
+            "tool": "extract_fields",
+            "llm_role": "classify"
+          },
+          {
+            "id": "match_purchase",
+            "tool": "match_purchase",
+            "llm_role": "none"
+          },
+          {
+            "id": "eligibility",
+            "tool": "refund_eligibility",
+            "llm_role": "none"
+          },
+          {
+            "id": "manual_review",
+            "type": "human_gate"
+          },
+          {
+            "id": "post_refund",
+            "tool": "post_refund",
+            "llm_role": "none"
+          },
+          {
+            "id": "respond",
+            "tool": "refund_confirm",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence",
+        "pattern-2"
+      ]
+    }
+  ]
+}

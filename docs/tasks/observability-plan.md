@@ -53,61 +53,61 @@ Forced hydrate failure is diagnosable from telemetry alone (no source reading).
 
 ### Phase 0: Foundation (Compose + edge identity)
 
-- [ ] Task O1: OTEL env + depends on `otel-lgtm` for all app services
-- [ ] Task O2: Structured JSON logging baseline (Java + Python)
-- [ ] Task O3: AFD request ID / `traceparent` accept-or-mint at channel edge
+- [x] Task O1: OTEL env + depends on `otel-lgtm` for all app services
+- [x] Task O2: Structured JSON logging baseline (Java + Python)
+- [x] Task O3: AFD request ID / `traceparent` accept-or-mint at channel edge
 
 ### Checkpoint: Foundation
 
-- [ ] Compose up; services start with `OTEL_*` set
-- [ ] At least one service exports a health-related signal visible in Grafana Explore (or documented “waiting on Phase 1 SDK”)
-- [ ] Review before Java/Python SDK work
+- [x] Compose up; services start with `OTEL_*` set
+- [x] At least one service exports a health-related signal visible in Grafana Explore (or documented “waiting on Phase 1 SDK”)
+- [x] Review before Java/Python SDK work
 
 ### Phase 1: Layer ② — traces + RED on the chat/jobs path
 
-- [ ] Task O4: Front Door OTel + RestClient propagation (decide, catalogue, runtime)
-- [ ] Task O5: Data Plane OTel + decide / catalog / JDBC
-- [ ] Task O6: Registry OTel + capability/manifest GET + JDBC
-- [ ] Task O7: Runtime OTel + FastAPI / httpx / SQLAlchemy + hydrate + loop spans
-- [ ] Task O8: Control Plane OTLP (catalogue client fetches) — optional if time-boxed after O4–O7
+- [x] Task O4: Front Door OTel + RestClient propagation (decide, catalogue, runtime)
+- [x] Task O5: Data Plane OTel + decide / catalog / JDBC
+- [x] Task O6: Registry OTel + capability/manifest GET + JDBC
+- [x] Task O7: Runtime OTel + FastAPI / httpx / SQLAlchemy + hydrate + loop spans
+- [x] Task O8: Control Plane OTLP (catalogue client fetches) — optional if time-boxed after O4–O7
 
 ### Checkpoint: Layer ②
 
-- [ ] One `fee_explain` turn: unbroken Tempo trace across AFD → ADP → AR → ACR
-- [ ] RED histograms queryable for decide and `/v1/runs`
-- [ ] No PII/secrets in span attributes (spot-check)
+- [x] One `fee_explain` turn: unbroken Tempo trace across AFD → ADP → AR → ACR
+- [x] RED histograms queryable for decide and `/v1/runs`
+- [x] No PII/secrets in span attributes (spot-check)
 
 ### Phase 2: Layer ① — business journey for `fee_explain`
 
-- [ ] Task O9: Emit journey business events on AFD / ADP / AR
-- [ ] Task O10: Journey KPI counters (route / clarify / abstain / complete / hydrate_fail)
-- [ ] Task O11: Grafana journey row (or provisioned dashboard JSON) for `fee_explain`
+- [x] Task O9: Emit journey business events on AFD / ADP / AR
+- [x] Task O10: Journey KPI counters (route / clarify / abstain / complete / hydrate_fail)
+- [x] Task O11: Grafana journey row (or provisioned dashboard JSON) for `fee_explain`
 
 ### Checkpoint: Layer ①
 
-- [ ] Demo utterance produces the event sequence in Loki
-- [ ] PromQL (or dashboard) shows outcome mix for the journey
+- [x] Demo utterance produces the event sequence in Loki
+- [x] PromQL (or dashboard) shows outcome mix for the journey
 
 ### Phase 3: Layer ③ — infra bound to service identity
 
-- [ ] Task O12: Hikari + SQLAlchemy pool metrics with `service` resource attrs
-- [ ] Task O13: Compose/resource labels + optional Postgres exporter or cAdvisor (local)
+- [x] Task O12: Hikari + SQLAlchemy pool metrics with `service` resource attrs
+- [x] Task O13: Compose/resource labels + optional Postgres exporter or cAdvisor (local)
 
 ### Checkpoint: Layer ③
 
-- [ ] Pool / DB signal for `agent-data-plane` (or `adp`) joinable to the same service name as traces
+- [x] Pool / DB signal for `agent-data-plane` (or `adp`) joinable to the same service name as traces
 
 ### Phase 4: Intelligence (L3 operating slice)
 
-- [ ] Task O14: Symptom alerts + short runbooks (decide errors, hydrate fail, journey completion drop)
-- [ ] Task O15: README / handbook notes — how to Explore traces, logs, journey KPIs
-- [ ] Task O16: Verification script or doc checklist (force hydrate fail; find via telemetry)
+- [x] Task O14: Symptom alerts + short runbooks (decide errors, hydrate fail, journey completion drop)
+- [x] Task O15: README / handbook notes — how to Explore traces, logs, journey KPIs
+- [x] Task O16: Verification script or doc checklist (force hydrate fail; find via telemetry)
 
 ### Checkpoint: Complete
 
-- [ ] All acceptance criteria in [observability-todo.md](./observability-todo.md) met
-- [ ] Maturity L3 on `fee_explain`: KPI → span → resource narrative works in a demo
-- [ ] Human review before expanding journeys beyond `fee_explain`
+- [x] All acceptance criteria in [observability-todo.md](./observability-todo.md) met
+- [x] Maturity L3 on `fee_explain`: KPI → span → resource narrative works in a demo
+- [x] Human sign-off — track complete (2026-08-26); expanding journeys beyond `fee_explain` is later
 
 ## Risks and Mitigations
 

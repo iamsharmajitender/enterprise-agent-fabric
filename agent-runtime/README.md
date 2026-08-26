@@ -2,11 +2,27 @@
 
 Executes a **pinned** route after Front Door has already decided. Does **not** classify utterances, own agent identity, or store conversation / long-term memory.
 
-Request order in the fabric: **AFD → ADP (decide / pin pointers) → AR (this service) → ACR (hydrate)**. Only AFD may call Runtime (`X-Workload: afd`).
+## Job
 
-Local stack: Compose service `agent-runtime`, typically `:3008`.
+Copy the freeze into a durable run pin, hydrate tools from ADP + ACR, run LangGraph (Patterns 0–3), invoke domain HTTP (local: agent-fabric-mocks), honor `working` / `loop` on the pin. Only AFD may start this box (`X-Workload: afd`).
 
-## Layout
+## Port / stack
+
+| | |
+| --- | --- |
+| Port | **3008** |
+| Stack | Python 3.12, **uv**, FastAPI, SQLAlchemy 2 + Alembic, **LangGraph** |
+| Database | `ar` (schema `runtime`) |
+| Compose | `agent-runtime` |
+| Auth | Ingress: workload `afd` only |
+
+Request order: **AFD → ADP (decide / pin pointers) → AR (this service) → ACR (hydrate)**.
+
+Docs map: [docs/README.md](../docs/README.md). Box pack: [docs/04-architecture/agent-runtime.md](../docs/04-architecture/agent-runtime.md). Stub auth: [docs/05-reference/stub-auth.md](../docs/05-reference/stub-auth.md).
+
+## Hexagonal layout
+
+Python layout (ports via protocols / injected clients):
 
 ```text
 app/
@@ -14,49 +30,121 @@ app/
   agents/
     hydrate.py         # Resolve route → hydrated tool/stage list
     clients.py         # HTTP clients for ADP catalogue + ACR
+    jobs_client.py     # kind=agent → AFD /v1/jobs
+    prefetch.py        # deterministic_prefetch pack
   core/
     agent_core.py      # RunService: start / resume / status / open-run
-    execution.py       # graph.invoke → complete or fail the pin
-    run_store.py       # Postgres pins (idempotency, status, working, checkpoint)
-    memory.py          # When to flush working notes / loop checkpoint
+    execution.py       # graph.invoke → complete, waiting, or fail
+    run_store.py       # Postgres pins
+    memory.py          # working notes/slots + loop checkpoint
+    checkpoint.py      # resume_index helpers
     state.py           # RunPin model + store protocol
   graph/
-    workflow.py        # LangGraph builders (linear stages + Pattern 1 loop)
+    workflow.py        # LangGraph builders (linear, branch, gate, Pattern 1)
     llm/               # LlmPort, SeedStubLlm, ProviderLlm, llm_from_env
   tools/
-    invoker.py         # HTTP POST/GET to capability invoke.url
+    invoker.py         # HTTP to capability invoke.url
   telemetry.py         # OTel spans + business events
 ```
 
-## End-to-end: one run
+## Auth
+
+Ingress:
+
+```http
+Authorization: Bearer fabric-internal
+X-Workload: afd
+```
+
+Outbound to ADP/ACR: workload headers from HTTP clients. Channel user claims are **not** re-checked here; AFD already entitled the start.
+
+## APIs
+
+| Method | Path | Notes |
+| --- | --- | --- |
+| `GET` | `/health` | `{"status":"UP"}` |
+| `POST` | `/v1/runs` | `mode: new`. Hydrate **before** `202`. Idempotent on `idempotency_key`. Body includes `session_id`, `route_id`, `route_version`, `goal`. |
+| `GET` | `/v1/runs/{correlation_id}` | Slim status |
+| `GET` | `/v1/runs?session_id=` | Open-run (latest for session) |
+| `POST` | `/v1/runs/{correlation_id}/turns` | Resume: reload working; human_gate packet; checkpoint resume (`{}` / `{ "resume": true }`) |
+
+Hydrate failure → **422** `HYDRATE_FAILED` (no `202`). Successful hydrate freezes `hydrated_tools` on the pin for the life of the run.
+
+### End-to-end: one run
 
 ```text
 POST /v1/runs  (from AFD)
-  → workload auth
   → RunService.start
        1. idempotency_key hit? return existing correlation_id
        2. hydrate (catalogue + registry) → list of pinned capabilities/stages
        3. insert RunPin (status=running)
        4. build graph from autonomy_mode + hydrated tools
-       5. run_loop → graph.invoke({ goal, notes })
-       6. store.complete({ message }) or mark failed
+       5. run_loop → graph.invoke({ goal, notes, slots })
+       6. store.complete / pause (waiting) / fail
   → 202 { correlation_id }
 ```
 
-Follow-ups: `POST /v1/runs/{correlation_id}/turns` reloads the pin, rebuilds the graph from **already hydrated** tools, optionally restores `working.notes`, invokes again.
+## Contracts
 
-Status: `GET /v1/runs/{correlation_id}`. Latest by session: `GET /v1/runs?session_id=…`.
+- [`docs/05-reference/run-start.json`](../docs/05-reference/run-start.json)
+- [`docs/05-reference/run-status-completed.json`](../docs/05-reference/run-status-completed.json)
+- [`docs/05-reference/stub-auth.md`](../docs/05-reference/stub-auth.md)
 
-### What is **not** here
+## Tables / schema
+
+Alembic / Flyway-style `V1__runtime.sql` on `ar`:
+
+| Column | Role |
+| --- | --- |
+| `correlation_id` | PK (`corr-*`) |
+| `idempotency_key` | Unique start key |
+| `session_id` | Chat `sess-*` or jobs `job:{key}` |
+| `route_id` / `route_version` | Pinned catalogue cut |
+| `hydrated_tools` | Frozen capability list JSON |
+| `status` | `running` / `waiting` / `completed` / `failed` |
+| `result` | Slim result JSON (`message`, …) |
+| `working` | `{ "notes": [...], "slots": { … } }` when `working=session` |
+| `checkpoint` | `{ step, stage_id, result, goal, resume_index, … }` when `loop=checkpoint` |
+
+Index: `(session_id, status)` for open-run.
+
+## Sibling calls
+
+| Direction | Call | Notes |
+| --- | --- | --- |
+| In | AFD `POST /v1/runs`, `/turns`, status, open-run | Only `afd` |
+| Out | ADP catalogue GET | Route, workflow, prompt, corpora |
+| Out | ACR GET | Manifest + each capability at pin |
+| Out | agent-fabric-mocks / domain `invoke.url` | Stage HTTP |
+| Out | AFD `POST /v1/jobs` | `kind=agent` child start (projected payload) |
+
+## Non-goals
+
+- Classify / decide (ADP)
+- Shared Memory `conversation` / `long_term` ([future-enhancement](../docs/tasks/future-enhancement.md#shared-memory-conversation-and-long_term))
+- HTTP retries on tool calls
+- Mid-loop registry GET (hydrate once)
+
+### What is **not** here (detail)
 
 | Topic | Reality today |
 | --- | --- |
-| **HTTP retries** on tool calls | None — `HttpToolClient` raises on non-2xx |
-| **Graph retries** / resume-from-failed-step | None — exception → run `failed`; resume is a new invoke with prior notes if configured |
-| **Child `kind=agent` jobs** | Skipped with a note (`agent skipped…`) |
-| **Classify / decide** | ADP before AR |
+| **HTTP retries** on tool calls | None — non-2xx raises |
+| **Graph resume** | `loop=checkpoint` failed runs resume from `resume_index` via `/turns` |
+| **Child `kind=agent`** | POST AFD `/v1/jobs` with projected `payload` only |
+| **LLM** | Env-selected: stub (`FABRIC_LLM_STUB=1`) or provider (Compose often Ollama). Not “never a model.” |
 
-Idempotency on **start** (`idempotency_key`) is the main “don’t double-start” guard, not a retry loop.
+## Tests
+
+```bash
+cd agent-runtime && uv run pytest
+```
+
+Notable suites: hydrate, graph (slots / branch / gate), prefetch, checkpoint, runs + idempotency, memory, LLM schema, jobs client.
+
+Inject fakes via `create_app(store=…, catalogue=…, registry=…, graph=…, tool_invoker=…, llm=…)`.
+
+---
 
 ## Hydrate
 
@@ -65,115 +153,40 @@ Idempotency on **start** (`idempotency_key`) is the main “don’t double-start
 1. Load route row from ADP (`CataloguePort.get_route`).
 2. **If** `tool_manifest` + version are set → ACR `get_manifest` → each `get_capability` (schemas + `invoke.url` frozen on the pin).
 3. Stamp `llm_role` / `llm_prompt` from the route’s workflow + prompt pack when present.
-4. **Else** no manifest → build nodes from **workflow stages** (invoke empty) or **prompt-only** (Pattern 0 single synthesis node).
-5. Pattern 2/3 HTTP-only lists get a trailing `respond` synthesis node if no classify/synthesis stage exists (`_ensure_llm`).
+4. **Else** no manifest → workflow stages or prompt-only Pattern 0.
+5. Pattern 2/3 HTTP-only lists get a trailing `respond` synthesis node if needed (`_ensure_llm`).
 
-Hydrate failure → `422 HYDRATE_FAILED` (no `202`). Successful hydrate is frozen on `RunPin.hydrated_tools` for the life of the run (resume does not re-hydrate).
-
-## Graphs (agent “framework”)
-
-Today the executor is **LangGraph**, wrapped behind `GraphPort.invoke(state)`.
+## Graphs
 
 | Autonomy | Builder | Behavior |
 | --- | --- | --- |
-| `0` / `2` / `3` (and default) | `build_tool_graph` | Linear nodes in hydrate order |
-| `1` | `build_agent_loop` | LLM emits `CALL <tool_id>` / `DONE <answer>` up to `max_loop_steps` |
+| `0` / `2` / `3` | `build_tool_graph` | Linear or branch; `human_gate` → `waiting` |
+| `1` | `build_agent_loop` | `CALL` / `DONE` up to `max_loop_steps` |
 
-Each linear stage (`_run_stage`) uses `llm_role`:
-
-| `llm_role` | Behavior |
-| --- | --- |
-| `none` | HTTP to `invoke.url` with `dict(goal)` (+ query if formulated) |
-| `query_formulation` | LLM writes `payload["query"]`, then HTTP |
-| `classify` / `synthesis` | LLM only; append text to `notes`; no HTTP |
-| empty `invoke.url` | No-op / carry prior result (prefetch placeholders) |
-
-`GraphState`: `{ result, goal, notes }`. The user-facing reply is `result` → stored as `{ "message": "…" }`.
-
-### Changing the agent framework
-
-Callers depend on `GraphPort` (`invoke(state) → state`), not LangGraph types.
-
-1. Implement another builder that returns an object with `.invoke(dict)`.
-2. Either inject it into `RunService(graph=…)` / `create_app(graph=…)`, or replace the `build_tool_graph` / `build_agent_loop` calls in `agent_core._graph_for`.
-3. Keep hydrate’s list shape (`id`, `invoke`, `llm_role`, `llm_prompt`, …) stable so tools and LLM ports stay unchanged.
-
-LangGraph lives only in `app/graph/workflow.py`.
-
-## Tools
-
-`HttpToolClient` (`app/tools/invoker.py`):
-
-- Reads `invoke.method` + `invoke.url` from the **hydrated** capability.
-- Sends JSON body (usually `dict(goal)`, maybe with `query`).
-- Forwards `X-Request-Id`.
-- Span: `tool.invoke`.
-- Local Compose URLs point at `http://tool-mock:3010…` ([`agent-fabric-mocks/tools`](../agent-fabric-mocks/tools/)).
-
-Swap invokers by implementing `ToolInvoker.call(invoke, payload)` and passing `tool_invoker=` into `create_app` / `RunService`.
-
-## LLM
-
-Port: `LlmPort.complete(system, user) → str` (`app/graph/llm/`).
-
-| Piece | Role |
-| --- | --- |
-| `factory.llm_from_env` | `FABRIC_LLM_STUB=1` → stub; else `ProviderLlm` |
-| `SeedStubLlm` | Deterministic CALL/DONE + canned lines (Compose default) |
-| `ProviderLlm` | Real completer; **today** LangChain + Ollama inside `_build_default_backend` |
-| `plain_text` | Normalize model content / strip think-tags |
-
-### Changing the LLM / SDK
-
-1. Keep using `LlmPort`.
-2. Replace `_build_default_backend()` in `app/graph/llm/provider.py` (or inject a backend into `ProviderLlm(backend=…)`).
-3. Wire via `create_app(llm=…)` or env (`FABRIC_LLM_STUB`, `OLLAMA_*`, optional `FABRIC_LLM_MODEL`).
-
-Do **not** import LangChain from `workflow.py` / `agent_core.py` — only through `LlmPort`.
+HTTP payload = `goal` ∪ schema-selected **slots** ([payload.py](app/graph/payload.py)). LLM reads `notes`. Prefetch writes `working.slots.prefetch`.
 
 ## Memory (working + checkpoint)
 
-From the catalogue `memory_profile` on the route (`app/core/memory.py`):
-
 | Flag | Effect |
 | --- | --- |
-| `working=session` | After each stage, flush `notes` to `runtime.runs.working`; resume reloads them |
-| `loop=checkpoint` | After each stage, write `{ step, stage_id, result, goal }` to `checkpoint` |
-
-Crash resume-from-step is **not** wired; checkpoint is persistence for observability / future resume.
-
-## Auth and identity
-
-- Ingress: `Authorization: Bearer fabric-internal` + `X-Workload: afd` (only AFD).
-- Outbound to ADP/ACR: workload headers from HTTP clients.
-- Channel user claims are **not** re-checked here; AFD already entitled the start.
+| `working=session` | Flush `{ notes, slots }` after each stage; `/turns` reloads both |
+| `loop=checkpoint` | Write checkpoint + `resume_index`; failed runs resume via `/turns` |
 
 ## Key environment
 
 | Variable | Purpose |
 | --- | --- |
-| `DATA_PLANE_URL` | Catalogue HTTP (routes, workflows, prompts) |
+| `DATA_PLANE_URL` | Catalogue HTTP |
 | `REGISTRY_URL` | ACR hydrate |
-| `DATABASE_URL` / store config | Run pins |
-| `FABRIC_LLM_STUB` | `0` = provider (Compose default); `1` = stub |
-| `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | Default provider backend |
-| `FABRIC_LLM_MODEL` | Optional model id override for provider |
+| `AFD_URL` | Child jobs (`kind=agent`) |
+| `DATABASE_URL` | Run pins |
+| `FABRIC_LLM_STUB` | `1` = stub; `0` = provider |
+| `OLLAMA_*` / `FABRIC_LLM_MODEL` | Provider backend |
 | `OTEL_*` | Tracing / metrics |
-
-## Tests
-
-```bash
-cd agent-runtime
-pytest
-```
-
-Notable suites: hydrate, graph stages, LLM stub/provider, runs + idempotency, memory flush, telemetry.
-
-Inject fakes via `create_app(store=…, catalogue=…, registry=…, graph=…, tool_invoker=…, llm=…)`.
 
 ## Related docs
 
 - Fabric overview: [`../README.md`](../README.md)
 - Patterns 0–3: [`../docs/06-patterns/`](../docs/06-patterns/)
-- Stub auth: [`../docs/05-reference/stub-auth.md`](../docs/05-reference/stub-auth.md)
+- Dataflow: [`../docs/tasks/dataflow-plan.md`](../docs/tasks/dataflow-plan.md)
 - Domain tool doubles: [`../agent-fabric-mocks/tools/`](../agent-fabric-mocks/tools/)

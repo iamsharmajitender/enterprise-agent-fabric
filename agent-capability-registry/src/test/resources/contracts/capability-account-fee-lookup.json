@@ -15,7 +15,7 @@
   },
   "invoke": {
     "method": "POST",
-    "url": "http://tool-mock:3010/fees/explain",
+    "url": "http://agent-mocks:3010/fees/explain",
     "auth": "domain-oauth"
   },
   "owner": "accounts",

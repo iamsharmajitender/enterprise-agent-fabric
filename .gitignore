@@ -17,6 +17,9 @@ AGENTS.md
 # Logs
 *.log
 
+# Local Compose: Flyway SQL content stamp used by start-app.sh
+docs/run/compose/.flyway-content.sha
+
 # Node (agent-control-plane)
 node_modules/
 dist/

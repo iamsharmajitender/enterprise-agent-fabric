@@ -21,8 +21,21 @@ Both channels use the same tree: catalogue JSON + wrappers grouped by autonomy.
 | --- | --- | --- | --- |
 | `0-single-inference/` | 0 | `email_summarize` | `agent-chat`, `chat_session`, `agent-policy-qa`, `policy_chat` |
 | `1-autonomous/` | 1 | `fee_explain`, `fraud_one_tool`, `fraud_casefile`, `fraud_investigate`, `ops_start_kyc`, `contract_investigation` | `search_only`, `research_assistant`, `fee_explain` |
-| `2-deterministic/` | 2 | `llm_pipeline`, `policy_memo`, `account_notify`, `card_freeze`, `dispute_intake`, `pack_then_*`, `clause_lookup`, `template_retrieve`, `msa_risk_review`, `kyc_onboarding`, `claims_adjudicate` | — (no seed chat-visible route) |
+| `2-deterministic/` | 2 | `llm_pipeline`, `policy_memo`, `account_notify`, `card_freeze`, `dispute_intake`, `purchase_refund`, `pack_then_*`, `clause_lookup`, `template_retrieve`, `msa_risk_review`, `kyc_onboarding`, `claims_adjudicate` | — (no seed chat-visible route) |
 | `3-guided/` | 3 | `ticket_triage`, `narrow_review`, `contract_review`, `due_diligence` | `product_explain` |
+
+**Dataflow proof routes** (a green `completed` on `--all` is **not** sufficient — see [verification checklist](../../tasks/dataflow-plan.md#verification-checklist-d13)):
+
+| Task | Route | What must move |
+| --- | --- | --- |
+| **D5** | `purchase_refund` | Classify slot `merchant`, `amount`, `date` → `match_purchase` HTTP body (not in job payload) |
+| **D7** | `policy_memo`, `pack_then_review` | Prefetch pack in `working.slots.prefetch` → synthesis/LLM (empty pack fails closed) |
+| **D8** | `kyc_onboarding` | `risk_score` slot → branch target stage |
+| **D9** | `purchase_refund`, `kyc_onboarding` | `human_gate` pause → resume packet in slot → later stages |
+| **D10** | `fraud_investigate`, `ops_start_kyc` | Parent projects `input_schema` keys into child jobs `payload` |
+| **D11** | any `loop=checkpoint` route | Failed run resumes from `resume_index`; completed HTTP stages skipped |
+
+Full scenario matrix: [docs/dataflow/scenarios.md](../../dataflow/scenarios.md).
 
 Add a request by appending the channel JSON and a wrapper in the matching autonomy folder. Wrappers call [`run-job.sh`](run-job.sh) or [`run-chat.sh`](run-chat.sh).
 
@@ -88,10 +101,10 @@ Single-route scripts always poll until `completed` / `failed` (or timeout). Over
 
 Stub user `jane`. Required claims come from the channel JSON (`accounts:read` for `fee_explain`, `claims:read` for `claims_adjudicate`, …). Missing claims → **403**, Runtime is not started. Chat turns that classify to nothing return `abstain` / `clarify`, not 403.
 
-Routes that only call domain tools can finish against tool-mock. Pattern 1 CALL/DONE and synthesis use host Ollama by default (`FABRIC_LLM_STUB=0`). Set `FABRIC_LLM_STUB=1` for deterministic stub replies without a model.
+Routes that only call domain tools can finish against agent-fabric-mocks. Pattern 1 CALL/DONE and synthesis use host Ollama by default (`FABRIC_LLM_STUB=0`). Set `FABRIC_LLM_STUB=1` for deterministic stub replies without a model.
 
 The `fee_explain` chat wrapper also checks Control Plane, FR-5, the canned fee line, and the four databases.
 
-`--all` with `WAIT=1` is pin/hydrate smoke. It is **not** the routing golden set. Routing labels: `./agent-fabric-evals/intent-router-evals/run.sh` ([agent-fabric-evals](../../../agent-fabric-evals/intent-router-evals/README.md)).
+`--all` with `WAIT=1` is pin/hydrate smoke. It is **not** proof that stage data moved correctly and **not** the routing golden set. Dataflow verification: [dataflow-plan.md — D13 checklist](../../tasks/dataflow-plan.md#verification-checklist-d13). Routing labels: `./agent-fabric-evals/intent-router-evals/run.sh` ([agent-fabric-evals](../../../agent-fabric-evals/intent-router-evals/README.md)).
 
 APIs: [agent-front-door/README.md](../../../agent-front-door/README.md). Docs map: [docs/README.md](../../README.md).

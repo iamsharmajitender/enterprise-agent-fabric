@@ -42,7 +42,9 @@ test("capability schemas render as a field table", () => {
   assert.match(js, /function renderJsonSchema/);
   assert.match(js, /function schemaTypeLabel/);
   assert.match(render, /isObjectSchema\(value\)/);
-  assert.match(js, /\["Field", "Type", "Required"\]/);
+  assert.match(js, /\["Field", "Type", "Required", "Description", "JSON"\]/);
+  assert.match(js, /function renderSchemaKeywords/);
+  assert.match(js, /function renderSchemaKeyword/);
 });
 
 test("detail sections flatten retrieval, memory, invoke, and roles", () => {
@@ -182,17 +184,20 @@ test("catalogue lists omit Status because tabs already filter", () => {
   assert.match(js, /columns: \["Prompt", "Version", "Owner", "Host"\]/);
   assert.match(js, /columns: \["Workflow", "Version", "Description", "Stages"\]/);
   assert.match(js, /columns: \["Manifest", "Version", "Description", "Tools"\]/);
+  assert.match(js, /columns: \["Corpus", "Display name", "Collection", "Owner", "Gateway"\]/);
   const routes = js.slice(js.indexOf("async function showRoutes"), js.indexOf("async function showCapabilities"));
   const caps = js.slice(js.indexOf("async function showCapabilities"), js.indexOf("async function showCapability("));
   const prompts = js.slice(js.indexOf("async function showPrompts"), js.indexOf("async function showWorkflows"));
   const workflows = js.slice(js.indexOf("async function showWorkflows"), js.indexOf("async function showManifests"));
-  const manifests = js.slice(js.indexOf("async function showManifests"), js.indexOf("function usageList"));
+  const manifests = js.slice(js.indexOf("async function showManifests"), js.indexOf("async function showCorpora"));
+  const corpora = js.slice(js.indexOf("async function showCorpora"), js.indexOf("function usageList"));
   for (const [name, slice] of [
     ["showRoutes", routes],
     ["showCapabilities", caps],
     ["showPrompts", prompts],
     ["showWorkflows", workflows],
     ["showManifests", manifests],
+    ["showCorpora", corpora],
   ]) {
     assert.ok(slice.length > 0, `${name} slice must exist`);
     assert.equal(slice.includes("statusCell("), false, `${name} list must not render statusCell`);

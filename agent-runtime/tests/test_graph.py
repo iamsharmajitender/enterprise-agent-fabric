@@ -1,3 +1,5 @@
+from typing import Any
+
 from app.graph.workflow import build_agent_loop, build_tool_graph
 
 
@@ -12,21 +14,22 @@ def test_tool_graph_calls_each_hydrated_tool_in_order() -> None:
     tools = [
         {
             "id": "account_fee_lookup",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/fees/explain"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/fees/explain"},
         },
         {
             "id": "list_accounts",
-            "invoke": {"method": "GET", "url": "http://tool-mock:3010/accounts"},
+            "invoke": {"method": "GET", "url": "http://agent-mocks:3010/accounts"},
         },
     ]
     graph = build_tool_graph(tools, Invoker())
     output = graph.invoke({"result": "", "goal": {"utterance": "Why was I charged $42?"}})
     assert [invoke["url"] for invoke, _ in calls] == [
-        "http://tool-mock:3010/fees/explain",
-        "http://tool-mock:3010/accounts",
+        "http://agent-mocks:3010/fees/explain",
+        "http://agent-mocks:3010/accounts",
     ]
     assert calls[0][1] == {"utterance": "Why was I charged $42?"}
-    assert output["result"] == "from-http://tool-mock:3010/accounts"
+    assert calls[1][1] == {"utterance": "Why was I charged $42?"}
+    assert output["result"] == "from-http://agent-mocks:3010/accounts"
 
 
 def test_empty_manifest_completes_with_empty_result() -> None:
@@ -58,11 +61,13 @@ def test_query_formulation_asks_llm_then_calls_tool() -> None:
             "id": "clause_search",
             "llm_role": "query_formulation",
             "llm_prompt": "Write the clause query",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/legal/clauses/search"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/legal/clauses/search"},
         }
     ]
     graph = build_tool_graph(tools, Invoker(), llm=Llm())
     output = graph.invoke({"result": "", "goal": {"claim_id": "clm-1001"}})
+    assert calls[0][1]["claim_id"] == "clm-1001"
+    assert "notes" not in calls[0][1]
     assert calls[0][1]["query"] == "exclusion 4.2 water damage"
     assert output["result"] == "clause 4.2"
 
@@ -83,7 +88,7 @@ def test_synthesis_uses_llm_and_skips_tool() -> None:
             "id": "draft_memo",
             "llm_role": "synthesis",
             "llm_prompt": "Draft the memo",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/legal/memo"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/legal/memo"},
         }
     ]
     graph = build_tool_graph(tools, Invoker(), llm=Llm())
@@ -91,6 +96,288 @@ def test_synthesis_uses_llm_and_skips_tool() -> None:
         {"result": "", "goal": {"claim_id": "clm-1001"}, "notes": ["clause 4.2"]}
     )
     assert output["result"] == "Deny: exclusion applies."
+
+
+def test_classify_passes_output_schema_to_llm() -> None:
+    seen: list[object] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("classify must not call a tool")
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            seen.append(schema)
+            return '{"merchant":"Acme","amount":45.36,"date":"2026-08-12"}'
+
+    tools = [
+        {
+            "id": "extract_fields",
+            "llm_role": "classify",
+            "llm_prompt": "Return JSON only.",
+            "output_schema": {
+                "type": "object",
+                "required": ["merchant", "amount", "date"],
+                "properties": {
+                    "merchant": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "date": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/unused"},
+        }
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    output = graph.invoke({"result": "", "goal": {"doc_id": "r-1"}})
+    assert seen[0]["required"] == ["merchant", "amount", "date"]
+    assert output["result"] == '{"merchant":"Acme","amount":45.36,"date":"2026-08-12"}'
+
+
+def test_synthesis_passes_output_schema_to_llm() -> None:
+    seen: list[object] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("synthesis must not call the canned tool")
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            seen.append(schema)
+            return "Refund posted."
+
+    tools = [
+        {
+            "id": "refund_confirm",
+            "llm_role": "synthesis",
+            "llm_prompt": "Write the confirm",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {"text": {"type": "string"}},
+            },
+            "invoke": {},
+        }
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    output = graph.invoke({"result": "", "goal": {}, "notes": ["matched"]})
+    assert seen[0]["required"] == ["text"]
+    assert output["result"] == "Refund posted."
+
+
+def test_query_formulation_passes_output_schema_to_llm() -> None:
+    seen: list[object] = []
+    calls: list[tuple[dict, dict]] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append((invoke, payload))
+            return {"text": "clause 4.2"}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            seen.append(schema)
+            return "exclusion 4.2 water damage"
+
+    tools = [
+        {
+            "id": "clause_search",
+            "llm_role": "query_formulation",
+            "llm_prompt": "Write the clause query",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {"text": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/legal/clauses/search"},
+        }
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    output = graph.invoke({"result": "", "goal": {"claim_id": "clm-1001"}})
+    assert seen[0]["required"] == ["text"]
+    assert calls[0][1]["query"] == "exclusion 4.2 water damage"
+    assert "notes" not in calls[0][1]
+    assert output["result"] == "clause 4.2"
+
+
+def test_http_after_classify_merges_slot_fields_not_notes() -> None:
+    calls: list[dict] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(payload)
+            return {"text": "matched"}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            return '{"merchant":"Acme","amount":45.36,"date":"2026-08-12"}'
+
+    tools = [
+        {
+            "id": "extract_fields",
+            "llm_role": "classify",
+            "llm_prompt": "Return JSON only.",
+            "output_schema": {
+                "type": "object",
+                "required": ["merchant", "amount", "date"],
+                "properties": {
+                    "merchant": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "date": {"type": "string"},
+                },
+            },
+            "invoke": {},
+        },
+        {
+            "id": "match_purchase",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["account_id", "merchant", "amount", "date"],
+                "properties": {
+                    "account_id": {"type": "string"},
+                    "merchant": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "date": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/receipts/match"},
+        },
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    graph.invoke({"result": "", "goal": {"doc_id": "r-1", "account_id": "a-1"}})
+    assert calls == [
+        {
+            "doc_id": "r-1",
+            "account_id": "a-1",
+            "merchant": "Acme",
+            "amount": 45.36,
+            "date": "2026-08-12",
+        }
+    ]
+
+
+def test_http_after_classify_fails_when_slot_missing_required_fields() -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("match must not run without classify fields")
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            return '{"merchant":"Acme"}'
+
+    tools = [
+        {
+            "id": "extract_fields",
+            "llm_role": "classify",
+            "llm_prompt": "Return JSON only.",
+            "invoke": {},
+        },
+        {
+            "id": "match_purchase",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["account_id", "merchant", "amount", "date"],
+                "properties": {
+                    "account_id": {"type": "string"},
+                    "merchant": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "date": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/receipts/match"},
+        },
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    try:
+        graph.invoke({"result": "", "goal": {"account_id": "a-1"}})
+    except RuntimeError as exc:
+        assert "missing required field" in str(exc)
+        return
+    raise AssertionError("expected schema validation failure")
+
+
+def test_http_merge_does_not_invent_fields_without_prior_slot() -> None:
+    calls: list[dict] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(payload)
+            return {"text": "first"}
+
+    tools = [
+        {
+            "id": "identity_check",
+            "llm_role": "none",
+            "input_schema": {"type": "object", "required": ["customer_id"], "properties": {"customer_id": {"type": "string"}}},
+            "output_schema": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/cards/identity"},
+        },
+        {
+            "id": "match_purchase",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["account_id", "merchant", "amount", "date"],
+                "properties": {
+                    "account_id": {"type": "string"},
+                    "merchant": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "date": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/receipts/match"},
+        },
+    ]
+    graph = build_tool_graph(tools, Invoker())
+    try:
+        graph.invoke({"result": "", "goal": {"customer_id": "c-1", "account_id": "a-1"}})
+    except RuntimeError as exc:
+        assert "missing required field" in str(exc)
+        assert not calls or "merchant" not in (calls[-1] if calls else {})
+        return
+    raise AssertionError("expected missing merchant/amount/date")
+
+
+def test_classify_slot_persisted_for_next_stage() -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            return {"text": "matched"}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            return '{"merchant":"Acme","amount":45.36,"date":"2026-08-12"}'
+
+    tools = [
+        {
+            "id": "extract_fields",
+            "llm_role": "classify",
+            "llm_prompt": "Return JSON only.",
+            "invoke": {},
+        },
+        {
+            "id": "match_purchase",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["account_id", "merchant", "amount", "date"],
+                "properties": {
+                    "account_id": {"type": "string"},
+                    "merchant": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "date": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/receipts/match"},
+        },
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    output = graph.invoke({"result": "", "goal": {"account_id": "a-1"}, "slots": {}})
+    assert output["slots"]["extract_fields"] == {
+        "merchant": "Acme",
+        "amount": 45.36,
+        "date": "2026-08-12",
+    }
 
 
 def test_classify_uses_llm_and_skips_tool() -> None:
@@ -108,7 +395,7 @@ def test_classify_uses_llm_and_skips_tool() -> None:
             "id": "extract",
             "llm_role": "classify",
             "llm_prompt": "Extract the requested fields from the input only.",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/unused"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/unused"},
         }
     ]
     graph = build_tool_graph(tools, Invoker(), llm=Llm())
@@ -132,7 +419,7 @@ def test_none_role_calls_tool_without_llm() -> None:
         {
             "id": "policy_search",
             "llm_role": "none",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/legal/playbook/search"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/legal/playbook/search"},
         }
     ]
     graph = build_tool_graph(tools, Invoker(), llm=Llm())
@@ -182,26 +469,368 @@ def test_none_without_url_is_noop() -> None:
     assert output["notes"] == ["packed"]
 
 
-def test_agent_kind_skips_http() -> None:
+def test_prefetch_stage_packs_scope_into_slot_and_notes() -> None:
+    from tests.conftest import FakeCatalogue
+    from tests.test_prefetch import FakePrefetch
+
     class Invoker:
         def call(self, invoke: dict, payload: dict) -> dict:
-            raise AssertionError("kind=agent must not POST jobs yet")
+            raise AssertionError("prefetch stage must not call domain tools")
+
+    class Llm:
+        last_user = ""
+
+        def complete(self, system: str, user: str, schema=None) -> str:
+            Llm.last_user = user
+            return "Memo from pack."
+
+    catalogue = FakeCatalogue()
+    catalogue.corpora = {
+        "policy-engine": {
+            "corpus_id": "policy-engine",
+            "url": "http://agent-mocks:3010/v1/search/assistant",
+            "collection": "policy-engine",
+            "status": "published",
+        }
+    }
+    prefetch = FakePrefetch()
+    tools = [
+        {"id": "prefetch", "llm_role": "none", "invoke": {}},
+        {"id": "generate", "llm_role": "synthesis", "llm_prompt": "Draft memo", "invoke": {}},
+    ]
+    graph = build_tool_graph(
+        tools,
+        Invoker(),
+        llm=Llm(),
+        retrieval={"mode": "deterministic_prefetch", "scope": ["policy-engine"]},
+        prefetch=prefetch,
+        catalogue=catalogue,
+    )
+    output = graph.invoke({"result": "", "goal": {"topic": "refunds"}})
+    assert prefetch.calls
+    assert "policy-engine" in output["slots"]["prefetch"]["chunks"][0]["corpus_id"]
+    assert "[policy-engine:" in output["notes"][0]
+    assert output["result"] == "Memo from pack."
+    assert "packed chunks:" in Llm.last_user
+    assert "Refund window" in Llm.last_user
+
+
+def test_prefetch_route_synthesis_fails_when_pack_missing() -> None:
+    from tests.conftest import FakeCatalogue
+    from tests.test_prefetch import FakePrefetch
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("synthesis must not call HTTP")
+
+    class Llm:
+        def complete(self, system: str, user: str, schema=None) -> str:
+            raise AssertionError("synthesis must not run without prefetch pack")
+
+    catalogue = FakeCatalogue()
+    catalogue.corpora = {
+        "policy-engine": {
+            "corpus_id": "policy-engine",
+            "url": "http://agent-mocks:3010/v1/search/assistant",
+            "collection": "policy-engine",
+            "status": "published",
+        }
+    }
+    tools = [
+        {"id": "prefetch", "llm_role": "none", "invoke": {}},
+        {"id": "generate", "llm_role": "synthesis", "llm_prompt": "Draft memo", "invoke": {}},
+    ]
+    graph = build_tool_graph(
+        tools,
+        Invoker(),
+        llm=Llm(),
+        retrieval={"mode": "deterministic_prefetch", "scope": ["policy-engine"]},
+        prefetch=FakePrefetch(chunks=[]),
+        catalogue=catalogue,
+    )
+    try:
+        graph.invoke({"result": "", "goal": {"topic": "refunds"}})
+    except RuntimeError as exc:
+        assert "no chunks" in str(exc) or "prefetch slot is empty" in str(exc)
+        return
+    raise AssertionError("expected prefetch pack failure")
+
+
+def test_prefetch_stage_fails_when_gateway_returns_no_chunks() -> None:
+    from tests.conftest import FakeCatalogue
+    from tests.test_prefetch import FakePrefetch
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("prefetch stage must not call domain tools")
+
+    catalogue = FakeCatalogue()
+    catalogue.corpora = {
+        "policy-engine": {
+            "corpus_id": "policy-engine",
+            "url": "http://agent-mocks:3010/v1/search/assistant",
+            "collection": "policy-engine",
+            "status": "published",
+        }
+    }
+    graph = build_tool_graph(
+        [{"id": "prefetch", "llm_role": "none", "invoke": {}}],
+        Invoker(),
+        retrieval={"mode": "deterministic_prefetch", "scope": ["policy-engine"]},
+        prefetch=FakePrefetch(chunks=[]),
+        catalogue=catalogue,
+    )
+    try:
+        graph.invoke({"result": "", "goal": {}})
+    except RuntimeError as exc:
+        assert "no chunks" in str(exc)
+        return
+    raise AssertionError("expected prefetch failure")
+
+
+def _kyc_branch_tools() -> list[dict]:
+    return [
+        {
+            "id": "kyc_risk_engine",
+            "workflow_stage_id": "risk_score",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/kyc/risk"},
+            "branch": {"high": "manual_review", "low": "activate_account"},
+        },
+        {
+            "id": "manual_review",
+            "workflow_stage_id": "manual_review",
+            "stage_type": "human_gate",
+            "llm_role": "none",
+            "invoke": {},
+        },
+        {
+            "id": "account_activate",
+            "workflow_stage_id": "activate_account",
+            "llm_role": "none",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/kyc/activate"},
+        },
+        {
+            "id": "summarize",
+            "workflow_stage_id": "summarize",
+            "llm_role": "synthesis",
+            "llm_prompt": "Summarize KYC",
+            "invoke": {},
+        },
+    ]
+
+
+def test_branch_low_routes_to_activate_not_manual_review() -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(str(invoke.get("url") or ""))
+            if invoke["url"].endswith("/kyc/risk"):
+                return {"risk": "low", "text": "KYC risk: low."}
+            return {"text": "activated"}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema=None) -> str:
+            return "KYC summary."
+
+    graph = build_tool_graph(_kyc_branch_tools(), Invoker(), llm=Llm())
+    output = graph.invoke({"result": "", "goal": {"applicant_id": "app-1"}})
+    assert calls == [
+        "http://agent-mocks:3010/kyc/risk",
+        "http://agent-mocks:3010/kyc/activate",
+    ]
+    assert output["result"] == "KYC summary."
+
+
+def test_branch_high_routes_to_manual_review_not_activate() -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(str(invoke.get("url") or ""))
+            return {"risk": "high", "text": "KYC risk: high."}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema=None) -> str:
+            raise AssertionError("synthesis must not run before human_gate resume")
+
+    from app.graph.human_gate import HumanGateWaiting
+
+    graph = build_tool_graph(_kyc_branch_tools(), Invoker(), llm=Llm())
+    try:
+        graph.invoke({"result": "", "goal": {"applicant_id": "app-2"}})
+    except HumanGateWaiting as exc:
+        assert calls == ["http://agent-mocks:3010/kyc/risk"]
+        assert exc.stage_id == "manual_review"
+        assert exc.resume_index == 3
+        return
+    raise AssertionError("expected human_gate waiting")
+
+
+def test_human_gate_resume_runs_merge_stage_only() -> None:
+    from app.graph.human_gate import resume_index_after_gate
+
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(str(invoke.get("url") or ""))
+            return {"risk": "high", "text": "KYC risk: high."}
+
+    class Llm:
+        def complete(self, system: str, user: str, schema=None) -> str:
+            return "KYC summary."
+
+    tools = _kyc_branch_tools()
+    graph = build_tool_graph(
+        tools,
+        Invoker(),
+        llm=Llm(),
+        start_index=resume_index_after_gate(tools, 1),
+    )
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"applicant_id": "app-2"},
+            "slots": {"manual_review": {"decision": "approve", "reviewer_id": "ops-1"}},
+        }
+    )
+    assert calls == []
+    assert output["result"] == "KYC summary."
+
+
+def test_branch_unknown_risk_fails_closed() -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            return {"risk": "medium", "text": "KYC risk: medium."}
+
+    graph = build_tool_graph(_kyc_branch_tools(), Invoker(), llm=object())
+    try:
+        graph.invoke({"result": "", "goal": {"applicant_id": "app-3"}})
+    except RuntimeError as exc:
+        assert "no known key" in str(exc)
+        return
+    raise AssertionError("expected branch routing failure")
+
+
+def test_agent_kind_posts_projected_child_goal() -> None:
+    calls: list[tuple[str, str, dict[str, Any], dict[str, Any] | None]] = []
+
+    class FakeJobs:
+        def start(
+            self,
+            route_id: str,
+            idempotency_key: str,
+            payload: dict[str, Any],
+            *,
+            invoke: dict[str, Any] | None = None,
+        ) -> dict[str, Any]:
+            calls.append((route_id, idempotency_key, payload, invoke))
+            return {"correlation_id": "corr-child-1"}
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("kind=agent must POST jobs, not domain HTTP")
 
     graph = build_tool_graph(
         [
             {
                 "id": "start_contract_review",
                 "kind": "agent",
+                "input_schema": {
+                    "type": "object",
+                    "required": ["document_id"],
+                    "properties": {
+                        "document_id": {"type": "string"},
+                        "matter_id": {"type": "string"},
+                    },
+                },
                 "invoke": {
                     "method": "POST",
                     "url": "https://api-afd.internal/v1/jobs",
+                    "body": {"route_id": "contract_review"},
                 },
             }
         ],
         Invoker(),
+        jobs=FakeJobs(),
     )
-    output = graph.invoke({"result": "", "goal": {"document_id": "doc-1"}, "notes": []})
-    assert "skipped" in output["result"]
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"document_id": "doc-1", "noise": "drop-me"},
+            "notes": ["prior prose must not leak"],
+            "slots": {"ocr_extract": {"matter_id": "m-9"}},
+            "correlation_id": "corr-parent-1",
+        }
+    )
+    assert calls == [
+        (
+            "contract_review",
+            "child-corr-parent-1-start_contract_review",
+            {"document_id": "doc-1", "matter_id": "m-9"},
+            {
+                "method": "POST",
+                "url": "https://api-afd.internal/v1/jobs",
+                "body": {"route_id": "contract_review"},
+            },
+        )
+    ]
+    assert "noise" not in calls[0][2]
+    assert "Started child job contract_review" in output["result"]
+    assert output["slots"]["start_contract_review"]["payload"] == {
+        "document_id": "doc-1",
+        "matter_id": "m-9",
+    }
+
+
+def test_agent_kind_fails_closed_when_required_child_field_missing() -> None:
+    class FakeJobs:
+        def start(self, *_args, **_kwargs) -> dict[str, Any]:
+            raise AssertionError("jobs must not start when projection is incomplete")
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            return {"text": "ok"}
+
+    graph = build_tool_graph(
+        [
+            {
+                "id": "start_kyc_onboarding",
+                "kind": "agent",
+                "input_schema": {
+                    "type": "object",
+                    "required": ["applicant_id"],
+                    "properties": {
+                        "applicant_id": {"type": "string"},
+                        "ticket_id": {"type": "string"},
+                    },
+                },
+                "invoke": {
+                    "method": "POST",
+                    "url": "https://api-afd.internal/v1/jobs",
+                    "body": {"route_id": "kyc_onboarding"},
+                },
+            }
+        ],
+        Invoker(),
+        jobs=FakeJobs(),
+    )
+    try:
+        graph.invoke(
+            {
+                "result": "",
+                "goal": {"ticket_id": "t-1"},
+                "notes": ["do not pass notes to child"],
+                "slots": {},
+                "correlation_id": "corr-parent-2",
+            }
+        )
+    except RuntimeError as exc:
+        assert "applicant_id" in str(exc)
+        return
+    raise AssertionError("expected missing child field failure")
 
 
 def test_classify_without_llm_raises() -> None:
@@ -263,10 +892,46 @@ def test_agent_loop_calls_tool_then_done() -> None:
     tools = [
         {
             "id": "account_fee_lookup",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/fees/explain"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/fees/explain"},
         }
     ]
     graph = build_agent_loop(tools, Invoker(), Llm())
     output = graph.invoke({"result": "", "goal": {"utterance": "Why $42?"}, "notes": []})
-    assert calls == ["http://tool-mock:3010/fees/explain"]
+    assert calls == ["http://agent-mocks:3010/fees/explain"]
+    assert output["result"] == "Fee of $42 is the monthly account charge."
+
+
+def test_agent_loop_tool_schema_miss_observes_and_continues() -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"text": "should-not-run"}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns == 1:
+                return "CALL account_fee_lookup"
+            assert "tool error" in user and "account_id" in user
+            return "DONE Fee of $42 is the monthly account charge."
+
+    tools = [
+        {
+            "id": "account_fee_lookup",
+            "input_schema": {
+                "type": "object",
+                "required": ["account_id"],
+                "properties": {"account_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/fees/explain"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    output = graph.invoke({"result": "", "goal": {"utterance": "Why was I charged $42?"}, "notes": []})
+    assert calls == []
     assert output["result"] == "Fee of $42 is the monthly account charge."

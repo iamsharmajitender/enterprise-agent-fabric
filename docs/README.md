@@ -12,7 +12,7 @@ Documentation for this repository. Behaviour is what Agent Runtime executes afte
 | [04-architecture](04-architecture/) | Box packs (AFD, ADP, ACR, AR) plus [narrative/](04-architecture/narrative/) |
 | [05-reference](05-reference/) | Frozen JSON contracts |
 | [06-patterns](06-patterns/) | Intended Pattern 0–3 compositions (what is possible) |
-| [07-usecases](07-usecases/) | Intended caller shapes (documents via DMS vs byte upload). Add files as we evolve |
+| [07-usecases](07-usecases/) | Intended caller and process shapes (documents via DMS vs byte upload; LLM review signal vs process gate). Add files as we evolve |
 
 ## Stays where it is
 
@@ -43,6 +43,7 @@ Domain HTTP doubles live at repo root: [`agent-fabric-mocks/tools/`](../agent-fa
 - [Capabilities](02-understand/capabilities.md) — two kinds (`domain`, `agent`); do not add kinds for retrieve, prompts, or MCP
 - [Patterns](02-understand/patterns.md) — how this binary hydrates Pattern 0–3. Intended compositions: [06-patterns](06-patterns/)
 - [Data](02-understand/data.md) — `goal` vs `notes`; HTTP is `dict(goal)` only; slots do not exist
+- [Schemas](02-understand/schemas.md) — capability `input_schema` / `output_schema`; what Runtime binds for LLM stages
 - [Prompts](02-understand/prompts.md) — `prompt_packs` and `llm_role`
 - [Retrieve](02-understand/retrieve.md) — named retrieve HTTP vs catalogue prefetch (no-op)
 - [Memory](02-understand/memory.md) — `memory_profiles` policy vs what Runtime writes

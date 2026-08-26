@@ -23,8 +23,10 @@ test("eligible and catalogue GET send X-Workload acp", async () => {
   await client.listManifests();
   await client.getManifest("fee_explain");
   await client.listManifestVersions("fee_explain");
+  await client.listCorpora();
+  await client.getCorpus("policy-engine");
 
-  assert.equal(seen.length, 13);
+  assert.equal(seen.length, 15);
   for (const headers of seen) {
     assert.equal(headers.get("X-Workload"), "acp");
     assert.equal(headers.get("Authorization"), "Bearer fabric-internal");

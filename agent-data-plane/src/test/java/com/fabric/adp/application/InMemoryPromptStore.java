@@ -71,6 +71,18 @@ public class InMemoryPromptStore implements PromptStore {
         "ops",
         role("synthesis", "synthesize", "Summarize the dispute packet for a human reviewer. Do not recommend a payout.")));
     put(pack(
+        "purchase_refund",
+        "Pattern 2. Do only the current stage. Do not invent a refund. Classify returns JSON only.",
+        "ops",
+        role(
+            "classify",
+            "classify",
+            "Extract receipt fields from OCR notes and the goal only. Always emit every output_schema key. Use null when a value is not in the notes; do not invent."),
+        role(
+            "synthesis",
+            "synthesize",
+            "Write the user-facing refund confirm from match, eligibility, and refund outputs only. Do not invent a payout.")));
+    put(pack(
         "pack_then_notify",
         "Pattern 2. Confirm the notify from stage outputs only. Prefetch chunks may be empty.",
         "ops",

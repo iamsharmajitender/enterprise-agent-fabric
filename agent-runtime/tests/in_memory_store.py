@@ -34,6 +34,36 @@ class InMemoryRunStore:
         pin.updated_at = utcnow()
         return pin
 
+    def pause(
+        self,
+        correlation_id: str,
+        *,
+        working: dict | None = None,
+        checkpoint: dict | None = None,
+    ) -> RunPin:
+        pin = self._by_id[correlation_id]
+        pin.status = "waiting"
+        if working is not None:
+            pin.working = working
+        if checkpoint is not None:
+            pin.checkpoint = checkpoint
+        pin.updated_at = utcnow()
+        return pin
+
+    def fail(self, correlation_id: str, result: dict) -> RunPin:
+        pin = self._by_id[correlation_id]
+        pin.status = "failed"
+        pin.result = result
+        pin.updated_at = utcnow()
+        return pin
+
+    def mark_running(self, correlation_id: str) -> RunPin:
+        pin = self._by_id[correlation_id]
+        pin.status = "running"
+        pin.result = None
+        pin.updated_at = utcnow()
+        return pin
+
     def save_progress(
         self,
         correlation_id: str,

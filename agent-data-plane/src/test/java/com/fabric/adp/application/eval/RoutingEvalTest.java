@@ -65,7 +65,7 @@ class RoutingEvalTest {
         assertThat(result.routeVersion()).isEqualTo(evalCase.expected().routeVersion());
       }
       assertThat(result.routeId())
-          .isNotIn("card_freeze", "account_notify", "kyc_onboarding", "fraud_investigate", "ops_start_kyc");
+          .isNotIn("card_freeze", "account_notify", "kyc_onboarding", "purchase_refund", "fraud_investigate", "ops_start_kyc");
     } else {
       assertThat(result.routeId()).isNull();
     }

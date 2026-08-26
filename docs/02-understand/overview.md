@@ -16,7 +16,7 @@ Catalogue matrix: [03-catalogue](../03-catalogue/). Box packs: [04-architecture]
 
 1. **Pin.** AFD gets a startable decide outcome (`route`), GETs that catalogue version, `POST /v1/runs` on AR, then writes a freeze (`frontdoor.freeze`). AR copies `route_id` + `route_version` onto a durable run pin. It does not re-read `active`. Hydrate failure is `422`; AR returns `202 { "correlation_id" }`. AFD does not mint that id.
 2. **Hydrate.** `agent-runtime/app/agents/hydrate.py` resolves the pinned row from ADP, then the pinned manifest and each capability from ACR (or a workflow / prompt pack when there is no manifest). It stamps `llm_role` and `llm_prompt` onto each node. `invoke` freezes on the pin. Mid-loop registry GET does not happen.
-3. **LangGraph.** `agent-runtime/app/graph/workflow.py` builds the graph from the hydrated list. Pattern 0/2/3 are linear (`START → n0 → n1 → … → END`). Pattern 1 is an LLM `CALL`/`DONE` loop over the manifest tools, up to `max_loop_steps`. `branch` and `human_gate` stay catalogue-only.
+3. **LangGraph.** `agent-runtime/app/graph/workflow.py` builds the graph from the hydrated list. Pattern 0/2/3 compile linear or **branch** graphs (`branch` reads prior slots). Pattern 1 is an LLM `CALL`/`DONE` loop. `human_gate` pauses until `/turns` merges a human packet into `slots`.
 
 ## Jobs vs chat
 
@@ -30,4 +30,4 @@ Catalogue matrix: [03-catalogue](../03-catalogue/). Box packs: [04-architecture]
 
 Both return `202 { "correlation_id" }`. AFD never mints that id.
 
-What Runtime passes between stages: [data](data.md). Capability kinds (`domain` vs `agent`): [capabilities](capabilities.md). Catalogue vs Runtime: [status](status.md).
+What Runtime passes between stages: [data](data.md). Capability JSON Schema (`input_schema` / `output_schema`): [schemas](schemas.md). Capability kinds (`domain` vs `agent`): [capabilities](capabilities.md). Catalogue vs Runtime: [status](status.md).

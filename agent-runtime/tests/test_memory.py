@@ -45,12 +45,15 @@ def test_persist_stage_writes_working_and_checkpoint() -> None:
         {"working": "session", "loop": "checkpoint"},
         1,
         "clause_search",
-        {"notes": ["hit"], "result": "hit", "goal": {"claim_id": "clm-1"}},
+        {"notes": ["hit"], "slots": {"ocr": {"text": "x"}}, "result": "hit", "goal": {"claim_id": "clm-1"}},
+        tools=[{"id": "ocr"}, {"id": "clause_search"}, {"id": "memo"}],
     )
     saved = store.get("corr-1")
     assert saved is not None
-    assert saved.working == working_payload(["hit"])
-    assert saved.checkpoint == checkpoint_payload(1, "clause_search", "hit", {"claim_id": "clm-1"})
+    assert saved.working == working_payload(["hit"], {"ocr": {"text": "x"}})
+    expected = checkpoint_payload(1, "clause_search", "hit", {"claim_id": "clm-1"})
+    expected["resume_index"] = 2
+    assert saved.checkpoint == expected
 
 
 def test_persist_stage_skips_when_profile_is_none() -> None:
@@ -72,6 +75,20 @@ def test_persist_stage_skips_when_profile_is_none() -> None:
     assert saved is not None
     assert saved.working is None
     assert saved.checkpoint is None
+
+
+def test_working_payload_includes_empty_slots() -> None:
+    assert working_payload(["a"]) == {"notes": ["a"], "slots": {}}
+
+
+def test_slots_from_working() -> None:
+    from app.core.memory import slots_from_working
+
+    assert slots_from_working({"notes": ["a"], "slots": {"ocr": {"text": "x"}}}) == {
+        "ocr": {"text": "x"}
+    }
+    assert slots_from_working({"notes": ["a"]}) == {}
+    assert slots_from_working(None) == {}
 
 
 def test_notes_from_working() -> None:

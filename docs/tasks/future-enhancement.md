@@ -4,9 +4,74 @@ Deferred work that is **not** on the v1 list in [todo.md](./todo.md). Remaining 
 
 Docs map: [docs/README.md](../README.md).
 
-**Active follow-on (separate task lists):** three-layer observability against the existing Grafana LGTM stack — [observability-plan.md](./observability-plan.md) and [observability-todo.md](./observability-todo.md). Agent evals (routing golden set, jobs entitle, pin lint) — [eval-plan.md](./eval-plan.md) and [eval-todo.md](./eval-todo.md). Layered intent router (eligible → ① rules → ② retrieve → ③ LLM fallback) — [intent-plan.md](./intent-plan.md) and [intent-todo.md](./intent-todo.md). Route-contract stage data sharing (`goal` / `notes` / slots, prefetch pack, branch, parent→child) — [dataflow-plan.md](./dataflow-plan.md) and [dataflow-todo.md](./dataflow-todo.md). Those lists do not replace v1 todos.
+**Active follow-on (separate task lists):** Agent evals (routing golden set, jobs entitle, pin lint) — [eval-plan.md](./eval-plan.md) and [eval-todo.md](./eval-todo.md). Layered intent router I1–I11 + packaging — [intent-plan.md](./intent-plan.md) and [intent-todo.md](./intent-todo.md) (Layer ③ **on** is deferred here as I12). Those lists do not replace v1 todos.
 
-Also parked here: [versioned route table](#versioned-route-table), [Front Door review follow-ups](#front-door-review-follow-ups), [Shared Memory](#shared-memory-conversation-and-long_term).
+**Done (signed off):**
+- Observability O1–O16 — [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md)
+- Route-contract stage data sharing D1–D13 — [dataflow-plan.md](./dataflow-plan.md) / [dataflow-todo.md](./dataflow-todo.md)
+
+Also parked here: [versioned route table](#versioned-route-table), [Front Door review follow-ups](#front-door-review-follow-ups), [Shared Memory](#shared-memory-conversation-and-long_term) (**both** `conversation` and `long_term`), [I12 Layer ③ LLM fallback](#i12-layer-3-llm-fallback).
+
+---
+
+# I12: Layer ③ LLM fallback (on decide)
+
+<a id="i12-layer-3-llm-fallback"></a>
+
+**Status:** Future enhancement (deferred from [intent-todo.md](./intent-todo.md#task-i12-structured-json-fallback-when--is-maybe--high-risk))  
+**Date:** 2026-08-26  
+**See also:** [intent-plan.md](./intent-plan.md) present-vs-remaining ③ row; layered classifier playbook
+
+Decide already has the **plumbing** for Layer ③ (I10 port, I11 bounded pool + 500 ms timeout). The **flag stays off** (`fabric.decide.llm.enabled=false`). I12 is the work to turn that path **on** for real classify traffic.
+
+## What it will offer
+
+When Layer ② retrieve is **not confident enough** (maybe-band score or high-risk top candidate), decide will call a model once and ask it to pick among **eligible `route_id`s only**:
+
+| Offer | Detail |
+| --- | --- |
+| **Ambiguous utterance → better `route` or `clarify`** | Today ② maybe / high-risk often ends in `clarify` or `abstain`. With I12, a rare LLM call can choose a single eligible id (or return top-k for `clarify`) instead of giving up. |
+| **Eligible-ids-only contract** | The model cannot invent a route. Prompt / response JSON is constrained to the same entitled set ①/② already see. Invalid id → `abstain`. |
+| **Confident ② stays free** | Fee-style unique winners at risk bar still **never** call ③. Jobs and named `route_id` bind still **never** call ③. |
+| **Fail-closed under load** | Existing I11 timeout / queue reject still shed to `abstain` with `router_layer=llm` — decide must not hang on a slow model. |
+| **Trace** | Decide events keep `router_layer=llm` and `latency_ms`. Chat FR-5 still strips these from assistant JSON. |
+
+It does **not** offer: free-form chat answers, tool calling, Layer ④ safety (injection/PII veto), or using ③ as the primary classifier.
+
+## What v1 does instead
+
+```text
+eligible → ① rules → ② retrieve → abstain / clarify
+                              ↑
+                    ③ port exists, flag OFF — never invoked
+```
+
+- Confident `$42` → `fee_explain` via ② (`router_layer=retrieve`).
+- Maybe / high-risk / OOD / over-budget → `clarify` or `abstain` **without** an LLM.
+- Operators keep local Compose safe: default flag off, no model gateway required for demos.
+
+## When to revive
+
+Reopen I12 when:
+
+- Seeded maybe-band or high-risk utterances need a second chance before `abstain`.
+- Eval / ops show too many false `clarify`s that a constrained JSON pick would fix.
+- A model gateway (or stub adapter) is available with a hard timeout budget.
+
+## Sketch (not on by default)
+
+1. Leave `fabric.decide.llm.enabled` **false** in Compose / local defaults.
+2. When flag **true**: after ② maybe or high-risk top candidate only, submit to I11 pool with eligible id list in the prompt.
+3. Parse structured JSON `{ "route_id": "…" }` or top-k candidates → `route` / `clarify` / `abstain`.
+4. Keep fee confident path and jobs path unit-tested as “③ never called.”
+5. Acceptance: [intent-todo I12](./intent-todo.md#task-i12-structured-json-fallback-when--is-maybe--high-risk) checkboxes.
+
+## Out of scope for this proposal
+
+- Layer ④ safety plane (separate plan).
+- Showing `router_layer` on chat wire JSON (FR-5).
+- Running ③ on the Layer ② CPU path / blocking the decide thread beyond I11 timeout.
+- Training or fine-tuning; HTTP to a gateway with eligible ids is enough for the first cut.
 
 ---
 
@@ -110,11 +175,20 @@ None of these block the local `fee_explain` demo (`POST /v1/jobs` then GET, or c
 
 # Shared Memory (conversation and long_term)
 
-**Status:** Proposal  
-**Date:** 2026-08-22  
-**See also:** root [README Memory](../../README.md#memory)
+**Status:** Future enhancement (both deferred)  
+**Date:** 2026-08-22 (updated 2026-08-26)  
+**See also:** root [README Memory](../../README.md#memory), [memory.md](../02-understand/memory.md)
 
-Catalogue `memory_profile` has four fields. Runtime already persists **`working`** (`ar.runtime.runs.working`) and **`loop`** (`ar.runtime.runs.checkpoint`) when the route asks for them. **`conversation`** and **`long_term`** stay catalogue-only until a Shared Memory box exists. Do not store either on `adp`, `ar`, `afd`, or `acr`. Same-run stage JSON handoff (`goal` vs `notes` vs slots, prefetch pack) is **not** this box — that is [dataflow-plan.md](./dataflow-plan.md).
+Catalogue `memory_profile` has four fields. Runtime already persists **`working`** (`{ notes, slots }` on `ar.runtime.runs.working`) and **`loop`** (`ar.runtime.runs.checkpoint`, including crash resume) when the route asks for them.
+
+**Both of these remain future enhancements — catalogue-only until a Shared Memory box exists:**
+
+| Field | Intent | DB today | Future store |
+| --- | --- | --- | --- |
+| **`conversation=session`** | Prior user/assistant turns in the next LLM call | **None.** Policy flag only on `dataplane.memory_profiles` | Shared Memory session transcript |
+| **`long_term=retrieve_only`** | Facts for a later journey (not every prompt) | **None.** Policy flag only | Shared Memory / RAG collection |
+
+Do **not** store either on `adp`, `ar`, `afd`, or `acr`. Same-run stage JSON handoff (`goal` / `slots` / `notes`, prefetch pack) is **not** this box — that track is done: [dataflow-plan.md](./dataflow-plan.md).
 
 ## Why consider it later
 
@@ -128,18 +202,19 @@ Stuffing transcripts into `ar.runtime.runs` would mix “this pipeline’s scrat
 
 ## What v1 does instead
 
-- `dataplane.memory_profiles` records intent (`conversation=session`, `long_term=retrieve_only`, TTL, isolation).
+- `dataplane.memory_profiles` records intent (`conversation=session`, `long_term=retrieve_only`, TTL, isolation) — **policy only**.
 - Front Door freeze (`afd.frontdoor.freeze` locally; Redis in prod) is route stickiness, not a transcript.
-- Graph `notes` for **this** run go to `working` when `working=session`. Loop cursor goes to `checkpoint` when `loop=checkpoint`. `/v1/runs/{id}/turns` reloads `working.notes`.
+- Graph `notes` + `slots` for **this** run go to `working` when `working=session`. Loop cursor (+ `resume_index`) goes to `checkpoint` when `loop=checkpoint`. `/v1/runs/{id}/turns` reloads `working` (notes/slots), not utterances.
 - `/turns` does **not** prepend prior user/assistant utterances. A second `chat_session` turn does not see turn 1.
+- Prefetch is **not** `long_term` — packs land in `working.slots.prefetch` for the same run only.
 
 ## When to revive
 
 Revisit when any of these become painful:
 
-- Multi-turn `chat_session` / `policy_chat` cannot answer “what was my account id?” after turn 1.
-- A later job or chat must recall a fact from an earlier journey without stuffing the whole transcript into the prompt.
-- Compliance needs session transcripts outside the run pin, with tenant isolation and TTL.
+- Multi-turn `chat_session` / `policy_chat` cannot answer “what was my account id?” after turn 1. → **`conversation`**
+- A later job or chat must recall a fact from an earlier journey without stuffing the whole transcript into the prompt. → **`long_term`**
+- Compliance needs session transcripts outside the run pin, with tenant isolation and TTL. → **`conversation`** (and possibly audit exports)
 
 ## Sketch (not in v1)
 
@@ -151,9 +226,7 @@ A fifth store (not one of `afd` / `adp` / `ar` / `acr`):
 | Long-term facts | `long_term=retrieve_only` | Same isolation, separate collection | After the run: summaries / facts, not full notes | Only via a retrieve tool (or prefetch). Never auto-inject into every prompt. |
 | (omit / `none`) | no row, or field `none` | — | Do not write | — |
 
-Honor `ttl_hours` (seed: 24 typical, 8 for KYC/dispute) and `isolation`. Prove conversation on `chat_session` with a stable `session_id` before wiring long_term.
-
-**Still later, same Runtime pin:** continue an in-flight graph from `checkpoint.step` after a replica crash (`loop=checkpoint`). Writes already happen; resume-from-cursor does not.
+Honor `ttl_hours` (seed: 24 typical, 8 for KYC/dispute) and `isolation`. Prove **`conversation`** on `chat_session` with a stable `session_id` before wiring **`long_term`**.
 
 ## Out of scope for this proposal
 
@@ -161,3 +234,4 @@ Honor `ttl_hours` (seed: 24 typical, 8 for KYC/dispute) and `isolation`. Prove c
 - Moving `working` / `loop` off `ar.runtime.runs`.
 - Treating freeze Redis as conversation memory.
 - Putting transcripts in files or in-process maps.
+- Confusing prefetch / working slots with `long_term` recall.

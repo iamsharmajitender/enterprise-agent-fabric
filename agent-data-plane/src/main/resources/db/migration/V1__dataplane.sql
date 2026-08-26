@@ -150,7 +150,7 @@ INSERT INTO dataplane.corpora (
 (
   'policy-engine',
   'Policy engine',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/assistant',
   'policy-engine',
   'workload-oauth',
   'policy-ops',
@@ -160,7 +160,7 @@ INSERT INTO dataplane.corpora (
 (
   'clause-index',
   'Clause index',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/legal',
   'clause-index',
   'workload-oauth',
   'legal',
@@ -170,7 +170,7 @@ INSERT INTO dataplane.corpora (
 (
   'legal-playbook',
   'Legal playbook',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/legal',
   'legal-playbook',
   'workload-oauth',
   'legal',
@@ -180,7 +180,7 @@ INSERT INTO dataplane.corpora (
 (
   'product-faq',
   'Product FAQ',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/assistant',
   'product-faq',
   'workload-oauth',
   'assistant-platform',
@@ -190,7 +190,7 @@ INSERT INTO dataplane.corpora (
 (
   'accounts',
   'Accounts',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/assistant',
   'accounts',
   'workload-oauth',
   'assistant-platform',
@@ -200,7 +200,7 @@ INSERT INTO dataplane.corpora (
 (
   'sanctions-lists',
   'Sanctions lists',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/kyc',
   'sanctions-lists',
   'workload-oauth',
   'kyc-ops',
@@ -210,7 +210,7 @@ INSERT INTO dataplane.corpora (
 (
   'kyc-policy',
   'KYC policy',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/v1/search/kyc',
   'kyc-policy',
   'workload-oauth',
   'kyc-ops',
@@ -220,7 +220,7 @@ INSERT INTO dataplane.corpora (
 (
   'research-index',
   'Research index',
-  'https://retrieve.internal/v1/search',
+  'http://agent-mocks:3010/corpora/research-index/search',
   'research-index',
   'workload-oauth',
   'assistant-platform',
@@ -234,8 +234,8 @@ INSERT INTO dataplane.corpora (
 INSERT INTO dataplane.corpora (
   corpus_id, display_name, url, collection, auth, owner, status, region
 ) VALUES
-  ('product-terms', 'Product terms', 'https://retrieve.internal/v1/search', 'product-terms', 'workload-oauth', 'product', 'published', NULL),
-  ('fee-schedule', 'Fee schedule', 'https://retrieve.internal/v1/search', 'fee-schedule', 'workload-oauth', 'product', 'published', NULL)
+  ('product-terms', 'Product terms', 'http://agent-mocks:3010/corpora/product-terms/search', 'product-terms', 'workload-oauth', 'product', 'published', NULL),
+  ('fee-schedule', 'Fee schedule', 'http://agent-mocks:3010/corpora/fee-schedule/search', 'fee-schedule', 'workload-oauth', 'product', 'published', NULL)
 ON CONFLICT (corpus_id) DO NOTHING;
 
 INSERT INTO dataplane.manifests (manifest_id, manifest_version, description, tools, status) VALUES
@@ -304,6 +304,18 @@ INSERT INTO dataplane.manifests (manifest_id, manifest_version, description, too
     {"name":"doc_intake","capability_id":"doc_intake","capability_version":"1.0.0","pdp_action":"doc_intake","risk_tier":"low"},
     {"name":"case_open","capability_id":"case_open","capability_version":"1.0.0","pdp_action":"case_open","risk_tier":"medium"},
     {"name":"packet_summarize","capability_id":"packet_summarize","capability_version":"1.0.0","pdp_action":"packet_summarize","risk_tier":"low"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'purchase_refund', '2026.08.1', 'Receipt refund: OCR, classify JSON, match, eligibility, gated refund, synthesis confirm.',
+  $$[
+    {"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+    {"name":"extract_fields","capability_id":"extract_fields","capability_version":"1.0.0","pdp_action":"extract_fields","risk_tier":"low"},
+    {"name":"match_purchase","capability_id":"match_purchase","capability_version":"1.0.0","pdp_action":"match_purchase","risk_tier":"medium"},
+    {"name":"refund_eligibility","capability_id":"refund_eligibility","capability_version":"1.0.0","pdp_action":"refund_eligibility","risk_tier":"medium"},
+    {"name":"post_refund","capability_id":"post_refund","capability_version":"1.0.0","pdp_action":"post_refund","risk_tier":"high"},
+    {"name":"refund_confirm","capability_id":"refund_confirm","capability_version":"1.0.0","pdp_action":"refund_confirm","risk_tier":"low"}
   ]$$::jsonb,
   'published'
 ),
@@ -452,6 +464,18 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
   ]$$::jsonb, 'published'
 ),
 (
+  'purchase_refund', '2026.08.1', 'Pattern 2: OCR, classify receipt JSON, match, eligibility, gated refund. human_gate is catalogue-only.',
+  $$[
+    {"id":"ocr","tool":"ocr_extract","llm_role":"none"},
+    {"id":"extract_fields","tool":"extract_fields","llm_role":"classify"},
+    {"id":"match_purchase","tool":"match_purchase","llm_role":"none"},
+    {"id":"eligibility","tool":"refund_eligibility","llm_role":"none"},
+    {"id":"manual_review","type":"human_gate"},
+    {"id":"post_refund","tool":"post_refund","llm_role":"none","side_effect":true,"requires_approval":true},
+    {"id":"respond","tool":"refund_confirm","llm_role":"synthesis"}
+  ]$$::jsonb, 'published'
+),
+(
   'pack_then_notify', '2026.08.1', 'Pattern 2: prefetch placeholder, domain notify, then synthesis confirm.',
   $$[
     {"id":"prefetch","llm_role":"none"},
@@ -585,6 +609,7 @@ INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, own
   ('account_notify', '2026.08.1', 'Pattern 2. Confirm the notify from stage outputs only. Do not invent send status.', 'published', 'ops'),
   ('card_freeze', '2026.08.1', 'Pattern 2. Confirm the freeze from identity, limit, and freeze outputs only. Do not invent card state.', 'published', 'ops'),
   ('dispute_intake', '2026.08.1', 'Pattern 2. Do only the current stage. Do not open extra cases.', 'published', 'ops'),
+  ('purchase_refund', '2026.08.1', 'Pattern 2. Do only the current stage. Do not invent a refund. Classify returns JSON only.', 'published', 'ops'),
   ('pack_then_notify', '2026.08.1', 'Pattern 2. Confirm the notify from stage outputs only. Prefetch chunks may be empty.', 'published', 'ops'),
   ('pack_then_freeze', '2026.08.1', 'Pattern 2. Confirm the freeze from stage outputs only. Prefetch chunks may be empty.', 'published', 'ops'),
   ('pack_then_review', '2026.08.1', 'Pattern 2. Do only the current stage. Draft the memo from packed playbook and stage outputs.', 'published', 'legal-agents'),
@@ -606,6 +631,8 @@ INSERT INTO dataplane.prompt_role_templates (prompt_id, prompt_version, llm_role
   ('account_notify', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from the notify tool output only.'),
   ('card_freeze', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from identity, limit, and freeze outputs only.'),
   ('dispute_intake', '2026.08.1', 'synthesis', 'synthesize', 'Summarize the dispute packet for a human reviewer. Do not recommend a payout.'),
+  ('purchase_refund', '2026.08.1', 'classify', 'classify', 'Extract receipt fields from OCR notes and the goal only. Always emit every output_schema key. Use null when a value is not in the notes; do not invent.'),
+  ('purchase_refund', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing refund confirm from match, eligibility, and refund outputs only. Do not invent a payout.'),
   ('pack_then_notify', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from the notify tool output only.'),
   ('pack_then_freeze', '2026.08.1', 'synthesis', 'synthesize', 'Write the user-facing confirm from freeze-path stage outputs only.'),
   ('pack_then_review', '2026.08.1', 'synthesis', 'synthesize', 'Draft the memo from packed playbook and stage outputs only.'),
@@ -744,6 +771,13 @@ INSERT INTO dataplane.routes (
   '["disputes:write"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
+  'purchase_refund', '2026.08.1', TRUE, 'active', 'purchase_refund',
+  'Pattern 2 (deterministic): HTTP OCR, classify receipt JSON, HTTP match and eligibility, gated refund, synthesis confirm. output_schema_id receipt_fields is not enforced. human_gate is catalogue-only. HTTP stays goal-only.',
+  'http://agent-runtime:3008/v1/runs', 'agent-purchase-refund', 'purchase_refund', '2026.08.1',
+  'high_risk_step_up', 'reasoning-standard', 'purchase_refund', 'purchase_refund', 'receipt_fields', 'purchase_refund_tools', NULL, 'escalate_human',
+  '["refunds:write"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
+),
+(
   'pack_then_notify', '2026.08.1', TRUE, 'active', 'pack_then_notify',
   'Pattern 2 (deterministic): prefetch placeholder, domain HTTP notify, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.',
   'http://agent-runtime:3008/v1/runs', 'agent-pack-then-notify', 'account_notify', '2026.08.1',
@@ -868,6 +902,7 @@ INSERT INTO dataplane.memory_profiles (
   ('fee_explain', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('contract_investigation', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('dispute_intake', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
+  ('purchase_refund', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
   ('pack_then_review', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('msa_risk_review', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('kyc_onboarding', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),

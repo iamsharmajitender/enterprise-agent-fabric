@@ -1,0 +1,80 @@
+{
+  "id": "extract_fields",
+  "version": "1.0.0",
+  "kind": "domain",
+  "description": "Classify receipt OCR notes into structured receipt JSON. HTTP is unused when llm_role=classify.",
+  "input_schema": {
+    "type": "object",
+    "properties": {}
+  },
+  "output_schema": {
+    "type": "object",
+    "description": "Receipt extraction from OCR notes and the goal. Always emit every required key. Use null when a value is not in the notes; do not invent. Set human_review_required when a receipt field is null or confidence is low.",
+    "required": [
+      "merchant",
+      "amount",
+      "currency",
+      "date",
+      "tax",
+      "missing_information",
+      "confidence",
+      "human_review_required",
+      "human_review_reason"
+    ],
+    "properties": {
+      "merchant": {
+        "type": ["string", "null"],
+        "minLength": 1,
+        "maxLength": 120,
+        "description": "Merchant name as printed, or null if missing. Copy from OCR notes; do not invent."
+      },
+      "amount": {
+        "type": ["number", "null"],
+        "minimum": 0,
+        "description": "Total charged, or null if missing. Use the receipt total, not tax alone."
+      },
+      "currency": {
+        "type": ["string", "null"],
+        "enum": ["USD", "AUD", "EUR", "GBP"],
+        "description": "ISO 4217 code when stated, or null if the receipt does not name a currency."
+      },
+      "date": {
+        "type": ["string", "null"],
+        "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+        "description": "Purchase date as YYYY-MM-DD, or null if missing. Convert printed dates to this form."
+      },
+      "tax": {
+        "type": ["number", "null"],
+        "minimum": 0,
+        "description": "Tax amount when printed, or null if not stated. Do not invent."
+      },
+      "missing_information": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Property names that are null or too unclear to extract. Empty array if complete."
+      },
+      "confidence": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1,
+        "description": "Confidence score from 0 to 1 for the extraction as a whole."
+      },
+      "human_review_required": {
+        "type": "boolean",
+        "description": "True when a receipt field is null, confidence is low, or the notes are ambiguous."
+      },
+      "human_review_reason": {
+        "type": ["string", "null"],
+        "description": "Why review is required, or null when human_review_required is false."
+      }
+    }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api.internal/receipts/extract",
+    "auth": "domain-oauth"
+  },
+  "snippet": null,
+  "owner": "ops",
+  "status": "published"
+}

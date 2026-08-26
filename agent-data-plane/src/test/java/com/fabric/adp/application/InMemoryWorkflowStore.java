@@ -43,6 +43,16 @@ public class InMemoryWorkflowStore implements WorkflowStore {
          {"id":"open","tool":"case_open","llm_role":"none"},
          {"id":"summarize","tool":"packet_summarize","llm_role":"synthesis"}]
         """));
+    put(parse("purchase_refund", "2026.08.1", "Pattern 2: OCR, classify receipt JSON, match, eligibility, gated refund. human_gate is catalogue-only.",
+        """
+        [{"id":"ocr","tool":"ocr_extract","llm_role":"none"},
+         {"id":"extract_fields","tool":"extract_fields","llm_role":"classify"},
+         {"id":"match_purchase","tool":"match_purchase","llm_role":"none"},
+         {"id":"eligibility","tool":"refund_eligibility","llm_role":"none"},
+         {"id":"manual_review","type":"human_gate"},
+         {"id":"post_refund","tool":"post_refund","llm_role":"none","side_effect":true,"requires_approval":true},
+         {"id":"respond","tool":"refund_confirm","llm_role":"synthesis"}]
+        """));
     put(parse("pack_then_notify", "2026.08.1", "Pattern 2: prefetch placeholder, domain notify, then synthesis confirm.",
         """
         [{"id":"prefetch","llm_role":"none"},

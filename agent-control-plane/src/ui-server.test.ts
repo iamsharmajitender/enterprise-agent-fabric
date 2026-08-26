@@ -46,6 +46,7 @@ test("GET /app.js keeps KPI cards on home and the table on /routes", async () =>
     assert.match(js, /function showPrompts/);
     assert.match(js, /function showWorkflows/);
     assert.match(js, /function showManifests/);
+    assert.match(js, /function showCorpora/);
     assert.match(js, /function showUsage/);
     assert.equal(js.includes("replaceChildren(kpis, wrap)"), false);
   });
@@ -53,7 +54,7 @@ test("GET /app.js keeps KPI cards on home and the table on /routes", async () =>
 
 test("GET /prompts and /manifests serve the SPA shell", async () => {
   await withServer(async (origin) => {
-    for (const path of ["/prompts", "/manifests", "/workflows", "/prompts/fee_explain", "/workflows/kyc_onboarding", "/capability/usage"]) {
+    for (const path of ["/prompts", "/manifests", "/workflows", "/corpora", "/prompts/fee_explain", "/workflows/kyc_onboarding", "/corpora/policy-engine", "/capability/usage"]) {
       const res = await fetch(`${origin}${path}`);
       assert.equal(res.status, 200);
       assert.match(await res.text(), /<h1>Enterprise Agent Fabric<\/h1>/);

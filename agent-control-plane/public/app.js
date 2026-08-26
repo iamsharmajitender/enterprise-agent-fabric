@@ -133,6 +133,27 @@ const WORKFLOW_SECTIONS = [
   },
 ];
 
+const CORPUS_SECTIONS = [
+  {
+    title: "Identity",
+    fields: [
+      ["corpus_id", "Corpus"],
+      ["display_name", "Display name"],
+      ["owner", "Owner"],
+      ["status", "Status"],
+    ],
+  },
+  {
+    title: "Gateway",
+    fields: [
+      ["url", "URL"],
+      ["collection", "Collection"],
+      ["auth", "Auth"],
+      ["region", "Region"],
+    ],
+  },
+];
+
 const POLICY_LABEL = {
   high_risk_step_up: "High risk",
   read_only_standard: "Read only",
@@ -512,10 +533,59 @@ function schemaTypeLabel(schema) {
   return "—";
 }
 
+function renderSchemaKeyword(value) {
+  if (isEmpty(value)) return el("span", "empty", "—");
+  if (Array.isArray(value) && value.every((item) => item == null || typeof item !== "object")) {
+    const wrap = el("span", "chips");
+    for (const item of value) {
+      wrap.append(pill(item == null ? "null" : String(item), "mono"));
+    }
+    return wrap;
+  }
+  if (typeof value === "object") {
+    const nested = el("div", "schema-keys");
+    for (const [nestedKey, nestedValue] of Object.entries(value)) {
+      const row = el("div", "nested-row");
+      row.append(el("span", "mono", nestedKey));
+      const cell = el("span");
+      cell.append(renderSchemaKeyword(nestedValue));
+      row.append(cell);
+      nested.append(row);
+    }
+    return nested;
+  }
+  return el("span", "mono", String(value));
+}
+
+function renderSchemaKeywords(spec, skip) {
+  const omitted = skip ?? new Set();
+  const entries = Object.entries(spec ?? {}).filter(([key]) => !omitted.has(key));
+  if (!entries.length) return el("span", "empty", "—");
+  const nested = el("div", "schema-keys");
+  for (const [key, value] of entries) {
+    const row = el("div", "nested-row");
+    row.append(el("span", "mono", key));
+    const cell = el("span");
+    cell.append(renderSchemaKeyword(value));
+    row.append(cell);
+    nested.append(row);
+  }
+  return nested;
+}
+
 function renderJsonSchema(schema) {
+  const wrap = el("div", "schema-block");
+  const rootSkip = new Set(["type", "properties"]);
+  const rootExtra = Object.keys(schema).filter((key) => !rootSkip.has(key) && key !== "required");
+  if (!isEmpty(schema.description) || rootExtra.length) {
+    wrap.append(renderSchemaKeywords(schema, new Set(["type", "properties", "required"])));
+  }
   const properties = schema.properties ?? {};
   const names = Object.keys(properties);
-  if (names.length === 0) return el("span", "empty", "No fields");
+  if (names.length === 0) {
+    wrap.append(el("span", "empty", "No fields"));
+    return wrap;
+  }
   const required = new Set(Array.isArray(schema.required) ? schema.required : []);
   const root = el("div", "table-root table-root--primary");
   const scroll = el("div", "table__scroll-container");
@@ -525,7 +595,7 @@ function renderJsonSchema(schema) {
   const thead = document.createElement("thead");
   thead.className = "table__header";
   const headRow = el("tr", "table__row");
-  for (const label of ["Field", "Type", "Required"]) {
+  for (const label of ["Field", "Type", "Required", "Description", "JSON"]) {
     const th = el("th", "table__column", label);
     th.scope = "col";
     headRow.append(th);
@@ -535,24 +605,33 @@ function renderJsonSchema(schema) {
   const tbody = document.createElement("tbody");
   tbody.className = "table__body";
   for (const name of names) {
+    const spec = properties[name] ?? {};
     const tr = el("tr", "table__row");
+    const description = spec.description;
     tr.append(
-      tableCell(el("span", "mono", name)),
-      tableCell(el("span", "mono", schemaTypeLabel(properties[name]))),
+      tableCell(el("span", "mono", name), true),
+      tableCell(el("span", "mono", schemaTypeLabel(spec)), true),
       tableCell(
         required.has(name) ? pill("Required", "ok") : el("span", "empty", "Optional"),
+        true,
       ),
+      tableCell(
+        isEmpty(description) ? el("span", "empty", "—") : el("span", "schema-doc", String(description)),
+        true,
+      ),
+      tableCell(renderSchemaKeywords(spec, new Set(["type", "description"])), true),
     );
     tbody.append(tr);
   }
   table.append(tbody);
   scroll.append(table);
   root.append(scroll);
-  return root;
+  wrap.append(root);
+  return wrap;
 }
 
-function tableCell(child) {
-  const td = el("td", "table__cell");
+function tableCell(child, top = false) {
+  const td = el("td", top ? "table__cell table__cell--top" : "table__cell");
   td.append(child);
   return td;
 }
@@ -939,6 +1018,7 @@ const CATALOG_ICONS = {
   prompts: `<svg ${CATALOG_ICON_SVG}><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/><path d="M8 12h10a2 2 0 0 1 2 2v6l-3-2h-7a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z"/></svg>`,
   workflows: `<svg ${CATALOG_ICON_SVG}><rect x="9" y="2" width="6" height="5" rx="1"/><rect x="2" y="17" width="6" height="5" rx="1"/><rect x="16" y="17" width="6" height="5" rx="1"/><path d="M12 7v4M5 17v-2.5A1.5 1.5 0 0 1 6.5 13h11a1.5 1.5 0 0 1 1.5 1.5V17"/></svg>`,
   manifests: `<svg ${CATALOG_ICON_SVG}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6M9 9h2"/></svg>`,
+  corpora: `<svg ${CATALOG_ICON_SVG}><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>`,
 };
 
 function catalogIcon(kind) {
@@ -953,7 +1033,7 @@ function skeletonCards() {
   const catalog = el("div", "catalog");
   catalog.setAttribute("aria-busy", "true");
   catalog.setAttribute("aria-label", "Loading catalogue counts");
-  for (let i = 0; i < 5; i += 1) {
+  for (let i = 0; i < 6; i += 1) {
     const row = el("section", "catalog-row");
     row.append(el("div", "skel catalog-row__skel"));
     const tiles = el("div", "catalog-row__tiles");
@@ -1045,6 +1125,7 @@ function parsePath() {
   if (path === "/prompts") return { page: "prompts" };
   if (path === "/workflows") return { page: "workflows" };
   if (path === "/manifests") return { page: "manifests" };
+  if (path === "/corpora") return { page: "corpora" };
   if (path === "/capability/usage") return { page: "usage" };
   const promptMatch = path.match(/^\/prompts\/([^/]+)(?:\/([^/]+))?$/);
   if (promptMatch) {
@@ -1069,6 +1150,10 @@ function parsePath() {
     if (rest === "history") return { page: "manifest-history", manifestId };
     if (rest) return { page: "manifest", manifestId, version: rest };
     return { page: "manifest", manifestId };
+  }
+  const corpusMatch = path.match(/^\/corpora\/([^/]+)$/);
+  if (corpusMatch) {
+    return { page: "corpus", corpusId: decodeURIComponent(corpusMatch[1] ?? "") };
   }
   const capMatch = path.match(/^\/capabilities\/([^/]+)(?:\/([^/]+))?$/);
   if (capMatch) {
@@ -1103,6 +1188,8 @@ async function renderFromPath() {
   if (parsed.page === "manifest-history") return showManifestHistory(parsed.manifestId);
   if (parsed.page === "manifest") return showManifest(parsed.manifestId, parsed.version);
   if (parsed.page === "manifests") return showManifests();
+  if (parsed.page === "corpus") return showCorpus(parsed.corpusId);
+  if (parsed.page === "corpora") return showCorpora();
   if (parsed.page === "usage") return showUsage();
   if (parsed.page === "capability-history") return showCapabilityHistory(parsed.capabilityId);
   if (parsed.page === "capability") return showCapability(parsed.capabilityId, parsed.version);
@@ -1242,18 +1329,20 @@ async function showLanding() {
     "showing-prompts",
     "showing-workflows",
     "showing-manifests",
+    "showing-corpora",
     "showing-usage",
   );
   document.body.classList.add("showing-home");
   document.title = "Enterprise Agent Fabric";
   clearMeta();
   skeletonCards();
-  const [res, capsRes, promptsRes, workflowsRes, manifestsRes] = await Promise.all([
+  const [res, capsRes, promptsRes, workflowsRes, manifestsRes, corporaRes] = await Promise.all([
     fetch("/api/routes?include=all"),
     fetch("/api/capabilities?include=all"),
     fetch("/api/prompts?include=all"),
     fetch("/api/workflows?include=all"),
     fetch("/api/manifests?include=all"),
+    fetch("/api/corpora?include=all"),
   ]);
   if (!res.ok) {
     pageEl.replaceChildren();
@@ -1281,6 +1370,11 @@ async function showLanding() {
   if (manifestsRes.ok) {
     const payload = await manifestsRes.json();
     manifests = Array.isArray(payload.manifests) ? payload.manifests : [];
+  }
+  let corpora = [];
+  if (corporaRes.ok) {
+    const payload = await corporaRes.json();
+    corpora = Array.isArray(payload.corpora) ? payload.corpora : [];
   }
   const routeCounts = countCatalogStatuses(
     routes.map((route) => ({ status: route.status, active: route.active })),
@@ -1317,6 +1411,9 @@ async function showLanding() {
       })),
     ),
   );
+  const corpusCounts = countCatalogStatuses(
+    corpora.map((item) => ({ status: item.status })),
+  );
   const catalog = el("div", "catalog");
   catalog.append(
     buildCatalogRow({ title: "Routes", href: "/routes", icon: "routes", counts: routeCounts }),
@@ -1324,6 +1421,7 @@ async function showLanding() {
     buildCatalogRow({ title: "Prompts", href: "/prompts", icon: "prompts", counts: promptCounts }),
     buildCatalogRow({ title: "Workflows", href: "/workflows", icon: "workflows", counts: workflowCounts }),
     buildCatalogRow({ title: "Manifests", href: "/manifests", icon: "manifests", counts: manifestCounts }),
+    buildCatalogRow({ title: "Corpora", href: "/corpora", icon: "corpora", counts: corpusCounts }),
   );
   pageEl.replaceChildren(catalog);
   pageEl.focus();
@@ -1911,6 +2009,10 @@ function goManifests() {
   go("/manifests");
 }
 
+function goCorpora() {
+  go("/corpora");
+}
+
 async function showResourceList({
   bodyClass,
   title,
@@ -1938,6 +2040,7 @@ async function showResourceList({
     "showing-prompts",
     "showing-workflows",
     "showing-manifests",
+    "showing-corpora",
     "showing-usage",
   );
   document.body.classList.add(bodyClass);
@@ -2152,6 +2255,29 @@ async function showManifests() {
   });
 }
 
+async function showCorpora() {
+  return showResourceList({
+    bodyClass: "showing-corpora",
+    title: "Corpora",
+    api: "/api/corpora?include=all",
+    itemsKey: "corpora",
+    basePath: "/corpora",
+    noun: "corpora",
+    columns: ["Corpus", "Display name", "Collection", "Owner", "Gateway"],
+    error: "Corpus catalogue read failed ({status}).",
+    caption: "Corpora in the selected status. Activate a row to open detail.",
+    statusesOf: (items) => items.map((item) => catalogStatus({ status: item.status })),
+    hrefOf: (item) => `/corpora/${encodeURIComponent(item.corpus_id)}`,
+    cellsOf: (item) => [
+      idHeadCell(item.corpus_id),
+      cell(item.display_name, "clip"),
+      cell(item.collection, "mono"),
+      cell(item.owner, "mono"),
+      cell(item.url, "clip mono"),
+    ],
+  });
+}
+
 function usageList(uses, empty = "Unused in latest manifests.") {
   if (!uses.length) return el("p", "empty", empty);
   const list = document.createElement("ul");
@@ -2210,6 +2336,7 @@ async function showUsage() {
     "showing-prompts",
     "showing-workflows",
     "showing-manifests",
+    "showing-corpora",
     "showing-home",
   );
   document.body.classList.add("showing-usage");
@@ -2317,19 +2444,24 @@ async function showCatalogDetail({
     "showing-prompts",
     "showing-workflows",
     "showing-manifests",
+    "showing-corpora",
     "showing-usage",
   );
   document.body.classList.add("showing-detail");
   document.title = `${id} · Control Plane`;
   void refreshMeta();
   const rowUrl = version ? `${apiBase}?version=${encodeURIComponent(version)}` : apiBase;
-  const [res, versionsRes] = await Promise.all([fetch(rowUrl), fetch(versionsPath)]);
+  const [res, versionsRes] = await Promise.all([
+    fetch(rowUrl),
+    versionsPath ? fetch(versionsPath) : Promise.resolve(null),
+  ]);
   if (!res.ok) {
     showError(notFound);
     return;
   }
   const row = await res.json();
-  const versionsPayload = versionsRes.ok ? await versionsRes.json() : { versions: [] };
+  const versionsPayload =
+    versionsRes && versionsRes.ok ? await versionsRes.json() : { versions: [] };
   const revisionCount = Array.isArray(versionsPayload.versions)
     ? versionsPayload.versions.length
     : 0;
@@ -2340,21 +2472,24 @@ async function showCatalogDetail({
   head.append(back, el("p", "detail-kicker", kicker(row)), el("h2", "", titleOf(row)), el("p", "lead", leadOf(row)));
   const chips = el("div", "chip-row");
   for (const chip of chipsOf(row, version)) chips.append(chip);
-  const historyBtn = el("button", "ghost-btn");
-  historyBtn.type = "button";
-  historyBtn.append("History");
-  historyBtn.append(pill(String(revisionCount), "mono"));
-  historyBtn.setAttribute(
-    "aria-label",
-    revisionCount === 1 ? "History, 1 revision" : `History, ${revisionCount} revisions`,
-  );
-  historyBtn.addEventListener("click", () => go(historyHref));
   const jsonBtn = el("button", "ghost-btn", "JSON");
   jsonBtn.type = "button";
   jsonBtn.setAttribute("aria-expanded", "false");
   jsonBtn.setAttribute("aria-controls", jsonId);
   const actions = el("div", "chip-actions");
-  actions.append(historyBtn, jsonBtn);
+  if (historyHref) {
+    const historyBtn = el("button", "ghost-btn");
+    historyBtn.type = "button";
+    historyBtn.append("History");
+    historyBtn.append(pill(String(revisionCount), "mono"));
+    historyBtn.setAttribute(
+      "aria-label",
+      revisionCount === 1 ? "History, 1 revision" : `History, ${revisionCount} revisions`,
+    );
+    historyBtn.addEventListener("click", () => go(historyHref));
+    actions.append(historyBtn);
+  }
+  actions.append(jsonBtn);
   const bar = el("div", "chip-bar");
   bar.append(chips, actions);
   head.append(bar);
@@ -2469,6 +2604,30 @@ async function showManifest(manifestId, version) {
   });
 }
 
+async function showCorpus(corpusId) {
+  return showCatalogDetail({
+    id: corpusId,
+    apiBase: `/api/corpora/${encodeURIComponent(corpusId)}`,
+    notFound: `Corpus ${corpusId} was not found.`,
+    backLabel: "← Corpora",
+    onBack: () => goCorpora(),
+    kicker: () => "Corpus",
+    titleOf: (row) => row.corpus_id,
+    leadOf: (row) => row.display_name ?? "",
+    chipsOf: (row) => {
+      const chips = [
+        statusPill({ status: row.status, live: row.status === "published" }),
+      ];
+      if (row.owner) chips.push(pill(row.owner, "mono"));
+      if (row.collection) chips.push(pill(row.collection, "mono"));
+      return chips;
+    },
+    jsonTitle: "Corpus JSON",
+    jsonId: "corpus-json",
+    sectionsOf: CORPUS_SECTIONS,
+  });
+}
+
 async function showVersionHistory({
   id,
   api,
@@ -2492,6 +2651,7 @@ async function showVersionHistory({
     "showing-prompts",
     "showing-workflows",
     "showing-manifests",
+    "showing-corpora",
     "showing-usage",
   );
   document.body.classList.add("showing-history");

@@ -110,6 +110,11 @@ public class InMemoryRouteStore implements RouteStore {
         RUNS, InMemoryManifestStore.disputeIntake(), null, loopMemory("none", 8), "read_only_standard",
         ModelProfile.REASONING_STANDARD, "dispute_intake", "dispute_intake",
         null, "dispute_intake_tools", null, "clarify", List.of("disputes:write"), List.of("api"), false, List.of());
+    add("purchase_refund", 2, "purchase_refund",
+        "Pattern 2 (deterministic): HTTP OCR, classify receipt JSON, HTTP match and eligibility, gated refund, synthesis confirm. output_schema_id receipt_fields is not enforced. human_gate is catalogue-only. HTTP stays goal-only.",
+        RUNS, InMemoryManifestStore.purchaseRefund(), null, loopMemory("none", 8), "high_risk_step_up",
+        ModelProfile.REASONING_STANDARD, "purchase_refund", "purchase_refund",
+        "receipt_fields", "purchase_refund_tools", null, "escalate_human", List.of("refunds:write"), List.of("api"), false, List.of());
     add("pack_then_notify", 2, "pack_then_notify",
         "Pattern 2 (deterministic): prefetch placeholder, domain HTTP notify, then synthesis confirm. Prompts: host plus synthesis template. Prefetch is not packed today.",
         RUNS, InMemoryManifestStore.accountNotify(), new Retrieval("deterministic_prefetch", List.of("product-terms")),

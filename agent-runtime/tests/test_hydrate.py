@@ -197,7 +197,7 @@ def test_hydrate_appends_synthesis_when_pattern_2_is_http_only() -> None:
         },
         capability={
             "id": "notify_customer",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/notify"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/notify"},
         },
     )
     tools = hydrate(
@@ -251,7 +251,7 @@ def test_hydrate_appends_synthesis_when_only_query_formulation_is_present() -> N
         },
         capability={
             "id": "clause_search",
-            "invoke": {"method": "POST", "url": "http://tool-mock:3010/clauses/search"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/clauses/search"},
         },
     )
     tools = hydrate(
@@ -263,3 +263,147 @@ def test_hydrate_appends_synthesis_when_only_query_formulation_is_present() -> N
     assert tools[0]["llm_role"] == "query_formulation"
     assert tools[1]["llm_role"] == "synthesis"
     assert tools[1]["llm_prompt"] == "Explain the retrieved clause in plain language."
+
+
+def test_hydrate_purchase_refund_classify_json_prompt() -> None:
+    """extract_fields is on the manifest so classify is a graph node; output_schema binds JSON."""
+    catalogue = FakeCatalogue(
+        {
+            "route_id": "purchase_refund",
+            "route_version": "2026.08.1",
+            "tool_manifest": "purchase_refund",
+            "tool_manifest_version": "2026.08.1",
+            "workflow_id": "purchase_refund",
+            "prompt_id": "purchase_refund",
+            "output_schema_id": "receipt_fields",
+            "autonomy_mode": 2,
+        }
+    )
+    catalogue.workflow = {
+        "stages": [
+            {"id": "ocr", "tool": "ocr_extract", "llm_role": "none"},
+            {"id": "extract_fields", "tool": "extract_fields", "llm_role": "classify"},
+            {"id": "match_purchase", "tool": "match_purchase", "llm_role": "none"},
+            {"id": "eligibility", "tool": "refund_eligibility", "llm_role": "none"},
+            {"id": "manual_review", "type": "human_gate"},
+            {"id": "post_refund", "tool": "post_refund", "llm_role": "none"},
+            {"id": "respond", "tool": "refund_confirm", "llm_role": "synthesis"},
+        ]
+    }
+    json_prompt = (
+        "Extract receipt fields from OCR notes and the goal only. "
+        "Always emit every output_schema key. Use null when a value is not in the notes; do not invent."
+    )
+    catalogue.prompt = {
+        "host": "Pattern 2. Do only the current stage. Do not invent a refund.",
+        "by_llm_role": {
+            "classify": {"text": json_prompt},
+            "synthesis": {"text": "Write the user-facing refund confirm from stage outputs only."},
+        },
+    }
+    registry = FakeRegistry(
+        manifest={
+            "tools": [
+                {"capability_id": "ocr_extract", "capability_version": "1.2.0"},
+                {"capability_id": "extract_fields", "capability_version": "1.0.0"},
+                {"capability_id": "match_purchase", "capability_version": "1.0.0"},
+                {"capability_id": "refund_eligibility", "capability_version": "1.0.0"},
+                {"capability_id": "post_refund", "capability_version": "1.0.0"},
+                {"capability_id": "refund_confirm", "capability_version": "1.0.0"},
+            ]
+        }
+    )
+    tools = hydrate(
+        {**START_BODY, "route_id": "purchase_refund"},
+        catalogue,
+        registry,
+    )
+    assert [tool["id"] for tool in tools] == [
+        "ocr_extract",
+        "extract_fields",
+        "match_purchase",
+        "refund_eligibility",
+        "post_refund",
+        "refund_confirm",
+    ]
+    assert [tool["llm_role"] for tool in tools] == [
+        "none",
+        "classify",
+        "none",
+        "none",
+        "none",
+        "synthesis",
+    ]
+    assert tools[1]["llm_prompt"] == json_prompt
+    assert "host" not in tools[1]["llm_prompt"]
+    assert tools[-1]["llm_prompt"].startswith("Write the user-facing refund confirm")
+
+
+def test_hydrate_kyc_onboarding_uses_workflow_order_when_branch_present() -> None:
+    catalogue = FakeCatalogue(
+        {
+            "route_id": "kyc_onboarding",
+            "route_version": "2026.08.1",
+            "tool_manifest": "kyc_onboarding_tools",
+            "tool_manifest_version": "2026.08.1",
+            "workflow_id": "kyc_onboarding",
+            "prompt_id": "kyc_onboarding",
+            "autonomy_mode": 2,
+        }
+    )
+    catalogue.workflow = {
+        "stages": [
+            {"id": "collect_docs", "tool": "doc_intake", "llm_role": "none"},
+            {"id": "identity_check", "tool": "id_verify", "llm_role": "none"},
+            {"id": "sanctions_screen", "tool": "sanctions_api", "llm_role": "none"},
+            {
+                "id": "risk_score",
+                "tool": "kyc_risk_engine",
+                "llm_role": "none",
+                "branch": {"high": "manual_review", "low": "activate_account"},
+            },
+            {"id": "manual_review", "type": "human_gate"},
+            {
+                "id": "activate_account",
+                "tool": "account_activate",
+                "llm_role": "none",
+                "side_effect": True,
+            },
+            {"id": "summarize", "llm_role": "synthesis"},
+        ]
+    }
+    catalogue.prompt = {
+        "host": "Pattern 2. Summarize KYC evidence for a human reviewer.",
+        "by_llm_role": {
+            "synthesis": {"text": "Summarize KYC stage outputs for a human reviewer."},
+        },
+    }
+    registry = FakeRegistry(
+        manifest={
+            "tools": [
+                {"capability_id": "doc_intake", "capability_version": "1.0.0"},
+                {"capability_id": "id_verify", "capability_version": "1.0.0"},
+                {"capability_id": "sanctions_api", "capability_version": "1.0.0"},
+                {"capability_id": "kyc_risk_engine", "capability_version": "1.0.0"},
+                {"capability_id": "account_activate", "capability_version": "1.0.0"},
+            ]
+        }
+    )
+    tools = hydrate(
+        {**START_BODY, "route_id": "kyc_onboarding"},
+        catalogue,
+        registry,
+    )
+    assert [tool.get("workflow_stage_id") or tool["id"] for tool in tools] == [
+        "collect_docs",
+        "identity_check",
+        "sanctions_screen",
+        "risk_score",
+        "manual_review",
+        "activate_account",
+        "summarize",
+    ]
+    assert tools[3]["branch"] == {"high": "manual_review", "low": "activate_account"}
+    assert tools[4]["stage_type"] == "human_gate"
+    assert tools[-1]["llm_role"] == "synthesis"
+

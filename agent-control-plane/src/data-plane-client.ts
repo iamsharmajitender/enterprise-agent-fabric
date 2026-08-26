@@ -107,6 +107,20 @@ export class DataPlaneClient {
     return this.fetchImpl(url, { headers: workloadHeaders() });
   }
 
+  listCorpora(include?: string): Promise<Response> {
+    const url = new URL("/v1/catalog/corpora", this.ensureTrailingSlash(this.baseUrl));
+    if (include) url.searchParams.set("include", include);
+    return this.fetchImpl(url, { headers: workloadHeaders() });
+  }
+
+  getCorpus(corpusId: string): Promise<Response> {
+    const url = new URL(
+      `/v1/catalog/corpora/${encodeURIComponent(corpusId)}`,
+      this.ensureTrailingSlash(this.baseUrl),
+    );
+    return this.fetchImpl(url, { headers: workloadHeaders() });
+  }
+
   private ensureTrailingSlash(baseUrl: string): string {
     return baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   }

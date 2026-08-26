@@ -38,6 +38,7 @@ Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1`
   - [What workflow to put on a route](#what-workflow-to-put-on-a-route)
 - [Prompts](#prompts)
   - [Pack shape](#pack-shape)
+  - [What the LLM sees](#what-the-llm-sees)
   - [What prompt to put on a route](#what-prompt-to-put-on-a-route)
 - [Retrieve](#retrieve)
   - [Modes](#modes)
@@ -55,6 +56,7 @@ Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1`
   - [Chat vs jobs](#chat-vs-jobs)
 - [Auth (stub)](#auth-stub)
 - [Docs](#docs)
+- [Future enhancements](docs/tasks/future-enhancement.md) (Shared Memory, I12 Layer ③, route tables)
 
 ## Prerequisites
 
@@ -79,6 +81,15 @@ Reload catalogue seed (deletes, then inserts):
 ./docs/run/scripts/seed-db.sh
 ```
 
+**Demo path (Task 24):**
+
+```bash
+./docs/run/dummy-request/run-job.sh fee_explain
+./docs/run/dummy-request/run-chat.sh fee_explain
+```
+
+Both hit Front Door **:3005** (`/v1/jobs*` and `/v1/assistant/*`). Stub IdP: `Bearer stub` + `X-Stub-Claims`. Decide Layer ③ stays **off**. Runtime LLM may use local Ollama or `FABRIC_LLM_STUB=1`. Kafka is not used (HTTP poll).
+
 | Command | What it does |
 | --- | --- |
 | `./docs/run/scripts/start-app.sh` | Build and start in the background |
@@ -90,7 +101,7 @@ Reload catalogue seed (deletes, then inserts):
 | `docker compose -f docs/run/compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
 | `docker compose -f docs/run/compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Do not edit a migration that already ran: Flyway checksum-fails, Data Plane crash-loops, and Control Plane shows `Catalogue read failed (502)`. `start-app.sh` exits non-zero in that case. Recover with `docker compose -f docs/run/compose/docker-compose.yml down -v`, then `./docs/run/scripts/start-app.sh`. Squashing Flyway history into a new `V1` is the same: wipe the Postgres volume so `flyway_schema_history` is empty. To reload seed without a new migration, use `./docs/run/scripts/seed-db.sh`.
+`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Editing an already-applied local seed migration (common while iterating on `V1__*.sql`) is fine: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable history; use `./docs/run/scripts/seed-db.sh` to reload catalogue rows without touching Flyway.
 
 ### Check it is up
 
@@ -182,11 +193,13 @@ Plan / task list: [docs/tasks/eval-plan.md](docs/tasks/eval-plan.md), [docs/task
 
 ## Ports and URLs
 
+Five Fabric folders: [`agent-front-door`](agent-front-door/README.md) · [`agent-control-plane`](agent-control-plane/README.md) · [`agent-data-plane`](agent-data-plane/README.md) · [`agent-runtime`](agent-runtime/README.md) · [`agent-capability-registry`](agent-capability-registry/README.md).
+
 | Port | What | URL |
 | --- | --- | --- |
 | 3000 | Grafana (LGTM) | http://localhost:3000 |
-| 3005 | Front Door (channel API) | http://localhost:3005 |
-| 3006 | Control Plane (catalogue UI) | http://localhost:3006 |
+| 3005 | Front Door (channel API — jobs **and** chat) | http://localhost:3005 |
+| 3006 | Control Plane (catalogue UI only; no Fabric APIs) | http://localhost:3006 |
 | 3007 | Data Plane | http://localhost:3007 |
 | 3008 | Agent Runtime | http://localhost:3008 |
 | 3009 | Capability Registry | http://localhost:3009 |
@@ -204,7 +217,7 @@ Grafana: username **`admin`**, password **`admin`**. Dev/demo only — not a pro
 
 Compose includes [`grafana/otel-lgtm`](https://hub.docker.com/r/grafana/otel-lgtm): one container with OpenTelemetry Collector, Prometheus (metrics), Loki (logs), Tempo (traces), and Grafana. Collector receives OTLP and Grafana already has the data sources.
 
-**App services export OTLP** (Compose sets `OTEL_*` and Spring `MANAGEMENT_OTLP_*`). Service names: `agent-front-door`, `agent-data-plane`, `agent-runtime`, `agent-capability-registry`, `agent-control-plane`, `tool-mock`. Each depends on `otel-lgtm`.
+**App services export OTLP** (Compose sets `OTEL_*` and Spring `MANAGEMENT_OTLP_*`). Service names: `agent-front-door`, `agent-data-plane`, `agent-runtime`, `agent-capability-registry`, `agent-control-plane`, `agent-mocks`. Each depends on `otel-lgtm`.
 
 Three-layer plan and tasks: [docs/tasks/observability-plan.md](docs/tasks/observability-plan.md), [docs/tasks/observability-todo.md](docs/tasks/observability-todo.md).
 
@@ -290,7 +303,7 @@ Box READMEs: [Front Door](agent-front-door/README.md#business-events), [Data Pla
 | Layer | What to look for |
 | --- | --- |
 | ① Business | Events in the table above; counter `fabric_journey_outcome_total` |
-| ② Service | Unbroken Tempo path AFD → ADP → AR → ACR → tool-mock; HTTP RED via Micrometer/OTel |
+| ② Service | Unbroken Tempo path AFD → ADP → AR → ACR → agent-mocks; HTTP RED via Micrometer/OTel |
 | ③ Infrastructure | Hikari/SQLAlchemy pool metrics; Compose labels `fabric.service` / `fabric.db` (`afd`/`adp`/`ar`/`acr`). Postgres exporter/cAdvisor deferred. |
 
 ### See a journey
@@ -299,7 +312,7 @@ Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM sta
 
 1. `./docs/run/dummy-request/job/1-autonomous/fee_explain.sh` or `./docs/run/dummy-request/chat/1-autonomous/fee_explain.sh`
 2. Explore → **Loki**: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitle.accepted` → `intent.decide.*` → `chat.run.accepted` / `job.run.accepted` → `run.hydrate.*` / `run.started` / `run.completed`)
-3. Explore → **Tempo**: `{.service.name="agent-front-door"}` — children include `agent-data-plane` and `agent-runtime` (Registry on hydrate; `tool-mock` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
+3. Explore → **Tempo**: `{.service.name="agent-front-door"}` — children include `agent-data-plane` and `agent-runtime` (Registry on hydrate; `agent-mocks` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
 4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-front-door`
 
 Stdout JSON is a backup: `docker compose -f docs/run/compose/docker-compose.yml logs -f`.
@@ -388,11 +401,11 @@ What each box owns, how a turn/job flows, and how [Routes](#routes-v1), [Catalog
 
 | Folder | Job | Stack | Database |
 | --- | --- | --- | --- |
-| [`agent-front-door`](agent-front-door/) | Channel ingress. Accepts the user turn, calls decide, starts the runtime. Chat JSON does not include `route_id` or `run_id`. | Java 21, Spring Boot, hexagonal | `afd` |
-| [`agent-data-plane`](agent-data-plane/) | Routes, eligibility, decide (`/v1/intent/*`: eligible → ① rules → ② retrieve → ③ **off**), catalogue (`/v1/catalog/*`). Owns the route rows. Does **not** store decision audit. Only Front Door may call decide. | Java 21, Spring Boot, hexagonal | `adp` |
-| [`agent-runtime`](agent-runtime/) | Executes the chosen route (hydrate tools, LangGraph loop). Nodes are built from the pinned tools and HTTP-call the mock. | Python 3.12, FastAPI, uv, LangGraph | `ar` |
-| [`agent-capability-registry`](agent-capability-registry/) | Published capabilities and manifests (`id@version`). Runtime hydrates from here at pin. | Java 21, Spring Boot, hexagonal | `acr` |
-| [`agent-control-plane`](agent-control-plane/) | Catalogue browser only. Lists routes, capabilities, prompts, manifests. **No** decide API, **no** database. | TypeScript, Node 22 | none |
+| [`agent-front-door/README.md`](agent-front-door/README.md) | Channel ingress. Jobs `/v1/jobs*` + chat `/v1/assistant/*` on **3005**. Chat JSON does not include `route_id` or `run_id` (FR-5). | Java 21, Spring Boot, hexagonal | `afd` |
+| [`agent-data-plane/README.md`](agent-data-plane/README.md) | Routes, eligibility, decide (`/v1/intent/*`: eligible → ① rules → ② retrieve → ③ **off**), catalogue (`/v1/catalog/*`). No decision audit. Only Front Door may call decide. | Java 21, Spring Boot, hexagonal | `adp` |
+| [`agent-runtime/README.md`](agent-runtime/README.md) | Executes the pinned route (hydrate, LangGraph, tools, working/checkpoint). | Python 3.12, FastAPI, uv, LangGraph | `ar` |
+| [`agent-capability-registry/README.md`](agent-capability-registry/README.md) | Published capabilities and manifests (`id@version`). Runtime hydrates from here at pin. | Java 21, Spring Boot, hexagonal | `acr` |
+| [`agent-control-plane/README.md`](agent-control-plane/README.md) | Catalogue browser only. **No** decide API, **no** database. | TypeScript, Node 22 | none |
 
 Supporting pieces:
 
@@ -403,7 +416,7 @@ Supporting pieces:
 | [`docs/run/scripts/`](docs/run/scripts/) | start / stop / catalogue seed SQL |
 | [`docs/run/dummy-request/`](docs/run/dummy-request/) | Dummy job and chat requests for every seed job route and chat-visible route (autonomy 0–3). Fresh ids each run |
 | [`agent-fabric-evals/`](agent-fabric-evals/) | CI eval fixtures: `intent-router-evals/` + `route-quality/` |
-| [`agent-fabric-mocks/`](agent-fabric-mocks/) | Local doubles — today [`tool-mock/`](agent-fabric-mocks/tools/) (domain HTTP `:3010`) |
+| [`agent-fabric-mocks/`](agent-fabric-mocks/) | Local doubles — today [`agent-fabric-mocks/`](agent-fabric-mocks/tools/) (domain HTTP `:3010`) |
 | [`docs/README.md`](docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
 | [`docs/04-architecture/`](docs/04-architecture/) | Architecture packs |
 | [`docs/05-reference/`](docs/05-reference/) | Frozen request/response fixtures and [stub auth](docs/05-reference/stub-auth.md) |
@@ -459,7 +472,7 @@ Pack: [agent-plane](docs/04-architecture/agent-plane.md) (Data Plane half; ACP i
 
 1. `PUT /v1/capabilities/{id}/versions/{version}` and `PUT /v1/manifests/...` append a cut. A second `PUT` of a published version is **409**.
 2. Runtime `GET`s the pinned manifest, then each capability ref, **before** the LLM. Mid-loop registry GET is forbidden. If hydrate fails, Runtime returns **422** `HYDRATE_FAILED` and AFD does not invent a run.
-3. Two kinds, one catalog: `domain` (HTTP to tool-mock / a real API) and `agent` (child job via AFD, not a POST to the callee AR).
+3. Two kinds, one catalog: `domain` (HTTP to agent-mocks / a real API) and `agent` (child job via AFD, not a POST to the callee AR).
 4. Control Plane lists capabilities/manifests for humans. Chat never sees this catalog as JSON.
 5. Status: Runtime may hydrate `published` (and still GET a retired pin). `draft` is not hydratable.
 
@@ -469,16 +482,16 @@ Pack: [agent-capability-registry](docs/04-architecture/agent-capability-registry
 
 ### AR — Agent Runtime (`ar`, :3008)
 
-**What.** Does the work. Copies the freeze into a durable **run pin**, hydrates tools from ACR, runs the LangGraph loop (Patterns 0–3), invokes tools (local: tool-mock :3010). Does **not** classify the next utterance, own agent identity, or store conversation / long-term facts.
+**What.** Does the work. Copies the freeze into a durable **run pin**, hydrates tools from ACR, runs the LangGraph loop (Patterns 0–3), invokes tools (local: agent-mocks :3010). Does **not** classify the next utterance, own agent identity, or store conversation / long-term facts.
 
 **How.**
 
 1. Only AFD starts AR (`POST /v1/runs`, `mode: new`). Returns `202 { "correlation_id" }` (`corr-*`). Default start is async.
 2. Hydrate: GET pinned catalogue row from ADP → GET manifest + capabilities from ACR → freeze those schemas on the pin. Then run.
-3. Graph nodes come from the pinned tools (or workflow/prompt if there is no manifest). HTTP invoke goes to the capability `invoke.url` (Compose: `http://tool-mock:3010...`).
+3. Graph nodes come from the pinned tools (or workflow/prompt if there is no manifest). HTTP invoke goes to the capability `invoke.url` (Compose: `http://agent-mocks:3010...`).
 4. Memory it **does** honor, from the catalogue `memory_profile`:
-   - `working=session` → `ar.runtime.runs.working` (`notes`) after each stage; `/v1/runs/{id}/turns` reloads them
-   - `loop=checkpoint` → `ar.runtime.runs.checkpoint` (`step`, `stage_id`, `result`, `goal`). Resume-from-step after a crash is not wired yet
+   - `working=session` → `ar.runtime.runs.working` (`{ "notes": [...], "slots": { "<stage_id>": <json> } }`) after each stage; `/v1/runs/{id}/turns` reloads both
+   - `loop=checkpoint` → `ar.runtime.runs.checkpoint` (`step`, `stage_id`, `result`, `goal`, `resume_index`). Failed runs resume via `POST /v1/runs/{id}/turns` with `{}` or `{ "resume": true }`
 5. Memory it **does not** honor yet: `conversation` and `long_term` stay catalogue-only until Shared Memory / RAG exists. Do not write either onto this pin.
 6. `GET /v1/runs/{correlation_id}` is slim status for AFD poll. `GET /v1/runs?session_id=` is open-run when AFD freeze TTL misses. Duplicate `idempotency_key` returns the original id.
 
@@ -494,10 +507,10 @@ Pack: [agent-runtime](docs/04-architecture/agent-runtime.md).
 | [Observability](#observability-grafana-lgtm) | Mints/echoes `X-Request-Id`; `chat.turn.received` / `job.entitle.accepted`; `chat.run.accepted` / `job.run.accepted` | `intent.decide.*` | Hydrate GETs on the Tempo path | `run.hydrate.*`, `run.started` / `run.completed`; span attrs `correlation_id` |
 | [Routes](#routes-v1) | Freezes the pin AFD got from decide; jobs name `route_id` | Owns versioned rows; classify = **active** mix | Manifest pointer only — no `tools[]` on the route | Executes the **pinned** version; never re-reads `active` |
 | [Catalogue statuses](#catalogue-statuses) | After `route`, GET that version | `active` vs `published` vs `draft` / `retired` on routes; prompts/workflows/corpora | Capability + manifest `draft` / `published` / `retired`; hydrate `published` | Hydrates the pin; 422 if the cut is missing or still draft |
-| [Workflows](#workflows) | None. Pin already has `workflow_id` on the row | Owns `dataplane.workflows` (stages, `llm_role`, allowlist). Route points at `workflow_id` | None | Hydrate: with a manifest, stamp `llm_role` onto tools; without, one graph node per stage. Pattern 0/2/3 stay linear; Pattern 1 is CALL/DONE. `branch` / `human_gate` are catalogue-only |
-| [Prompts](#prompts) | None | Owns `dataplane.prompt_packs` + `prompt_role_templates`. Route points at `prompt_id` | None | GET published pack; `host` plus `by_llm_role` text onto each node. LLM stub / Ollama uses that string |
-| [Retrieve](#retrieve) | None | Owns `dataplane.retrieval` (mode + corpus ids) and `dataplane.corpora` (url / collection) | Retrieve tools are ordinary capabilities (`clause_search`, `account_fee_lookup`) | Does **not** POST the corpus gateway yet. Prefetch stages with empty `invoke` are no-ops. Retrieve **tools** HTTP-call tool-mock like any other tool |
-| [Tools](#tools) | None. Does not inline `tools[]` | Route stores `tool_manifest` + version; ADP copy is for the catalogue UI | Source of truth: published manifest + each `id@version` (schema, `invoke.url`, `kind`) | Hydrate whole manifest before the LLM. Loop HTTP-calls `invoke.url` (local: tool-mock). No mid-loop registry GET |
+| [Workflows](#workflows) | None. Pin already has `workflow_id` on the row | Owns `dataplane.workflows` (stages, `llm_role`, allowlist). Route points at `workflow_id` | None | Hydrate: with a manifest, stamp `llm_role` onto tools; when a stage declares `branch`, graph order follows workflow stages and conditional edges read prior slots. Pattern 0/2/3 stay linear except branch routes; Pattern 1 is CALL/DONE. `human_gate` pauses (D9); stage `allowlist` and approval flags are catalogue-only |
+| [Prompts](#prompts) | None | Owns `dataplane.prompt_packs` + `prompt_role_templates`. Route points at `prompt_id` | None | GET published pack; stamp **one** `llm_prompt` per node (`by_llm_role.{role}.text`, else `host`). LLM stub / Ollama uses that string — `host` and role `text` are not concatenated |
+| [Retrieve](#retrieve) | None | Owns `dataplane.retrieval` (mode + corpus ids) and `dataplane.corpora` (url / collection) | Retrieve tools are ordinary capabilities (`clause_search`, `account_fee_lookup`) | On `deterministic_prefetch`, `id=prefetch` stages GET corpora and POST the gateway; pack lands in `working.slots.prefetch` and downstream LLM/HTTP stages consume it. Retrieve **tools** HTTP-call agent-mocks like any other tool |
+| [Tools](#tools) | None. Does not inline `tools[]` | Route stores `tool_manifest` + version; ADP copy is for the catalogue UI | Source of truth: published manifest + each `id@version` (schema, `invoke.url`, `kind`) | Hydrate whole manifest before the LLM. Loop HTTP-calls `invoke.url` (local: agent-mocks). No mid-loop registry GET |
 | [Memory](#memory) | Freeze = stickiness, not transcripts. Chat `session_id` vs jobs `job:{key}` | `dataplane.memory_profiles` is **policy** (`conversation`, `working`, `loop`, `long_term`, TTL, isolation) | None | Honors `working` + `loop` on the pin. Ignores `conversation` / `long_term` until Shared exists |
 | [Auth (stub)](#auth-stub) | Channel bearer in; workload `afd` out | Workload `afd` on decide; `ar` / `acp` on catalogue GET | Workload `ar` on hydrate GET; `acp` on UI list | Workload `afd` on start; does not use the user bearer as tool `Authorization` |
 
@@ -507,7 +520,7 @@ Three routers stay separate: **ADP** picks the workflow/manifest, **AR** picks t
 
 Each route is versioned on its own (`route_id` + `route_version`). One version per route is `active`. Classify uses the active mix. A follow-up pin is that route’s id and version, not a shared table snapshot. A later contest-board snapshot is proposed in [docs/tasks/future-enhancement.md](docs/tasks/future-enhancement.md).
 
-The catalogue seed is the Pattern 0–3 set (31 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. The same file also has extra published, draft, and retired cuts plus version history. Reload everything in one shot:
+The catalogue seed is the Pattern 0–3 set (32 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. The same file also has extra published, draft, and retired cuts plus version history. Reload everything in one shot:
 
 ```bash
 ./docs/run/scripts/seed-db.sh
@@ -567,17 +580,17 @@ A workflow is a **fixed stage list**. Pattern 2 (deterministic) and Pattern 3 (g
 | `llm_role` | `none` / `query_formulation` / `classify` / `synthesis` — see [Prompts](#prompts) |
 | `corpus` | Corpus id for a named retrieve stage (`clause-index`). Not a URL |
 | `allowlist` | Pattern 3: tools the model may pick **inside** this stage |
-| `branch` | Catalogue branch (`high` → `manual_review`). Not executed yet |
-| `type` | e.g. `human_gate`. Catalogue-only today |
-| `side_effect` / `requires_approval` | Gated writes (`freeze_card`). Catalogue-only today |
+| `branch` | Runtime branch (`high` → `manual_review`) from the prior stage slot |
+| `type` | e.g. `human_gate`. Pauses until resume (D9) |
+| `side_effect` / `requires_approval` | Gated writes (`freeze_card`). `requires_approval` is catalogue metadata; the gate pause blocks the write until resume |
 
 Seeded examples: `llm_pipeline` (three LLM stages, no tools), `card_freeze` (identity → limits → freeze), `msa_risk_review` (OCR → two retrieve stages → score → memo).
 
 ### How Runtime hydrates a workflow
 
-1. **Route has `tool_manifest`:** ACR hydrates every capability on the manifest. Workflow only **stamps** `llm_role` (and therefore prompt text) onto tools whose id matches `stage.tool`. Graph order is manifest order, not stage order.
+1. **Route has `tool_manifest`:** ACR hydrates every capability on the manifest. Workflow **stamps** `llm_role` (and therefore prompt text) onto tools whose id matches `stage.tool`. When any stage declares `branch`, graph order follows **workflow stage order** (including `human_gate` placeholders), not manifest order.
 2. **Route has no manifest:** one graph node per stage. `invoke` is empty, so `llm_role=none` stages (typical `prefetch`) skip HTTP; `classify` / `synthesis` call the LLM.
-3. Pattern 0/2/3 are a **linear** LangGraph. Pattern 1 is an LLM `CALL`/`DONE` loop over the manifest tools. `branch`, `human_gate`, stage `allowlist`, and approval flags are stored on ADP and shown in Control Plane; AR does not walk them yet.
+3. Pattern 0/2/3 compile a LangGraph. Branch stages pick the next node from a **slot** on the branching stage (`risk_score` → `high` / `low`). Unknown keys fail closed. Both branch paths merge at the next non-target stage (e.g. `summarize`). Pattern 1 is an LLM `CALL`/`DONE` loop over the manifest tools. `human_gate` sets `status=waiting` until `POST /v1/runs/{id}/turns` merges a human packet into `working.slots`, then continues from the next stage. Stage `allowlist` flags are stored on ADP and shown in Control Plane; AR does not enforce allowlists yet.
 
 If hydrate finds neither a manifest, a workflow, nor a prompt: **422** `HYDRATE_FAILED`.
 
@@ -592,9 +605,9 @@ If hydrate finds neither a manifest, a workflow, nor a prompt: **422** `HYDRATE_
 
 ## Prompts
 
-A prompt pack is the **text the LLM sees**, not the route description. Pattern 0 can be prompt-only. Tool and workflow routes still point at a pack so each `llm_role` has a template.
+A prompt pack is the **text the LLM sees**, not the route description. One `prompt_id` per route is one **pack**, not one prompt string for every LLM step. Pattern 0 can be prompt-only. Tool and workflow routes still point at a pack so each `llm_role` has a template.
 
-**AFD** does not load packs. **ADP** owns `dataplane.prompt_packs` (`host`, `status`, `owner`) and `dataplane.prompt_role_templates` (`llm_role`, `task_type`, `text`). APIs: `GET /v1/catalog/prompts`. The route stores `prompt_id` only. Runtime GETs `/v1/catalog/prompts/{id}` (published pack). **ACR** is not involved. **AR** copies `host` / role text onto hydrated nodes as `llm_prompt`.
+**AFD** does not load packs. **ADP** owns `dataplane.prompt_packs` (`host`, `status`, `owner`) and `dataplane.prompt_role_templates` (`llm_role`, `task_type`, `text`). APIs: `GET /v1/catalog/prompts`. The route stores `prompt_id` only. Runtime GETs `/v1/catalog/prompts/{id}` (published pack). **ACR** is not involved. **AR** stamps **one** `llm_prompt` per node: matching `by_llm_role.{role}.text` when present, otherwise `host`. Those two strings are not concatenated.
 
 Status: `draft` / `published` / `deprecated` — no `active`. One published version per `prompt_id`. Lifecycle: [Catalogue statuses](#capabilities-manifests-prompts).
 
@@ -602,9 +615,9 @@ Status: `draft` / `published` / `deprecated` — no `active`. One published vers
 
 | Piece | Where | Used when |
 | --- | --- | --- |
-| `host` | `prompt_packs.host` | System-level instruction. Prompt-only routes (no workflow) use `host` as the single `synthesis` node |
-| `by_llm_role.{role}.text` | `prompt_role_templates` | Stamped onto the matching workflow stage / tool |
-| `task_type` | `plan` / `synthesize` / `classify` | Labels the template; must not be `none` |
+| `host` | `prompt_packs.host` | Pattern 0: the one `synthesis` node. Pattern 1: CALL/DONE system prompt every turn. Pattern 2/3: **fallback** when that stage’s role has no `text`. Not a prefix on the role text. |
+| `by_llm_role.{role}.text` | `prompt_role_templates` | System prompt for that `llm_role`. Wins over `host` when present. Unique per `(prompt_id, llm_role)`. |
+| `task_type` | `plan` / `synthesize` / `classify` | Catalogue label only; must not be `none`. Not sent to the model. |
 
 `llm_role` on a **stage** (or stamped on a tool) is what Runtime executes:
 
@@ -614,7 +627,20 @@ Status: `draft` / `published` / `deprecated` — no `active`. One published vers
 | `query_formulation` | LLM writes `payload.query`, then HTTP | `msa_risk_review` retrieve stages |
 | `classify` / `synthesis` | LLM only; skip HTTP | `llm_pipeline` extract / rewrite; memo stages |
 
-Unknown roles fail the run. LLM-only roles need the Runtime LLM (local Ollama). Tool-only `none` stages finish against tool-mock without a model.
+Unknown roles fail the run. LLM-only roles need the Runtime LLM (local Ollama). Tool-only `none` stages finish against agent-mocks without a model.
+
+### What the LLM sees
+
+Each LLM call is `llm.complete(system, user)`. Hydrate picks **one** system string per node.
+
+| Message | Source |
+| --- | --- |
+| **system** | That node’s `llm_prompt`: `by_llm_role.{role}.text` for the stage’s `llm_role`, else `host`. |
+| **user** | Goal plus prior stage outputs. Pattern 1 also carries the CALL/DONE contract and `Tools:`. |
+
+Same `llm_role` → same template. Two `synthesis` stages share one synthesis `text`. Seeded packs with more than one role: `llm_pipeline` (`classify` + `synthesis`); `clause_lookup`, `template_retrieve`, `msa_risk_review`, `claims_adjudicate` (`query_formulation` + `synthesis`); `purchase_refund` (`classify` + `synthesis`). Pattern 0/1 packs are `host` only. Most other Pattern 2/3 packs have a single `synthesis` template.
+
+Example (`llm_pipeline`): classify gets `"Extract the requested fields from the input only."` Synthesis gets `"Rewrite or format using the previous stage output only."` `host` (`"Pattern 2. Do only the current stage…"`) is unused because both roles have text. Any LLM stage with a bindable capability `output_schema` validates through `with_structured_output` (`purchase_refund` classify → receipt JSON in `slots` + `notes`; synthesis `{text}` schemas unwrap to prose). How to write that schema: [docs/02-understand/schemas.md](docs/02-understand/schemas.md). Route `output_schema_id=receipt_fields` is a pointer only — not loaded. On `json_to_http` routes, the next HTTP body merges **schema-named keys** from prior slots (see [Memory](#memory)); older paths may still pass classify prose on `payload["notes"]`.
 
 ### What prompt to put on a route
 
@@ -622,8 +648,8 @@ Unknown roles fail the run. LLM-only roles need the Runtime LLM (local Ollama). 
 | --- | --- |
 | Prompt-only Pattern 0 (`agent-chat`, `email_summarize`, `chat_session`) | One pack. `host` only. One LLM call. |
 | Open loop Pattern 1 (`fee_explain`) | One pack. `host` reused each CALL/DONE turn. |
-| Mixed workflow Pattern 2/3 (`msa_risk_review`, `clause_lookup`, `llm_pipeline`) | One pack. `host` plus a role template for each distinct `llm_role`. Two synthesis stages share one synthesis template. |
-| Write path Pattern 2 (`account_notify`, `card_freeze`) | One pack. `host` plus `synthesis`. Hydrate still appends `respond` if the hydrated tool list has no classify/synthesis node. |
+| Mixed workflow Pattern 2/3 (`msa_risk_review`, `clause_lookup`, `llm_pipeline`) | One pack. A role template for each distinct `llm_role`. `host` is unused when those templates exist. Two synthesis stages share one synthesis template. |
+| Write path Pattern 2 (`account_notify`, `card_freeze`) | One pack. `synthesis` template (or `host` if none). Hydrate still appends `respond` if the hydrated tool list has no classify/synthesis node. |
 
 Every active route has a `prompt_id`. Do not grow the prompt into a transcript. That is [Memory](#memory) `conversation`, not this pack.
 
@@ -631,7 +657,7 @@ Every active route has a `prompt_id`. Do not grow the prompt into a transcript. 
 
 Retrieval is **corpus policy** on the route, not long-term memory and not a tool list. Prefetch is not `long_term`. A retrieve **tool** is still a [capability](#tools) (`clause_search`, `account_fee_lookup`).
 
-**AFD** does not retrieve. **ADP** owns `dataplane.retrieval` (`mode`, `scope` = corpus ids) and `dataplane.corpora` (display name, `url`, `collection`, auth, owner, status). `GET /v1/catalog/corpora`. The route never stores a retrieve URL. **ACR** publishes retrieve tools like any other `kind=domain` capability. **AR** does not GET corpora or POST the retrieve gateway yet. Prefetch is catalogue + a no-op stage. A retrieve tool on the manifest is ordinary HTTP to tool-mock.
+**AFD** does not retrieve. **ADP** owns `dataplane.retrieval` (`mode`, `scope` = corpus ids) and `dataplane.corpora` (display name, `url`, `collection`, auth, owner, status). `GET /v1/catalog/corpora`. The route never stores a retrieve URL. **ACR** publishes retrieve tools like any other `kind=domain` capability. **AR** on `deterministic_prefetch`: looks up each scoped corpus id, POSTs `{collection, goal}` to the corpus `url` (Compose: agent-mocks `POST /v1/search`), writes `working.slots.prefetch`, and injects packed text into downstream LLM user blobs (and HTTP payloads when `input_schema` includes `packed_text`). Empty invoke without prefetch mode is still a no-op. Retrieve tools on the manifest are ordinary HTTP to agent-mocks.
 
 ### Modes
 
@@ -650,11 +676,11 @@ Omit the `retrieval` row when the route must not touch an index (`email_summariz
 | Field | Role |
 | --- | --- |
 | `corpus_id` | What `scope` and `stage.corpus` point at (`policy-engine`, `clause-index`) |
-| `url` | Retrieve gateway (`https://retrieve.internal/v1/search` in seed). Not on the route |
+| `url` | Retrieve gateway POST target. Each corpus row may point at a **different** host or path (`/v1/search/assistant`, `/v1/search/legal`, `/corpora/{id}/search`). Browse rows at [http://localhost:3006/corpora](http://localhost:3006/corpora). Compose seed uses `agent-mocks:3010`; from the host use `localhost:3010`. Not on the route |
 | `collection` | Index name when the gateway is shared |
-| `status` | `draft` / `published` / `deprecated`. Runtime must use **published** only (when POST is wired) |
+| `status` | `draft` / `published` / `deprecated`. Runtime uses **published** only |
 
-Designed (not in this Runtime): look up each id, POST `url` with `collection`, pack chunks into working memory / the generate prompt. Until then, prefetch stages with empty `invoke` skip HTTP (`policy_memo`), and retrieve tools hit tool-mock (`fee_explain` → `POST http://tool-mock:3010/fees/explain`).
+On prefetch routes (`policy_memo`, `pack_then_review`), the prefetch stage fills `working.slots.prefetch`; synthesis and query-formulation stages fail closed if the pack is empty. Pattern 1 agent loops without a prefetch workflow stage do not enforce the pack yet.
 
 ### What retrieval to put on a route
 
@@ -669,7 +695,7 @@ Designed (not in this Runtime): look up each id, POST `url` with `collection`, p
 
 The route has **no** `tools[]`. It points at `tool_manifest` + `tool_manifest_version`. Publishers append immutable capabilities; the manifest **refers** (`capability_id` + `capability_version`). Runtime hydrates the whole pin **before** the LLM. The loop never calls the registry again.
 
-**AFD** does not hydrate. **ADP** stores the pointer on the route and keeps a catalogue copy of manifests for Control Plane (`GET /v1/catalog/manifests`). **ACR** is the hydrate source of truth: `GET /v1/manifests/{id}/versions/{version}`, then each `GET /v1/capabilities/{id}/versions/{version}`. **AR** freezes schemas + `invoke` on the run pin, then HTTP-calls `invoke.url` (Compose: tool-mock `:3010`).
+**AFD** does not hydrate. **ADP** stores the pointer on the route and keeps a catalogue copy of manifests for Control Plane (`GET /v1/catalog/manifests`). **ACR** is the hydrate source of truth: `GET /v1/manifests/{id}/versions/{version}`, then each `GET /v1/capabilities/{id}/versions/{version}`. **AR** freezes schemas + `invoke` on the run pin, then HTTP-calls `invoke.url` (Compose: agent-mocks `:3010`).
 
 A published capability is not permission. `pdp_action` / `risk_tier` sit on the manifest ref (agent policy). Dual check in Shared PEP is not built locally.
 
@@ -687,19 +713,19 @@ Publish is append-only. A second `PUT` of a published version is **409**. Runtim
 
 | `kind` | `invoke` | Local |
 | --- | --- | --- |
-| `domain` | Domain HTTP (`http://tool-mock:3010/fees/explain`) | Tools in [`agent-fabric-mocks/tools/`](agent-fabric-mocks/tools/) |
+| `domain` | Domain HTTP (`http://agent-mocks:3010/fees/explain`) | Tools in [`agent-fabric-mocks/tools/`](agent-fabric-mocks/tools/) |
 | `agent` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
 
 Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`docs/02-understand/capabilities.md`](docs/02-understand/capabilities.md).
 
-Add a domain tool: add `agent-fabric-mocks/tools/tools/<id>.json` with unique `method`+`path`, point the capability `invoke.url` at `http://tool-mock:3010{path}`, rebuild.
+Add a domain tool: add `agent-fabric-mocks/tools/tools/<id>.json` with unique `method`+`path`, point the capability `invoke.url` at `http://agent-mocks:3010{path}`, rebuild.
 
 ### How the loop calls them
 
 1. Hydrate fails closed (422) if the pinned manifest or any ref is missing.
 2. Each hydrated record becomes one LangGraph node, in manifest order. Workflow `llm_role` / prompt text are stamped when `stage.tool` matches capability id.
 3. `invoke.url` set + `llm_role=none` → HTTP. `query_formulation` → LLM then HTTP. `classify` / `synthesis` → LLM, skip HTTP even if a url exists.
-4. Telemetry: span `tool.invoke` (no tokens, no claims). Tempo path includes ACR on hydrate and tool-mock on invoke.
+4. Telemetry: span `tool.invoke` (no tokens, no claims). Tempo path includes ACR on hydrate and agent-mocks on invoke.
 
 Pattern 0 **cannot** take tools. Pattern 1 takes a manifest and `max_loop_steps`, no workflow; Runtime runs a `CALL`/`DONE` loop. `account_notify` / `card_freeze` take a manifest **and** a workflow (`llm_role=none` on the HTTP stages); hydrate appends a `respond` synthesis node so the route is not HTTP-only.
 
@@ -720,6 +746,22 @@ Author a profile only on routes that should remember something. Omit the row for
 
 Seeded values: `session`, `none`, `checkpoint`, `retrieve_only`. Retrieval (`prefetch` / retrieve tools) is a **different** table — prefetch is not `long_term`.
 
+### goal, slots, and notes
+
+Three channels carry stage data inside one run. Do not conflate them with Shared Memory (`conversation`, `long_term`).
+
+| Channel | Shape | Mutable? | Who reads it |
+| --- | --- | --- | --- |
+| **`goal`** | Caller job/chat payload | **No** — ingress only | Every LLM user blob; base of every HTTP body |
+| **`slots`** | `{ "<stage_id>": <json> }` on `working` | Yes — after each stage completes | Branch/gate routing; HTTP merge (schema keys only); child `kind=agent` projection |
+| **`notes`** | Append-only **strings** | Yes — prose from tools/LLM | LLM `_user_blob(goal, notes)`; optional `payload["notes"]` on HTTP |
+
+When `working=session`, Runtime persists `{ "notes": [...], "slots": { ... } }` to `ar.runtime.runs.working` after each stage. `/v1/runs/{id}/turns` reloads both.
+
+**HTTP assembly** (`agent-runtime/app/graph/payload.py`): `payload = dict(goal)`, then merge keys from **all prior stage slots** whose names appear in the **next** capability `input_schema.properties` and are not already in `goal`. Fail closed if any `input_schema.required` key is missing. Do not dump every slot or every note onto HTTP.
+
+**How stage 2 gets stage 1’s JSON:** stage 1 writes its result to `working.slots[<stage_1_id>]`. Stage 2’s HTTP invoke merges only the keys that stage 2’s `input_schema` declares. Example: `purchase_refund` — `extract_fields` (classify) supplies `merchant`, `amount`, `date` to `match_purchase`; the job payload has only `doc_id` and `account_id`. See [docs/dataflow/scenarios.md](docs/dataflow/scenarios.md) and the [verification checklist](docs/tasks/dataflow-plan.md#verification-checklist-d13).
+
 ### Where each type is stored
 
 | Field | Save when | Prod store | Local Fabric DB |
@@ -738,17 +780,17 @@ Seeded values: `session`, `none`, `checkpoint`, `retrieve_only`. Retrieval (`pre
 | Field | Values | Meaning | What you must build |
 | --- | --- | --- | --- |
 | `conversation` | `session` / `none` (omit) | Prior user/assistant turns in the next LLM call | Shared Memory session store (not built) |
-| `working` | `session` / `none` | Scratch pad: tool hits, extracted fields, packed chunks | **Done.** Runtime writes `ar.runtime.runs.working` after each stage; `/turns` reloads `notes` |
-| `loop` | `checkpoint` / `none` | Open-loop crash cursor (Pattern 1), not chat history | **Done.** Runtime writes `ar.runtime.runs.checkpoint` after each stage. Resume-from-step after a crash is still later |
+| `working` | `session` / `none` | Scratch pad: tool hits, extracted fields, packed chunks | **Done.** Runtime writes `{ notes, slots }` to `ar.runtime.runs.working` after each stage; `/turns` reloads both |
+| `loop` | `checkpoint` / `none` | Open-loop crash cursor (Pattern 1), not chat history | **Done.** Runtime writes `ar.runtime.runs.checkpoint` after each stage; failed runs resume from `resume_index` |
 | `long_term` | `retrieve_only` / `none` | Facts that must not sit in every prompt | Shared Memory / RAG (not built) |
 | `ttl_hours` | `24` typical, `8` for KYC/dispute | When session/working blobs expire | Sweeper or store TTL. Freeze TTL is separate and shorter |
 | `isolation` | `["tenant","user","session"]` | Key shape so Jane cannot see John | Namespace every read/write; stub has no tenant — key by `session_id` at minimum |
 
 **`conversation=session`:** next utterance knows what was already said (`chat_session`, `policy_chat`, `fee_explain`). **`none` / omit:** each call is stateless (`email_summarize`, `llm_pipeline`).
 
-**`working=session`:** later stages or a later turn keep intermediate artefacts. Cap size — not a transcript, not a corpus. Runtime flushes `notes` to `ar.runtime.runs.working` after each stage.
+**`working=session`:** later stages or a later turn keep intermediate artefacts. Cap size — not a transcript, not a corpus. Runtime flushes `{ notes, slots }` to `ar.runtime.runs.working` after each stage. `notes` is the LLM-facing projection; `slots` is structured JSON for HTTP merge, branch, gate, prefetch, and child projection.
 
-**`loop=checkpoint`:** the model may take several tool steps (`search_only`, `fraud_casefile`). Runtime writes `{step, stage_id, result, goal}` to `ar.runtime.runs.checkpoint` after each stage. **`none`:** fixed short pipeline (`chat_session`, `llm_pipeline`); death fails the run. Continuing the graph from that cursor after a replica crash is not wired yet.
+**`loop=checkpoint`:** the model may take several tool steps (`search_only`, `fraud_casefile`). Runtime writes `{step, stage_id, result, goal, resume_index}` to `ar.runtime.runs.checkpoint` after each stage. On replica death, resume with `/turns` and the graph continues from `resume_index` without re-running completed HTTP stages. **`none`:** fixed short pipeline (`chat_session`, `llm_pipeline`); death fails the run with no checkpoint resume.
 
 **`long_term=retrieve_only`:** recall later via retrieve, not by stuffing history (`claims_adjudicate`, research/legal loops). **`none`:** nothing outlives the session window (`chat_session`, `kyc_onboarding`). Do not fake this by growing `conversation`. This is the Shared Memory box in the architecture pack.
 
@@ -762,7 +804,7 @@ Seeded values: `session`, `none`, `checkpoint`, `retrieve_only`. Retrieval (`pre
 | Open loop / guided with tools | `session` | `session` | `checkpoint` | `retrieve_only` |
 | Sensitive packet (`kyc_onboarding`) | `session` | `session` | `checkpoint` | `none` + short TTL |
 
-Enable in this order: (1) `conversation=session` on `chat_session` (needs Shared Memory), (2) `working` notes (Runtime, done), (3) `loop=checkpoint` writes (Runtime, done; crash-continue later), (4) `long_term` last (Shared Memory / RAG).
+Enable in this order: (1) `conversation=session` on `chat_session` (needs Shared Memory), (2) `working` notes (Runtime, done), (3) `loop=checkpoint` writes + crash resume (Runtime, done), (4) `long_term` last (Shared Memory / RAG).
 
 ### Chat vs jobs
 

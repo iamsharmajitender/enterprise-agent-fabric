@@ -316,9 +316,11 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 
 ## Task I12: Structured JSON fallback when ② is maybe / high-risk
 
-**Deferred.** Flag stays off (`fabric.decide.llm.enabled=false`). I10 port + I11 pool/timeout stay in place; decide never calls a live model. Reopen when a ② maybe / high-risk miss needs JSON over eligible ids.
+**Deferred → future enhancement.** Flag stays off (`fabric.decide.llm.enabled=false`). I10 port + I11 pool/timeout stay in place; decide never calls a live model.
 
-**Description:** Turn ③ **on** only for ② maybe-band or high-risk top candidate. Prompt (or stub) must return JSON choosing among eligible ids only. Ambiguous → `clarify` with top-k. Invalid id → `abstain`. Local demo may keep the flag off.
+**Canonical write-up (what it will offer, when to revive):** [future-enhancement.md — I12 Layer ③ LLM fallback](./future-enhancement.md#i12-layer-3-llm-fallback).
+
+**Description:** Turn ③ **on** only for ② maybe-band or high-risk top candidate. Prompt (or stub) must return JSON choosing among eligible ids only. Ambiguous → `clarify` with top-k. Invalid id → `abstain`. Local demo keeps the flag off.
 
 **Acceptance criteria:**
 - [ ] Flag on: ② confident fee utterance still does **not** call ③
@@ -336,6 +338,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 - Layer ③ stub adapter
 - DecideService gating
 - tests
+- [future-enhancement.md](./future-enhancement.md#i12-layer-3-llm-fallback) (keep in sync when reopening)
 
 **Estimated scope:** Medium
 

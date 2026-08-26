@@ -4,15 +4,15 @@ Plan: [plan.md](./plan.md). Docs map: [docs/README.md](../README.md).
 
 Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane · **3008** AR · **3009** Registry. Control Plane: no database.
 
-**Remaining execution order** (task numbers stay; work this file top-to-bottom from here): service handbooks (25–29) then root README (24). Not today.
+**Remaining execution order** (task numbers stay): handbooks 25–29 + root README 24 are **done**. Final checkpoint below.
 
-**Observability** (O1–O16): [observability-todo.md](./observability-todo.md) — does not replace this list.
+**Observability** (O1–O16): [observability-todo.md](./observability-todo.md) — signed off.
 
-**Evals** (E1–E14): [eval-todo.md](./eval-todo.md) — does not replace this list.
+**Evals** (E1–E14): [eval-todo.md](./eval-todo.md) — done.
 
-**Intent router** (I1–I14): [intent-todo.md](./intent-todo.md) / [intent-plan.md](./intent-plan.md) — layered classifier ①–③; does not replace this list.
+**Intent router** (I1–I11, I13–I14): [intent-todo.md](./intent-todo.md) — I12 deferred to [future-enhancement.md](./future-enhancement.md#i12-layer-3-llm-fallback).
 
-**Stage data sharing** (D1–D13): [dataflow-todo.md](./dataflow-todo.md) / [dataflow-plan.md](./dataflow-plan.md) — route-contract `goal` / `notes` / slots; does not replace this list.
+**Stage data sharing** (D1–D13): [dataflow-todo.md](./dataflow-todo.md) — signed off.
 
 ---
 
@@ -667,12 +667,12 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** `agent-capability-registry/README.md` explains this box as built: publish/get, immutability, schema, who may call it.
 
 **Acceptance criteria:**
-- [ ] Headings: job, port/stack, hexagonal layout, auth, APIs, contracts, tables/schema, sibling calls, non-goals, tests
-- [ ] Documents `PUT`/`GET` capability and manifest paths, 409 on published overwrite, AR cannot GET draft
-- [ ] Documents `acr` tables, keys `(id, version)` and `(manifest_id, manifest_version)`, and seed `account_fee_lookup@1.0.0`
+- [x] Headings: job, port/stack, hexagonal layout, auth, APIs, contracts, tables/schema, sibling calls, non-goals, tests
+- [x] Documents `PUT`/`GET` capability and manifest paths, 409 on published overwrite, AR cannot GET draft
+- [x] Documents `acr` tables, keys `(id, version)` and `(manifest_id, manifest_version)`, and seed `account_fee_lookup@1.0.0`
 
 **Verification:**
-- [ ] Manual: every path and table in the README exists in code/migrations
+- [x] Manual: every path and table in the README exists in code/migrations
 
 **Dependencies:** Task 10
 
@@ -688,12 +688,12 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** `agent-data-plane/README.md` explains eligible, decide, catalogue row (manifest pointers), and `adp` schema. No audit.
 
 **Acceptance criteria:**
-- [ ] Same heading set as Task 25
-- [ ] Documents decide / eligible / catalogue APIs, Layer ①/②, outcomes `route`/`clarify`/`abstain`; AR must not call decide; Control Plane may GET eligible and catalogue
-- [ ] Documents catalogue tables only; explicitly **no** decisions/audit API or table
+- [x] Same heading set as Task 25
+- [x] Documents decide / eligible / catalogue APIs, Layer ①/②, outcomes `route`/`clarify`/`abstain`; AR must not call decide; Control Plane may GET eligible and catalogue
+- [x] Documents catalogue tables only; explicitly **no** decisions/audit API or table
 
 **Verification:**
-- [ ] Manual: README matches running Data Plane and Flyway files
+- [x] Manual: README matches running Data Plane and Flyway files
 
 **Dependencies:** Task 15
 
@@ -709,12 +709,12 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** `agent-control-plane/README.md` explains the TypeScript client: no APIs, no database, calls Data Plane for routes/intent/catalogue.
 
 **Acceptance criteria:**
-- [ ] Same heading set; APIs section is **none**; schema section is **no database**
-- [ ] Documents outbound `GET /v1/intent/eligible` and `GET /v1/catalog/routes/{route_id}` with `X-Workload: acp`
-- [ ] Documents that decide is AFD-only and that this process is not on the chat hot path
+- [x] Same heading set; APIs section is **none**; schema section is **no database**
+- [x] Documents outbound `GET /v1/intent/eligible` and `GET /v1/catalog/routes/{route_id}` with `X-Workload: acp`
+- [x] Documents that decide is AFD-only and that this process is not on the chat hot path
 
 **Verification:**
-- [ ] Manual: README matches the client; no invented Fastify routes or SQL
+- [x] Manual: README matches the client; no invented Fastify routes or SQL
 
 **Dependencies:** Task 14
 
@@ -730,12 +730,12 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** `agent-runtime/README.md` explains start, hydrate, LangGraph stub graph, run pin schema, uv commands.
 
 **Acceptance criteria:**
-- [ ] Same heading set; stack is uv + FastAPI + LangGraph
-- [ ] Documents `/v1/runs`, turns, status, open-run by `session_id`, idempotency, hydrate-before-202
-- [ ] Documents `ar` tables (`correlation_id`, `idempotency_key`, `hydrated_tools`, checkpoint/status) and that the graph stub does not call a live model
+- [x] Same heading set; stack is uv + FastAPI + LangGraph
+- [x] Documents `/v1/runs`, turns, status, open-run by `session_id`, idempotency, hydrate-before-202
+- [x] Documents `ar` tables (`correlation_id`, `idempotency_key`, `hydrated_tools`, checkpoint/status) and LLM via env (stub or provider — not “never a model”)
 
 **Verification:**
-- [ ] Manual: README matches FastAPI routes, Alembic, and `app/graph.py`
+- [x] Manual: README matches FastAPI routes, Alembic, and graph modules
 
 **Dependencies:** Task 18
 
@@ -751,12 +751,12 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** `agent-front-door/README.md` adds chat AFD: hints, turns, events poll, freeze table, FR-5, sibling call map. Jobs routes are already documented in Task 31.
 
 **Acceptance criteria:**
-- [ ] Same heading set; hexagonal layout; chat `/v1/assistant/*` and jobs `/v1/jobs*` on 3005 (one process)
-- [ ] Documents `/v1/assistant/hints`, `turns`, `events`; slim JSON; continuation skips decide
-- [ ] Documents `afd` freeze table fields, TTL, and that pin miss uses AR HTTP not AR SQL
+- [x] Same heading set; hexagonal layout; chat `/v1/assistant/*` and jobs `/v1/jobs*` on 3005 (one process)
+- [x] Documents `/v1/assistant/hints`, `turns`, `events`; slim JSON; continuation skips decide
+- [x] Documents `afd` freeze table fields, TTL, and that pin miss uses AR HTTP not AR SQL
 
 **Verification:**
-- [ ] Manual: README matches AFD APIs and Flyway; forbidden keys listed
+- [x] Manual: README matches AFD APIs and Flyway; forbidden keys listed
 
 **Dependencies:** Task 22, Task 31
 
@@ -772,12 +772,12 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** Short run instructions only — not a restatement of the architecture packs. Links to the five service handbooks. Mentions both `/v1/assistant/*` and `/v1/jobs*` on 3005.
 
 **Acceptance criteria:**
-- [ ] README lists HTTP ports 3005 / 3007 / 3008 / 3009, unused 3006, and the five folders
-- [ ] Commands: compose up, seed, jobs demo, chat demo; stubs: Kafka, IdP, LLM
-- [ ] Links to each service `README.md`; both route families on 3005
+- [x] README lists HTTP ports 3005 / 3007 / 3008 / 3009, Control Plane UI 3006, and the five folders
+- [x] Commands: compose up, seed, jobs demo, chat demo; stubs: Kafka, IdP, LLM (decide ③ off)
+- [x] Links to each service `README.md`; both route families on 3005
 
 **Verification:**
-- [ ] Manual: a new session can follow README without this chat
+- [x] Manual: a new session can follow README without this chat
 
 **Dependencies:** Task 23, Task 31, Tasks 25–29
 
@@ -790,8 +790,8 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 ## Checkpoint: Complete
 
-- [ ] `./docs/run/dummy-request/run-job.sh fee_explain` and `./docs/run/dummy-request/run-chat.sh fee_explain` pass on a clean compose
-- [ ] Per-service tests pass
-- [ ] Each of the five service `README.md` files matches running APIs and schemas
-- [ ] Out of scope still out (no Kafka, no second AFD fleet, no real model)
-- [ ] Human approves
+- [x] `./docs/run/dummy-request/run-job.sh fee_explain` and `./docs/run/dummy-request/run-chat.sh fee_explain` pass on a clean compose
+- [x] Per-service tests pass (Runtime pytest; Control Plane `npm test`; spot-check)
+- [x] Each of the five service `README.md` files matches running APIs and schemas
+- [x] Out of scope still out (no Kafka, no second AFD fleet; decide Layer ③ off)
+- [x] Human approves (2026-08-26) — handbooks 24–29 + checkpoint

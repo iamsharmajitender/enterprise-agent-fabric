@@ -155,6 +155,40 @@
       "tags": []
     },
     {
+      "id": "jobs-purchase_refund-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "purchase_refund",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "refunds:write": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "purchase_refund",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-purchase_refund-no-claims",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "purchase_refund",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": []
+    },
+    {
       "id": "jobs-pack_then_notify-entitled",
       "ingress": "jobs",
       "channel": "web",

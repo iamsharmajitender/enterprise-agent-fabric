@@ -4,7 +4,7 @@ The registry has **two kinds**. That is the catalog contract. A kind is how Runt
 
 | `kind` | Invoke | What it is |
 | --- | --- | --- |
-| `domain` | HTTP to a governed business API (local: tool-mock) | OCR, fee lookup, freeze, notify. |
+| `domain` | HTTP to a governed business API (local: agent-fabric-mocks) | OCR, fee lookup, freeze, notify. |
 | `agent` | Front Door `POST /v1/jobs` with a **fixed** `route_id` in `invoke.body` | Start another catalogue product. New freeze, new entitle, callee `agent_client_id`. Not a POST to the callee Runtime. |
 
 Same `id` + `version` UX for both. Control Plane lists them together. Manifests only store `{capability_id, capability_version}`; `kind` lives on the capability row (`acr.registry.capabilities.kind`).
@@ -19,6 +19,7 @@ These already have a home. A new `kind` would split the catalog and confuse hydr
 | --- | --- |
 | Retrieve / RAG / named corpus | Route `retrieval` + [retrieve](retrieve.md). Not a capability kind. |
 | Prompt pack / `llm_role` | [prompts](prompts.md). Not a capability. |
+| JSON Schema in/out | [schemas](schemas.md). `output_schema` binds on LLM stages; `input_schema` is catalogue today. |
 | Workflow stage, `branch`, `human_gate` | ADP workflow JSON. Linear graph today; see [patterns](patterns.md) and [status](status.md). |
 | Memory policy | [memory](memory.md). |
 | MCP `list_tools` | Not the catalog. Exam and pin need a frozen `id@version`. |

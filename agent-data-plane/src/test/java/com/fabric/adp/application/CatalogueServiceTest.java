@@ -23,7 +23,7 @@ class CatalogueServiceTest {
     assertThat(catalogue.list()).extracting(RouteRow::routeId)
         .contains("fee_explain", "agent-chat", "agent-policy-qa", "contract_review")
         .doesNotContain("agent-research-v0", "agent-payments-v2");
-    assertThat(catalogue.listAll()).hasSize(31);
+    assertThat(catalogue.listAll()).hasSize(32);
   }
 
   @Test
@@ -121,10 +121,11 @@ class CatalogueServiceTest {
     Map<String, AutonomyPattern> expected =
         catalogue.listAll().stream()
             .collect(Collectors.toMap(RouteRow::routeId, RouteRow::autonomyMode));
-    assertThat(expected).hasSize(31);
+    assertThat(expected).hasSize(32);
     assertThat(expected.get("agent-chat")).isEqualTo(AutonomyPattern.SINGLE_INFERENCE);
     assertThat(expected.get("fee_explain")).isEqualTo(AutonomyPattern.AUTONOMOUS);
     assertThat(expected.get("kyc_onboarding")).isEqualTo(AutonomyPattern.DETERMINISTIC);
+    assertThat(expected.get("purchase_refund")).isEqualTo(AutonomyPattern.DETERMINISTIC);
     assertThat(expected.get("due_diligence")).isEqualTo(AutonomyPattern.GUIDED);
     expected.forEach(
         (routeId, pattern) ->

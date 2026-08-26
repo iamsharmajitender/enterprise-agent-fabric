@@ -1,34 +1,41 @@
 # Data
 
-The run graph has two channels. Slots do not exist.
+The run graph has three channels for stage handoff inside one correlation id:
 
 | Channel | Lives on | Who consumes it |
 | --- | --- | --- |
-| `goal` | Start body (job `payload` / chat utterance). Copied onto every HTTP tool. **Never updated.** | Every HTTP stage |
-| `notes` | Append-only **strings** (`text` / `message` / LLM completion) | LLM stages (`query_formulation`, `classify`, `synthesis`); `/v1/runs/{id}/turns` when `working=session` |
+| `goal` | Start body (job `payload` / chat utterance). **Never updated.** | Every LLM stage; base of every HTTP body |
+| `slots` | `working.slots[stage_id]` — structured JSON after each stage | Next HTTP merge (schema keys only); branch/gate; prefetch pack; child `kind=agent` projection |
+| `notes` | Append-only **strings** on `working` | LLM stages (`_user_blob(goal, notes)`); optional `payload["notes"]` on HTTP |
 
-`GraphState` in `agent-runtime/app/graph/workflow.py` is `result`, `goal`, `notes`. HTTP payload is `dict(goal)` only:
+`GraphState` in `agent-runtime/app/graph/workflow.py` is `result`, `goal`, `notes`, `slots`. HTTP assembly is in `agent-runtime/app/graph/payload.py`:
 
 ```python
 payload = dict(goal)
+# merge keys from prior slots when declared on next input_schema.properties
 ```
 
-`query_formulation` then sets `payload["query"]` from the LLM. `classify` and `synthesis` append the completion to `notes` and skip HTTP.
+Fail closed if `input_schema.required` keys are missing. Do not dump all slots or all notes onto every HTTP call.
 
-## Freeze example
+`query_formulation` sets `payload["query"]` from the LLM. `classify` / `synthesis` append prose to `notes` and, when JSON parses, write `slots[stage_id]`. LLM roles with `output_schema` validate through `with_structured_output`. How to write that schema: [schemas](schemas.md).
 
-Route `card_freeze` is identity → limits → freeze. Dummy job payload is `card_id` and `account_id`. That object is `goal` for the whole run.
+## Example: stage 2 gets stage 1’s JSON
 
-1. `identity_check` POSTs `dict(goal)`. It does not receive a derived `customer_id` from anywhere else.
-2. The tool JSON (whatever identity returned) is **not** merged into `goal`. Only `text` / `message` is appended to `notes`.
-3. `freeze_card` POSTs the same `dict(goal)` again. It never sees `identity_check` JSON. `customer_id` is missing unless the caller put it on the job payload.
+Route `purchase_refund` (**D5 proof**): job payload has `doc_id`, `account_id` only.
 
-Dummy jobs still complete because tool-mock ignores request bodies. That is not proof of dataflow.
+1. `extract_fields` (classify) returns `{ merchant, amount, date }` → stored in `slots["extract_fields"]` and appended to `notes`.
+2. `match_purchase` HTTP body = `goal` ∪ `{ merchant, amount, date }` because those keys are `required` on `match_purchase`’s `input_schema`.
+3. If classify omits a required field, the run fails **before** `match_purchase` invokes.
 
-## What is not built
+Route `card_freeze` today: identity/limit tools return prose; structured slot merge is not the proof path unless the workflow adds schema-bound hops.
 
-- **Slots.** No structured per-stage JSON on the run pin. A capability `input_schema` does not fill the next HTTP body.
-- **Tool JSON → next HTTP.** `notes` are strings for the LLM. HTTP never reads `notes`.
-- **Prefetch pack.** Empty `invoke.url` is a no-op; chunks are not written anywhere. See [retrieve](retrieve.md).
+## Prefetch
 
-Later work: [dataflow-plan.md](../tasks/dataflow-plan.md). Catalogue vs Runtime: [status](status.md).
+On `deterministic_prefetch`, empty-invoke prefetch stages POST corpus gateways and write `working.slots.prefetch`. Downstream LLM/HTTP stages consume packed text. See [retrieve](retrieve.md).
+
+## Still catalogue-only
+
+- **`conversation` / `long_term`** — Shared Memory (not the run pin). See [memory](memory.md).
+- **Stage allowlists** on Pattern 3 — metadata only; AR does not enforce inner tool picks yet.
+
+Catalogue vs Runtime matrix: [status](status.md). Verification checklist: [dataflow-plan.md](../tasks/dataflow-plan.md#verification-checklist-d13).

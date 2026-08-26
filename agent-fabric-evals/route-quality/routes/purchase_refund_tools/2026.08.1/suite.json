@@ -1,0 +1,7 @@
+{
+  "suite_id": "purchase_refund_tools",
+  "suite_version": "2026.08.1",
+  "kind": "tool-sequence",
+  "route_id": "purchase_refund",
+  "description": "Pattern 2: OCR \u2192 classify receipt JSON \u2192 match \u2192 eligibility \u2192 human_gate \u2192 refund \u2192 synthesis."
+}

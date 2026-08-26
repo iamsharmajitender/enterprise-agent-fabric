@@ -297,7 +297,7 @@ class CatalogAndDecideControllerTest {
                 .header("X-Workload", "ar"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.corpus_id").value("policy-engine"))
-        .andExpect(jsonPath("$.url").value("https://retrieve.internal/v1/search"))
+        .andExpect(jsonPath("$.url").value("http://agent-mocks:3010/v1/search/assistant"))
         .andExpect(jsonPath("$.collection").value("policy-engine"))
         .andExpect(jsonPath("$.auth").value("workload-oauth"))
         .andExpect(jsonPath("$.owner").value("policy-ops"))
@@ -323,7 +323,7 @@ class CatalogAndDecideControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.corpus_id").value("legal-playbook"))
         .andExpect(jsonPath("$.collection").value("legal-playbook"))
-        .andExpect(jsonPath("$.url").value("https://retrieve.internal/v1/search"));
+        .andExpect(jsonPath("$.url").value("http://agent-mocks:3010/v1/search/legal"));
   }
 
   @Test

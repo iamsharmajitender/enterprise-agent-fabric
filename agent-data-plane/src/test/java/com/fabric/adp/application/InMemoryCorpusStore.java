@@ -26,7 +26,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     put(new Corpus(
         "product-terms",
         "Product terms",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.dedicated("product-terms"),
         "product-terms",
         "workload-oauth",
         "product",
@@ -36,7 +36,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     put(new Corpus(
         "fee-schedule",
         "Fee schedule",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.dedicated("fee-schedule"),
         "fee-schedule",
         "workload-oauth",
         "product",
@@ -50,7 +50,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "policy-engine",
         "Policy engine",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.ASSISTANT,
         "policy-engine",
         "workload-oauth",
         "policy-ops",
@@ -63,7 +63,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "clause-index",
         "Clause index",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.LEGAL,
         "clause-index",
         "workload-oauth",
         "legal",
@@ -76,7 +76,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "legal-playbook",
         "Legal playbook",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.LEGAL,
         "legal-playbook",
         "workload-oauth",
         "legal",
@@ -89,7 +89,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "product-faq",
         "Product FAQ",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.ASSISTANT,
         "product-faq",
         "workload-oauth",
         "assistant-platform",
@@ -102,7 +102,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "accounts",
         "Accounts",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.ASSISTANT,
         "accounts",
         "workload-oauth",
         "assistant-platform",
@@ -115,7 +115,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "sanctions-lists",
         "Sanctions lists",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.KYC,
         "sanctions-lists",
         "workload-oauth",
         "kyc-ops",
@@ -128,7 +128,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "kyc-policy",
         "KYC policy",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.KYC,
         "kyc-policy",
         "workload-oauth",
         "kyc-ops",
@@ -141,7 +141,7 @@ public class InMemoryCorpusStore implements CorpusStore {
     return new Corpus(
         "research-index",
         "Research index",
-        "https://retrieve.internal/v1/search",
+        CorpusGatewayUrls.dedicated("research-index"),
         "research-index",
         "workload-oauth",
         "assistant-platform",

@@ -59,6 +59,18 @@ class RunStore(Protocol):
 
     def complete(self, correlation_id: str, result: dict[str, Any]) -> RunPin: ...
 
+    def pause(
+        self,
+        correlation_id: str,
+        *,
+        working: dict[str, Any] | None = None,
+        checkpoint: dict[str, Any] | None = None,
+    ) -> RunPin: ...
+
+    def fail(self, correlation_id: str, result: dict[str, Any]) -> RunPin: ...
+
+    def mark_running(self, correlation_id: str) -> RunPin: ...
+
     def save_progress(
         self,
         correlation_id: str,

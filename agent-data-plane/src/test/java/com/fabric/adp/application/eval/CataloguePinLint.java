@@ -17,7 +17,7 @@ import java.util.Set;
 final class CataloguePinLint {
 
   static final Set<String> HIGH_RISK_WRITES =
-      Set.of("card_freeze", "account_notify", "kyc_onboarding");
+      Set.of("card_freeze", "account_notify", "kyc_onboarding", "purchase_refund");
   private static final String VERSION = "2026.08.1";
 
   private CataloguePinLint() {}

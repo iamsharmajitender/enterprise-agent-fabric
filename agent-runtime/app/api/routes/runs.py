@@ -24,7 +24,10 @@ def start_run(request: Request, body: dict[str, Any]) -> JSONResponse:
 @router.post("/v1/runs/{correlation_id}/turns")
 def resume_turn(request: Request, correlation_id: str, body: dict[str, Any]) -> Any:
     """Continue an existing run with a follow-up turn payload."""
-    result = request.app.state.runs.resume(correlation_id, body)
+    try:
+        result = request.app.state.runs.resume(correlation_id, body)
+    except ValueError as exc:
+        return error_response(400, "BAD_REQUEST", str(exc))
     if result is None:
         return error_response(404, "NOT_FOUND", correlation_id)
     return result

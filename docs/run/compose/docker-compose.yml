@@ -4,7 +4,7 @@
 # Adminer (Postgres GUI): http://localhost:8080 — System PostgreSQL, Server postgres, user/password fabric.
 # Grafana LGTM (OTel): http://localhost:3000 — admin/admin. OTLP gRPC 4317, OTLP HTTP 4318.
 
-name: agent-fabric
+name: EAF
 
 x-otel-env: &otel-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
@@ -138,16 +138,16 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  tool-mock:
+  agent-mocks:
     build:
       context: ../../../agent-fabric-mocks/tools
       dockerfile: Dockerfile
-    image: agent-fabric-tool-mock:0.1.0
+    image: agent-mocks:0.1.0
     labels:
       fabric.role: stub-domain
     environment:
       <<: *otel-env
-      OTEL_SERVICE_NAME: tool-mock
+      OTEL_SERVICE_NAME: agent-mocks
       TOOLS_DIR: /app/catalog
     ports:
       - "3010:3010"
@@ -180,6 +180,7 @@ services:
       DATABASE_URL: postgresql+psycopg://fabric:fabric@postgres:5432/ar
       DATA_PLANE_URL: http://agent-data-plane:3007
       REGISTRY_URL: http://agent-capability-registry:3009
+      AFD_URL: http://agent-front-door:3005
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       # Set FABRIC_LLM_STUB=1 for SeedStubLlm (no Ollama). Default 0 = ProviderLlm.
       FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
@@ -194,7 +195,7 @@ services:
         condition: service_started
       agent-capability-registry:
         condition: service_started
-      tool-mock:
+      agent-mocks:
         condition: service_healthy
       otel-lgtm:
         condition: service_started

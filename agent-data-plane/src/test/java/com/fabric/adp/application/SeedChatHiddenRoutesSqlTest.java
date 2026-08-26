@@ -67,7 +67,9 @@ class SeedChatHiddenRoutesSqlTest {
     assertThat(seed).contains("'legal-playbook'");
     assertThat(seed).contains("'product-faq'");
     assertThat(seed).contains("'research-index'");
-    assertThat(seed).contains("https://retrieve.internal/v1/search");
+    assertThat(seed).contains("http://agent-mocks:3010/v1/search/assistant");
+    assertThat(seed).contains("http://agent-mocks:3010/v1/search/legal");
+    assertThat(seed).contains("http://agent-mocks:3010/corpora/research-index/search");
   }
 
   @Test

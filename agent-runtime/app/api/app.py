@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request
 
 from app import telemetry
 from app.agents.clients import HttpCatalogueClient, HttpRegistryClient
+from app.agents.jobs_client import HttpJobsClient
+from app.agents.prefetch_client import HttpPrefetchClient
 from app.api.errors import error_response
 from app.api.routes.health import router as health_router
 from app.api.routes.runs import router as runs_router
@@ -56,10 +58,21 @@ def create_app(
     graph: Any = None,
     tool_invoker: Any = None,
     llm: Any = None,
+    prefetch: Any = None,
+    jobs: Any = None,
 ) -> FastAPI:
     """Attach run dependencies (store, catalogue, tools, LLM) onto the app."""
     app.state.store = store
-    app.state.runs = RunService(store, catalogue, registry, graph=graph, invoker=tool_invoker, llm=llm)
+    app.state.runs = RunService(
+        store,
+        catalogue,
+        registry,
+        graph=graph,
+        invoker=tool_invoker,
+        llm=llm,
+        prefetch=prefetch,
+        jobs=jobs,
+    )
     telemetry.instrument_app(app)
     return app
 
@@ -76,6 +89,8 @@ def build_app() -> FastAPI:
         registry=HttpRegistryClient(registry_url) if registry_url else None,
         tool_invoker=HttpToolClient(),
         llm=llm_from_env(),
+        prefetch=HttpPrefetchClient(),
+        jobs=HttpJobsClient(),
     )
 
 

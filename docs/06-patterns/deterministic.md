@@ -45,7 +45,7 @@ Front Door POST /v1/runs
             kind=agent: fixed index, not model-chosen
 ```
 
-Data that moves: every HTTP body is `dict(goal)`. `query_formulation` then sets `payload["query"]`. LLM stages read `goal` + `notes`. HTTP never reads `notes`. See [data](../02-understand/data.md).
+Data that moves: every HTTP body is `dict(goal)` plus `notes`. `query_formulation` then sets `payload["query"]`. LLM stages read `goal` + `notes`. See [data](../02-understand/data.md).
 
 This Runtime: prefetch invoke is empty (no pack); slots do not copy tool JSON into the next HTTP body; `branch` / `human_gate` / child start are not executed. Gaps: [status](../02-understand/status.md).
 

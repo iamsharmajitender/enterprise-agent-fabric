@@ -65,6 +65,7 @@ route-quality/
 | `msa_risk_review_tools` | `msa_risk_review` | ocr → clause → policy → risk → memo |
 | `kyc_onboarding_tools` | `kyc_onboarding` | docs → id → sanctions → risk → human_gate → activate → summarize |
 | `claims_adjudicate_tools` | `claims_adjudicate` | policy_search → clause_search → risk → memo |
+| `purchase_refund_tools` | `purchase_refund` | ocr → classify JSON → match → eligibility → human_gate → refund → confirm |
 
 Stage lists match the seeded workflow JSON in Data Plane (`InMemoryWorkflowStore` / `V1__dataplane.sql`). `kyc_onboarding` includes catalogue-only `branch` / `human_gate` nodes in designer order.
 

@@ -25,6 +25,7 @@ class SeedCatalogueSqlTest {
     "account_notify",
     "card_freeze",
     "dispute_intake",
+    "purchase_refund",
     "pack_then_notify",
     "pack_then_freeze",
     "pack_then_review",

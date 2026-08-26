@@ -4,6 +4,7 @@
   "path": "/kyc/risk",
   "status": 200,
   "response": {
+    "risk": "low",
     "text": "KYC risk: low."
   }
 }

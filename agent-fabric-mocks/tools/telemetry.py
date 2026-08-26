@@ -1,4 +1,4 @@
-"""Optional OpenTelemetry for tool-mock. No-op unless OTEL_EXPORTER_OTLP_ENDPOINT is set."""
+"""Optional OpenTelemetry for agent-mocks. No-op unless OTEL_EXPORTER_OTLP_ENDPOINT is set."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def setup() -> None:
     except ImportError:
         return
 
-    service_name = os.environ.get("OTEL_SERVICE_NAME", "tool-mock")
+    service_name = os.environ.get("OTEL_SERVICE_NAME", "agent-mocks")
     resource = Resource(
         attributes={
             "service.name": service_name,

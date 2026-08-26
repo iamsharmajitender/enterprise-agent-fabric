@@ -26,6 +26,7 @@ public class InMemoryManifestStore implements ManifestStore {
     put(accountNotify());
     put(cardFreeze());
     put(disputeIntake());
+    put(purchaseRefund());
     put(clauseLookup());
     put(templateRetrieve());
     put(msaRiskReview());
@@ -132,6 +133,21 @@ public class InMemoryManifestStore implements ManifestStore {
         [{"name":"doc_intake","capability_id":"doc_intake","capability_version":"1.0.0","pdp_action":"doc_intake","risk_tier":"low"},
          {"name":"case_open","capability_id":"case_open","capability_version":"1.0.0","pdp_action":"case_open","risk_tier":"medium"},
          {"name":"packet_summarize","capability_id":"packet_summarize","capability_version":"1.0.0","pdp_action":"packet_summarize","risk_tier":"low"}]
+        """);
+  }
+
+  public static ToolManifest purchaseRefund() {
+    return parse(
+        "purchase_refund",
+        "2026.08.1",
+        "Receipt refund: OCR, classify JSON, match, eligibility, gated refund, synthesis confirm.",
+        """
+        [{"name":"ocr_extract","capability_id":"ocr_extract","capability_version":"1.2.0","pdp_action":"ocr_extract","risk_tier":"low"},
+         {"name":"extract_fields","capability_id":"extract_fields","capability_version":"1.0.0","pdp_action":"extract_fields","risk_tier":"low"},
+         {"name":"match_purchase","capability_id":"match_purchase","capability_version":"1.0.0","pdp_action":"match_purchase","risk_tier":"medium"},
+         {"name":"refund_eligibility","capability_id":"refund_eligibility","capability_version":"1.0.0","pdp_action":"refund_eligibility","risk_tier":"medium"},
+         {"name":"post_refund","capability_id":"post_refund","capability_version":"1.0.0","pdp_action":"post_refund","risk_tier":"high"},
+         {"name":"refund_confirm","capability_id":"refund_confirm","capability_version":"1.0.0","pdp_action":"refund_confirm","risk_tier":"low"}]
         """);
   }
 

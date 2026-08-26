@@ -6,24 +6,25 @@ What the catalogue can name versus what this Runtime does. Present tense on the 
 | --- | --- | --- |
 | goal on every HTTP tool | yes | yes |
 | notes → LLM stages | yes | yes |
+| notes → HTTP body | yes | yes (`payload["notes"]`) |
 | query_formulation adds query | yes | yes |
-| tool JSON → next HTTP (slots / fill-by-name) | implied by input schema | NO |
-| deterministic_prefetch pack | mode+scope on route | NO (empty invoke) |
-| workflow `branch` | stored | NOT executed |
-| `human_gate` | stored | NOT executed |
-| kind=agent child projection | capability kind | skipped HTTP (no child jobs POST) |
+| tool JSON → next HTTP (slots / fill-by-name) | implied by input schema | yes — schema-selected slot merge + hop validation |
+| deterministic_prefetch pack | mode+scope on route | yes — `working.slots.prefetch` |
+| workflow `branch` | stored | executed (slot → next stage) |
+| `human_gate` | stored | executed (`status=waiting`; resume via `/turns`) |
+| kind=agent child projection | capability `input_schema` | POST API AFD `/v1/jobs` with projected child `payload` only |
 | conversation=session | flag | NO transcript store |
 | long_term=retrieve_only | flag | NO |
-| loop=checkpoint resume | writes blob | NO resume-from-step |
+| loop=checkpoint resume | writes blob + `resume_index` | resume from `resume_index` on failed run via `/turns` |
 
 ## How to read the gaps
 
-- **goal / notes / query_formulation** — implemented in `agent-runtime/app/graph/workflow.py`. `GraphState` is `result`, `goal`, `notes`. HTTP body is `payload = dict(goal)`. `query_formulation` sets `payload["query"]`. LLM stages read prior `notes`. Hydrate stamps `llm_role` / `llm_prompt` in `agent-runtime/app/agents/hydrate.py`.
-- **Slots / fill-by-name** — capability input schema does not copy `identity_check` JSON into `freeze_card`. See [data](data.md).
-- **deterministic_prefetch** — `policy_memo` does not POST the corpus gateway. Prefetch `invoke` is empty. See [retrieve](retrieve.md).
-- **branch / human_gate** — linear LangGraph only (`kyc_onboarding` names both). See [patterns](patterns.md).
-- **kind=agent** — child start is AFD `POST /v1/jobs` with a new goal body. Parent routes: `fraud_investigate` (`start_contract_review` → `contract_review`) and `ops_start_kyc` (`start_kyc_onboarding` → `kyc_onboarding`). Runtime skips that HTTP today. Parent `notes` are not merged. Projection of parent fields into the child goal is not built. See [capabilities](capabilities.md).
+- **goal / notes / query_formulation** — implemented in `agent-runtime/app/graph/workflow.py`. `GraphState` is `result`, `goal`, `notes`. HTTP body is `dict(goal)` plus `notes`. `query_formulation` sets `payload["query"]`. LLM stages read goal and prior `notes` in `_user_blob`. Hydrate stamps `llm_role` / `llm_prompt` in `agent-runtime/app/agents/hydrate.py`.
+- **Slots / fill-by-name** — prior stage JSON merges into the next HTTP body when keys appear on `input_schema`. See [data](data.md).
+- **deterministic_prefetch** — corpus POST writes `working.slots.prefetch`. See [retrieve](retrieve.md).
+- **branch / human_gate** — branch routes pick the next stage from a prior slot; `human_gate` sets `status=waiting` until `POST /v1/runs/{id}/turns` merges a human packet. See [patterns](patterns.md) and [human-review-process-gate](../07-usecases/human-review-process-gate.md).
+- **kind=agent** — child start POSTs API AFD `/v1/jobs` with a projected `payload` (`input_schema` keys from parent `goal` ∪ slots; notes excluded). Parent routes: `fraud_investigate`, `ops_start_kyc`. See [capabilities](capabilities.md).
 - **conversation / long_term** — flags on `dataplane.memory_profiles`. Not a Shared Memory box. See [memory](memory.md).
-- **loop=checkpoint** — cursor JSON is written. Continuing the graph from `checkpoint.step` after a crash is not wired.
+- **loop=checkpoint** — cursor JSON and `resume_index` are written after each stage. Failed runs with `loop=checkpoint` resume from the next stage via `POST /v1/runs/{id}/turns` with `{}` or `{ "resume": true }`; `goal` reloads from checkpoint, `slots`/`notes` from `working`. `loop=none` still fails closed.
 
 Later work: [dataflow-plan.md](../tasks/dataflow-plan.md). Do not treat dummy `--all` green as dataflow. Catalogue matrix: [03-catalogue](../03-catalogue/). Contracts: [05-reference](../05-reference/). Box packs: [04-architecture](../04-architecture/).

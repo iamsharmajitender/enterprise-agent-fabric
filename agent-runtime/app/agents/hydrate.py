@@ -12,6 +12,8 @@ class CataloguePort(Protocol):
 
     def get_prompt(self, prompt_id: str) -> dict[str, Any]: ...
 
+    def get_corpus(self, corpus_id: str) -> dict[str, Any]: ...
+
 
 class RegistryPort(Protocol):
     def get_manifest(self, manifest_id: str, manifest_version: str) -> dict[str, Any]: ...
@@ -39,7 +41,12 @@ def hydrate(
     )
     if manifest_id and manifest_version:
         hydrated = _hydrate_manifest(registry, manifest_id, manifest_version)
-        _attach_llm_roles(catalogue, row, hydrated)
+        workflow_id = str(row.get("workflow_id") or "")
+        workflow = catalogue.get_workflow(workflow_id) if workflow_id else {"stages": []}
+        if workflow_id and _workflow_has_branch(workflow):
+            hydrated = _hydrate_workflow_ordered(catalogue, row, hydrated, workflow)
+        else:
+            _attach_llm_roles(catalogue, row, hydrated, workflow)
         return _ensure_llm(catalogue, row, hydrated)
     return _ensure_llm(catalogue, row, _hydrate_without_manifest(catalogue, row))
 
@@ -59,6 +66,71 @@ def _hydrate_manifest(
         if not cap_id or not cap_version:
             raise HydrateError("tool ref missing capability pin")
         hydrated.append(registry.get_capability(cap_id, cap_version))
+    return hydrated
+
+
+def _workflow_has_branch(workflow: dict[str, Any]) -> bool:
+    """True when any workflow stage declares a branch map."""
+    stages = workflow.get("stages") if isinstance(workflow.get("stages"), list) else []
+    for stage in stages:
+        if isinstance(stage, dict) and isinstance(stage.get("branch"), dict) and stage["branch"]:
+            return True
+    return False
+
+
+def _hydrate_workflow_ordered(
+    catalogue: CataloguePort,
+    row: dict[str, Any],
+    manifest_tools: list[dict[str, Any]],
+    workflow: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Build graph nodes in workflow stage order when branching is declared."""
+    stages = workflow.get("stages") if isinstance(workflow.get("stages"), list) else []
+    prompts, host = _prompt_pack(catalogue, str(row.get("prompt_id") or ""))
+    by_capability = {str(tool.get("id") or ""): dict(tool) for tool in manifest_tools}
+    hydrated: list[dict[str, Any]] = []
+    for index, stage in enumerate(stages):
+        if not isinstance(stage, dict):
+            continue
+        stage_id = str(stage.get("id") or stage.get("tool") or f"stage_{index}")
+        role = str(stage.get("llm_role") or "none")
+        tool_id = str(stage.get("tool") or "")
+        stage_type = str(stage.get("type") or "")
+        if stage_type == "human_gate":
+            hydrated.append(
+                {
+                    "id": stage_id,
+                    "workflow_stage_id": stage_id,
+                    "stage_type": "human_gate",
+                    "llm_role": "none",
+                    "llm_prompt": prompts.get(role) or host,
+                    "invoke": {},
+                }
+            )
+            continue
+        if tool_id:
+            capability = by_capability.get(tool_id)
+            if capability is None:
+                raise HydrateError(f"workflow tool {tool_id!r} missing from manifest")
+            node = dict(capability)
+        else:
+            node = {
+                "id": stage_id,
+                "llm_role": role,
+                "llm_prompt": prompts.get(role) or host,
+                "invoke": {},
+            }
+        node["llm_role"] = role
+        node["llm_prompt"] = prompts.get(role) or host
+        node["workflow_stage_id"] = stage_id
+        branch = stage.get("branch")
+        if isinstance(branch, dict) and branch:
+            node["branch"] = {str(key): str(value) for key, value in branch.items()}
+        if stage_type:
+            node["stage_type"] = stage_type
+        hydrated.append(node)
+    if not hydrated:
+        raise HydrateError("workflow has no stages")
     return hydrated
 
 
@@ -108,11 +180,8 @@ def _hydrate_prompt_only(catalogue: CataloguePort, prompt_id: str) -> list[dict[
     return [{"id": prompt_id, "llm_role": "synthesis", "llm_prompt": text, "invoke": {}}]
 
 
-def _roles_by_tool(catalogue: CataloguePort, workflow_id: str) -> dict[str, str]:
+def _roles_by_tool(workflow: dict[str, Any]) -> dict[str, str]:
     """Read workflow stages into `{tool_id: llm_role}`."""
-    if not workflow_id:
-        return {}
-    workflow = catalogue.get_workflow(workflow_id)
     stages = workflow.get("stages") if isinstance(workflow.get("stages"), list) else []
     roles: dict[str, str] = {}
     for stage in stages:
@@ -138,10 +207,13 @@ def _prompt_pack(catalogue: CataloguePort, prompt_id: str) -> tuple[dict[str, st
 
 
 def _attach_llm_roles(
-    catalogue: CataloguePort, row: dict[str, Any], tools: list[dict[str, Any]]
+    catalogue: CataloguePort,
+    row: dict[str, Any],
+    tools: list[dict[str, Any]],
+    workflow: dict[str, Any],
 ) -> None:
     """Stamp each hydrated capability with its workflow llm_role and prompt."""
-    roles = _roles_by_tool(catalogue, str(row.get("workflow_id") or ""))
+    roles = _roles_by_tool(workflow)
     prompts, _host = _prompt_pack(catalogue, str(row.get("prompt_id") or ""))
     for tool in tools:
         role = roles.get(str(tool.get("id") or ""), "none")

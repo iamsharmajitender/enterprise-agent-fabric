@@ -63,6 +63,16 @@ class PromptServiceTest {
   }
 
   @Test
+  void purchaseRefundClassifyDefersShapeToOutputSchema() {
+    PromptPack pack = prompts.get("purchase_refund", "2026.08.1");
+    assertThat(pack.roles())
+        .extracting(PromptRoleTemplate::llmRole)
+        .containsExactly("classify", "synthesis");
+    assertThat(pack.role("classify").orElseThrow().text()).contains("output_schema");
+    assertThat(pack.role("classify").orElseThrow().text()).contains("do not invent");
+  }
+
+  @Test
   void missingPinIsNotFound() {
     assertThatThrownBy(() -> prompts.get("msa_risk_review", "1999.01.1"))
         .isInstanceOf(NotFoundException.class)

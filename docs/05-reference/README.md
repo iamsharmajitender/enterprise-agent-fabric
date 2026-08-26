@@ -56,6 +56,7 @@ Docs map: [../README.md](../README.md). Stub headers: [stub-auth.md](stub-auth.m
 | --- | --- |
 | [capability-account-fee-lookup.json](capability-account-fee-lookup.json) | Domain capability `account_fee_lookup` |
 | [capability-ocr-extract.json](capability-ocr-extract.json) | Domain capability `ocr_extract` |
+| [capability-extract-fields.json](capability-extract-fields.json) | Domain capability `extract_fields` (classify `output_schema`) |
 | [capability-start-contract-review.json](capability-start-contract-review.json) | Agent-start capability `start_contract_review` → `contract_review` |
 | [capability-start-kyc-onboarding.json](capability-start-kyc-onboarding.json) | Agent-start capability `start_kyc_onboarding` → `kyc_onboarding` |
 | [manifest-fee-explain.json](manifest-fee-explain.json) | Manifest for `fee_explain` |
