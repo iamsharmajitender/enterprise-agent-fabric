@@ -1,0 +1,12 @@
+{
+  "id": "investigate_duplicate_charge",
+  "method": "POST",
+  "path": "/shopassist/investigate_duplicate_charge",
+  "status": 200,
+  "response": {
+    "order_id": "ORD-77819",
+    "duplicate_charge_found": false,
+    "payment_status": "second authorization pending, not captured",
+    "text": "No duplicate capture on ORD-77819. Second authorization is pending and not billed."
+  }
+}

@@ -170,7 +170,7 @@ Turn request:
 
 ```json
 {
-  "session_id": "sess-88",
+  "session_id": "chat-11111111-1111-4111-8111-111111111111",
   "message": "Why was I charged $42?",
   "hint_id": null,
   "option_id": null
@@ -180,12 +180,12 @@ Turn request:
 Turn responses (slim; AFD keeps `route_id` server-side):
 
 ```json
-{ "session_id": "sess-88", "status": "accepted" }
+{ "session_id": "chat-11111111-1111-4111-8111-111111111111", "status": "accepted" }
 ```
 
 ```json
 {
-  "session_id": "sess-88",
+  "session_id": "chat-11111111-1111-4111-8111-111111111111",
   "status": "clarify",
   "prompt": "Did you want a fee explanation or recent transactions?",
   "options": [

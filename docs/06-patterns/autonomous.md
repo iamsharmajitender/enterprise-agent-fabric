@@ -74,6 +74,8 @@ The model must reply with **one line**:
 
 Unknown tool id fails the run. Exceeding `max_loop_steps` fails the run. A retrieve capability is just another CALL. Prefetch is not a CALL. Pattern 1 uses `host` only — it does not stamp `by_llm_role` onto tools ([prompts](../02-understand/prompts.md)).
 
+**`escalate_to_human`:** after a successful handoff, Runtime auto-completes the parent when no specialist joins are still pending; a second `CALL escalate_to_human` is idempotent (same handoff, no second POST). See [escalate-to-human-handoff](../07-usecases/escalate-to-human-handoff.md).
+
 ## What you may attach
 
 | Attachment | Allowed | Role |

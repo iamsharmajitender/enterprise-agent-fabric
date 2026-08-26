@@ -322,7 +322,7 @@ INSERT INTO registry.capabilities (
   'domain',
   'Score KYC risk as low or high.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
-  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["risk","text"],"properties":{"risk":{"type":"string","enum":["low","high"]},"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/kyc/risk","auth":"domain-oauth"}'::jsonb,
   NULL,
   'kyc-ops',
@@ -381,7 +381,7 @@ INSERT INTO registry.capabilities (
   '1.0.0',
   'domain',
   'Score a product offer.',
-  '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["utterance"],"properties":{"utterance":{"type":"string"},"product_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/product/score","auth":"domain-oauth"}'::jsonb,
   NULL,
@@ -393,7 +393,7 @@ INSERT INTO registry.capabilities (
   '1.0.0',
   'domain',
   'Compare product options.',
-  '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["utterance"],"properties":{"utterance":{"type":"string"},"product_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/product/compare","auth":"domain-oauth"}'::jsonb,
   NULL,
@@ -634,6 +634,102 @@ INSERT INTO registry.capabilities (
   NULL,
   'kyc-ops',
   'published'
+),
+(
+  'extract_case_facts',
+  '1.0.0',
+  'domain',
+  'Extract structured ShopAssist case facts from the customer message.',
+  '{"type":"object","required":[],"properties":{"utterance":{"type":"string"},"order_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text","order_id"],"properties":{"text":{"type":"string"},"order_id":{"type":"string"},"customer_id":{"type":"string"},"item_id":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/extract_case_facts","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'lookup_order',
+  '1.0.0',
+  'domain',
+  'Look up order status, item, price, and damage flags.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"order_id":{"type":"string"},"item_id":{"type":"string"},"price":{"type":"number"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/lookup_order","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'investigate_duplicate_charge',
+  '1.0.0',
+  'domain',
+  'Check whether an order has a duplicate captured charge.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"duplicate_charge_found":{"type":"boolean"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/investigate_duplicate_charge","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'check_return_policy',
+  '1.0.0',
+  'domain',
+  'Check return and refund policy for a ShopAssist case.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"item_id":{"type":"string"},"reason":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"eligible":{"type":"boolean"},"automatic_refund_limit":{"type":"number"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/check_return_policy","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'escalate_to_human',
+  '1.0.0',
+  'domain',
+  'Create a structured human escalation handoff for ShopAssist.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"},"escalation_reason":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"handoff_id":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/handoff/escalate","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'start_order_specialist',
+  '1.0.0',
+  'agent',
+  'Start order/damage specialist as a jobs run and join its result.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"order_damaged"},"join":true}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'start_billing_specialist',
+  '1.0.0',
+  'agent',
+  'Start billing/duplicate-charge specialist as a jobs run and join its result.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"billing_duplicate"},"join":true}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'start_policy_specialist',
+  '1.0.0',
+  'agent',
+  'Start policy/refund specialist as a jobs run and join its result.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"item_id":{"type":"string"},"reason":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"policy_refund"},"join":true}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
 )
 ON CONFLICT (id, version) DO NOTHING;
 
@@ -653,6 +749,32 @@ INSERT INTO registry.manifests (manifest_id, manifest_version, tools, status) VA
     {"name":"parse_ticket","capability_id":"parse_ticket","capability_version":"1.0.0","pdp_action":"parse_ticket","risk_tier":"low"},
     {"name":"start_kyc_onboarding","capability_id":"start_kyc_onboarding","capability_version":"1.0.0","pdp_action":"start_kyc_onboarding","risk_tier":"high"}
   ]$$::jsonb,
+  'published'
+),
+(
+  'shopassist_case', '2026.08.1',
+  $$[
+    {"name":"extract_case_facts","capability_id":"extract_case_facts","capability_version":"1.0.0","pdp_action":"extract_case_facts","risk_tier":"low"},
+    {"name":"start_order_specialist","capability_id":"start_order_specialist","capability_version":"1.0.0","pdp_action":"start_order_specialist","risk_tier":"medium"},
+    {"name":"start_billing_specialist","capability_id":"start_billing_specialist","capability_version":"1.0.0","pdp_action":"start_billing_specialist","risk_tier":"medium"},
+    {"name":"start_policy_specialist","capability_id":"start_policy_specialist","capability_version":"1.0.0","pdp_action":"start_policy_specialist","risk_tier":"medium"},
+    {"name":"escalate_to_human","capability_id":"escalate_to_human","capability_version":"1.0.0","pdp_action":"escalate_to_human","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'order_damaged', '2026.08.1',
+  '[{"name":"lookup_order","capability_id":"lookup_order","capability_version":"1.0.0","pdp_action":"lookup_order","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'billing_duplicate', '2026.08.1',
+  '[{"name":"investigate_duplicate_charge","capability_id":"investigate_duplicate_charge","capability_version":"1.0.0","pdp_action":"investigate_duplicate_charge","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'policy_refund', '2026.08.1',
+  '[{"name":"check_return_policy","capability_id":"check_return_policy","capability_version":"1.0.0","pdp_action":"check_return_policy","risk_tier":"low"}]'::jsonb,
   'published'
 )
 ON CONFLICT (manifest_id, manifest_version) DO NOTHING;

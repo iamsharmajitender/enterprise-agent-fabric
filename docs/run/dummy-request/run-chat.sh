@@ -19,7 +19,8 @@ COMPOSE=(docker compose -f "$HERE/../compose/docker-compose.yml")
 
 usage() {
   cat >&2 <<EOF
-Usage: $0 [--list] [--all] [--mode N] [route_id]
+Usage: $0 [--list] [--all] [--mode N] [chat_id]
+chat_id is chats.json id (or route_id when id is omitted).
 Each run mints a new session_id and payload ids.
 
 EOF
@@ -41,8 +42,9 @@ mode = sys.argv[2]
 for chat in chats:
     if mode != "" and str(chat["autonomy_mode"]) != mode:
         continue
+    key = chat.get("id") or chat["route_id"]
     claims = ",".join(chat.get("claims") or []) or "-"
-    print("%s  %-18s  %-24s  %s" % (chat["autonomy_mode"], chat["label"], chat["route_id"], claims))
+    print("%s  %-18s  %-28s  %s" % (chat["autonomy_mode"], chat["label"], key, claims))
 ' "$CATALOG" "${1:-}"
 }
 
@@ -54,7 +56,7 @@ mode = sys.argv[2]
 for chat in chats:
     if mode != "" and str(chat["autonomy_mode"]) != mode:
         continue
-    print(chat["route_id"])
+    print(chat.get("id") or chat["route_id"])
 ' "$CATALOG" "${1:-}"
 }
 
@@ -62,11 +64,16 @@ mint() {
   python3 -c '
 import json, sys, uuid
 catalog = json.load(open(sys.argv[1]))
-route_id = sys.argv[2]
+key = sys.argv[2]
 token = uuid.uuid4().hex[:12]
-chat = next((row for row in catalog["chats"] if row["route_id"] == route_id), None)
+
+def catalog_key(row):
+    return row.get("id") or row["route_id"]
+
+chat = next((row for row in catalog["chats"] if catalog_key(row) == key), None)
 if chat is None:
-    raise SystemExit("unknown route_id: " + route_id)
+    raise SystemExit("unknown chat id: " + key)
+route_id = chat["route_id"]
 
 def expand(node):
     if isinstance(node, str):
@@ -80,6 +87,7 @@ def expand(node):
 claims = {"sub": "jane", "emts": {claim: True for claim in chat.get("claims") or []}}
 json.dump(
     {
+        "id": catalog_key(chat),
         "route_id": route_id,
         "message": expand(chat.get("message") or ""),
         "expected_message": chat.get("expected_message"),
@@ -228,7 +236,7 @@ post_turn() {
 import json, sys
 body = json.load(open(sys.argv[1]))
 status = body.get("status")
-if status != "accepted" or not str(body.get("session_id") or "").startswith("sess-"):
+if status != "accepted" or not str(body.get("session_id") or "").startswith("chat-"):
     raise SystemExit("turn was not accepted: " + json.dumps(body))
 print(body["session_id"])
 ' "$tmp"
@@ -290,10 +298,10 @@ else:
 }
 
 run_one() {
-  local route_id="$1"
+  local chat_id="$1"
   local minted
-  minted="$(mint "$route_id")"
-  local claims_json message expected hint_contains prove token autonomy label
+  minted="$(mint "$chat_id")"
+  local claims_json message expected hint_contains prove token autonomy label route_id
   claims_json="$(python3 -c 'import json,sys; print(json.dumps(json.loads(sys.argv[1])["claims"], separators=(",",":")))' "$minted")"
   message="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["message"])' "$minted")"
   expected="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1]).get("expected_message") or "")' "$minted")"
@@ -302,8 +310,9 @@ run_one() {
   token="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["token"])' "$minted")"
   autonomy="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["autonomy_mode"])' "$minted")"
   label="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["label"])' "$minted")"
+  route_id="$(python3 -c 'import json,sys; print(json.loads(sys.argv[1])["route_id"])' "$minted")"
 
-  echo "route_id=${route_id}  autonomy=${autonomy} (${label})"
+  echo "chat_id=${chat_id}  route_id=${route_id}  autonomy=${autonomy} (${label})"
   echo "token=${token}"
   echo "message=${message}"
 
@@ -375,7 +384,7 @@ fi
 LIST=0
 ALL=0
 MODE=""
-ROUTE=""
+CHAT=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -390,16 +399,16 @@ while [[ $# -gt 0 ]]; do
     -h|--help) usage ;;
     --*) usage ;;
     *)
-      if [[ -n "$ROUTE" ]]; then
+      if [[ -n "$CHAT" ]]; then
         usage
       fi
-      ROUTE="$1"
+      CHAT="$1"
       ;;
   esac
   shift
 done
 
-if [[ "$LIST" == "1" || ( -z "$ROUTE" && "$ALL" != "1" && -z "$MODE" ) ]]; then
+if [[ "$LIST" == "1" || ( -z "$CHAT" && "$ALL" != "1" && -z "$MODE" ) ]]; then
   list_chats "$MODE"
   exit 0
 fi
@@ -409,8 +418,8 @@ if ! curl -sf "${AFD}/health" >/dev/null; then
   exit 1
 fi
 
-if [[ -n "$ROUTE" ]]; then
-  run_one "$ROUTE"
+if [[ -n "$CHAT" ]]; then
+  run_one "$CHAT"
   exit 0
 fi
 
@@ -418,9 +427,9 @@ if [[ "$ALL" == "1" || -n "$MODE" ]]; then
   if [[ "${WAIT:-0}" != "1" ]]; then
     CREATE_ONLY=1
   fi
-  while IFS= read -r route_id; do
+  while IFS= read -r chat_id; do
     echo "----"
-    run_one "$route_id"
+    run_one "$chat_id"
   done < <(chat_ids "$MODE")
   exit 0
 fi

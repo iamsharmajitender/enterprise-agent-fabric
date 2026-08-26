@@ -117,7 +117,7 @@ Flyway `V1__frontdoor.sql` on `afd`:
 | `frontdoor.freeze` | Stickiness pin: `session_id` PK, `idempotency_key`, `route_id`, `route_version`, `activation_target`, `agent_client_id`, `correlation_id`, `expires_at` (TTL **45 min** via `JdbcFreezeStore`) |
 | `frontdoor.opaque_ids` | Opaque hint ids per session |
 
-Jobs use `session_id = job:{idempotency_key}`. Chat uses `sess-*`. Freeze is **not** the catalogue and **not** the Runtime run pin. Pin miss uses Runtime `GET /v1/runs?session_id=` — never AR SQL from this box.
+Jobs use `session_id = job-{uuid}` (or `sub-{uuid}` when the idempotency key is a subagent start). Chat mints `chat-{uuid}`. Freeze is **not** the catalogue and **not** the Runtime run pin. Pin miss uses Runtime `GET /v1/runs?session_id=` — never AR SQL from this box.
 
 ## Sibling calls
 

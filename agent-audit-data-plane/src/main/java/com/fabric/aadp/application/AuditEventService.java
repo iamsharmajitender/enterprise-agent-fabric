@@ -45,14 +45,27 @@ public class AuditEventService {
 
   public record WorkflowPage(List<CompletedWorkflow> items, long total, int limit, int offset) {}
 
-  public WorkflowPage completedWorkflows(int limit, int offset) {
+  /** {@code status} is {@code completed} (default) or {@code in_progress}. */
+  public WorkflowPage workflows(String status, int limit, int offset) {
     int safeLimit = Math.min(Math.max(limit, 1), 100);
     int safeOffset = Math.max(offset, 0);
+    String bucket = status == null ? "completed" : status.trim().toLowerCase(Locale.ROOT);
+    if ("in_progress".equals(bucket) || "in-progress".equals(bucket)) {
+      return new WorkflowPage(
+          store.findInProgressWorkflows(safeLimit, safeOffset),
+          store.countInProgressWorkflows(),
+          safeLimit,
+          safeOffset);
+    }
     return new WorkflowPage(
         store.findCompletedWorkflows(safeLimit, safeOffset),
         store.countCompletedWorkflows(),
         safeLimit,
         safeOffset);
+  }
+
+  public WorkflowPage completedWorkflows(int limit, int offset) {
+    return workflows("completed", limit, offset);
   }
 
   static AuditEvent parse(Map<String, Object> body) {

@@ -10,7 +10,8 @@
       "channel": "api",
       "goal": {
         "card_id": "crd-eval-1",
-        "account_id": "acc-eval-1"
+        "account_id": "acc-eval-1",
+        "customer_id": "cust-eval-1"
       },
       "claims": {
         "sub": "eval",

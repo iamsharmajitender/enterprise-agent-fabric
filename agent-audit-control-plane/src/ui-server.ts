@@ -42,16 +42,19 @@ export function createUiServer(client: AuditDataPlaneClient) {
       if (url.pathname === "/api/workflows" && req.method === "GET") {
         const limit = Number.parseInt(url.searchParams.get("limit") ?? "50", 10);
         const offset = Number.parseInt(url.searchParams.get("offset") ?? "0", 10);
+        const status = url.searchParams.get("status") ?? "completed";
         try {
           const result = await client.listWorkflows(
             Number.isFinite(limit) ? limit : 50,
             Number.isFinite(offset) ? offset : 0,
+            status,
           );
           sendJson(res, result.status >= 400 ? 502 : 200, {
             items: result.items,
             total: result.total,
             limit: result.limit,
             offset: result.offset,
+            status: status === "in_progress" || status === "in-progress" ? "in_progress" : "completed",
             upstream: result.status,
             error: result.status >= 400 ? `audit-data-plane HTTP ${result.status}` : undefined,
           });
@@ -61,6 +64,7 @@ export function createUiServer(client: AuditDataPlaneClient) {
             total: 0,
             limit: 50,
             offset: 0,
+            status: "completed",
             upstream: 0,
             error: `audit-data-plane unreachable (${String(err)}). Is :3012 up?`,
           });

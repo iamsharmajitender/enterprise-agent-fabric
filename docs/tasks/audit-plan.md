@@ -84,7 +84,7 @@ Stable fields for HTTP now and Kafka later:
 | `occurred_at` | Producer clock (ISO-8601) |
 | `producer` | `afd` \| `adp` \| `ar` \| `acr` |
 | `correlation_id` | Run key when known (nullable on early decide) |
-| `session_id` | Chat session or `job:{idempotency_key}` when known |
+| `session_id` | Chat session (`chat-{uuid}`) or jobs/sub freeze key (`job-{uuid}` / `sub-{uuid}`) when known |
 | `decision_id` | Optional join from decide → freeze |
 | `payload` | Allowlisted JSON per `event_type` (hashes/digests; see below) |
 

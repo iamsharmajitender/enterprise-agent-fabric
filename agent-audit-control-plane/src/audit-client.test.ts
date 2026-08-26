@@ -32,6 +32,7 @@ test("listWorkflows returns paginated completed runs", async () => {
     assert.equal(url.pathname, "/v1/audit/workflows");
     assert.equal(url.searchParams.get("limit"), "50");
     assert.equal(url.searchParams.get("offset"), "0");
+    assert.equal(url.searchParams.get("status"), "completed");
     return new Response(
       JSON.stringify({
         items: [
@@ -57,4 +58,17 @@ test("listWorkflows returns paginated completed runs", async () => {
   assert.equal(result.status, 200);
   assert.equal(result.total, 1);
   assert.equal(result.items[0]?.route_id, "email_summarize");
+});
+
+test("listWorkflows passes in_progress status", async () => {
+  const client = new AuditDataPlaneClient("http://audit.test", async (input) => {
+    const url = new URL(String(input));
+    assert.equal(url.searchParams.get("status"), "in_progress");
+    return new Response(JSON.stringify({ items: [], total: 0, limit: 50, offset: 0 }), {
+      status: 200,
+    });
+  });
+  const result = await client.listWorkflows(50, 0, "in_progress");
+  assert.equal(result.status, 200);
+  assert.equal(result.total, 0);
 });

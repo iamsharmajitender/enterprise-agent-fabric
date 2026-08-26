@@ -768,7 +768,7 @@ def test_agent_kind_posts_projected_child_goal() -> None:
     assert calls == [
         (
             "contract_review",
-            "child-corr-parent-1-start_contract_review",
+            "subagent-corr-parent-1-start_contract_review",
             {"document_id": "doc-1", "matter_id": "m-9"},
             {
                 "method": "POST",
@@ -778,7 +778,7 @@ def test_agent_kind_posts_projected_child_goal() -> None:
         )
     ]
     assert "noise" not in calls[0][2]
-    assert "Started child job contract_review" in output["result"]
+    assert "Started subagent contract_review" in output["result"]
     assert output["slots"]["start_contract_review"]["payload"] == {
         "document_id": "doc-1",
         "matter_id": "m-9",
@@ -899,6 +899,185 @@ def test_agent_loop_calls_tool_then_done() -> None:
     output = graph.invoke({"result": "", "goal": {"utterance": "Why $42?"}, "notes": []})
     assert calls == ["http://agent-mocks:3010/fees/explain"]
     assert output["result"] == "Fee of $42 is the monthly account charge."
+
+
+def test_agent_loop_escalate_to_human_completes_without_done() -> None:
+    """Successful escalate opens an async handoff; parent completes (no loop burn)."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            assert self.turns == 1, "must not ask the model again after escalate"
+            return "CALL escalate_to_human"
+
+    tools = [
+        {
+            "id": "escalate_to_human",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    output = graph.invoke({"result": "", "goal": {"utterance": "need refund"}, "notes": []})
+    assert calls == ["http://agent-mocks:3010/handoff/escalate"]
+    assert "hof-1" in output["result"]
+    assert "escalated" in output["result"].lower()
+    assert (output.get("slots") or {}).get("escalate_to_human", {}).get("handoff_id") == "hof-1"
+
+
+def test_agent_loop_escalate_idempotent_on_repeat_call() -> None:
+    """Repeat CALL escalate_to_human must not POST again; reuse handoff and complete."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"handoff_id": f"hof-{len(calls)}", "text": f"Handoff opened: hof-{len(calls)}."}
+
+    class Llm:
+        def complete(self, system: str, user: str) -> str:
+            return "CALL escalate_to_human"
+
+    tools = [
+        {
+            "id": "escalate_to_human",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    # Prior successful escalate already in slots — model tries CALL again.
+    output = graph.invoke(
+        {
+            "result": "Handoff opened: hof-1.",
+            "goal": {"utterance": "need refund"},
+            "notes": ["Handoff opened: hof-1."],
+            "slots": {
+                "escalate_to_human": {
+                    "handoff_id": "hof-1",
+                    "text": "Handoff opened: hof-1.",
+                }
+            },
+        }
+    )
+    assert calls == [], "idempotent replay must not POST handoff again"
+    assert (output.get("slots") or {}).get("escalate_to_human", {}).get("handoff_id") == "hof-1"
+    assert "hof-1" in output["result"]
+    assert "hof-2" not in output["result"]
+
+
+def test_agent_loop_escalate_idempotent_while_join_pending() -> None:
+    """While joins pending, repeat CALL escalate skips HTTP and stays in the loop."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"handoff_id": "hof-should-not", "text": "should not post"}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns == 1:
+                return "CALL escalate_to_human"
+            return "DONE still waiting on specialist"
+
+    tools = [
+        {
+            "id": "escalate_to_human",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    output = graph.invoke(
+        {
+            "result": "Handoff opened: hof-1.",
+            "goal": {"utterance": "need refund"},
+            "notes": [],
+            "slots": {
+                "escalate_to_human": {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."},
+                "start_order_specialist": {
+                    "correlation_id": "corr-pending-1",
+                    "route_id": "order_damaged",
+                    "status": "running",
+                },
+            },
+        }
+    )
+    assert calls == []
+    assert "idempotent" in " ".join(output.get("notes") or []).lower() or "hof-1" in str(
+        output.get("slots")
+    )
+    assert output["result"] == "still waiting on specialist"
+
+
+def test_agent_loop_escalate_waits_when_subagent_join_pending() -> None:
+    """Do not auto-complete escalate while a child job join is still pending."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"handoff_id": "hof-2", "text": "Handoff opened: hof-2."}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns == 1:
+                return "CALL escalate_to_human"
+            return "DONE waiting on specialist then closing"
+
+    tools = [
+        {
+            "id": "escalate_to_human",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "need refund"},
+            "notes": [],
+            "slots": {
+                "start_order_specialist": {
+                    "correlation_id": "corr-pending-1",
+                    "route_id": "order_damaged",
+                    "status": "running",
+                }
+            },
+        }
+    )
+    assert calls == ["http://agent-mocks:3010/handoff/escalate"]
+    assert output["result"] == "waiting on specialist then closing"
 
 
 def test_agent_loop_tool_schema_miss_observes_and_continues() -> None:

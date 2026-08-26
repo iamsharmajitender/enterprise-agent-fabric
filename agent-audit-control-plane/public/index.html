@@ -3,25 +3,77 @@
   <head>
     <meta charset="utf-8" />
     <title>Agent Audit</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=5" />
   </head>
   <body>
     <main>
       <header class="page-head">
         <div>
           <h1>Agent Audit</h1>
-          <p class="lede">Completed workflows end-to-end. Data from agent-audit-data-plane only.</p>
+          <p class="lede">Workflow runs from agent-audit-data-plane. Search is unchanged.</p>
         </div>
         <a class="btn" href="/search">Search</a>
       </header>
 
-      <p id="status" class="status" aria-live="polite">Loading…</p>
+      <div class="tabs" role="tablist" aria-label="Workflow status">
+        <button
+          type="button"
+          class="tab is-active"
+          role="tab"
+          id="tab-completed"
+          aria-selected="true"
+          aria-controls="panel-workflows"
+          data-status="completed"
+        >
+          Completed
+        </button>
+        <button
+          type="button"
+          class="tab"
+          role="tab"
+          id="tab-in-progress"
+          aria-selected="false"
+          aria-controls="panel-workflows"
+          data-status="in_progress"
+        >
+          In progress
+        </button>
+      </div>
 
-      <div class="table-wrap" role="region" aria-label="Completed workflows">
+      <div class="list-toolbar">
+        <p id="status" class="status" aria-live="polite">Loading…</p>
+        <div class="view-toggle" role="group" aria-label="List layout">
+          <button
+            type="button"
+            class="view-btn is-active"
+            id="view-nested"
+            data-view="nested"
+            aria-pressed="true"
+          >
+            Nested
+          </button>
+          <button
+            type="button"
+            class="view-btn"
+            id="view-flat"
+            data-view="flat"
+            aria-pressed="false"
+          >
+            Flat
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="table-wrap is-nested"
+        id="panel-workflows"
+        role="tabpanel"
+        aria-labelledby="tab-completed"
+      >
         <table id="workflows">
           <thead>
             <tr>
-              <th scope="col">Completed</th>
+              <th scope="col" id="col-when">Finished</th>
               <th scope="col">Started</th>
               <th scope="col">Route</th>
               <th scope="col">Status</th>
@@ -39,6 +91,6 @@
         <button type="button" id="next" disabled>Next 50</button>
       </nav>
     </main>
-    <script src="/landing.js"></script>
+    <script src="/landing.js?v=5"></script>
   </body>
 </html>

@@ -2,7 +2,11 @@ package com.fabric.aadp.domain;
 
 import java.time.Instant;
 
-/** One finished run (correlation) that reached {@code run.terminal} with status completed. */
+/**
+ * One run (correlation) for the workflows list. {@code completedAt} is the terminal time for
+ * finished runs, or the latest activity time for in-progress runs. {@code parentCorrelationId} is
+ * set when this run was started as a {@code kind=agent} child of another correlation.
+ */
 public record CompletedWorkflow(
     String correlationId,
     String sessionId,
@@ -11,4 +15,5 @@ public record CompletedWorkflow(
     String routeVersion,
     String status,
     Instant startedAt,
-    Instant completedAt) {}
+    Instant completedAt,
+    String parentCorrelationId) {}

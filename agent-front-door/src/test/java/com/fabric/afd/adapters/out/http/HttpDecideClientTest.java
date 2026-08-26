@@ -9,6 +9,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import com.fabric.afd.domain.DecideCall;
 import com.fabric.afd.domain.DecideOutcome;
+import com.fabric.afd.domain.SessionIds;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class HttpDecideClientTest {
             new DecideCall(
                 "jobs",
                 "web",
-                "job:job-fee-explain:v1",
+                SessionIds.mintJobOrSub("job-fee-explain:v1"),
                 null,
                 "fee_explain",
                 Map.of("sub", "jane")));

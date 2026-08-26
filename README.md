@@ -439,7 +439,7 @@ How the later README topics land on each box is summarized at the end of this se
 1. Channel auth: `Authorization: Bearer stub` + `X-Stub-Claims`. Missing bearer → 401.
 2. **Jobs:** `POST /v1/jobs` with explicit `route_id` + `idempotency_key`. Skip retrieve and `clarify` (Layer ① only). Still call Data Plane decide (`ingress: "jobs"`) so entitle + record happen. Missing claims / unknown route → **403**, do not start Runtime.
 3. **Chat:** `POST /v1/assistant/turns` with a message (or opaque `hint_id` / `option_id`). Data Plane classifies (① command, else ② retrieve). Only `outcome=route` freezes and starts. `clarify` / `abstain` never pin. Assistant JSON stays FR-5 slim (no `route_id`, `router_layer`, …).
-4. On `route`, AFD GETs the pinned catalogue row, writes a **freeze** keyed by `session_id` (`sess-*` for chat, `job:{idempotency_key}` for jobs), then `POST /v1/runs` on Runtime. Returns `202 { "correlation_id" }`. AFD never mints that id — if Runtime fails, AFD returns **503**.
+4. On `route`, AFD GETs the pinned catalogue row, writes a **freeze** keyed by `session_id` (`chat-{uuid}` for chat, `job-{uuid}` / `sub-{uuid}` for jobs), then `POST /v1/runs` on Runtime. Returns `202 { "correlation_id" }`. AFD never mints that id — if Runtime fails, AFD returns **503**.
 5. Status: `GET /v1/jobs/{correlation_id}` (or chat events) polls Runtime HTTP. **No** Data Plane call on the poll path.
 6. Follow-up chat turns reuse the freeze (same pin, skip classify). Duplicate job keys return the original `correlation_id`.
 
@@ -810,7 +810,7 @@ Enable in this order: (1) `conversation=session` on `chat_session` (needs Shared
 
 | | Chat (`/v1/assistant/*`) | Jobs (`/v1/jobs`) |
 | --- | --- | --- |
-| Session | Stable `session_id` (`sess-*`). Front Door freeze keeps the next turn on the same run (skip classify). That is **route stickiness**, not memory. | `session_id = job:{idempotency_key}`. One-shot. No follow-up turns. |
+| Session | Stable `session_id` (`chat-{uuid}`). Front Door freeze keeps the next turn on the same run (skip classify). That is **route stickiness**, not memory. | `session_id = job-{uuid}` (or `sub-{uuid}` for subagents). One-shot. No follow-up turns. |
 | Needs `conversation` | **Yes**, if the route has `conversation=session`. Prove it: turn 1 “my account is acc-42”, turn 2 “what was my account id?” | **No**, unless you add job follow-ups. Idempotent POST is not a second turn. |
 | Needs `working` | Yes for multi-stage / multi-turn chat that must keep packed chunks or tool hits (`policy_chat`, `fee_explain`). | Yes **inside one job** if stages must see prior stage output. Persisted on `ar.runtime.runs.working` when the route profile says `session`. |
 | Needs `loop` | Yes for Pattern 1 chat (`search_only`, `research_assistant`) so a crash does not restart the loop. | Same for long tool loops (`fraud_casefile`, `contract_review`). Irrelevant for `llm_pipeline` / `account_notify`. |

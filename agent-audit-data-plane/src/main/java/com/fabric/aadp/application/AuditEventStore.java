@@ -20,4 +20,12 @@ public interface AuditEventStore {
   List<CompletedWorkflow> findCompletedWorkflows(int limit, int offset);
 
   long countCompletedWorkflows();
+
+  /**
+   * In-progress runs newest-first: started correlations without a completed/failed terminal
+   * (includes {@code waiting} and still-running).
+   */
+  List<CompletedWorkflow> findInProgressWorkflows(int limit, int offset);
+
+  long countInProgressWorkflows();
 }

@@ -8,6 +8,7 @@ import com.fabric.afd.domain.DecideOutcome;
 import com.fabric.afd.domain.ForbiddenException;
 import com.fabric.afd.domain.FrozenRoute;
 import com.fabric.afd.domain.RunStart;
+import com.fabric.afd.domain.SessionIds;
 import java.util.Map;
 
 public class JobsService {
@@ -48,7 +49,7 @@ public class JobsService {
     if (blank(routeId) || blank(idempotencyKey)) {
       throw new BadRequestException("route_id and idempotency_key are required");
     }
-    String sessionId = "job:" + idempotencyKey;
+    String sessionId = SessionIds.mintJobOrSub(idempotencyKey);
     String journeyId = "job." + routeId;
     TraceIds.put("session_id", sessionId);
     TraceIds.put("route_id", routeId);
@@ -92,7 +93,12 @@ public class JobsService {
             correlationId));
     audit.emitAsync(
         AuditEvents.freezeWritten(
-            correlationId, sessionId, row.routeId(), row.routeVersion(), "jobs"));
+            correlationId,
+            sessionId,
+            row.routeId(),
+            row.routeVersion(),
+            "jobs",
+            SessionIds.parentCorrelationId(idempotencyKey)));
     events.emit(
         "job.run.accepted",
         journeyId,

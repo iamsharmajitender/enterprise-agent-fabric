@@ -299,7 +299,7 @@ INSERT INTO registry.capabilities (
   'domain',
   'Score KYC risk as low or high.',
   '{"type":"object","required":["customer_id"],"properties":{"customer_id":{"type":"string"}}}'::jsonb,
-  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["risk","text"],"properties":{"risk":{"type":"string","enum":["low","high"]},"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/kyc/risk","auth":"domain-oauth"}'::jsonb,
   NULL,
   'kyc-ops',
@@ -358,7 +358,7 @@ INSERT INTO registry.capabilities (
   '1.0.0',
   'domain',
   'Score a product offer.',
-  '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["utterance"],"properties":{"utterance":{"type":"string"},"product_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/product/score","auth":"domain-oauth"}'::jsonb,
   NULL,
@@ -370,7 +370,7 @@ INSERT INTO registry.capabilities (
   '1.0.0',
   'domain',
   'Compare product options.',
-  '{"type":"object","required":["product_id"],"properties":{"product_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["utterance"],"properties":{"utterance":{"type":"string"},"product_id":{"type":"string"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/product/compare","auth":"domain-oauth"}'::jsonb,
   NULL,
@@ -399,6 +399,102 @@ INSERT INTO registry.capabilities (
   '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"kyc_onboarding"}}'::jsonb,
   NULL,
   'kyc-ops',
+  'published'
+),
+(
+  'extract_case_facts',
+  '1.0.0',
+  'domain',
+  'Extract structured ShopAssist case facts from the customer message.',
+  '{"type":"object","required":[],"properties":{"utterance":{"type":"string"},"order_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text","order_id"],"properties":{"text":{"type":"string"},"order_id":{"type":"string"},"customer_id":{"type":"string"},"item_id":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/extract_case_facts","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'lookup_order',
+  '1.0.0',
+  'domain',
+  'Look up order status, item, price, and damage flags.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"order_id":{"type":"string"},"item_id":{"type":"string"},"price":{"type":"number"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/lookup_order","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'investigate_duplicate_charge',
+  '1.0.0',
+  'domain',
+  'Check whether an order has a duplicate captured charge.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"duplicate_charge_found":{"type":"boolean"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/investigate_duplicate_charge","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'check_return_policy',
+  '1.0.0',
+  'domain',
+  'Check return and refund policy for a ShopAssist case.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"item_id":{"type":"string"},"reason":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"eligible":{"type":"boolean"},"automatic_refund_limit":{"type":"number"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/shopassist/check_return_policy","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'escalate_to_human',
+  '1.0.0',
+  'domain',
+  'Create a structured human escalation handoff for ShopAssist.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"},"escalation_reason":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"handoff_id":{"type":"string"}}}'::jsonb,
+  '{"method":"POST","url":"http://agent-mocks:3010/handoff/escalate","auth":"domain-oauth"}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'start_order_specialist',
+  '1.0.0',
+  'agent',
+  'Start order/damage specialist as a jobs run and join its result.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"order_damaged"},"join":true}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'start_billing_specialist',
+  '1.0.0',
+  'agent',
+  'Start billing/duplicate-charge specialist as a jobs run and join its result.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"billing_duplicate"},"join":true}'::jsonb,
+  NULL,
+  'shopassist',
+  'published'
+),
+(
+  'start_policy_specialist',
+  '1.0.0',
+  'agent',
+  'Start policy/refund specialist as a jobs run and join its result.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"item_id":{"type":"string"},"reason":{"type":"string"}}}'::jsonb,
+  NULL,
+  '{"method":"POST","url":"https://api-afd.internal/v1/jobs","auth":"calling-agent-oauth","body":{"route_id":"policy_refund"},"join":true}'::jsonb,
+  NULL,
+  'shopassist',
   'published'
 );
 
@@ -577,6 +673,34 @@ INSERT INTO registry.manifests (manifest_id, manifest_version, tools, status) VA
   'ops_start_kyc', '2026.08.1', $$[
     {"name":"parse_ticket","capability_id":"parse_ticket","capability_version":"1.0.0","pdp_action":"parse_ticket","risk_tier":"low"},
     {"name":"start_kyc_onboarding","capability_id":"start_kyc_onboarding","capability_version":"1.0.0","pdp_action":"start_kyc_onboarding","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'shopassist_case', '2026.08.1', $$[
+    {"name":"extract_case_facts","capability_id":"extract_case_facts","capability_version":"1.0.0","pdp_action":"extract_case_facts","risk_tier":"low"},
+    {"name":"start_order_specialist","capability_id":"start_order_specialist","capability_version":"1.0.0","pdp_action":"start_order_specialist","risk_tier":"medium"},
+    {"name":"start_billing_specialist","capability_id":"start_billing_specialist","capability_version":"1.0.0","pdp_action":"start_billing_specialist","risk_tier":"medium"},
+    {"name":"start_policy_specialist","capability_id":"start_policy_specialist","capability_version":"1.0.0","pdp_action":"start_policy_specialist","risk_tier":"medium"},
+    {"name":"escalate_to_human","capability_id":"escalate_to_human","capability_version":"1.0.0","pdp_action":"escalate_to_human","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'order_damaged', '2026.08.1', $$[
+    {"name":"lookup_order","capability_id":"lookup_order","capability_version":"1.0.0","pdp_action":"lookup_order","risk_tier":"low"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'billing_duplicate', '2026.08.1', $$[
+    {"name":"investigate_duplicate_charge","capability_id":"investigate_duplicate_charge","capability_version":"1.0.0","pdp_action":"investigate_duplicate_charge","risk_tier":"low"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'policy_refund', '2026.08.1', $$[
+    {"name":"check_return_policy","capability_id":"check_return_policy","capability_version":"1.0.0","pdp_action":"check_return_policy","risk_tier":"low"}
   ]$$::jsonb,
   'published'
 );
@@ -802,6 +926,32 @@ INSERT INTO dataplane.manifests (manifest_id, manifest_version, description, too
     {"name":"start_kyc_onboarding","capability_id":"start_kyc_onboarding","capability_version":"1.0.0","pdp_action":"start_kyc_onboarding","risk_tier":"high"}
   ]$$::jsonb,
   'published'
+),
+(
+  'shopassist_case', '2026.08.1', 'ShopAssist coordinator: extract facts, optional join specialists, escalate',
+  $$[
+    {"name":"extract_case_facts","capability_id":"extract_case_facts","capability_version":"1.0.0","pdp_action":"extract_case_facts","risk_tier":"low"},
+    {"name":"start_order_specialist","capability_id":"start_order_specialist","capability_version":"1.0.0","pdp_action":"start_order_specialist","risk_tier":"medium"},
+    {"name":"start_billing_specialist","capability_id":"start_billing_specialist","capability_version":"1.0.0","pdp_action":"start_billing_specialist","risk_tier":"medium"},
+    {"name":"start_policy_specialist","capability_id":"start_policy_specialist","capability_version":"1.0.0","pdp_action":"start_policy_specialist","risk_tier":"medium"},
+    {"name":"escalate_to_human","capability_id":"escalate_to_human","capability_version":"1.0.0","pdp_action":"escalate_to_human","risk_tier":"high"}
+  ]$$::jsonb,
+  'published'
+),
+(
+  'order_damaged', '2026.08.1', 'ShopAssist order/damage specialist',
+  '[{"name":"lookup_order","capability_id":"lookup_order","capability_version":"1.0.0","pdp_action":"lookup_order","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'billing_duplicate', '2026.08.1', 'ShopAssist billing/duplicate specialist',
+  '[{"name":"investigate_duplicate_charge","capability_id":"investigate_duplicate_charge","capability_version":"1.0.0","pdp_action":"investigate_duplicate_charge","risk_tier":"low"}]'::jsonb,
+  'published'
+),
+(
+  'policy_refund', '2026.08.1', 'ShopAssist policy/refund specialist',
+  '[{"name":"check_return_policy","capability_id":"check_return_policy","capability_version":"1.0.0","pdp_action":"check_return_policy","risk_tier":"low"}]'::jsonb,
+  'published'
 );
 
 INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, stages, status) VALUES
@@ -969,6 +1119,27 @@ INSERT INTO dataplane.workflows (workflow_id, workflow_version, description, sta
     {"id":"analyse","allowlist":["clause_search","policy_search","risk_engine"],"max_tool_calls":8},
     {"id":"report","tool":"draft_memo","llm_role":"synthesis"}
   ]$$::jsonb, 'published'
+),
+(
+  'order_damaged', '2026.08.1', 'ShopAssist order specialist: lookup then synthesize findings.',
+  $$[
+    {"id":"lookup","tool":"lookup_order","llm_role":"none"},
+    {"id":"respond","llm_role":"synthesis"}
+  ]$$::jsonb, 'published'
+),
+(
+  'billing_duplicate', '2026.08.1', 'ShopAssist billing specialist: investigate then synthesize findings.',
+  $$[
+    {"id":"investigate","tool":"investigate_duplicate_charge","llm_role":"none"},
+    {"id":"respond","llm_role":"synthesis"}
+  ]$$::jsonb, 'published'
+),
+(
+  'policy_refund', '2026.08.1', 'ShopAssist policy specialist: check policy then synthesize findings.',
+  $$[
+    {"id":"policy","tool":"check_return_policy","llm_role":"none"},
+    {"id":"respond","llm_role":"synthesis"}
+  ]$$::jsonb, 'published'
 );
 
 INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, owner) VALUES
@@ -985,6 +1156,10 @@ INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, own
   ('contract_investigate', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use only allowed tools. Prefer evidence. Do not invent tool results.', 'published', 'legal-agents'),
   ('fraud_investigate', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Use OCR and memo tools. You may CALL start_contract_review. Do not invent tools.', 'published', 'fraud-ops'),
   ('ops_start_kyc', '2026.08.1', 'Pattern 1. Reply CALL <tool_id> or DONE <answer>. Parse the ticket. You may CALL start_kyc_onboarding. Do not invent tools.', 'published', 'ops'),
+  ('shopassist_case', '2026.08.1', 'Pattern 1. You are the ShopAssist coordinator. Reply CALL <tool_id> or DONE <answer>. First CALL extract_case_facts. Then CALL only the specialists needed (start_order_specialist, start_billing_specialist, start_policy_specialist) based on customer issues. After specialist findings, CALL escalate_to_human when refund exceeds auto limits or human review is required. After escalate_to_human succeeds, DONE immediately with a customer-facing summary that includes the handoff id — never CALL escalate_to_human twice. Do not invent tool results. DONE with the customer-facing summary only after required findings are collected.', 'published', 'shopassist'),
+  ('order_damaged', '2026.08.1', 'Pattern 2. Order specialist. Do only the current stage. Return damage/order facts only. Do not contact the customer.', 'published', 'shopassist'),
+  ('billing_duplicate', '2026.08.1', 'Pattern 2. Billing specialist. Do only the current stage. Return payment facts only. Do not contact the customer.', 'published', 'shopassist'),
+  ('policy_refund', '2026.08.1', 'Pattern 2. Policy specialist. Do only the current stage. Return eligibility and limits only. Do not promise refunds.', 'published', 'shopassist'),
   ('llm_pipeline', '2026.08.1', 'Pattern 2. Do only the current stage. Do not choose the next stage. No tools.', 'published', 'assistant-platform'),
   ('policy_memo', '2026.08.1', 'Pattern 2. Do only the current stage. Draft from prefetched policy only.', 'published', 'assistant-platform'),
   ('account_notify', '2026.08.1', 'Pattern 2. Confirm the notify from stage outputs only. Do not invent send status.', 'published', 'ops'),
@@ -1006,6 +1181,9 @@ INSERT INTO dataplane.prompt_packs (prompt_id, prompt_version, host, status, own
   ('due_diligence', '2026.08.1', 'Pattern 3. Extract always retrieves the playbook. Analyse may retrieve again. Do not invent stages.', 'published', 'legal-agents');
 
 INSERT INTO dataplane.prompt_role_templates (prompt_id, prompt_version, llm_role, task_type, "text") VALUES
+  ('order_damaged', '2026.08.1', 'synthesis', 'synthesize', 'Summarize order and damage facts from the lookup tool only. Do not invent evidence.'),
+  ('billing_duplicate', '2026.08.1', 'synthesis', 'synthesize', 'Summarize payment/duplicate findings from the investigate tool only. Do not invent captures.'),
+  ('policy_refund', '2026.08.1', 'synthesis', 'synthesize', 'State eligibility, auto refund limit, and recommended next step from the policy tool only. Do not promise a payout.'),
   ('llm_pipeline', '2026.08.1', 'classify', 'classify', 'Extract the requested fields from the input only.'),
   ('llm_pipeline', '2026.08.1', 'synthesis', 'synthesize', 'Rewrite or format using the previous stage output only.'),
   ('policy_memo', '2026.08.1', 'synthesis', 'synthesize', 'Draft the memo from prefetched chunks only. Cite chunk ids.'),
@@ -1129,6 +1307,34 @@ INSERT INTO dataplane.routes (
   'http://agent-runtime:3008/v1/runs', 'agent-ops-start-kyc', 'ops_start_kyc', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'ops_start_kyc', NULL, NULL, 6, 'clarify',
   '["kyc:onboard"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 1
+),
+(
+  'shopassist_case', '2026.08.1', TRUE, 'active', 'shopassist_case',
+  'Pattern 1 (autonomous): ShopAssist coordinator. CALL extract_case_facts then optional join specialists (order/billing/policy). Escalate when needed.',
+  'http://agent-runtime:3008/v1/runs', 'agent-shopassist-case', 'shopassist_case', '2026.08.1',
+  'read_only_standard', 'reasoning-standard', NULL, 'shopassist_case', NULL, NULL, 12, 'clarify',
+  '["support:case"]'::jsonb, '["web","api"]'::jsonb, TRUE, '["damaged","damage","refund","jacket","charged twice","duplicate charge","ORD-77819"]'::jsonb, 1
+),
+(
+  'order_damaged', '2026.08.1', TRUE, 'active', 'order_damaged',
+  'Pattern 2 (deterministic): ShopAssist order/damage specialist. lookup_order then synthesis.',
+  'http://agent-runtime:3008/v1/runs', 'agent-order-damaged', 'order_damaged', '2026.08.1',
+  'read_only_standard', 'reasoning-standard', 'order_damaged', 'order_damaged', NULL, NULL, NULL, 'clarify',
+  '["support:case"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
+),
+(
+  'billing_duplicate', '2026.08.1', TRUE, 'active', 'billing_duplicate',
+  'Pattern 2 (deterministic): ShopAssist billing specialist. investigate_duplicate_charge then synthesis.',
+  'http://agent-runtime:3008/v1/runs', 'agent-billing-duplicate', 'billing_duplicate', '2026.08.1',
+  'read_only_standard', 'reasoning-standard', 'billing_duplicate', 'billing_duplicate', NULL, NULL, NULL, 'clarify',
+  '["support:case"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
+),
+(
+  'policy_refund', '2026.08.1', TRUE, 'active', 'policy_refund',
+  'Pattern 2 (deterministic): ShopAssist policy specialist. check_return_policy then synthesis.',
+  'http://agent-runtime:3008/v1/runs', 'agent-policy-refund', 'policy_refund', '2026.08.1',
+  'read_only_standard', 'reasoning-standard', 'policy_refund', 'policy_refund', NULL, NULL, NULL, 'clarify',
+  '["support:case"]'::jsonb, '["api"]'::jsonb, FALSE, '[]'::jsonb, 2
 ),
 (
   'llm_pipeline', '2026.08.1', TRUE, 'active', 'llm_pipeline',
@@ -1298,6 +1504,10 @@ INSERT INTO dataplane.memory_profiles (
   ('contract_investigation', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('fraud_investigate', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),
   ('ops_start_kyc', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
+  ('shopassist_case', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 24, '["tenant","user","session"]'::jsonb),
+  ('order_damaged', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
+  ('billing_duplicate', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
+  ('policy_refund', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
   ('dispute_intake', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
   ('purchase_refund', '2026.08.1', 'session', 'session', 'checkpoint', 'none', 8, '["tenant","user","session"]'::jsonb),
   ('pack_then_review', '2026.08.1', 'session', 'session', 'checkpoint', 'retrieve_only', 24, '["tenant","user","session"]'::jsonb),

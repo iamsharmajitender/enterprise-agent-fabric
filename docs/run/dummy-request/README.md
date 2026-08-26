@@ -20,8 +20,8 @@ Both channels use the same tree: catalogue JSON + wrappers grouped by autonomy.
 | Folder | Autonomy | Jobs | Chat |
 | --- | --- | --- | --- |
 | `0-single-inference/` | 0 | `email_summarize` | `agent-chat`, `chat_session`, `agent-policy-qa`, `policy_chat` |
-| `1-autonomous/` | 1 | `fee_explain`, `fraud_one_tool`, `fraud_casefile`, `fraud_investigate`, `ops_start_kyc`, `contract_investigation` | `search_only`, `research_assistant`, `fee_explain` |
-| `2-deterministic/` | 2 | `llm_pipeline`, `policy_memo`, `account_notify`, `card_freeze`, `dispute_intake`, `purchase_refund`, `pack_then_*`, `clause_lookup`, `template_retrieve`, `msa_risk_review`, `kyc_onboarding`, `claims_adjudicate` | — (no seed chat-visible route) |
+| `1-autonomous/` | 1 | `fee_explain`, `fraud_one_tool`, `fraud_casefile`, `fraud_investigate`, `ops_start_kyc`, `contract_investigation`, `shopassist_case` | `search_only`, `research_assistant`, `fee_explain`, `shopassist_case`, `shopassist_case_no_escalate` |
+| `2-deterministic/` | 2 | `llm_pipeline`, `policy_memo`, `account_notify`, `card_freeze`, `dispute_intake`, `purchase_refund`, `pack_then_*`, `clause_lookup`, `template_retrieve`, `msa_risk_review`, `kyc_onboarding`, `claims_adjudicate`, `order_damaged`, `billing_duplicate`, `policy_refund` | — (no seed chat-visible route) |
 | `3-guided/` | 3 | `ticket_triage`, `narrow_review`, `contract_review`, `due_diligence` | `product_explain` |
 
 **Dataflow proof routes** (a green `completed` on `--all` is **not** sufficient — see [verification checklist](../../tasks/dataflow-plan.md#verification-checklist-d13)):
@@ -48,7 +48,7 @@ Each invocation mints:
 | `idempotency_key` | this folder (jobs) | `job-{route_id}:{token}` |
 | payload ids (`account_id`, `claim_id`, …) | this folder | `{id}` in the channel JSON replaced with the same token |
 | `correlation_id` | Front Door / Runtime | `corr-…` (jobs) |
-| `session_id` | Front Door | `sess-…` (chats) |
+| `session_id` | Front Door | `chat-{uuid}` (chats); jobs use `job-{uuid}` / `sub-{uuid}` |
 
 Hitting the same script twice creates **two** jobs or **two** chat sessions.
 

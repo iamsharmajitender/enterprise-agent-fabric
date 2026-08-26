@@ -60,6 +60,48 @@
       }
     },
     {
+      "route_id": "shopassist_case",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["support:case"],
+      "payload": {
+        "order_id": "ORD-77819",
+        "customer_id": "CUS-1842",
+        "utterance": "Blue jacket arrived damaged. Possibly charged twice. Want full refund for ORD-77819."
+      }
+    },
+    {
+      "route_id": "order_damaged",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["support:case"],
+      "payload": {
+        "order_id": "ORD-77819",
+        "customer_id": "CUS-1842"
+      }
+    },
+    {
+      "route_id": "billing_duplicate",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["support:case"],
+      "payload": {
+        "order_id": "ORD-77819",
+        "customer_id": "CUS-1842"
+      }
+    },
+    {
+      "route_id": "policy_refund",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["support:case"],
+      "payload": {
+        "order_id": "ORD-77819",
+        "item_id": "jacket_blue_m",
+        "reason": "damaged_item"
+      }
+    },
+    {
       "route_id": "contract_investigation",
       "autonomy_mode": 1,
       "label": "Autonomous",
@@ -103,7 +145,8 @@
       "claims": ["cards:freeze"],
       "payload": {
         "card_id": "crd-{id}",
-        "account_id": "acc-{id}"
+        "account_id": "acc-{id}",
+        "customer_id": "cust-{id}"
       }
     },
     {
@@ -112,7 +155,10 @@
       "label": "Deterministic",
       "claims": ["disputes:write"],
       "payload": {
-        "dispute_id": "dsp-{id}"
+        "dispute_id": "dsp-{id}",
+        "customer_id": "cust-{id}",
+        "account_id": "acc-{id}",
+        "packet_id": "pkt-{id}"
       }
     },
     {
@@ -141,7 +187,9 @@
       "label": "Deterministic",
       "claims": ["cards:freeze"],
       "payload": {
-        "card_id": "crd-{id}"
+        "card_id": "crd-{id}",
+        "account_id": "acc-{id}",
+        "customer_id": "cust-{id}"
       }
     },
     {
@@ -168,7 +216,8 @@
       "label": "Deterministic",
       "claims": ["legal:read"],
       "payload": {
-        "query": "late-notice exclusion {id}"
+        "query": "late-notice exclusion {id}",
+        "score_profile": "template-retrieve"
       }
     },
     {
@@ -186,7 +235,8 @@
       "label": "Deterministic",
       "claims": ["kyc:onboard"],
       "payload": {
-        "applicant_id": "kyc-{id}"
+        "applicant_id": "kyc-{id}",
+        "customer_id": "cust-{id}"
       }
     },
     {
@@ -195,7 +245,10 @@
       "label": "Deterministic",
       "claims": ["claims:read"],
       "payload": {
-        "claim_id": "clm-{id}"
+        "claim_id": "clm-{id}",
+        "query": "claim adjudication playbook {id}",
+        "score_profile": "claims",
+        "audience": "claims-ops"
       }
     },
     {
@@ -231,7 +284,10 @@
       "label": "Guided",
       "claims": ["legal:read"],
       "payload": {
-        "doc_id": "doc-{id}"
+        "doc_id": "doc-{id}",
+        "query": "due diligence playbook {id}",
+        "score_profile": "diligence",
+        "audience": "counsel"
       }
     }
   ]

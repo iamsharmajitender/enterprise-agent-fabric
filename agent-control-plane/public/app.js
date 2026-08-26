@@ -642,6 +642,37 @@ function riskChip(tier) {
   return pill(String(tier), tone);
 }
 
+async function withToolKinds(tools) {
+  tools = Array.isArray(tools) ? tools : [];
+  if (tools.length === 0) return tools;
+  const byPin = new Map();
+  const byId = new Map();
+  try {
+    const res = await fetch("/api/capabilities?include=all");
+    if (res.ok) {
+      const payload = await res.json();
+      const caps = Array.isArray(payload?.capabilities)
+        ? payload.capabilities
+        : Array.isArray(payload)
+          ? payload
+          : [];
+      for (const cap of caps) {
+        if (!cap?.id) continue;
+        if (cap.version != null) byPin.set(`${cap.id}@${cap.version}`, cap.kind);
+        if (!byId.has(cap.id) || cap.status === "published") byId.set(cap.id, cap.kind);
+      }
+    }
+  } catch {
+    /* kind stays empty when registry is down */
+  }
+  return tools.map((tool) => {
+    if (tool?.kind || !tool?.capability_id) return tool;
+    const pinned = `${tool.capability_id}@${tool.capability_version ?? ""}`;
+    const kind = byPin.get(pinned) ?? byId.get(tool.capability_id);
+    return kind ? { ...tool, kind } : tool;
+  });
+}
+
 function renderToolsTable(tools) {
   tools = Array.isArray(tools) ? tools : [];
   const root = el("div", "table-root table-root--primary");
@@ -652,7 +683,7 @@ function renderToolsTable(tools) {
   const thead = document.createElement("thead");
   thead.className = "table__header";
   const headRow = el("tr", "table__row");
-  for (const label of ["Name", "Capability", "Version", "Action", "Risk"]) {
+  for (const label of ["Name", "Kind", "Capability", "Version", "Action", "Risk"]) {
     const th = el("th", "table__column", label);
     th.scope = "col";
     headRow.append(th);
@@ -663,7 +694,7 @@ function renderToolsTable(tools) {
   tbody.className = "table__body";
   if (tools.length === 0) {
     const empty = el("td", "table__cell table__empty", "No tools");
-    empty.colSpan = 5;
+    empty.colSpan = 6;
     const tr = el("tr", "table__row");
     tr.append(empty);
     tbody.append(tr);
@@ -675,6 +706,9 @@ function renderToolsTable(tools) {
         : isEmpty(name)
           ? el("span", "empty", "—")
           : el("span", "mono", name);
+      const kindNode = isEmpty(tool?.kind)
+        ? el("span", "empty", "—")
+        : kindPill(tool.kind);
       const version = isEmpty(tool?.capability_version)
         ? el("span", "empty", "—")
         : el("span", "mono", tool.capability_version);
@@ -684,6 +718,7 @@ function renderToolsTable(tools) {
       const tr = el("tr", "table__row");
       tr.append(
         tableCell(nameNode),
+        tableCell(kindNode),
         tableCell(idLink(catalogHref("capability_id", tool.capability_id), tool.capability_id, "mono")),
         tableCell(version),
         tableCell(action),
@@ -1786,7 +1821,17 @@ async function showRoute(routeId, routeVersion) {
     showError(`Route ${routeId} was not found.`);
     return;
   }
-  const row = await res.json();
+  const rowRaw = await res.json();
+  let row = rowRaw;
+  if (row.manifest && Array.isArray(row.manifest.tools)) {
+    row = {
+      ...row,
+      manifest: {
+        ...row.manifest,
+        tools: await withToolKinds(row.manifest.tools),
+      },
+    };
+  }
   const versionsPayload = versionsRes.ok ? await versionsRes.json() : { versions: [] };
   const revisionCount = Array.isArray(versionsPayload.versions)
     ? versionsPayload.versions.length
@@ -2468,7 +2513,20 @@ async function showCatalogDetail({
     showError(notFound);
     return;
   }
-  const row = await res.json();
+  const rowRaw = await res.json();
+  let row = rowRaw;
+  if (Array.isArray(row.tools)) {
+    row = { ...row, tools: await withToolKinds(row.tools) };
+  }
+  if (row.manifest && Array.isArray(row.manifest.tools)) {
+    row = {
+      ...row,
+      manifest: {
+        ...row.manifest,
+        tools: await withToolKinds(row.manifest.tools),
+      },
+    };
+  }
   const versionsPayload =
     versionsRes && versionsRes.ok ? await versionsRes.json() : { versions: [] };
   const revisionCount = Array.isArray(versionsPayload.versions)

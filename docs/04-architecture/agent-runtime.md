@@ -161,7 +161,7 @@ Start body (AFD → AR):
 {
   "mode": "new",
   "idempotency_key": "alert-88421:v1",
-  "session_id": "sess-88",
+  "session_id": "chat-11111111-1111-4111-8111-111111111111",
   "route_id": "fraud_investigate",
   "route_table_version": "2026.08.1",
   "activation_target": "https://assistant-app.internal/v1/runs",

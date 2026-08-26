@@ -9,7 +9,7 @@ Append-only fabric **evidence** store. Port **3012** (local Compose). Database: 
 | `POST /v1/audit/events` ingest (idempotent on `event_id`) | Decide, pin, start Runtime |
 | `GET /v1/audit/chains/{correlation_id}` | Host the ops UI (see agent-audit-control-plane) |
 | `GET /v1/audit/sessions/{session_id}` | Rewrite history (no update/delete APIs) |
-| `GET /v1/audit/workflows?limit&offset` | |
+| `GET /v1/audit/workflows?limit&offset&status` | `status=completed` (default: terminal `completed` **and** `failed`) or `in_progress`. Rows may include `parent_correlation_id` for `kind=agent` children. |
 
 Producers: AFD, ADP, AR, ACR (async HTTP). Control plane AACP queries only.
 

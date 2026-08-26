@@ -96,7 +96,7 @@ Alembic / Flyway-style `V1__runtime.sql` on `ar`:
 | --- | --- |
 | `correlation_id` | PK (`corr-*`) |
 | `idempotency_key` | Unique start key |
-| `session_id` | Chat `sess-*` or jobs `job:{key}` |
+| `session_id` | Chat `chat-{uuid}` or jobs `job-{uuid}` / subagent `sub-{uuid}` |
 | `route_id` / `route_version` | Pinned catalogue cut |
 | `hydrated_tools` | Frozen capability list JSON |
 | `status` | `running` / `waiting` / `completed` / `failed` |

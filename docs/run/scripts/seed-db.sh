@@ -14,7 +14,7 @@ for sql in "$DELETE_SQL" "$CREATE_SQL"; do
   fi
 done
 
-echo "Deleting then loading catalogue seed in acr and adp..."
+echo "Deleting then loading catalogue seed (acr, adp) and clearing audit events..."
 "${COMPOSE[@]}" exec -T postgres psql -U fabric -d afd -v ON_ERROR_STOP=1 -f - < "$DELETE_SQL"
 "${COMPOSE[@]}" exec -T postgres psql -U fabric -d afd -v ON_ERROR_STOP=1 -f - < "$CREATE_SQL"
-echo "Catalogue seed reloaded."
+echo "Catalogue seed reloaded; audit.events cleared."

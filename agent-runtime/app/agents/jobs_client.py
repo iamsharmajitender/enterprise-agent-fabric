@@ -34,6 +34,8 @@ class JobsPort(Protocol):
         invoke: dict[str, Any] | None = None,
     ) -> dict[str, Any]: ...
 
+    def status(self, correlation_id: str) -> dict[str, Any]: ...
+
 
 class HttpJobsClient:
     """POST child jobs to API Front Door (calling-agent / stub channel auth in v1)."""
@@ -81,4 +83,28 @@ class HttpJobsClient:
             result = response.json()
             if not isinstance(result, dict):
                 raise RuntimeError("jobs start response must be a JSON object")
+            return result
+
+    def status(self, correlation_id: str) -> dict[str, Any]:
+        afd = os.environ.get("AFD_URL", "http://localhost:3005").rstrip("/")
+        url = f"{afd}/v1/jobs/{correlation_id}"
+        with telemetry.tracer().start_as_current_span("agent.job_status") as span:
+            span.set_attribute("jobs.correlation_id", correlation_id)
+            span.set_attribute("http.url", url.split("?", 1)[0])
+            response = self._http.get(
+                url,
+                headers={
+                    "Authorization": "Bearer stub",
+                    "X-Stub-Claims": self._claims_header,
+                },
+            )
+            span.set_attribute("http.status_code", response.status_code)
+            try:
+                response.raise_for_status()
+            except Exception as exc:
+                telemetry.record_error(span, exc)
+                raise
+            result = response.json()
+            if not isinstance(result, dict):
+                raise RuntimeError("jobs status response must be a JSON object")
             return result

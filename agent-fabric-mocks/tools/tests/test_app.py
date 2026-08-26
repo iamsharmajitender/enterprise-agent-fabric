@@ -51,6 +51,19 @@ def test_match_is_method_and_path() -> None:
     assert match_tool("POST", "/y", tools) is None
 
 
+def test_shopassist_match_variant_no_escalate() -> None:
+    client = TestClient(app)
+    default = client.post("/shopassist/extract_case_facts", json={"utterance": "ORD-77819 jacket"})
+    auto = client.post(
+        "/shopassist/extract_case_facts",
+        json={"utterance": "Hi, my water bottle arrived damaged. Order ORD-22001."},
+    )
+    policy = client.post("/shopassist/check_return_policy", json={"order_id": "ORD-22001"})
+    assert default.json()["order_id"] == "ORD-77819"
+    assert auto.json()["order_id"] == "ORD-22001"
+    assert policy.json()["recommended_action"] == "automatic_store_credit"
+
+
 def test_default_tools_have_unique_method_and_path() -> None:
     tools = _default_tools()
     assert tools, "expected catalog/*.json"

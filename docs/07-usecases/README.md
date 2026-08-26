@@ -6,18 +6,22 @@ Add a file here when a new caller or control-flow shape is real. One concern per
 
 Autonomy mode does not change these pages. Jobs vs chat is ingress, not a new use case.
 
+**Index of domain-agnostic shapes** (control-flow + autonomy + attachments + seed map): [generic-shapes](generic-shapes.md).
+
 ## Files
 
 | File | Concern | Fabric sees |
 | --- | --- | --- |
+| [generic-shapes](generic-shapes.md) | Domain-agnostic index of what EAF supports | Cross-links to this shelf, patterns, catalogue, tasks |
 | [files-via-dms](files-via-dms.md) | Objects already in the enterprise DMS | JSON ids, or a short-lived presigned GET |
 | [files-bytes-upload](files-bytes-upload.md) | Raw bytes on the channel request | Multipart on Front Door; DMS id on `goal` after mint |
 | [human-review-llm-signal](human-review-llm-signal.md) | Classify says a person should look | Structured `human_review_*` on stage output (evidence, not a pause) |
 | [human-review-process-gate](human-review-process-gate.md) | Designer stops before a write | `human_gate` → `waiting` → resume packet → `requires_approval` write |
+| [escalate-to-human-handoff](escalate-to-human-handoff.md) | Bot opens an async ops ticket then finishes | `escalate_to_human` → handoff id → parent **completed** (idempotent re-CALL) |
 
 Default for documents is DMS-first ([files-via-dms](files-via-dms.md)). Byte upload is opt-in per route.
 
-Default for risky writes is a process gate ([human-review-process-gate](human-review-process-gate.md)). The LLM signal ([human-review-llm-signal](human-review-llm-signal.md)) feeds the reviewer (or a later `branch`); it does not pause by itself.
+Default for risky writes is a process gate ([human-review-process-gate](human-review-process-gate.md)). The LLM signal ([human-review-llm-signal](human-review-llm-signal.md)) feeds the reviewer (or a later `branch`); it does not pause by itself. For Pattern 1 “file a ticket and end the turn,” use [escalate-to-human-handoff](escalate-to-human-handoff.md) — that is not a gate.
 
 ## Honest now vs later
 

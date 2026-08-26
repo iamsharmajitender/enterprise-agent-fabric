@@ -114,3 +114,4 @@ Seed: [`purchase_refund`](../03-catalogue/routes.md#purchase_refund). Patterns: 
 | Slot `extract_fields` for branch / reviewer UI | No. Dataflow D3. |
 | Branch on `human_review_required` | No. Catalogue may name `branch`; Runtime is linear. See [status](../02-understand/status.md). |
 | Auto-pause when flag is true | Never planned. Gate stages only. |
+| Review SLA / due-by clock | Not on this signal. Optional on [`human_gate`](human-review-process-gate.md#review-sla-optional) (`fail` / `reject` / `escalate` / rare `approve`). |

@@ -66,17 +66,17 @@ class AssistantControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         """
-                        {"session_id":"sess-88","message":"Why was I charged $42?","hint_id":null,"option_id":null}
+                        {"session_id":"chat-11111111-1111-4111-8111-111111111111","message":"Why was I charged $42?","hint_id":null,"option_id":null}
                         """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.session_id").value("sess-88"))
+            .andExpect(jsonPath("$.session_id").value("chat-11111111-1111-4111-8111-111111111111"))
             .andExpect(jsonPath("$.status").value("accepted"))
             .andReturn();
     assertFr5(accepted.getResponse().getContentAsString());
 
     MvcResult events =
         mvc.perform(
-                get("/v1/assistant/sessions/sess-88/events")
+                get("/v1/assistant/sessions/chat-11111111-1111-4111-8111-111111111111/events")
                     .header("Authorization", "Bearer stub")
                     .header("X-Stub-Claims", JANE))
             .andExpect(status().isOk())

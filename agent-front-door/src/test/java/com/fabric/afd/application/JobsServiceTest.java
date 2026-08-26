@@ -52,7 +52,23 @@ class JobsServiceTest {
     assertThat(call.channel()).isEqualTo("web");
     assertThat(runtime.starts).hasSize(1);
     assertThat(runtime.starts.getFirst().idempotencyKey()).isEqualTo("job-fee-explain:v1");
-    assertThat(freeze.get("job:job-fee-explain:v1").correlationId()).isEqualTo("corr-9f3c");
+    String sessionId = runtime.starts.getFirst().sessionId();
+    assertThat(sessionId).startsWith("job-");
+    assertThat(sessionId).isEqualTo(com.fabric.afd.domain.SessionIds.mintJobOrSub("job-fee-explain:v1"));
+    assertThat(freeze.get(sessionId).correlationId()).isEqualTo("corr-9f3c");
+  }
+
+  @Test
+  void subagentIdempotencyMintsSubSession() {
+    String correlationId =
+        jobs.start("order_damaged", "subagent-corr-parent-start_order_specialist", Map.of(), jane());
+    assertThat(correlationId).isEqualTo("corr-9f3c");
+    String sessionId = runtime.starts.getFirst().sessionId();
+    assertThat(sessionId).startsWith("sub-");
+    assertThat(sessionId)
+        .isEqualTo(
+            com.fabric.afd.domain.SessionIds.mintJobOrSub(
+                "subagent-corr-parent-start_order_specialist"));
   }
 
   @Test
@@ -82,6 +98,8 @@ class JobsServiceTest {
     assertThat(again).isEqualTo("corr-9f3c");
     assertThat(runtime.starts).hasSize(2);
     assertThat(runtime.starts.get(0).idempotencyKey()).isEqualTo(runtime.starts.get(1).idempotencyKey());
+    assertThat(runtime.starts.get(0).sessionId()).isEqualTo(runtime.starts.get(1).sessionId());
+    assertThat(runtime.starts.get(0).sessionId()).startsWith("job-");
   }
 
   @Test

@@ -4,6 +4,8 @@ A designer-owned workflow stage **stops the run** before a side-effect write. A 
 
 Use this for KYC activate, refunds, card freeze, or any path where the business write must wait on a person. Pair with an [LLM review signal](human-review-llm-signal.md) when classify/OCR evidence should sit on the reviewer packet — the signal is not the stop.
 
+**Not this page:** opening an async ops ticket and finishing the Pattern 1 turn (`escalate_to_human`) — see [escalate-to-human-handoff](escalate-to-human-handoff.md). That tool does not set `waiting`.
+
 ## Who does what
 
 ```
@@ -122,6 +124,46 @@ Expected lifecycle when Runtime executes gates:
 2. Resume with approve packet → `post_refund` → confirm → `completed`
 3. Resume with reject → no refund HTTP → terminal rejected/failed
 
+## Review SLA (optional)
+
+The pause can carry a **designer-owned** time window (1 hour, 1 day, 7 days, …). Put it on the **`human_gate` / run**, not on the LLM signal [`human_review_required`](human-review-llm-signal.md). That boolean is evidence only; it does not start a clock.
+
+Sketch (not wired yet):
+
+```json
+{
+  "id": "manual_review",
+  "type": "human_gate",
+  "sla": { "after": "24h", "on_timeout": "reject" }
+}
+```
+
+### Options when the reviewer misses the SLA
+
+Finish the waiting run through the **same resume path** a human would use (`POST /v1/runs/{id}/turns`), or fail the pin — do not invent a separate “expire” API.
+
+| `on_timeout` | Effect at deadline |
+| --- | --- |
+| `fail` | Fail the run (`reason_code` e.g. `review_sla_exceeded`). No side-effect write. |
+| `reject` | Synthetic resume `{ "decision": "reject", "comment": "sla_exceeded" }` — same as human reject; gated write does not run. |
+| `escalate` | Fail or reject **and** notify ops (ticket / audit). Still no silent approve. |
+| `approve` | Synthetic approve resume — **only** when the product explicitly allows unattended approve (rare for refunds / KYC / freeze). |
+
+**Default for `requires_approval` writes:** `fail` or `reject`. Never silent approve money or account activation.
+
+### How to schedule the deadline
+
+When the run hits `waiting` + `waiting_for=human_gate`, store `review_due_at` (or `sla` + pause time) on the checkpoint and schedule a wake:
+
+| Approach | When |
+| --- | --- |
+| In-process delayed task | Local / Compose — same idea as subagent join (`_maybe_schedule_subagent_join`): `_schedule_run` + wait until `review_due_at` |
+| Durable delayed queue | Prod — Redis / SQS / etc., keyed by `correlation_id` + gate stage |
+
+On fire: reload the pin. If still waiting on that gate → apply `on_timeout`. If a human already resumed → no-op. On human resume before the deadline → cancel the job (or let the wake no-op after a status check).
+
+**Do not:** put the timer on `human_review_required`; block the HTTP thread for hours; treat AFD freeze TTL as review SLA (that is pin storage, not ops due-by).
+
 ## Not this use case
 
 | Shape | Where |
@@ -136,8 +178,9 @@ Expected lifecycle when Runtime executes gates:
 | Piece | Now |
 | --- | --- |
 | `human_gate` / `branch` / `requires_approval` on seed workflows | Yes. Shown in Control Plane. |
-| Runtime pauses at `human_gate` | No. Linear graph; gate stage dropped when the route has a manifest. [status](../02-understand/status.md) |
-| Resume merges human packet into slots | No. Dataflow D9 (after slots D3; branch D8 for KYC). |
-| Dummy `purchase_refund` completes the refund without a person | Yes today — do not treat green as “gate works.” |
+| Runtime pauses at `human_gate` | Yes. `status=waiting`; resume via `/turns`. See [status](../02-understand/status.md). |
+| Resume merges human packet into slots | Yes (D9). |
+| Gate `sla` / `review_due_at` / timeout wake | **Not built.** Options above are the intended menu; closest scheduler pattern is subagent join. |
+| Dummy `purchase_refund` may still complete without a person in some smoke paths | Treat green carefully — pair with a real wait/resume check. |
 
-Build toward: hydrate keeps gate nodes → graph sets `waiting` → `/turns` accepts the packet → gated write runs only after approve.
+Build toward: optional `sla` on the gate → checkpoint `review_due_at` → scheduled wake → fail/reject (or rare approve) if still waiting.

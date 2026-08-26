@@ -19,6 +19,11 @@ from app.graph.human_gate import (
     human_gate_slot_key,
     resume_index_after_gate,
 )
+from app.graph.subagent_gate import (
+    SubagentWaiting,
+    join_enabled,
+    subagent_result_present,
+)
 from app.graph.llm import LlmPort
 from app.graph.llm.schema import llm_output_schema
 from app.graph.payload import (
@@ -200,6 +205,13 @@ def _run_stage(
     if str(pinned.get("kind") or "") == "agent":
         if jobs is None:
             raise RuntimeError("jobs client required for kind=agent")
+        if subagent_result_present(slots, stage_id):
+            prior = slots.get(stage_id) if isinstance(slots.get(stage_id), dict) else {}
+            text = str((prior or {}).get("result") or state.get("result") or "")
+            if isinstance((prior or {}).get("result"), dict):
+                text = f"Subagent {(prior or {}).get('status')}: {stage_id}"
+            notes.append(text)
+            return {"result": text, "notes": notes, "slots": slots}
         child_goal = project_child_goal(goal, slots, input_schema)
         validate_input_schema(child_goal, input_schema)
         invoke_body = invoke.get("body") if isinstance(invoke.get("body"), dict) else {}
@@ -208,7 +220,7 @@ def _run_stage(
             raise RuntimeError("agent invoke missing route_id")
         parent_id = str(state.get("correlation_id") or "")
         idempotency_key = (
-            f"child-{parent_id}-{stage_id}" if parent_id else f"child-{stage_id}"
+            f"subagent-{parent_id}-{stage_id}" if parent_id else f"subagent-{stage_id}"
         )
         started = jobs.start(
             child_route_id,
@@ -217,17 +229,34 @@ def _run_stage(
             invoke=invoke,
         )
         child_correlation_id = str(started.get("correlation_id") or "")
-        text = f"Started child job {child_route_id} ({child_correlation_id})"
+        text = f"Started subagent {child_route_id} ({child_correlation_id})"
         notes.append(text)
         slot_body = {
             "route_id": child_route_id,
             "correlation_id": child_correlation_id,
             "payload": child_goal,
+            "status": "running",
         }
+        new_slots = _write_slot(slots, stage_id, slot_body, pinned)
+        if join_enabled(pinned, invoke):
+            gate_index = int(pinned.get("_graph_index") or 0)
+            raise SubagentWaiting(
+                stage_id=stage_id,
+                gate_index=gate_index,
+                resume_index=gate_index + 1,
+                subagent_ids=[child_correlation_id],
+                state={
+                    "result": text,
+                    "goal": goal,
+                    "notes": notes,
+                    "slots": new_slots,
+                    "correlation_id": parent_id,
+                },
+            )
         return {
             "result": text,
             "notes": notes,
-            "slots": _write_slot(slots, stage_id, slot_body, pinned),
+            "slots": new_slots,
         }
     url = str(invoke.get("url") or "")
     if not url:
@@ -421,8 +450,12 @@ _LOOP_SYSTEM = (
     "DONE <answer>\n"
     "CALL a tool before DONE when tools can answer the goal. "
     "Do not invent tool results. After a tool output, CALL another tool or DONE. "
-    "When DONE after a tool result, use that tool output as the answer unless the goal needs another tool."
+    "When DONE after a tool result, use that tool output as the answer unless the goal needs another tool. "
+    "After escalate_to_human succeeds, you MUST DONE with a customer-facing summary that includes the handoff id. "
+    "Never CALL escalate_to_human more than once."
 )
+
+_ESCALATE_TOOL_ID = "escalate_to_human"
 
 
 def _parse_agent_line(text: str) -> tuple[str, str]:
@@ -438,6 +471,108 @@ def _parse_agent_line(text: str) -> tuple[str, str]:
     if token == "DONE":
         return "done", rest.strip()
     return "done", (text or "").strip()
+
+
+def _handoff_id_from_slots(slots: dict[str, Any]) -> str:
+    """Return handoff_id from escalate_to_human slot when present."""
+    slot = slots.get(_ESCALATE_TOOL_ID)
+    if not isinstance(slot, dict):
+        return ""
+    return str(slot.get("handoff_id") or "").strip()
+
+
+def _escalate_succeeded(slots: dict[str, Any]) -> bool:
+    """True when escalate_to_human produced a handoff (async ticket opened)."""
+    return bool(_handoff_id_from_slots(slots))
+
+
+def _pending_agent_joins(slots: dict[str, Any]) -> bool:
+    """True when a kind=agent child was started but has not joined terminal yet."""
+    for key, slot in slots.items():
+        if key == _ESCALATE_TOOL_ID or not isinstance(slot, dict):
+            continue
+        corr = str(slot.get("correlation_id") or "").strip()
+        if not corr and not slot.get("route_id"):
+            continue
+        # Joined packet shape: status + result. Bare start / in-flight child is pending.
+        status = str(slot.get("status") or "").strip().lower()
+        if status in {"completed", "failed"} and "result" in slot:
+            continue
+        if corr or slot.get("route_id"):
+            return True
+    return False
+
+
+def _escalation_complete_message(slots: dict[str, Any], result: str) -> str:
+    """Customer-facing summary after a successful escalation handoff."""
+    handoff = _handoff_id_from_slots(slots)
+    if handoff:
+        return (
+            f"I've escalated your case for human review. Reference {handoff}. "
+            "Someone will follow up."
+        )
+    text = (result or "").strip()
+    if text:
+        return (
+            f"I've escalated your case for human review. {text} "
+            "Someone will follow up."
+        )
+    return "I've escalated your case for human review. Someone will follow up."
+
+
+def _complete_after_escalate(
+    current: GraphState,
+    step: int,
+    on_stage: Callable[[int, str, GraphState], None] | None,
+) -> GraphState | None:
+    """Auto-complete parent when escalate succeeded and no child join is still pending."""
+    slots = _slots(current)
+    if not _escalate_succeeded(slots):
+        return None
+    if _pending_agent_joins(slots):
+        return None
+    text = _escalation_complete_message(slots, str(current.get("result") or ""))
+    out: GraphState = {
+        **current,
+        "result": text,
+        "notes": list(current.get("notes") or []) + [text],
+    }
+    if on_stage is not None:
+        on_stage(step, "respond", out)
+    return out
+
+
+def _idempotent_escalate_replay(
+    current: GraphState,
+    step: int,
+    on_stage: Callable[[int, str, GraphState], None] | None,
+) -> tuple[str, GraphState]:
+    """Handle a repeated CALL escalate_to_human after a successful handoff.
+
+    Returns (action, state):
+    - ``complete`` — parent should finish now (no pending joins)
+    - ``skip`` — do not POST again; keep looping (joins still pending)
+    - ``call`` — no prior handoff; proceed with HTTP
+    """
+    slots = _slots(current)
+    if not _escalate_succeeded(slots):
+        return "call", current
+    done = _complete_after_escalate(current, step, on_stage)
+    if done is not None:
+        return "complete", done
+    handoff = _handoff_id_from_slots(slots)
+    note = (
+        f"escalate_to_human idempotent: handoff {handoff} already open; "
+        "not creating another ticket"
+    )
+    skipped: GraphState = {
+        **current,
+        "result": str(current.get("result") or note),
+        "notes": list(current.get("notes") or []) + [note],
+    }
+    if on_stage is not None:
+        on_stage(step, _ESCALATE_TOOL_ID, skipped)
+    return "skip", skipped
 
 
 def build_agent_loop(
@@ -469,6 +604,7 @@ def build_agent_loop(
                 "goal": dict(_mapping(state.get("goal"))),
                 "notes": list(state.get("notes") or []),
                 "slots": _slots(state),
+                "correlation_id": str(state.get("correlation_id") or ""),
             }
             start_step = int(state.get("_resume_loop_step") or 0)
             for step in range(start_step, max(1, max_steps)):
@@ -492,8 +628,16 @@ def build_agent_loop(
                 pinned = dict(by_id.get(payload) or {})
                 if not pinned:
                     raise RuntimeError(f"unknown tool {payload!r}")
+                # Idempotent escalate: never POST a second handoff after success.
+                if payload == _ESCALATE_TOOL_ID:
+                    action_esc, current = _idempotent_escalate_replay(current, step, on_stage)
+                    if action_esc == "complete":
+                        return current
+                    if action_esc == "skip":
+                        continue
                 http = dict(pinned)
                 http["llm_role"] = "none"
+                http["_graph_index"] = step
                 try:
                     stage_out = _run_stage(
                         http,
@@ -505,6 +649,15 @@ def build_agent_loop(
                         catalogue=catalogue,
                         jobs=jobs,
                     )
+                except SubagentWaiting as exc:
+                    raise SubagentWaiting(
+                        stage_id=exc.stage_id,
+                        gate_index=step,
+                        resume_index=exc.resume_index,
+                        subagent_ids=exc.subagent_ids,
+                        state=exc.state,
+                        resume_loop_step=step + 1,
+                    ) from exc
                 except RuntimeError as exc:
                     # Pattern 1: missing schema fields / tool HTTP → observe and continue (chat goal may only have utterance).
                     note = f"tool error ({payload}): {exc}"
@@ -519,6 +672,11 @@ def build_agent_loop(
                 current = {**current, **stage_out}
                 if on_stage is not None:
                     on_stage(step, payload, current)
+                # First successful escalate + no pending joins → parent completes.
+                if payload == _ESCALATE_TOOL_ID:
+                    done = _complete_after_escalate(current, step, on_stage)
+                    if done is not None:
+                        return done
             raise RuntimeError(f"agent loop exceeded {max_steps} steps")
 
     return AgentLoop()

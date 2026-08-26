@@ -43,7 +43,7 @@ class AssistantServiceTest {
   void hintsMintsSessionAndReturnsOpaqueChipsOnly() {
     Map<String, Object> body = assistant.hints(null, jane());
 
-    assertThat((String) body.get("session_id")).startsWith("sess-");
+    assertThat((String) body.get("session_id")).startsWith("chat-");
     @SuppressWarnings("unchecked")
     List<Map<String, Object>> hints = (List<Map<String, Object>>) body.get("hints");
     assertThat(hints).hasSize(1);
@@ -60,7 +60,7 @@ class AssistantServiceTest {
         assistant.turn(null, "Why was I charged $42?", null, null, jane());
 
     assertThat(body.get("status")).isEqualTo("accepted");
-    assertThat((String) body.get("session_id")).startsWith("sess-");
+    assertThat((String) body.get("session_id")).startsWith("chat-");
     assertFr5(body);
     assertThat(decide.calls).hasSize(1);
     DecideCall call = decide.calls.getFirst();
@@ -78,11 +78,11 @@ class AssistantServiceTest {
 
   @Test
   void hintTapIsLayerOneDecide() {
-    Map<String, Object> hints = assistant.hints("sess-88", jane());
+    Map<String, Object> hints = assistant.hints("chat-11111111-1111-4111-8111-111111111111", jane());
     @SuppressWarnings("unchecked")
     String hintId = (String) ((List<Map<String, Object>>) hints.get("hints")).getFirst().get("hint_id");
 
-    Map<String, Object> body = assistant.turn("sess-88", null, hintId, null, jane());
+    Map<String, Object> body = assistant.turn("chat-11111111-1111-4111-8111-111111111111", null, hintId, null, jane());
 
     assertThat(body.get("status")).isEqualTo("accepted");
     assertThat(decide.calls.getFirst().routeId()).isEqualTo("fee_explain");
@@ -100,7 +100,7 @@ class AssistantServiceTest {
             List.of(
                 Map.of("intent_label", "fee_explain", "route_id", "fee_explain", "label", "Explain a fee")));
 
-    Map<String, Object> body = assistant.turn("sess-88", "what about my account", null, null, jane());
+    Map<String, Object> body = assistant.turn("chat-11111111-1111-4111-8111-111111111111", "what about my account", null, null, jane());
 
     assertThat(body.get("status")).isEqualTo("clarify");
     assertThat(body.get("prompt")).asString().contains("fee explanation");
@@ -109,17 +109,17 @@ class AssistantServiceTest {
     assertThat(options.getFirst().get("id")).asString().startsWith("opt-");
     assertThat(options.getFirst().get("label")).isEqualTo("Explain a fee");
     assertThat(runtime.starts).isEmpty();
-    assertThat(freeze.get("sess-88")).isNull();
+    assertThat(freeze.get("chat-11111111-1111-4111-8111-111111111111")).isNull();
     assertFr5(body);
   }
 
   @Test
   void eventsPollsRuntimeWithoutDecide() {
-    assistant.turn("sess-88", "Why was I charged $42?", null, null, jane());
+    assistant.turn("chat-11111111-1111-4111-8111-111111111111", "Why was I charged $42?", null, null, jane());
     decide.calls.clear();
     catalogue.gets.clear();
 
-    Map<String, Object> body = assistant.events("sess-88");
+    Map<String, Object> body = assistant.events("chat-11111111-1111-4111-8111-111111111111");
 
     assertThat(body.get("status")).isEqualTo("completed");
     assertThat(body.get("message")).isEqualTo("Fee of $42 is the monthly account charge.");
@@ -131,8 +131,8 @@ class AssistantServiceTest {
 
   @Test
   void continuationSkipsDecideAndResumesRuntime() {
-    assistant.turn("sess-88", "Why was I charged $42?", null, null, jane());
-    Map<String, Object> again = assistant.turn("sess-88", "yes", null, null, jane());
+    assistant.turn("chat-11111111-1111-4111-8111-111111111111", "Why was I charged $42?", null, null, jane());
+    Map<String, Object> again = assistant.turn("chat-11111111-1111-4111-8111-111111111111", "yes", null, null, jane());
 
     assertThat(again.get("status")).isEqualTo("accepted");
     assertThat(decide.calls).hasSize(1);
@@ -143,12 +143,12 @@ class AssistantServiceTest {
 
   @Test
   void freezeTtlMissRestoresFromRuntimeOpenRun() {
-    assistant.turn("sess-88", "Why was I charged $42?", null, null, jane());
-    freeze.expire("sess-88");
+    assistant.turn("chat-11111111-1111-4111-8111-111111111111", "Why was I charged $42?", null, null, jane());
+    freeze.expire("chat-11111111-1111-4111-8111-111111111111");
     runtime.open =
         Optional.of(
             new FrozenRoute(
-                "sess-88",
+                "chat-11111111-1111-4111-8111-111111111111",
                 null,
                 "fee_explain",
                 "2026.08.1",
@@ -156,13 +156,13 @@ class AssistantServiceTest {
                 "fee-explain-v1",
                 "corr-9f3c"));
 
-    Map<String, Object> again = assistant.turn("sess-88", "yes", null, null, jane());
+    Map<String, Object> again = assistant.turn("chat-11111111-1111-4111-8111-111111111111", "yes", null, null, jane());
 
     assertThat(again.get("status")).isEqualTo("accepted");
     assertThat(decide.calls).hasSize(1);
     assertThat(runtime.starts).hasSize(1);
     assertThat(runtime.resumes).containsExactly("corr-9f3c:yes");
-    assertThat(runtime.openLookups).contains("sess-88");
+    assertThat(runtime.openLookups).contains("chat-11111111-1111-4111-8111-111111111111");
   }
 
   @Test

@@ -20,6 +20,7 @@ export type CompletedWorkflow = {
   status: string;
   started_at: string;
   completed_at: string;
+  parent_correlation_id?: string | null;
 };
 
 export type WorkflowPage = {
@@ -56,10 +57,11 @@ export class AuditDataPlaneClient {
     return { status: res.status, events: Array.isArray(events) ? events : [] };
   }
 
-  async listWorkflows(limit = 50, offset = 0): Promise<WorkflowPage> {
+  async listWorkflows(limit = 50, offset = 0, status = "completed"): Promise<WorkflowPage> {
     const url = new URL("/v1/audit/workflows", this.baseUrl);
     url.searchParams.set("limit", String(limit));
     url.searchParams.set("offset", String(offset));
+    url.searchParams.set("status", status);
     const res = await this.fetchImpl(url, { headers: workloadHeaders() });
     if (!res.ok) {
       return { status: res.status, items: [], total: 0, limit, offset };

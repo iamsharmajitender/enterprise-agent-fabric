@@ -1,0 +1,29 @@
+{
+  "id": "lookup_order",
+  "method": "POST",
+  "path": "/shopassist/lookup_order",
+  "status": 200,
+  "response": {
+    "order_id": "ORD-77819",
+    "item_id": "jacket_blue_m",
+    "item_name": "Blue Jacket",
+    "price": 149.0,
+    "delivered_at": "2026-06-24",
+    "flags": ["damage_claim"],
+    "text": "Order ORD-77819: Blue Jacket $149 delivered 2026-06-24. Flags: damage_claim."
+  },
+  "match": [
+    {
+      "body_contains": "ORD-22001",
+      "response": {
+        "order_id": "ORD-22001",
+        "item_id": "bottle_40oz",
+        "item_name": "40oz Water Bottle",
+        "price": 40.0,
+        "delivered_at": "2026-06-20",
+        "flags": ["damage_claim"],
+        "text": "Order ORD-22001: 40oz Water Bottle $40 delivered 2026-06-20. Flags: damage_claim."
+      }
+    }
+  ]
+}

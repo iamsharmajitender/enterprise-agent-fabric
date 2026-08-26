@@ -11,7 +11,7 @@ from app import telemetry
 from app.graph.llm.schema import dump_structured, model_from_json_schema
 from app.graph.llm.text import plain_text
 
-_DEFAULT_MODEL = "ollama:qwen3:8b"
+_DEFAULT_MODEL = "ollama:llama3.1:8b"
 _DEFAULT_SYSTEM = "Follow the user request. Reply with the result only."
 
 
@@ -70,10 +70,10 @@ def _build_default_backend() -> _ChatBackend:
     from langchain.chat_models import init_chat_model
 
     kwargs: dict[str, Any] = {
-        "temperature": 0.5,
+        "temperature": 0.1,
         "timeout": 300,
-        "max_tokens": 25000,
-        "num_predict": 25000,
+        "max_tokens": 4096,
+        "num_predict": 4096,
         "client_kwargs": {"timeout": 300.0},
     }
     base_url = os.environ.get("OLLAMA_BASE_URL", "").strip()

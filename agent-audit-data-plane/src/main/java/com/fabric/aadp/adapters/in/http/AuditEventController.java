@@ -44,13 +44,18 @@ public class AuditEventController {
 
   @GetMapping("/v1/audit/workflows")
   public Map<String, Object> workflows(
-      @RequestParam(defaultValue = "50") int limit, @RequestParam(defaultValue = "0") int offset) {
-    AuditEventService.WorkflowPage page = events.completedWorkflows(limit, offset);
+      @RequestParam(defaultValue = "50") int limit,
+      @RequestParam(defaultValue = "0") int offset,
+      @RequestParam(defaultValue = "completed") String status) {
+    AuditEventService.WorkflowPage page = events.workflows(status, limit, offset);
     Map<String, Object> out = new LinkedHashMap<>();
     out.put("items", page.items().stream().map(AuditEventController::toWorkflowMap).toList());
     out.put("total", page.total());
     out.put("limit", page.limit());
     out.put("offset", page.offset());
+    out.put("status", "in_progress".equalsIgnoreCase(status) || "in-progress".equalsIgnoreCase(status)
+        ? "in_progress"
+        : "completed");
     return out;
   }
 
@@ -83,6 +88,7 @@ public class AuditEventController {
     out.put("status", workflow.status());
     out.put("started_at", workflow.startedAt().toString());
     out.put("completed_at", workflow.completedAt().toString());
+    out.put("parent_correlation_id", workflow.parentCorrelationId());
     return out;
   }
 }

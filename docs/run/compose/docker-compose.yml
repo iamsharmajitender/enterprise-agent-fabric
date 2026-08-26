@@ -234,6 +234,7 @@ services:
       DATA_PLANE_URL: http://agent-data-plane:3007
       REGISTRY_URL: http://agent-capability-registry:3009
       AFD_URL: http://agent-front-door:3005
+      AFD_JOBS_CLAIMS: '{"sub":"agent-runtime","emts":{"support:case":true}}'
       AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       # Set FABRIC_LLM_STUB=1 for SeedStubLlm (no Ollama). Default 0 = ProviderLlm.

@@ -59,6 +59,8 @@ test("detail sections flatten retrieval, memory, invoke, and roles", () => {
 test("manifest field renders a HeroUI card with tools below", () => {
   assert.match(js, /function renderManifestTable/);
   assert.match(js, /function renderToolsTable/);
+  assert.match(js, /function withToolKinds/);
+  assert.match(js, /\["Name", "Kind", "Capability", "Version", "Action", "Risk"\]/);
   assert.match(js, /card card--default/);
   assert.match(js, /table-root table-root--primary/);
   assert.match(js, /el\("hr", "separator"\)/);

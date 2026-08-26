@@ -9,6 +9,7 @@ import com.fabric.afd.domain.EligibleRoute;
 import com.fabric.afd.domain.FrozenRoute;
 import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
+import com.fabric.afd.domain.SessionIds;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -251,7 +252,20 @@ public class AssistantService {
   }
 
   private static String orMint(String sessionId) {
-    return blank(sessionId) ? "sess-" + token(12) : sessionId;
+    if (blank(sessionId)) {
+      return SessionIds.mintChat();
+    }
+    String sid = sessionId.trim();
+    if (sid.startsWith("job-")
+        || sid.startsWith("sub-")
+        || sid.startsWith("job:")
+        || sid.startsWith("subagent-")) {
+      throw new BadRequestException("session_id must be a chat session (chat-{uuid})");
+    }
+    if (!SessionIds.isChatSession(sid)) {
+      throw new BadRequestException("session_id must be chat-{uuid}");
+    }
+    return sid;
   }
 
   private static String token(int n) {

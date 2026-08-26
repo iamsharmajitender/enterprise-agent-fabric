@@ -14,11 +14,24 @@ public final class AuditEvents {
       String routeId,
       String routeVersion,
       String ingress) {
+    return freezeWritten(correlationId, sessionId, routeId, routeVersion, ingress, null);
+  }
+
+  public static Map<String, Object> freezeWritten(
+      String correlationId,
+      String sessionId,
+      String routeId,
+      String routeVersion,
+      String ingress,
+      String parentCorrelationId) {
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("route_id", routeId);
     payload.put("route_version", routeVersion);
     payload.put("ingress", ingress);
     payload.put("freeze_key", sessionId);
+    if (parentCorrelationId != null && !parentCorrelationId.isBlank()) {
+      payload.put("parent_correlation_id", parentCorrelationId);
+    }
     return envelope("freeze.written", "afd", correlationId, sessionId, null, payload);
   }
 

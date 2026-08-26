@@ -1,0 +1,35 @@
+{
+  "id": "check_return_policy",
+  "method": "POST",
+  "path": "/shopassist/check_return_policy",
+  "status": 200,
+  "response": {
+    "policy_id": "returns-v7",
+    "eligible": true,
+    "automatic_refund_limit": 75.0,
+    "recommended_action": "escalate_to_human",
+    "text": "Policy returns-v7: eligible for refund. Auto limit $75; $149 requires human escalation."
+  },
+  "match": [
+    {
+      "body_contains": "ORD-22001",
+      "response": {
+        "policy_id": "returns-v7",
+        "eligible": true,
+        "automatic_refund_limit": 75.0,
+        "recommended_action": "automatic_store_credit",
+        "text": "Policy returns-v7: eligible. $40 is under $75 auto limit; automatic store credit approved, no human escalation."
+      }
+    },
+    {
+      "body_contains": "bottle_40oz",
+      "response": {
+        "policy_id": "returns-v7",
+        "eligible": true,
+        "automatic_refund_limit": 75.0,
+        "recommended_action": "automatic_store_credit",
+        "text": "Policy returns-v7: eligible. $40 is under $75 auto limit; automatic store credit approved, no human escalation."
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 -- Wipe catalogue + lifecycle seed in Capability Registry (acr) and Data Plane (adp).
+-- Also clears append-only audit evidence so AACP landing matches a fresh seed.
 -- Does not drop schema or model profiles. Flyway corpora are kept; lifecycle corpora are removed.
 -- Run via ./docs/run/scripts/seed-db.sh (first of two).
 
@@ -16,3 +17,6 @@ DELETE FROM dataplane.workflows;
 DELETE FROM dataplane.manifests;
 DELETE FROM dataplane.corpora
  WHERE corpus_id IN ('credit-policy', 'research-notes', 'fax-archive');
+
+\c audit
+DELETE FROM audit.events;

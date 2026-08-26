@@ -39,6 +39,9 @@ def checkpoint_resume_index(
     if checkpoint.get("waiting_for") == "human_gate":
         raw = checkpoint.get("resume_index")
         return int(raw) if raw is not None else None
+    if checkpoint.get("waiting_for") == "subagent":
+        raw = checkpoint.get("resume_index")
+        return int(raw) if raw is not None else None
     if checkpoint.get("resume_index") is not None:
         return int(checkpoint["resume_index"])
     if checkpoint.get("step") is None:

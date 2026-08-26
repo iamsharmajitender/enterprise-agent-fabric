@@ -55,6 +55,26 @@ def match_tool(method: str, path: str, tools: list[dict[str, Any]]) -> dict[str,
     return None
 
 
+def resolve_response(tool: dict[str, Any], request_body: dict[str, Any]) -> dict[str, Any]:
+    """Pick default or body-matched variant response (first match wins)."""
+    default = tool.get("response")
+    if not isinstance(default, dict):
+        default = {}
+    haystack = json.dumps(request_body, sort_keys=True).lower()
+    variants = tool.get("match")
+    if not isinstance(variants, list):
+        return default
+    for variant in variants:
+        if not isinstance(variant, dict):
+            continue
+        needle = str(variant.get("body_contains") or "").strip().lower()
+        if not needle or needle not in haystack:
+            continue
+        body = variant.get("response")
+        return body if isinstance(body, dict) else default
+    return default
+
+
 app = FastAPI(title="agent-mocks")
 otel.setup()
 
@@ -114,9 +134,8 @@ async def dispatch(request: Request, path: str) -> JSONResponse:
                 }
             },
         )
-    body = tool.get("response")
-    if not isinstance(body, dict):
-        body = {}
+    request_body = await _search_body(request)
+    body = resolve_response(tool, request_body)
     status = int(tool.get("status") or 200)
     return JSONResponse(status_code=status, content=body)
 

@@ -11,6 +11,7 @@ import com.fabric.afd.domain.CatalogRoute;
 import com.fabric.afd.domain.HydrateFailedException;
 import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
+import com.fabric.afd.domain.SessionIds;
 import com.fabric.afd.domain.UnavailableException;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +49,7 @@ class HttpRuntimeClientTest {
         client.start(
             new RunStart(
                 "job-fee-explain:v1",
-                "job:job-fee-explain:v1",
+                SessionIds.mintJobOrSub("job-fee-explain:v1"),
                 new CatalogRoute(
                     "fee_explain",
                     "2026.08.1",
@@ -107,16 +108,16 @@ class HttpRuntimeClientTest {
   @Test
   void openRunReadsPinBySessionId() {
     server
-        .expect(requestTo("http://ar/v1/runs?session_id=sess-88"))
+        .expect(requestTo("http://ar/v1/runs?session_id=chat-11111111-1111-4111-8111-111111111111"))
         .andExpect(method(HttpMethod.GET))
         .andRespond(
             withSuccess(
                 """
-                {"correlation_id":"corr-9f3c","session_id":"sess-88","route_id":"fee_explain","route_version":"2026.08.1"}
+                {"correlation_id":"corr-9f3c","session_id":"chat-11111111-1111-4111-8111-111111111111","route_id":"fee_explain","route_version":"2026.08.1"}
                 """,
                 MediaType.APPLICATION_JSON));
 
-    assertThat(client.openRun("sess-88").orElseThrow().correlationId()).isEqualTo("corr-9f3c");
+    assertThat(client.openRun("chat-11111111-1111-4111-8111-111111111111").orElseThrow().correlationId()).isEqualTo("corr-9f3c");
     server.verify();
   }
 
@@ -153,7 +154,7 @@ class HttpRuntimeClientTest {
   private static RunStart feeExplainStart() {
     return new RunStart(
         "job-fee-explain:v1",
-        "job:job-fee-explain:v1",
+        SessionIds.mintJobOrSub("job-fee-explain:v1"),
         new CatalogRoute(
             "fee_explain",
             "2026.08.1",

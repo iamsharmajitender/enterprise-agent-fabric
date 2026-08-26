@@ -18,9 +18,11 @@ from app.core.checkpoint import (
 )
 from app.core.execution import GraphPort, run_loop
 from app.core.memory import memory_profile, notes_from_working, persist_stage, save_loop, save_working, slots_from_working, working_payload
+from app.core.session_ids import is_jobs_session
 from app.core.state import RunPin, RunStore
 from app.graph.human_gate import parse_gate_packet
 from app.graph.llm import LlmPort
+from app.graph.subagent_gate import merge_subagent_packet, parse_subagent_packet, poll_subagents
 from app.graph.workflow import build_agent_loop, build_tool_graph
 from app.tools.invoker import ToolInvoker
 
@@ -180,7 +182,7 @@ class RunService:
         route_version = str(body.get("route_version") or "")
         telemetry.attach(session_id=session_id, route_id=route_id, route_version=route_version)
         journey_id = f"chat.{route_id}" if route_id else "chat.turn"
-        if session_id.startswith("job:"):
+        if is_jobs_session(session_id):
             journey_id = f"job.{route_id}" if route_id else "job.turn"
         profile: dict[str, Any] = {}
         try:
@@ -291,15 +293,8 @@ class RunService:
             goal=goal,
             profile=profile,
         )
-        emit_async(
-            run_terminal(
-                finished.correlation_id,
-                session_id,
-                finished.status,
-                route_id,
-                route_version,
-            )
-        )
+        self._maybe_schedule_subagent_join(finished)
+        self._emit_run_terminal(finished)
 
     def resume(self, correlation_id: str, body: dict[str, Any]) -> dict[str, Any] | None:
         """Re-invoke the graph for an existing pin and return its slim status."""
@@ -319,36 +314,61 @@ class RunService:
 
         if pin.status == "waiting":
             checkpoint = pin.checkpoint if isinstance(pin.checkpoint, dict) else {}
-            packet = parse_gate_packet(body if isinstance(body, dict) else {})
-            if packet is None:
-                raise ValueError("human_gate resume packet required")
+            waiting_for = str(checkpoint.get("waiting_for") or "human_gate")
             stage_id = str(checkpoint.get("stage_id") or "")
             if not stage_id:
-                raise ValueError("human_gate checkpoint missing stage_id")
-            decision = str(packet.get("decision") or "").strip().lower()
-            if decision == "reject":
-                failed = self._store.fail(
-                    correlation_id,
-                    {"message": str(packet.get("comment") or "human_gate rejected")},
-                )
-                return failed.slim_status()
-            resume_index = int(checkpoint.get("resume_index") or checkpoint.get("step", -1) + 1)
+                raise ValueError(f"{waiting_for} checkpoint missing stage_id")
             goal = checkpoint.get("goal") if isinstance(checkpoint.get("goal"), dict) else {}
             merged_slots = dict(prior_slots)
-            merged_slots[stage_id] = packet
+            resume_index = int(checkpoint.get("resume_index") or checkpoint.get("step", -1) + 1)
+            resume_loop = None
+
+            if waiting_for == "subagent":
+                packet = parse_subagent_packet(body if isinstance(body, dict) else {})
+                if packet is None:
+                    raise ValueError("subagent resume packet required")
+                expected = {
+                    str(item)
+                    for item in (checkpoint.get("subagent_ids") or [])
+                    if item
+                }
+                got = {item["correlation_id"] for item in packet}
+                if expected and got != expected:
+                    raise ValueError("subagent resume packet missing expected correlation ids")
+                merged_slots = merge_subagent_packet(merged_slots, stage_id, packet)
+                note = f"Joined subagent {stage_id}: {[p['status'] for p in packet]}"
+                prior_notes = list(prior_notes) + [note]
+                if checkpoint.get("resume_loop_step") is not None:
+                    resume_loop = int(checkpoint["resume_loop_step"])
+            else:
+                gate_packet = parse_gate_packet(body if isinstance(body, dict) else {})
+                if gate_packet is None:
+                    raise ValueError("human_gate resume packet required")
+                decision = str(gate_packet.get("decision") or "").strip().lower()
+                if decision == "reject":
+                    failed = self._store.fail(
+                        correlation_id,
+                        {"message": str(gate_packet.get("comment") or "human_gate rejected")},
+                    )
+                    self._emit_run_terminal(failed)
+                    return failed.slim_status()
+                merged_slots[stage_id] = gate_packet
+
             if save_working(profile):
                 self._store.save_progress(
                     correlation_id,
                     working=working_payload(prior_notes, merged_slots),
                 )
             pin = self._store.mark_running(correlation_id)
+            row_mode = int(row.get("autonomy_mode") or 0)
+            start_index = 0 if (waiting_for == "subagent" and row_mode == 1) else resume_index
             run_loop(
                 self._graph_for(
                     pin.hydrated_tools,
                     correlation_id=pin.correlation_id,
                     profile=profile,
                     row=row,
-                    start_index=resume_index,
+                    start_index=start_index,
                     session_id=pin.session_id,
                 ),
                 self._store,
@@ -357,7 +377,12 @@ class RunService:
                 notes=prior_notes,
                 slots=merged_slots,
                 profile=profile,
+                resume_loop_step=resume_loop,
             )
+            finished = self._store.get(correlation_id)
+            if finished is not None:
+                self._maybe_schedule_subagent_join(finished)
+                self._emit_run_terminal(finished)
             return self.status(correlation_id)
 
         if pin.status == "failed":
@@ -377,7 +402,7 @@ class RunService:
             row_mode = int(row.get("autonomy_mode") or 0)
             resume_loop = loop_resume_step(checkpoint) if row_mode == 1 else None
             pin = self._store.mark_running(correlation_id)
-            run_loop(
+            finished = run_loop(
                 self._graph_for(
                     pin.hydrated_tools,
                     correlation_id=pin.correlation_id,
@@ -394,6 +419,7 @@ class RunService:
                 profile=profile,
                 resume_loop_step=resume_loop,
             )
+            self._emit_run_terminal(finished)
             return self.status(correlation_id)
 
         finished = run_loop(
@@ -411,15 +437,7 @@ class RunService:
             slots=prior_slots,
             profile=profile,
         )
-        emit_async(
-            run_terminal(
-                finished.correlation_id,
-                pin.session_id,
-                finished.status,
-                pin.route_id,
-                pin.route_version,
-            )
-        )
+        self._emit_run_terminal(finished)
         return self.status(correlation_id)
 
     def status(self, correlation_id: str) -> dict[str, Any] | None:
@@ -438,6 +456,64 @@ class RunService:
             return {"runs": []}
         telemetry.attach(correlation_id=pin.correlation_id, route_id=pin.route_id)
         return pin.open_run()
+
+    def _emit_run_terminal(self, pin: RunPin | None) -> None:
+        """Emit run.terminal so audit can leave in_progress (waiting/running)."""
+        if pin is None:
+            return
+        emit_async(
+            run_terminal(
+                pin.correlation_id,
+                pin.session_id,
+                pin.status,
+                pin.route_id,
+                pin.route_version,
+            )
+        )
+
+    def _maybe_schedule_subagent_join(self, pin: RunPin) -> None:
+        """When a parent is waiting on subagent join, poll jobs and resume with results."""
+        if pin.status != "waiting":
+            return
+        checkpoint = pin.checkpoint if isinstance(pin.checkpoint, dict) else {}
+        if checkpoint.get("waiting_for") != "subagent":
+            return
+        if self._jobs is None:
+            log.warning("subagent join skipped: jobs client not configured (%s)", pin.correlation_id)
+            return
+        parent_id = pin.correlation_id
+        self._schedule_run(lambda: self._join_subagents(parent_id))
+
+    def _join_subagents(self, parent_correlation_id: str) -> None:
+        """Poll subagent job status and resume the parent with a subagents packet."""
+        import os
+
+        pin = self._store.get(parent_correlation_id)
+        if pin is None or pin.status != "waiting":
+            return
+        checkpoint = pin.checkpoint if isinstance(pin.checkpoint, dict) else {}
+        if checkpoint.get("waiting_for") != "subagent":
+            return
+        ids = [str(item) for item in (checkpoint.get("subagent_ids") or []) if item]
+        if not ids or self._jobs is None:
+            return
+        try:
+            interval = float(os.environ.get("SUBAGENT_JOIN_POLL_S", "0.5"))
+            timeout = float(os.environ.get("SUBAGENT_JOIN_TIMEOUT_S", "120"))
+            packet = poll_subagents(
+                self._jobs,
+                ids,
+                interval_s=interval,
+                timeout_s=timeout,
+            )
+            self.resume(parent_correlation_id, {"subagents": packet})
+        except Exception:
+            log.exception("subagent join failed for %s", parent_correlation_id)
+            failed = self._store.fail(
+                parent_correlation_id,
+                {"message": "subagent join failed", "recoverable": True},
+            )
+            self._emit_run_terminal(failed)
 
 
 def _hydrate_reason(exc: HydrateError) -> str:

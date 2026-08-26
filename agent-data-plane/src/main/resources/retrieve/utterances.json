@@ -226,6 +226,17 @@
     { "route_id": "fraud_investigate", "text": "Full fraud investigation loop" },
     { "route_id": "fraud_investigate", "text": "Investigate fraud and draft findings" },
 
+    { "route_id": "shopassist_case", "text": "My blue jacket arrived damaged and I want a refund" },
+    { "route_id": "shopassist_case", "text": "I was charged twice for my order and need help" },
+    { "route_id": "shopassist_case", "text": "Damaged goods and duplicate charge on ORD-77819" },
+    { "route_id": "shopassist_case", "text": "Jacket damaged, charged twice, full refund please" },
+    { "route_id": "shopassist_case", "text": "I received a damaged jacket and think I was charged twice" },
+    { "route_id": "shopassist_case", "text": "Help with damaged item and refund for my order" },
+    { "route_id": "shopassist_case", "text": "ShopAssist case for damaged delivery and billing" },
+    { "route_id": "shopassist_case", "text": "Order arrived damaged and I want a full refund not replacement" },
+    { "route_id": "shopassist_case", "text": "Damaged water bottle ORD-22001 store credit is fine" },
+    { "route_id": "shopassist_case", "text": "My water bottle arrived damaged, $40 store credit please" },
+
     { "route_id": "contract_investigation", "text": "Investigate this contract" },
     { "route_id": "contract_investigation", "text": "Contract investigation with clauses" },
     { "route_id": "contract_investigation", "text": "Investigate the agreement" },

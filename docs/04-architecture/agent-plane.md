@@ -169,7 +169,7 @@ Decide request (chat vs jobs):
 {
   "ingress": "chat",
   "channel": "web",
-  "session_id": "sess-88",
+  "session_id": "chat-11111111-1111-4111-8111-111111111111",
   "message": "Why was I charged $42?",
   "route_id": null,
   "claims": { "sub": "jane", "emts": { "accounts:read": true } }

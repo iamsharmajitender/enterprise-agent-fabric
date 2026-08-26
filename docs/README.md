@@ -12,7 +12,7 @@ Documentation for this repository. Behaviour is what Agent Runtime executes afte
 | [04-architecture](04-architecture/) | Box packs (AFD, ADP, ACR, AR) plus [narrative/](04-architecture/narrative/) |
 | [05-reference](05-reference/) | Frozen JSON contracts |
 | [06-patterns](06-patterns/) | Intended Pattern 0–3 compositions (what is possible) |
-| [07-usecases](07-usecases/) | Intended caller and process shapes (documents via DMS vs byte upload; LLM review signal vs process gate). Add files as we evolve |
+| [07-usecases](07-usecases/) | Intended caller and process shapes (see [generic-shapes](07-usecases/generic-shapes.md); documents via DMS vs byte upload; LLM review signal vs process gate vs async handoff). Add files as we evolve |
 
 ## Stays where it is
 
@@ -31,7 +31,7 @@ Domain HTTP doubles live at repo root: [`agent-fabric-mocks/tools/`](../agent-fa
 | You want | Start here |
 | --- | --- |
 | New you | [01-start](01-start/README.md), then [overview](02-understand/overview.md) |
-| What can it do | [06-patterns](06-patterns/), then [03-catalogue](03-catalogue/), then [07-usecases](07-usecases/) |
+| What can it do | [07-usecases/generic-shapes](07-usecases/generic-shapes.md), then [06-patterns](06-patterns/), then [03-catalogue](03-catalogue/) |
 | How a box works | [04-architecture](04-architecture/), then [02-understand](02-understand/overview.md) |
 | Enhance later | [tasks/](tasks/), especially [dataflow-plan.md](tasks/dataflow-plan.md), [intent-plan.md](tasks/intent-plan.md), [audit-plan.md](tasks/audit-plan.md), [tool-failure-plan.md](tasks/tool-failure-plan.md) |
 | Routing eval gate | [eval-plan.md](tasks/eval-plan.md), [agent-fabric-evals](../agent-fabric-evals/intent-router-evals/README.md) |
