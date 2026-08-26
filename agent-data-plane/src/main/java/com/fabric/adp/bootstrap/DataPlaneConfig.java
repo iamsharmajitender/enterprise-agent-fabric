@@ -1,11 +1,13 @@
 package com.fabric.adp.bootstrap;
 
+import com.fabric.adp.adapters.out.http.HttpAuditClient;
 import com.fabric.adp.adapters.out.jdbc.JdbcCorpusStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcIntentRuleStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcManifestStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcPromptStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcRouteStore;
 import com.fabric.adp.adapters.out.jdbc.JdbcWorkflowStore;
+import com.fabric.adp.application.AuditPort;
 import com.fabric.adp.application.BusinessEvents;
 import com.fabric.adp.application.CatalogueService;
 import com.fabric.adp.application.CorpusService;
@@ -26,7 +28,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.util.concurrent.ExecutorService;
 
@@ -109,8 +114,27 @@ public class DataPlaneConfig {
       BusinessEvents events,
       IntentRuleStore rules,
       ExecutorService llmFallbackPool,
+      AuditPort audit,
       @Value("${fabric.decide.llm.enabled:false}") boolean llmEnabled,
       @Value("${fabric.decide.llm.timeout-ms:500}") long llmTimeoutMs) {
-    return new DecideService(catalogue, events, rules, llmEnabled, llmFallbackPool, llmTimeoutMs);
+    return new DecideService(
+        catalogue, events, rules, llmEnabled, llmFallbackPool, llmTimeoutMs, audit);
+  }
+
+  @Bean
+  AuditPort auditPort(
+      RestClient.Builder builder,
+      @Value("${fabric.audit-data-plane-url:}") String baseUrl) {
+    if (baseUrl == null || baseUrl.isBlank()) {
+      return AuditPort.NOOP;
+    }
+    RestClient client =
+        builder
+            .baseUrl(baseUrl)
+            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer fabric-internal")
+            .defaultHeader("X-Workload", "adp")
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+    return new HttpAuditClient(client, true);
   }
 }

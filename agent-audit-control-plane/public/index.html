@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Agent Audit</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <header class="page-head">
+        <div>
+          <h1>Agent Audit</h1>
+          <p class="lede">Completed workflows end-to-end. Data from agent-audit-data-plane only.</p>
+        </div>
+        <a class="btn" href="/search">Search</a>
+      </header>
+
+      <p id="status" class="status" aria-live="polite">Loading…</p>
+
+      <div class="table-wrap" role="region" aria-label="Completed workflows">
+        <table id="workflows">
+          <thead>
+            <tr>
+              <th scope="col">Completed</th>
+              <th scope="col">Started</th>
+              <th scope="col">Route</th>
+              <th scope="col">Status</th>
+              <th scope="col">correlation_id</th>
+              <th scope="col">session_id</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <nav class="pager" aria-label="Pagination">
+        <button type="button" id="prev" disabled>Previous 50</button>
+        <span id="page-label"></span>
+        <button type="button" id="next" disabled>Next 50</button>
+      </nav>
+    </main>
+    <script src="/landing.js"></script>
+  </body>
+</html>

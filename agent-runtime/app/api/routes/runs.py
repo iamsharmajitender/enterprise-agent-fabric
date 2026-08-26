@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.post("/v1/runs")
 def start_run(request: Request, body: dict[str, Any]) -> JSONResponse:
-    """Start a new run: hydrate tools, pin the route, execute the graph."""
+    """Start a new run: hydrate and pin before 202; graph runs asynchronously."""
     try:
         correlation_id = request.app.state.runs.start(body)
     except ValueError as exc:

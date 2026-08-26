@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fabric.registry.application.AuditPort;
 import com.fabric.registry.application.InMemoryManifestStore;
 import com.fabric.registry.application.ManifestService;
 import java.nio.charset.StandardCharsets;
@@ -59,6 +60,11 @@ class ManifestControllerTest {
     @Bean
     ManifestService manifestService() {
       return new ManifestService(new InMemoryManifestStore());
+    }
+
+    @Bean
+    AuditPort auditPort() {
+      return AuditPort.NOOP;
     }
   }
 }

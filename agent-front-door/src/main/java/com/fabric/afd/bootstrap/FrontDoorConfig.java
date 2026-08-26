@@ -1,11 +1,13 @@
 package com.fabric.afd.bootstrap;
 
+import com.fabric.afd.adapters.out.http.HttpAuditClient;
 import com.fabric.afd.adapters.out.http.HttpCatalogueClient;
 import com.fabric.afd.adapters.out.http.HttpDecideClient;
 import com.fabric.afd.adapters.out.http.HttpRuntimeClient;
 import com.fabric.afd.adapters.out.http.RequestIdInterceptor;
 import com.fabric.afd.adapters.out.jdbc.JdbcFreezeStore;
 import com.fabric.afd.application.AssistantService;
+import com.fabric.afd.application.AuditPort;
 import com.fabric.afd.application.BusinessEvents;
 import com.fabric.afd.application.CataloguePort;
 import com.fabric.afd.application.DecidePort;
@@ -68,8 +70,9 @@ public class FrontDoorConfig {
       CataloguePort catalogue,
       RuntimePort runtime,
       FreezeStore freeze,
-      BusinessEvents events) {
-    return new JobsService(decide, catalogue, runtime, freeze, events);
+      BusinessEvents events,
+      AuditPort audit) {
+    return new JobsService(decide, catalogue, runtime, freeze, events, audit);
   }
 
   @Bean
@@ -78,8 +81,18 @@ public class FrontDoorConfig {
       CataloguePort catalogue,
       RuntimePort runtime,
       FreezeStore freeze,
-      BusinessEvents events) {
-    return new AssistantService(decide, catalogue, runtime, freeze, events);
+      BusinessEvents events,
+      AuditPort audit) {
+    return new AssistantService(decide, catalogue, runtime, freeze, events, audit);
+  }
+
+  @Bean
+  AuditPort auditPort(
+      RestClient.Builder builder, @Value("${fabric.audit-data-plane-url:}") String baseUrl) {
+    if (baseUrl == null || baseUrl.isBlank()) {
+      return AuditPort.NOOP;
+    }
+    return new HttpAuditClient(workloadClient(builder, baseUrl, Duration.ofSeconds(5)), true);
   }
 
   private static RestClient workloadClient(

@@ -17,6 +17,7 @@ public class JobsService {
   private final RuntimePort runtime;
   private final FreezeStore freeze;
   private final BusinessEvents events;
+  private final AuditPort audit;
 
   public JobsService(
       DecidePort decide,
@@ -24,11 +25,22 @@ public class JobsService {
       RuntimePort runtime,
       FreezeStore freeze,
       BusinessEvents events) {
+    this(decide, catalogue, runtime, freeze, events, AuditPort.NOOP);
+  }
+
+  public JobsService(
+      DecidePort decide,
+      CataloguePort catalogue,
+      RuntimePort runtime,
+      FreezeStore freeze,
+      BusinessEvents events,
+      AuditPort audit) {
     this.decide = decide;
     this.catalogue = catalogue;
     this.runtime = runtime;
     this.freeze = freeze;
     this.events = events;
+    this.audit = audit == null ? AuditPort.NOOP : audit;
   }
 
   public String start(
@@ -78,6 +90,9 @@ public class JobsService {
             row.activationTarget(),
             row.agentClientId(),
             correlationId));
+    audit.emitAsync(
+        AuditEvents.freezeWritten(
+            correlationId, sessionId, row.routeId(), row.routeVersion(), "jobs"));
     events.emit(
         "job.run.accepted",
         journeyId,

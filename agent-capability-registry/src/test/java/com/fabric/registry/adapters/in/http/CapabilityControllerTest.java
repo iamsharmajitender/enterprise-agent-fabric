@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.fabric.registry.application.AuditPort;
 import com.fabric.registry.application.CapabilityService;
 import com.fabric.registry.application.InMemoryCapabilityStore;
 import org.junit.jupiter.api.Test;
@@ -167,6 +168,11 @@ class CapabilityControllerTest {
     @Bean
     CapabilityService capabilityService() {
       return new CapabilityService(new InMemoryCapabilityStore());
+    }
+
+    @Bean
+    AuditPort auditPort() {
+      return AuditPort.NOOP;
     }
   }
 }

@@ -3,6 +3,7 @@ fabric:
     llm:
       enabled: ${FABRIC_DECIDE_LLM_ENABLED:false}
       timeout-ms: ${FABRIC_DECIDE_LLM_TIMEOUT_MS:500}
+  audit-data-plane-url: ${AUDIT_DATA_PLANE_URL:}
 
 server.port: 3007
 

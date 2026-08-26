@@ -144,6 +144,19 @@ test("prompt detail links related routes", () => {
   assert.match(prompt, /Unused by any route/);
 });
 
+test("corpus detail links related routes", () => {
+  const corpus = js.slice(
+    js.indexOf("async function showCorpus("),
+    js.indexOf("async function showVersionHistory("),
+  );
+  assert.match(js, /function corpusUses/);
+  assert.match(js, /retrievalScope\(route\.retrieval\)\.includes\(corpusId\)/);
+  assert.match(corpus, /fetch\("\/api\/routes"\)/);
+  assert.match(corpus, /afterNodes:/);
+  assert.match(corpus, /buildUsedBySection\(uses/);
+  assert.match(corpus, /Unused by any route/);
+});
+
 test("routes table can sort Autonomy and Description", () => {
   const routes = js.slice(js.indexOf("async function showRoutes"), js.indexOf("async function showCapabilities"));
   assert.match(js, /function compareSortValues/);

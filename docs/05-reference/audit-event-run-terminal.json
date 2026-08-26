@@ -1,0 +1,15 @@
+{
+  "event_id": "44444444-4444-4444-8444-444444444444",
+  "event_type": "run.terminal",
+  "occurred_at": "2026-08-26T01:00:05Z",
+  "producer": "ar",
+  "correlation_id": "corr-fee-1",
+  "session_id": "sess-88",
+  "decision_id": null,
+  "payload": {
+    "status": "completed",
+    "route_id": "fee_explain",
+    "route_version": "2026.08.1",
+    "reason_code": null
+  }
+}

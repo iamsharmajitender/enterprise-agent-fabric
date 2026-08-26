@@ -49,6 +49,7 @@ public class DecideService {
   private final boolean llmEnabled;
   private final ExecutorService llmPool;
   private final long llmTimeoutMs;
+  private final AuditPort audit;
 
   public DecideService(CatalogueService catalogue, BusinessEvents events) {
     this(catalogue, events, () -> List.of());
@@ -73,6 +74,17 @@ public class DecideService {
       boolean llmEnabled,
       ExecutorService llmPool,
       long llmTimeoutMs) {
+    this(catalogue, events, rules, llmEnabled, llmPool, llmTimeoutMs, AuditPort.NOOP);
+  }
+
+  public DecideService(
+      CatalogueService catalogue,
+      BusinessEvents events,
+      IntentRuleStore rules,
+      boolean llmEnabled,
+      ExecutorService llmPool,
+      long llmTimeoutMs,
+      AuditPort audit) {
     this(
         catalogue,
         events,
@@ -82,7 +94,8 @@ public class DecideService {
         LAYER_TWO_BUDGET_MS,
         llmEnabled,
         llmPool,
-        llmTimeoutMs);
+        llmTimeoutMs,
+        audit);
   }
 
   DecideService(
@@ -134,6 +147,30 @@ public class DecideService {
       boolean llmEnabled,
       ExecutorService llmPool,
       long llmTimeoutMs) {
+    this(
+        catalogue,
+        events,
+        rules,
+        classifier,
+        llmFallback,
+        layerTwoBudgetMs,
+        llmEnabled,
+        llmPool,
+        llmTimeoutMs,
+        AuditPort.NOOP);
+  }
+
+  DecideService(
+      CatalogueService catalogue,
+      BusinessEvents events,
+      DecideLayer rules,
+      DecideLayer classifier,
+      DecideLayer llmFallback,
+      long layerTwoBudgetMs,
+      boolean llmEnabled,
+      ExecutorService llmPool,
+      long llmTimeoutMs,
+      AuditPort audit) {
     this.catalogue = catalogue;
     this.events = events;
     this.rules = rules;
@@ -143,6 +180,7 @@ public class DecideService {
     this.llmEnabled = llmEnabled;
     this.llmPool = llmPool;
     this.llmTimeoutMs = llmTimeoutMs;
+    this.audit = audit == null ? AuditPort.NOOP : audit;
   }
 
   public DecideResult decide(DecideRequest request, String workload) {
@@ -263,6 +301,20 @@ public class DecideService {
             "latency_ms",
             result.latencyMs() == null ? null : Long.toString(result.latencyMs())));
     events.countDecide(journeyId, result.outcome(), request.channel());
+    String decisionId = "dec-" + java.util.UUID.randomUUID();
+    audit.emitAsync(
+        AuditEvents.decide(
+            decisionId,
+            request.sessionId(),
+            result.outcome(),
+            result.routeId(),
+            result.routeVersion(),
+            result.eligibleRoutes(),
+            result.routerLayer(),
+            AuditEvents.sha256Hex(String.valueOf(request.claims())),
+            AuditEvents.sha256Hex(request.message()),
+            request.channel(),
+            request.ingress()));
   }
 
   private static Optional<DecideResult> tagged(String layer, Optional<DecideResult> decided) {

@@ -26,6 +26,7 @@ public class AssistantService {
   private final RuntimePort runtime;
   private final FreezeStore freeze;
   private final BusinessEvents events;
+  private final AuditPort audit;
 
   public AssistantService(
       DecidePort decide,
@@ -33,11 +34,22 @@ public class AssistantService {
       RuntimePort runtime,
       FreezeStore freeze,
       BusinessEvents events) {
+    this(decide, catalogue, runtime, freeze, events, AuditPort.NOOP);
+  }
+
+  public AssistantService(
+      DecidePort decide,
+      CataloguePort catalogue,
+      RuntimePort runtime,
+      FreezeStore freeze,
+      BusinessEvents events,
+      AuditPort audit) {
     this.decide = decide;
     this.catalogue = catalogue;
     this.runtime = runtime;
     this.freeze = freeze;
     this.events = events;
+    this.audit = audit == null ? AuditPort.NOOP : audit;
   }
 
   public Map<String, Object> hints(String sessionId, Map<String, Object> claims) {
@@ -123,6 +135,9 @@ public class AssistantService {
             row.activationTarget(),
             row.agentClientId(),
             correlationId));
+    audit.emitAsync(
+        AuditEvents.freezeWritten(
+            correlationId, sid, row.routeId(), row.routeVersion(), INGRESS));
     events.emit(
         "chat.run.accepted",
         journeyId,

@@ -3,11 +3,14 @@ package com.fabric.registry.adapters.in.http;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fabric.registry.application.AuditEvents;
+import com.fabric.registry.application.AuditPort;
 import com.fabric.registry.application.ManifestService;
 import com.fabric.registry.domain.ManifestVersion;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,10 +23,15 @@ public class ManifestController {
 
   private final ManifestService manifests;
   private final ObjectMapper mapper;
+  private final AuditPort audit;
 
-  public ManifestController(ManifestService manifests, ObjectMapper mapper) {
+  public ManifestController(
+      ManifestService manifests,
+      ObjectMapper mapper,
+      @Autowired(required = false) AuditPort audit) {
     this.manifests = manifests;
     this.mapper = mapper;
+    this.audit = audit == null ? AuditPort.NOOP : audit;
   }
 
   @PutMapping("/v1/manifests/{manifestId}/versions/{manifestVersion}")
@@ -32,9 +40,12 @@ public class ManifestController {
       @PathVariable String manifestVersion,
       @RequestBody Map<String, Object> body) {
     String status = body.get("status") == null ? "published" : String.valueOf(body.get("status"));
+    String toolsJson = json(body.get("tools"));
     ManifestVersion saved =
-        manifests.put(
-            new ManifestVersion(manifestId, manifestVersion, json(body.get("tools")), status));
+        manifests.put(new ManifestVersion(manifestId, manifestVersion, toolsJson, status));
+    if ("published".equalsIgnoreCase(saved.status())) {
+      audit.emitAsync(AuditEvents.manifestPublished(manifestId, manifestVersion, toolsJson));
+    }
     return ResponseEntity.ok(toBody(saved));
   }
 

@@ -1,0 +1,24 @@
+{
+  "event_id": "33333333-3333-4333-8333-333333333333",
+  "event_type": "hydrate.snapshot",
+  "occurred_at": "2026-08-26T01:00:02Z",
+  "producer": "ar",
+  "correlation_id": "corr-fee-1",
+  "session_id": "sess-88",
+  "decision_id": null,
+  "payload": {
+    "route_id": "fee_explain",
+    "route_version": "2026.08.1",
+    "manifest_id": "fee_explain_v1",
+    "manifest_version": "2026.08.1",
+    "capabilities": [
+      {
+        "capability_id": "account_fee_lookup",
+        "capability_version": "2026.08.1",
+        "invoke_url_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "input_schema_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "output_schema_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      }
+    ]
+  }
+}

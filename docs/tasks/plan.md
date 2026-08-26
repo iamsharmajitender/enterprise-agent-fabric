@@ -1,6 +1,6 @@
 # Implementation Plan: Enterprise Agent Fabric v1 (local)
 
-Observability (OTLP → LGTM, three layers) is a **separate** plan: [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md). Evals (routing golden set / CI gate) are a **separate** plan: [eval-plan.md](./eval-plan.md) / [eval-todo.md](./eval-todo.md). Intent router (layered classifier ①–③) is a **separate** plan: [intent-plan.md](./intent-plan.md) / [intent-todo.md](./intent-todo.md). Route-contract stage data sharing is a **separate** plan: [dataflow-plan.md](./dataflow-plan.md) / [dataflow-todo.md](./dataflow-todo.md). Do not fold those tasks into the checkboxes below.
+Observability (OTLP → LGTM, three layers) is a **separate** plan: [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md). Evals (routing golden set / CI gate) are a **separate** plan: [eval-plan.md](./eval-plan.md) / [eval-todo.md](./eval-todo.md). Intent router (layered classifier ①–③) is a **separate** plan: [intent-plan.md](./intent-plan.md) / [intent-todo.md](./intent-todo.md). Route-contract stage data sharing is a **separate** plan: [dataflow-plan.md](./dataflow-plan.md) / [dataflow-todo.md](./dataflow-todo.md). Generic tool failure handling (business/technical, retryable) is a **separate** plan: [tool-failure-plan.md](./tool-failure-plan.md) / [tool-failure-todo.md](./tool-failure-todo.md). Do not fold those tasks into the checkboxes below.
 
 ## Overview
 

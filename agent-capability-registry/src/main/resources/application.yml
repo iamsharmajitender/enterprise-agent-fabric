@@ -14,6 +14,9 @@ spring:
   flyway:
     enabled: true
 
+fabric:
+  audit-data-plane-url: ${AUDIT_DATA_PLANE_URL:}
+
 logging:
   structured:
     format:

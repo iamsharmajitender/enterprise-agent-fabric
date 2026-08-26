@@ -81,14 +81,39 @@ bring_up() {
   echo "Starting fabric in the background..."
   # --remove-orphans: renamed services (e.g. agent-fabric-mocks → agent-mocks) otherwise keep port binds.
   "${COMPOSE[@]}" up --build -d --remove-orphans
+  ensure_postgres_databases
   "${COMPOSE[@]}" ps
+}
+
+# init-postgres.sql runs only on an empty volume. When we add a DB later (e.g. audit),
+# existing volumes never pick it up — create missing DBs idempotently after Postgres is up.
+ensure_postgres_databases() {
+  local db
+  echo "Ensuring Postgres app databases exist (adp, ar, acr, audit)…"
+  for _ in $(seq 1 30); do
+    if "${COMPOSE[@]}" exec -T postgres pg_isready -U fabric -d afd >/dev/null 2>&1; then
+      break
+    fi
+    sleep 1
+  done
+  for db in adp ar acr audit; do
+    "${COMPOSE[@]}" exec -T postgres \
+      psql -U fabric -d afd -v ON_ERROR_STOP=1 \
+      -c "SELECT 'ok' FROM pg_database WHERE datname = '${db}'" 2>/dev/null \
+      | grep -q ok \
+      || "${COMPOSE[@]}" exec -T postgres \
+        psql -U fabric -d afd -v ON_ERROR_STOP=1 \
+        -c "CREATE DATABASE ${db};"
+  done
+  # AADP may have crash-looped before audit existed; restart once DBs are ready.
+  "${COMPOSE[@]}" up -d --no-deps agent-audit-data-plane >/dev/null 2>&1 || true
 }
 
 flyway_checksum_failed() {
   local svc
-  for svc in agent-data-plane agent-capability-registry agent-front-door; do
+  for svc in agent-data-plane agent-capability-registry agent-front-door agent-audit-data-plane; do
     if "${COMPOSE[@]}" logs --no-color --tail 400 "$svc" 2>/dev/null \
-      | grep -Eq "Migration checksum mismatch|FlywayValidateException"; then
+      | grep -Eq "Migration checksum mismatch|FlywayValidateException|database \"audit\" does not exist"; then
       return 0
     fi
   done
@@ -115,6 +140,7 @@ wait_healthy() {
 wait_stack_healthy() {
   wait_healthy http://127.0.0.1:3007/health "Data Plane" || return $?
   wait_healthy http://127.0.0.1:3009/health "Capability Registry" || return $?
+  wait_healthy http://127.0.0.1:3012/health "Audit Data Plane" || return $?
   return 0
 }
 
@@ -158,3 +184,4 @@ fi
 
 save_flyway_stamp
 echo "Fabric is up. Front Door http://localhost:3005  Control Plane http://localhost:3006"
+echo "Audit Control Plane http://localhost:3013  (data plane :3012). Java unit tests: ./docs/run/scripts/test-java.sh"

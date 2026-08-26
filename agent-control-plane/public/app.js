@@ -2326,6 +2326,15 @@ function promptUses(routes, promptId) {
     }));
 }
 
+function corpusUses(routes, corpusId) {
+  return (routes ?? [])
+    .filter((route) => retrievalScope(route.retrieval).includes(corpusId))
+    .map((route) => ({
+      route_id: route.route_id ?? null,
+      route_version: route.route_version ?? null,
+    }));
+}
+
 async function showUsage() {
   clearError();
   document.body.classList.remove(
@@ -2605,6 +2614,9 @@ async function showManifest(manifestId, version) {
 }
 
 async function showCorpus(corpusId) {
+  const routesRes = await fetch("/api/routes");
+  const routesPayload = routesRes.ok ? await routesRes.json() : { routes: [] };
+  const uses = corpusUses(routesPayload.routes ?? [], corpusId);
   return showCatalogDetail({
     id: corpusId,
     apiBase: `/api/corpora/${encodeURIComponent(corpusId)}`,
@@ -2625,6 +2637,7 @@ async function showCorpus(corpusId) {
     jsonTitle: "Corpus JSON",
     jsonId: "corpus-json",
     sectionsOf: CORPUS_SECTIONS,
+    afterNodes: () => [buildUsedBySection(uses, "Unused by any route.")],
   });
 }
 

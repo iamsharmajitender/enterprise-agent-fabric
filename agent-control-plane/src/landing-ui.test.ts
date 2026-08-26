@@ -15,19 +15,27 @@ test("landing is titled Enterprise Agent Fabric", () => {
   assert.match(js, /Enterprise Agent Fabric/);
 });
 
-test("header has Glossary then Observability then Scratchpad", () => {
+test("header has Audit then Glossary then Observability then Scratchpad", () => {
   assert.match(html, /class="header-actions"/);
   assert.match(html, /class="header-btn"/);
+  assert.match(html, /href="http:\/\/localhost:3013\/"/);
   assert.match(html, /href="http:\/\/localhost:3000\/"/);
   assert.match(html, /href="http:\/\/localhost:3005\/chat\.html"/);
   assert.match(html, /target="_blank"/);
+  assert.match(html, />Audit</);
   assert.match(html, />Glossary</);
   assert.match(html, />Observability</);
   assert.match(html, />Scratchpad</);
+  const audit = html.indexOf(">Audit<");
   const glossary = html.indexOf(">Glossary<");
   const observability = html.indexOf(">Observability<");
   const scratchpad = html.indexOf(">Scratchpad<");
-  assert.ok(glossary > 0 && observability > glossary && scratchpad > observability);
+  assert.ok(
+    audit > 0 &&
+      glossary > audit &&
+      observability > glossary &&
+      scratchpad > observability,
+  );
   assert.match(css, /\.header-btn/);
   assert.match(css, /\.top \{[\s\S]*position:\s*sticky/);
 });

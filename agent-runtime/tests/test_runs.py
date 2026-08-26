@@ -124,6 +124,50 @@ def test_get_status_returns_slim_completed_canned_message(client: TestClient) ->
     }
 
 
+def test_async_start_returns_202_while_graph_still_running(
+    store, catalogue: FakeCatalogue, registry: FakeRegistry
+) -> None:
+    """Production schedule: 202 after pin; status stays running until the graph finishes."""
+    import threading
+    import time
+
+    from app.core.agent_core import run_in_background
+
+    release = threading.Event()
+    entered = threading.Event()
+
+    class SlowGraph:
+        def invoke(self, state: dict) -> dict:
+            entered.set()
+            assert release.wait(timeout=5)
+            return {"result": "async-done"}
+
+    client = TestClient(
+        create_app(
+            store=store,
+            catalogue=catalogue,
+            registry=registry,
+            graph=SlowGraph(),
+            schedule_run=run_in_background,
+        )
+    )
+    started = client.post("/v1/runs", headers=AFD, json=START_BODY)
+    assert started.status_code == 202
+    correlation_id = started.json()["correlation_id"]
+    assert entered.wait(timeout=5)
+    mid = client.get(f"/v1/runs/{correlation_id}", headers=AFD)
+    assert mid.json()["status"] == "running"
+    release.set()
+    deadline = time.time() + 5
+    while time.time() < deadline:
+        body = client.get(f"/v1/runs/{correlation_id}", headers=AFD).json()
+        if body.get("status") == "completed":
+            assert body["result"]["message"] == "async-done"
+            return
+        time.sleep(0.02)
+    raise AssertionError("run did not complete")
+
+
 def test_unknown_correlation_id_is_404(client: TestClient) -> None:
     response = client.get("/v1/runs/corr-missing", headers=AFD)
     assert response.status_code == 404

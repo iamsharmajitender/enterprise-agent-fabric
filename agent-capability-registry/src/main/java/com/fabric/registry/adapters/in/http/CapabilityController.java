@@ -3,12 +3,15 @@ package com.fabric.registry.adapters.in.http;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fabric.registry.application.AuditEvents;
+import com.fabric.registry.application.AuditPort;
 import com.fabric.registry.application.CapabilityService;
 import com.fabric.registry.domain.CapabilityVersion;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +25,15 @@ public class CapabilityController {
 
   private final CapabilityService capabilities;
   private final ObjectMapper mapper;
+  private final AuditPort audit;
 
-  public CapabilityController(CapabilityService capabilities, ObjectMapper mapper) {
+  public CapabilityController(
+      CapabilityService capabilities,
+      ObjectMapper mapper,
+      @Autowired(required = false) AuditPort audit) {
     this.capabilities = capabilities;
     this.mapper = mapper;
+    this.audit = audit == null ? AuditPort.NOOP : audit;
   }
 
   @GetMapping("/v1/capabilities")
@@ -65,6 +73,9 @@ public class CapabilityController {
       @PathVariable String version,
       @RequestBody Map<String, Object> body) {
     CapabilityVersion saved = capabilities.put(fromBody(id, version, body));
+    if ("published".equalsIgnoreCase(saved.status())) {
+      audit.emitAsync(AuditEvents.capabilityPublished(id, version, json(body)));
+    }
     return ResponseEntity.ok(toBody(saved));
   }
 

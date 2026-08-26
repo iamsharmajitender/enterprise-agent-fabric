@@ -63,12 +63,12 @@ Outbound to ADP/ACR: workload headers from HTTP clients. Channel user claims are
 | Method | Path | Notes |
 | --- | --- | --- |
 | `GET` | `/health` | `{"status":"UP"}` |
-| `POST` | `/v1/runs` | `mode: new`. Hydrate **before** `202`. Idempotent on `idempotency_key`. Body includes `session_id`, `route_id`, `route_version`, `goal`. |
+| `POST` | `/v1/runs` | `mode: new`. Hydrate + pin **before** `202`. Graph runs in the background. Idempotent on `idempotency_key`. Body includes `session_id`, `route_id`, `route_version`, `goal`. |
 | `GET` | `/v1/runs/{correlation_id}` | Slim status |
 | `GET` | `/v1/runs?session_id=` | Open-run (latest for session) |
 | `POST` | `/v1/runs/{correlation_id}/turns` | Resume: reload working; human_gate packet; checkpoint resume (`{}` / `{ "resume": true }`) |
 
-Hydrate failure → **422** `HYDRATE_FAILED` (no `202`). Successful hydrate freezes `hydrated_tools` on the pin for the life of the run.
+Hydrate failure → **422** `HYDRATE_FAILED` (no `202`). Successful hydrate freezes `hydrated_tools` on the pin for the life of the run. Clients observe completion via `GET /v1/runs/{correlation_id}` (AFD: `GET /v1/jobs/{correlation_id}`).
 
 ### End-to-end: one run
 
@@ -78,10 +78,8 @@ POST /v1/runs  (from AFD)
        1. idempotency_key hit? return existing correlation_id
        2. hydrate (catalogue + registry) → list of pinned capabilities/stages
        3. insert RunPin (status=running)
-       4. build graph from autonomy_mode + hydrated tools
-       5. run_loop → graph.invoke({ goal, notes, slots })
-       6. store.complete / pause (waiting) / fail
-  → 202 { correlation_id }
+       4. return 202 { correlation_id }
+       5. (background) build graph + run_loop → complete / pause / fail
 ```
 
 ## Contracts

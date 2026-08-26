@@ -6,7 +6,8 @@ COPY agent-data-plane/pom.xml .
 RUN mvn -q -B -DskipTests dependency:go-offline
 COPY agent-data-plane/src src
 COPY agent-fabric-evals /workspace/agent-fabric-evals
-RUN mvn -q -B test package
+# Image build packages only. Unit tests run via `mvn test` / CI — not Compose image builds.
+RUN mvn -q -B -DskipTests package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app

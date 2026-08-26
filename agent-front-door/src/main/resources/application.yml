@@ -46,3 +46,4 @@ management:
 fabric:
   data-plane-url: ${DATA_PLANE_URL:http://localhost:3007}
   runtime-url: ${RUNTIME_URL:http://localhost:3008}
+  audit-data-plane-url: ${AUDIT_DATA_PLANE_URL:}

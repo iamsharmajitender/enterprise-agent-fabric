@@ -1,0 +1,17 @@
+{
+  "event_id": "55555555-5555-4555-8555-555555555555",
+  "event_type": "stage.completed",
+  "occurred_at": "2026-08-26T01:00:03Z",
+  "producer": "ar",
+  "correlation_id": "corr-fee-1",
+  "session_id": "sess-88",
+  "decision_id": null,
+  "payload": {
+    "stage_id": "account_fee_lookup",
+    "llm_role": "none",
+    "status": "completed",
+    "latency_ms": 12,
+    "request_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "response_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
+  }
+}

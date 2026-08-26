@@ -10,7 +10,7 @@ from app.agents.prefetch_client import HttpPrefetchClient
 from app.api.errors import error_response
 from app.api.routes.health import router as health_router
 from app.api.routes.runs import router as runs_router
-from app.core.agent_core import RunService
+from app.core.agent_core import RunService, run_in_background, run_inline
 from app.core.db import engine
 from app.core.run_store import PersistentRunStore
 from app.graph.llm import llm_from_env
@@ -60,8 +60,13 @@ def create_app(
     llm: Any = None,
     prefetch: Any = None,
     jobs: Any = None,
+    schedule_run: Any = None,
 ) -> FastAPI:
-    """Attach run dependencies (store, catalogue, tools, LLM) onto the app."""
+    """Attach run dependencies (store, catalogue, tools, LLM) onto the app.
+
+    ``schedule_run`` defaults to inline execution so TestClient callers see
+    completion on the same thread. Production ``build_app`` uses a background thread.
+    """
     app.state.store = store
     app.state.runs = RunService(
         store,
@@ -72,6 +77,7 @@ def create_app(
         llm=llm,
         prefetch=prefetch,
         jobs=jobs,
+        schedule_run=schedule_run if schedule_run is not None else run_inline,
     )
     telemetry.instrument_app(app)
     return app
@@ -91,6 +97,7 @@ def build_app() -> FastAPI:
         llm=llm_from_env(),
         prefetch=HttpPrefetchClient(),
         jobs=HttpJobsClient(),
+        schedule_run=run_in_background,
     )
 
 

@@ -4,13 +4,16 @@ Deferred work that is **not** on the v1 list in [todo.md](./todo.md). Remaining 
 
 Docs map: [docs/README.md](../README.md).
 
-**Active follow-on (separate task lists):** Agent evals (routing golden set, jobs entitle, pin lint) — [eval-plan.md](./eval-plan.md) and [eval-todo.md](./eval-todo.md). Layered intent router I1–I11 + packaging — [intent-plan.md](./intent-plan.md) and [intent-todo.md](./intent-todo.md) (Layer ③ **on** is deferred here as I12). Those lists do not replace v1 todos.
+**Active follow-on (separate task lists):** Agent evals (routing golden set, jobs entitle, pin lint) — [eval-plan.md](./eval-plan.md) and [eval-todo.md](./eval-todo.md). Layered intent router I1–I11 + packaging — [intent-plan.md](./intent-plan.md) and [intent-todo.md](./intent-todo.md) (Layer ③ **on** is deferred here as I12). Agent audit (evidence chain; AADP + AACP) — [audit-plan.md](./audit-plan.md) and [audit-todo.md](./audit-todo.md). Generic tool failures (business/technical envelope + runtime policy) — [tool-failure-plan.md](./tool-failure-plan.md) and [tool-failure-todo.md](./tool-failure-todo.md). Those lists do not replace v1 todos.
 
 **Done (signed off):**
 - Observability O1–O16 — [observability-plan.md](./observability-plan.md) / [observability-todo.md](./observability-todo.md)
 - Route-contract stage data sharing D1–D13 — [dataflow-plan.md](./dataflow-plan.md) / [dataflow-todo.md](./dataflow-todo.md)
+- Agent audit A1–A16 (Phase 0–4; Kafka A17–A18 still parked) — [audit-plan.md](./audit-plan.md) / [audit-todo.md](./audit-todo.md)
 
-Also parked here: [versioned route table](#versioned-route-table), [Front Door review follow-ups](#front-door-review-follow-ups), [Shared Memory](#shared-memory-conversation-and-long_term) (**both** `conversation` and `long_term`), [I12 Layer ③ LLM fallback](#i12-layer-3-llm-fallback).
+Also parked here: [versioned route table](#versioned-route-table), [Front Door review follow-ups](#front-door-review-follow-ups), [Shared Memory](#shared-memory-conversation-and-long_term) (**both** `conversation` and `long_term`), [I12 Layer ③ LLM fallback](#i12-layer-3-llm-fallback), [platform hardening (bank readiness)](#platform-hardening-bank-readiness).
+
+IdP / PEP / policy dual-check, Shared Memory, and a model router are **out of this hardening list** (handled separately or already parked above). Chat discoverability (utterances / Layer ②) stays on the intent track.
 
 ---
 
@@ -235,3 +238,278 @@ Honor `ttl_hours` (seed: 24 typical, 8 for KYC/dispute) and `isolation`. Prove *
 - Treating freeze Redis as conversation memory.
 - Putting transcripts in files or in-process maps.
 - Confusing prefetch / working slots with `long_term` recall.
+
+---
+
+# Platform hardening (bank readiness)
+
+<a id="platform-hardening-bank-readiness"></a>
+
+**Status:** Future enhancement (architecture is bank-shaped; binary is a local foundation)  
+**Date:** 2026-08-26  
+**See also:** [status.md](../02-understand/status.md), [agent-runtime.md](../04-architecture/agent-runtime.md), [dataflow-plan.md](./dataflow-plan.md), hydrate in `agent-runtime/app/agents/hydrate.py`
+
+EAF’s locked fabric rules (AFD pin → ADP catalogue → ACR capabilities → AR execute) are a credible **target platform spine** for bank agentic work. The gaps below are what turn “compose demo + content plugs” into a platform a bank can **standardize on and harden**. They are **not** more Patterns; they are fidelity, evidence, publish, and production posture.
+
+**Suggested order when revived:** (1) hydrate fidelity → (2) publish lint / dual-store resolve → (3) evidence chain — **active track:** [audit-plan.md](./audit-plan.md) / [audit-todo.md](./audit-todo.md) → (4) side-effect invoke policy → (5) asserting mocks (stage I/O evidence is audit Phase B) → (6) release train / activate split → (7) HA / fleets / egress / chaos.
+
+**Explicitly not in this section:** IdP / PEP / policy, `conversation` / `long_term` ([Shared Memory](#shared-memory-conversation-and-long_term)), model router (add later as its own cut), Layer ③ ([I12](#i12-layer-3-llm-fallback)).
+
+---
+
+## 1. Hydrate fidelity — catalogue truth = runtime truth
+
+### Why it is needed
+
+Banks treat a seeded `human_gate` or prefetch stage as a **control**. If hydrate drops those stages unless a workflow happens to declare `branch` (or has no manifest), the catalogue lies: risk and audit believe a pause or pack exists, and the run never hits it. Silent skip is a control failure, not a cosmetic bug.
+
+### What v1 does instead
+
+- Manifest routes: full workflow order / `human_gate` / tool-less stages only when `_workflow_has_branch` is true; otherwise manifest order + `llm_role` stamps (`hydrate.py`).
+- Prefetch packing requires stage id literally `"prefetch"` plus `retrieval.mode=deterministic_prefetch`.
+- Unknown `llm_role` fails at graph build; dropped stages do not.
+
+### When to revive
+
+- Any route with gates or prefetch must be trusted in ops / risk review.
+- Contract tests show hydrated node ids ≠ workflow stage ids.
+- Seed comments still say “catalogue-only” for gates that `status.md` claims execute.
+
+### Sketch
+
+1. **Single hydrate path:** when `workflow_id` is set, always build nodes from **workflow stage order**; manifest only supplies capability pins.
+2. Unsupported `type` / `llm_role` / prefetch without retrieval → **hydrate fail closed** (no 202).
+3. Seed / CI contract: for every catalogue route, hydrated stage ids == workflow stage ids (presence + order).
+4. Optional: persist hydrate snapshot hash on the run pin for replay.
+
+### Out of scope here
+
+- Changing Pattern semantics; only making stored workflow executable or rejected.
+
+---
+
+## 2. Dual content stores (ADP + ACR) — publish resolve
+
+### Why it is needed
+
+Split catalogue journey (ADP) from published capabilities (ACR) is the right design. Ops pain is **two authoring surfaces, one pin**. Drift → hydrate 422 in “prod,” or humans patch only one Flyway file. Banks need one **publish unit** and automated proof that pointers resolve.
+
+### What v1 does instead
+
+- Route rows in `adp` point at `tool_manifest` + versions; AR `get_manifest` / `get_capability` hit **ACR only**.
+- Seeds duplicate manifest/capability content across `V1__dataplane.sql` and `V1__registry.sql` by hand.
+- No CI “pin resolve” gate beyond runtime hydrate failure.
+
+### When to revive
+
+- More than one team publishes routes or capabilities.
+- Dual SQL / dual PR drift becomes the default failure mode.
+- Rollback / promote must be “one cut,” not tribal sync.
+
+### Sketch
+
+1. Keep two stores; add a **release artifact** (single source → both migrations, or publish API).
+2. **`fabric publish lint`:** every route’s manifest and each tool pin resolves in ACR; fail on missing/yanked.
+3. Route versions never mutate capability pins in place — new cut → new manifest version.
+4. Control Plane “pin health”: route → manifest → caps, red if unresolved.
+
+### Out of scope here
+
+- Merging ADP and ACR into one database.
+- [Versioned route table](#versioned-route-table) (contest-board snapshot is related but separate).
+
+---
+
+## 3. Audit / decision record — evidence chain
+
+**Active track (do not implement from this sketch alone):** [audit-plan.md](./audit-plan.md) · [audit-todo.md](./audit-todo.md).
+
+### Why it is needed
+
+Banks ask for more than “the agent answered.” They need **why this route**, under what entitlement snapshot, **which frozen contract** ran, and **what each stage saw/wrote**. v1 intent deferred decision audit (`/v1/decisions`). Freeze + correlation help; they are not a full evidence chain. IdP elsewhere does not replace fabric evidence. OTel is ops, not an append-only exam trail.
+
+### Confirmed shape (see plan)
+
+- **agent-audit-data-plane** (:3012, Java, DB `audit`) — append-only ingest + query.
+- **agent-audit-control-plane** (:3013, TypeScript, no DB) — ops UI; only calls AADP.
+- Producers AFD / ADP / AR / ACR → AADP via **async non-blocking HTTP**; Kafka later (same envelope).
+- **Phase A:** decide, freeze/pin, hydrate snapshot, run terminal. **Phase B:** stage digests + ACR publish events.
+
+### What v1 does instead
+
+- No `/v1/decisions`; no audit table on `adp` / `ar`.
+- Freeze + OTel only; chat FR-5 stays slim.
+
+### Out of scope here
+
+- Full SIEM; Shared Memory transcripts; `router_layer` on chat wire; implementing from this summary instead of the audit todo.
+
+---
+
+## 4. Side-effect tools — invoke policy
+
+> **Related active track:** classifying tool outcomes (business vs technical, retryable) and a domain-free AR policy table lives in [tool-failure-plan.md](./tool-failure-plan.md) / [tool-failure-todo.md](./tool-failure-todo.md). This section keeps **capability `side_effect` / timeout / retry fields** — the gate for *whether* a classified `transient` retry is allowed on mutators.
+
+### Why it is needed
+
+Refunds, freezes, limit changes are **once-only or carefully idempotent**. Blind HTTP retry double-posts money movers. Mocks that ignore bodies teach false confidence (`--all` green ≠ correct hop). Architecture packs already describe risk-tier retries; the binary and capability contract do not yet enforce them.
+
+### What v1 does instead
+
+- Capabilities carry `invoke` + schemas; limited or no first-class `side_effect` / retry / timeout policy on the pin.
+- agent-fabric-mocks often return canned bodies and ignore request JSON (except prefetch collection).
+- Dataflow D-track proved slots/schema merge; dummy completed is still not full domain proof.
+
+### When to revive
+
+- Any production mutating tool (POST refund, freeze, KYC start).
+- Need to fail closed on uncertain timeout for `once` operations.
+- Contract tests must assert tool input and echo ids for stage N+1.
+
+### Sketch
+
+1. ACR capability fields: `side_effect: none | idempotent | once`, `timeout_ms`, `retry` policy.
+2. AR: retry only when allowed; `once` → no retry on uncertain timeout, or require `Idempotency-Key` (`correlation_id` + stage_id).
+3. Mocks for proof routes: validate required fields; return deterministic ids into next-slot JSON.
+4. Compensation stays out-of-band (case system) unless explicit compensate stages are added later.
+
+### Out of scope here
+
+- Pattern 3 allowlist enforcement (policy track).
+- Building a general saga engine inside LangGraph.
+
+---
+
+## 5. Runtime conventions as validated DSL
+
+### Why it is needed
+
+Platform teams scale by **publish rules**, not by reading `prefetch.py` / `branch.py`. Tribal conventions (“stage must be named prefetch”; branch keys guessed from `risk` / `tier`) become “works on my seed.” Banks need conventions **documented and linted at publish**, with runtime still fail-closed.
+
+### What v1 does instead
+
+| Convention | Where |
+| --- | --- |
+| Prefetch stage id must be `"prefetch"` | `prefetch.py` `is_prefetch_stage` |
+| Branch choice fields `risk`, `risk_tier`, `branch`, `level`, `tier` (then any matching string) | `branch.py` |
+| `llm_role` ∈ `none` / `query_formulation` / `classify` / `synthesis` | `workflow.py` / schema bind |
+| Ordered hydrate gated on branch presence | `hydrate.py` |
+| Flat schemas for structured LLM bind | `schema.py` |
+
+Eval pin lint covers some catalogue pins; not full workflow semantics.
+
+### When to revive
+
+- Alongside hydrate unification (§1), so the wrong DSL is not baked in.
+- Second team authors workflows without AR code reading.
+- Nested schemas or multi-branch graphs are requested (may stay rejected — but **explicitly**).
+
+### Sketch
+
+1. In-repo route-contract schema mirrored from the playbook reference.
+2. Publish lint: enum roles, prefetch/`type`, `branch_on` JSON path (prefer over field heuristics), diamond-or-reject topology.
+3. Prefer `type: prefetch` (or stage flag) over magic id; keep fail-closed at runtime.
+4. Extend CataloguePinLint / CI to workflow semantics, not only pins.
+
+### Out of scope here
+
+- Arbitrary DAG workflows or free-form planners in v1 hardening.
+
+---
+
+## 6. Production posture
+
+### Why it is needed
+
+`docker compose up` proves **local contracts**. Banks buy **failure modes**: dual AFD fleets, poison handling, shed load, AZ loss, egress allowlists, secret rotation. Packs (§12 / §17) describe deployment and resilience; the running profile is still stub-auth / stub-Kafka / stub-or-local LLM and one AFD process.
+
+### What v1 does instead
+
+- One Front Door process for chat + jobs; Kafka / IdP stubbed per intent.
+- Seed stub LLM special-cases fee / `account_fee_lookup` under `FABRIC_LLM_STUB`.
+- Observability track done for local evidence; not multi-AZ DR runbooks as acceptance tests.
+
+### When to revive
+
+- First non-lab environment.
+- Need real model gateway without fee-canned stub in the “prod” profile.
+- Chaos: kill registry mid-hydrate (must not 202); kill tool mid-`once` POST (no double apply).
+
+### Sketch (phased)
+
+| Phase | Bar |
+| --- | --- |
+| A | Real LLM path; prod profile disables fee-special stub; stubs only behind `FABRIC_PROFILE=local` |
+| B | Two AFD fleets (chat / API); `{runs_topic}` as designed |
+| C | Multi-instance AR + open-run rules; Postgres HA; backup/restore runbook |
+| D | Egress allowlist AR → ADP / ACR / tools only |
+| E | Chaos / poison / shed tests from pack failure tables |
+
+### Out of scope here
+
+- Implementing IdP (separate). Replacing Compose as the local DX.
+
+---
+
+## 7. Publish governance — release train
+
+### Why it is needed
+
+Architecture allows content-driven journeys; banks need **who may publish**, **what gates**, and **rollback = new version / flip active**. Without a train, SQL insert ≈ production product. Eval suites already exist (`agent-fabric-evals`); they should become **merge gates**, not demos.
+
+### What v1 does instead
+
+- Authors edit Flyway seeds (and mocks / utterances) and run local tests.
+- `active` on a route version is not a separate controlled promote from “authored.”
+- No formal roles: capability publisher ≠ route owner ≠ activator.
+
+### When to revive
+
+- Org-wide or multi-BU adoption.
+- Need yank/deprecate of capability versions with lint failure for routes still pinning them.
+- Change ticket must separate “published” from “live contest / live jobs pin.”
+
+### Sketch
+
+```text
+content PR
+  → schema lint (workflow / capability)
+  → pin resolve (ADP ↔ ACR)
+  → hydrate dry-run (no silent drop)
+  → route-quality / intent evals for touched routes
+  → side-effect policy present for mutating caps
+  → approve + append-only publish
+  → activate (separate step / ticket)
+```
+
+Roles: **capability publisher** (ACR) ≠ **route owner** (ADP) ≠ **activator**. Related: [versioned route table](#versioned-route-table) for chat contest atomicity.
+
+### Out of scope here
+
+- Full GRC product; human committee process outside the technical gates.
+
+---
+
+## Other suggestions (parked)
+
+Smaller or adjacent items that also matter for platform credibility; revive with the matching section above when possible.
+
+| Suggestion | Why | Ties to |
+| --- | --- | --- |
+| **Fail loud in Control Plane** | Show pin health / hydrate dry-run errors in ACP so authors see catalogue≠runtime before ops does | §1, §2 |
+| **Hydrate snapshot on run status API** | Ops can fetch frozen caps without digging logs | §3 |
+| **Asserting mocks for D5 proof routes** | Body-validated tool stubs so dataflow cannot regress silently | §4 |
+| **`branch_on` in workflow JSON** | Replace heuristic field list with an explicit path | §5 |
+| **Remove / gate fee special-case in seed stub** | Prod profile must not invent fee answers from keyword blobs | §6 |
+| **Activate ≠ publish** | Authoring a version must not auto-win chat contest or jobs default | §7, [route table](#versioned-route-table) |
+| **Jobs channel on entitle** | Front Door still hardcodes `channel: "web"` on some paths — see [Front Door follow-ups](#front-door-review-follow-ups) | FD parked list |
+| **Chat must not resume `job:` freeze keys** | Cross-surface freeze confusion | FD parked list |
+| **Model router (later)** | Route/model selection as its own cut; not Pattern work | Separate future cut |
+| **Pattern 3 allowlist enforcement** | Catalogue today; runtime ignore — policy track when IdP/PEP lands | Policy (out of this list) |
+| **Nested structured output** | Flat schema bind only; document reject or extend `schema.py` deliberately | §5 |
+| **Multi-branch / non-diamond graphs** | Reject at publish until topology is specified | §5 |
+| **Utterances as catalogue content** | Chat discoverability: Layer ② classpath JSON vs SQL — intent track, not AR | [intent-todo](./intent-todo.md) |
+
+### Stakeholder one-liner
+
+EAF’s architecture is bank-shaped; hardening is **make catalogue executable truth fail-loud, prove pins with a publish train, record evidence, and treat mutating tools as once-only** — not invent more agent patterns.

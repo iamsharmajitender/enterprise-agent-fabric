@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Agent Audit — Search</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <header class="page-head">
+        <div>
+          <h1>Agent Audit</h1>
+          <p class="lede">Look up fabric evidence by correlation or session.</p>
+        </div>
+        <a class="btn btn-secondary" href="/">← Workflows</a>
+      </header>
+
+      <form id="lookup">
+        <label>
+          correlation_id
+          <input name="correlation_id" placeholder="corr-…" autocomplete="off" />
+        </label>
+        <label>
+          session_id
+          <input name="session_id" placeholder="sess-… or job:…" autocomplete="off" />
+        </label>
+        <button type="submit">Load chain</button>
+      </form>
+      <pre id="out">No events loaded.</pre>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

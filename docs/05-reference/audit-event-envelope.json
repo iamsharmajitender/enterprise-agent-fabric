@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fabric.local/schemas/audit-event-envelope.json",
+  "title": "Agent audit event envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "occurred_at", "producer", "payload"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "event_type": {
+      "type": "string",
+      "description": "Phase A: decide.*, freeze.*, pin.*, hydrate.snapshot, run.terminal. Phase B: stage.*, capability.published, manifest.published"
+    },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "producer": { "type": "string", "enum": ["afd", "adp", "ar", "acr"] },
+    "correlation_id": { "type": ["string", "null"] },
+    "session_id": { "type": ["string", "null"] },
+    "decision_id": { "type": ["string", "null"] },
+    "payload": {
+      "type": "object",
+      "description": "Allowlisted fields only. Deny: utterance, claims, Authorization, raw tool bodies, LLM prompts."
+    }
+  }
+}

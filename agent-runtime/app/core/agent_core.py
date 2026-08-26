@@ -1,7 +1,12 @@
+import contextvars
+import logging
+import threading
+from collections.abc import Callable
 from typing import Any
 from uuid import uuid4
 
 from app import telemetry
+from app.agents.audit_client import emit_async, hydrate_snapshot, run_terminal, stage_completed
 from app.agents.hydrate import CataloguePort, HydrateError, RegistryPort, hydrate
 from app.agents.jobs_client import JobsPort
 from app.agents.prefetch import PrefetchPort
@@ -19,6 +24,28 @@ from app.graph.llm import LlmPort
 from app.graph.workflow import build_agent_loop, build_tool_graph
 from app.tools.invoker import ToolInvoker
 
+log = logging.getLogger(__name__)
+
+ScheduleRun = Callable[[Callable[[], None]], None]
+
+
+def run_inline(fn: Callable[[], None]) -> None:
+    """Execute the run on the calling thread (tests / deterministic clients)."""
+    fn()
+
+
+def run_in_background(fn: Callable[[], None]) -> None:
+    """Schedule the run on a daemon thread; copy contextvars for request_id/telemetry."""
+    ctx = contextvars.copy_context()
+
+    def _safe() -> None:
+        try:
+            ctx.run(fn)
+        except Exception:
+            log.exception("background run failed")
+
+    threading.Thread(target=_safe, name="ar-run-execute", daemon=True).start()
+
 
 class RunService:
     def __init__(
@@ -31,6 +58,7 @@ class RunService:
         llm: LlmPort | None = None,
         prefetch: PrefetchPort | None = None,
         jobs: JobsPort | None = None,
+        schedule_run: ScheduleRun | None = None,
     ) -> None:
         """Hold store, catalogue, registry, and optional graph/tool/LLM ports."""
         self._store = store
@@ -41,6 +69,7 @@ class RunService:
         self._llm = llm
         self._prefetch = prefetch
         self._jobs = jobs
+        self._schedule_run = schedule_run or run_in_background
 
     def _graph_for(
         self,
@@ -50,6 +79,7 @@ class RunService:
         profile: dict[str, Any],
         row: dict[str, Any] | None = None,
         start_index: int = 0,
+        session_id: str | None = None,
     ) -> GraphPort:
         """Use an injected graph, or build a Pattern 1 loop / linear graph."""
         if self._graph is not None:
@@ -66,6 +96,21 @@ class RunService:
                 stage_id,
                 state,
                 tools=tools,
+            )
+            tool = tools[step] if 0 <= step < len(tools) else {}
+            slots = state.get("slots") if isinstance(state.get("slots"), dict) else {}
+            slot = slots.get(stage_id) if isinstance(slots, dict) else None
+            emit_async(
+                stage_completed(
+                    correlation_id,
+                    session_id,
+                    stage_id,
+                    str(tool.get("llm_role") or "none"),
+                    "completed",
+                    0,
+                    state.get("goal") or {},
+                    slot if slot is not None else state.get("notes") or [],
+                )
             )
 
         row = row or {}
@@ -110,7 +155,12 @@ class RunService:
         return self._catalogue.get_route(route_id, route_version)
 
     def start(self, body: dict[str, Any]) -> str:
-        """Hydrate, pin, and execute a new run. Same idempotency key returns the original id."""
+        """Hydrate and pin a new run, then schedule graph execution.
+
+        Returns ``correlation_id`` after the pin is durable (status ``running``).
+        Graph execution continues via ``schedule_run`` (background in production).
+        Same idempotency key returns the original id without a second execute.
+        """
         if body.get("mode") != "new":
             raise ValueError("mode must be new")
         key = str(body.get("idempotency_key") or "").strip()
@@ -182,6 +232,17 @@ class RunService:
             telemetry.attach(correlation_id=saved.correlation_id)
             return saved.correlation_id
         telemetry.attach(correlation_id=saved.correlation_id)
+        emit_async(
+            hydrate_snapshot(
+                saved.correlation_id,
+                session_id,
+                route_id,
+                route_version,
+                tools,
+                manifest_id=str(row.get("tool_manifest") or ""),
+                manifest_version=str(row.get("tool_manifest_version") or ""),
+            )
+        )
         telemetry.emit(
             "run.started",
             journey_id=journey_id,
@@ -191,19 +252,54 @@ class RunService:
             route_version=route_version,
             outcome="started",
         )
-        run_loop(
-            self._graph_for(
-                saved.hydrated_tools,
-                correlation_id=saved.correlation_id,
-                profile=profile,
+        goal = body.get("goal") if isinstance(body.get("goal"), dict) else {}
+        self._schedule_run(
+            lambda: self._execute_new_run(
+                saved,
                 row=row,
-            ),
-            self._store,
-            saved,
-            goal=body.get("goal") if isinstance(body.get("goal"), dict) else {},
-            profile=profile,
+                profile=profile,
+                goal=goal,
+                session_id=session_id,
+                route_id=route_id,
+                route_version=route_version,
+            )
         )
         return saved.correlation_id
+
+    def _execute_new_run(
+        self,
+        pin: RunPin,
+        *,
+        row: dict[str, Any],
+        profile: dict[str, Any],
+        goal: dict[str, Any],
+        session_id: str,
+        route_id: str,
+        route_version: str,
+    ) -> None:
+        """Invoke the graph for a newly pinned run and emit the terminal audit event."""
+        finished = run_loop(
+            self._graph_for(
+                pin.hydrated_tools,
+                correlation_id=pin.correlation_id,
+                profile=profile,
+                row=row,
+                session_id=session_id,
+            ),
+            self._store,
+            pin,
+            goal=goal,
+            profile=profile,
+        )
+        emit_async(
+            run_terminal(
+                finished.correlation_id,
+                session_id,
+                finished.status,
+                route_id,
+                route_version,
+            )
+        )
 
     def resume(self, correlation_id: str, body: dict[str, Any]) -> dict[str, Any] | None:
         """Re-invoke the graph for an existing pin and return its slim status."""
@@ -253,6 +349,7 @@ class RunService:
                     profile=profile,
                     row=row,
                     start_index=resume_index,
+                    session_id=pin.session_id,
                 ),
                 self._store,
                 pin,
@@ -287,6 +384,7 @@ class RunService:
                     profile=profile,
                     row=row,
                     start_index=resume_index,
+                    session_id=pin.session_id,
                 ),
                 self._store,
                 pin,
@@ -298,12 +396,13 @@ class RunService:
             )
             return self.status(correlation_id)
 
-        run_loop(
+        finished = run_loop(
             self._graph_for(
                 pin.hydrated_tools,
                 correlation_id=pin.correlation_id,
                 profile=profile,
                 row=row,
+                session_id=pin.session_id,
             ),
             self._store,
             pin,
@@ -311,6 +410,15 @@ class RunService:
             notes=prior_notes,
             slots=prior_slots,
             profile=profile,
+        )
+        emit_async(
+            run_terminal(
+                finished.correlation_id,
+                pin.session_id,
+                finished.status,
+                pin.route_id,
+                pin.route_version,
+            )
         )
         return self.status(correlation_id)
 

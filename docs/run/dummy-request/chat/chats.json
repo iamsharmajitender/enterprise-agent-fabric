@@ -7,7 +7,7 @@
       "label": "Single inference",
       "claims": [],
       "message": "hello",
-      "hint_contains": "Pattern 0 cannot take tools"
+      "hint_contains": "no memory, no retrieval"
     },
     {
       "route_id": "chat_session",
@@ -23,7 +23,7 @@
       "label": "Single inference",
       "claims": ["policy:read"],
       "message": "What is the handbook procedure?",
-      "hint_contains": "App prefetches policy-engine and product-faq"
+      "hint_contains": "policy-engine and product-faq"
     },
     {
       "route_id": "policy_chat",
