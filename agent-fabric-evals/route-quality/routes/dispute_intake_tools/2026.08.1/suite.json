@@ -1,7 +1,0 @@
-{
-  "suite_id": "dispute_intake_tools",
-  "suite_version": "2026.08.1",
-  "kind": "tool-sequence",
-  "route_id": "dispute_intake",
-  "description": "Pattern 2: doc_intake \u2192 case_open \u2192 packet_summarize."
-}

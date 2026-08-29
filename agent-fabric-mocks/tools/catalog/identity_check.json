@@ -1,9 +1,0 @@
-{
-  "id": "identity_check",
-  "method": "POST",
-  "path": "/cards/identity",
-  "status": 200,
-  "response": {
-    "text": "Identity verified for the cardholder."
-  }
-}

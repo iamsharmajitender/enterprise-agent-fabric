@@ -1,9 +1,0 @@
-{
-  "id": "refund_confirm",
-  "method": "POST",
-  "path": "/receipts/confirm",
-  "status": 200,
-  "response": {
-    "text": "Refund confirm placeholder. Classify/synthesis skip this HTTP."
-  }
-}

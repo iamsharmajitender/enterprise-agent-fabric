@@ -1,9 +1,0 @@
-{
-  "id": "refund_eligibility",
-  "method": "POST",
-  "path": "/receipts/eligibility",
-  "status": 200,
-  "response": {
-    "text": "Refund eligible. Window open. No prior payout."
-  }
-}

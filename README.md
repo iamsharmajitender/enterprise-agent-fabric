@@ -22,10 +22,10 @@ Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1`
   - [Persistence](#persistence)
 - [Components](#components)
 - [The four boxes (AFD, ADP, ACR, AR)](#the-four-boxes-afd-adp-acr-ar)
-  - [AFD — Agent Front Door](#afd--agent-front-door-afd-3005)
-  - [ADP — Agent Data Plane](#adp--agent-data-plane-adp-3007)
-  - [ACR — Agent Capability Registry](#acr--agent-capability-registry-acr-3009)
-  - [AR — Agent Runtime](#ar--agent-runtime-ar-3008)
+  - [AFD — Agent Front Door](#afd--agent-fabric-front-door-afd-3005)
+  - [ADP — Agent Data Plane](#adp--agent-fabric-plane/agent-data-plane-adp-3007)
+  - [ACR — Agent Capability Registry](#acr--agent-fabric-capability-registry-acr-3009)
+  - [AR — Agent Runtime](#ar--agent-fabric-runtime-ar-3008)
   - [How README topics map onto the four boxes](#how-readme-topics-map-onto-the-four-boxes)
 - [Routes (v1)](#routes-v1)
 - [Catalogue statuses](#catalogue-statuses)
@@ -56,7 +56,7 @@ Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1`
   - [Chat vs jobs](#chat-vs-jobs)
 - [Auth (stub)](#auth-stub)
 - [Docs](#docs)
-- [Future enhancements](docs/tasks/future-enhancement.md) (Shared Memory, I12 Layer ③, route tables)
+- [Future enhancements](agent-fabric-docs/tasks/future-enhancement.md) (Shared Memory, I12 Layer ③, route tables)
 
 ## Prerequisites
 
@@ -66,42 +66,43 @@ Demo utterance: `"Why was I charged $42?"` → route `fee_explain` @ `2026.08.1`
 ## Run
 
 ```bash
-./docs/run/scripts/start-app.sh
+./agent-fabric-scripts/stack/start-app.sh
 ```
 
 That is `docker compose up --build -d`. Stop (volumes kept):
 
 ```bash
-./docs/run/scripts/stop-app.sh
+./agent-fabric-scripts/stack/stop-app.sh
 ```
 
 Reload catalogue seed (deletes, then inserts):
 
 ```bash
-./docs/run/scripts/seed-db.sh
+./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
 ```
 
 **Demo path (Task 24):**
 
 ```bash
-./docs/run/dummy-request/run-job.sh fee_explain
-./docs/run/dummy-request/run-chat.sh fee_explain
+./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
 ```
 
 Both hit Front Door **:3005** (`/v1/jobs*` and `/v1/assistant/*`). Stub IdP: `Bearer stub` + `X-Stub-Claims`. Decide Layer ③ stays **off**. Runtime LLM may use local Ollama or `FABRIC_LLM_STUB=1`. Kafka is not used (HTTP poll).
 
 | Command | What it does |
 | --- | --- |
-| `./docs/run/scripts/start-app.sh` | Build and start in the background |
-| `./docs/run/scripts/stop-app.sh` | Stop containers (volumes kept) |
-| `./docs/run/scripts/seed-db.sh` | Delete and reload catalogue seed |
-| `docker compose -f docs/run/compose/docker-compose.yml ps` | Process status |
-| `docker compose -f docs/run/compose/docker-compose.yml logs -f` | Follow all logs |
-| `docker compose -f docs/run/compose/docker-compose.yml logs -f agent-data-plane` | One service |
-| `docker compose -f docs/run/compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
-| `docker compose -f docs/run/compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
+| `./agent-fabric-scripts/stack/start-app.sh` | Build and start in the background |
+| `./agent-fabric-scripts/stack/stop-app.sh` | Stop containers (volumes kept) |
+| `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` | Delete and add all routes and catalogue seed data |
+| `./agent-fabric-scripts/catalogue-seed/delete-seed-data.sh` | Delete all application data from every fabric database |
+| `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh shopassist_case` | Load one route pack from `catalogue-seed/route/<route_id>/` |
+| `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml ps` | Process status |
+| `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f` | Follow all logs |
+| `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f agent-fabric-plane/agent-data-plane` | One service |
+| `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
+| `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Editing an already-applied local seed migration (common while iterating on `V1__*.sql`) is fine: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable history; use `./docs/run/scripts/seed-db.sh` to reload catalogue rows without touching Flyway.
+`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Editing an already-applied local seed migration (common while iterating on `V1__*.sql`) is fine: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable history; use `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` to reload catalogue rows without touching Flyway.
 
 ### Check it is up
 
@@ -119,81 +120,28 @@ Grafana LGTM can take a minute. Wait until logs print `The OpenTelemetry collect
 
 ### Dummy requests
 
-Seed job and chat-visible routes live under [`docs/run/dummy-request/`](docs/run/dummy-request/). Catalogue and flags: [docs/run/dummy-request/README.md](docs/run/dummy-request/README.md).
+Chat demo routes live under [`agent-fabric-scripts/catalogue-seed/`](agent-fabric-scripts/catalogue-seed/). Catalogue and flags: [agent-fabric-scripts/catalogue-seed/README.md](agent-fabric-scripts/catalogue-seed/README.md).
 
 ```bash
-./docs/run/dummy-request/run-job.sh --list
-./docs/run/dummy-request/run-job.sh --all
-./docs/run/dummy-request/run-job.sh --mode 2
-./docs/run/dummy-request/run-chat.sh --list
-./docs/run/dummy-request/run-chat.sh --all
+./agent-fabric-scripts/catalogue-seed/run-chat.sh --list
+./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
+./agent-fabric-scripts/catalogue-seed/run-chat.sh --all
 ```
 
-`--all` posts every row in `jobs.json` / `chats.json`. `--mode N` is one band (`0`–`3`). Both **only POST** unless you poll:
+`--all` posts every row in `chats.json`. `--mode 1` is the autonomous band. Both **only POST** unless you poll:
 
 ```bash
-WAIT=1 ./docs/run/dummy-request/run-job.sh --all
-WAIT=1 ./docs/run/dummy-request/run-chat.sh --all
+WAIT=1 ./agent-fabric-scripts/catalogue-seed/run-chat.sh --all
 ```
 
-One job (polls until done): `./docs/run/dummy-request/job/1-autonomous/fee_explain.sh` or `./docs/run/dummy-request/run-job.sh claims_adjudicate`. One chat: `./docs/run/dummy-request/chat/1-autonomous/fee_explain.sh`.
+One chat (polls until done): `./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask`.
 
 ## Evals
 
-CI-gated routing and pin checks for the catalogue seed. They are **not** on decide / pin / start / loop — Jane’s turn does not run them. A failed eval blocks a catalogue change (or a PR), not a live reply.
-
-Fixtures live in [`agent-fabric-evals/`](agent-fabric-evals/README.md). Intent-router suites (routing / jobs entitle / pin) are grouped under [`intent-router-evals/`](agent-fabric-evals/intent-router-evals/README.md); each suite is **versioned** and `active.json` selects the cut:
-
-```text
-agent-fabric-evals/
-  intent-router-evals/
-    active.json
-    routing/2026.08.1/cases/fee.json   # + clarify, adversarial, seed-intents, guards
-    routing/2026.08.1/route-catalogue.json
-    routing/2026.08.1/route-case-manifest.json
-    jobs-entitle/2026.08.1/cases/mode-*.json
-    jobs-entitle/2026.08.1/jobs-entitle-catalogue.json
-    pin/2026.08.1/pin-suite.json
-    schemas/
-    run.sh
-  route-quality/          # Pattern 2 *_tools suites; harness E14
-```
-
-`eval_suite_id` on a route is slice 3 (route quality). Pattern 2 fixtures live under [`agent-fabric-evals/route-quality/routes/`](agent-fabric-evals/route-quality/README.md) as `{route_id}_tools`. Empty is correct for free-form chat. Routing is the **board** (the labelled mix in the JSON header), not a pointer on one row.
-
-### What CI runs
-
-There is no GitHub Actions workflow in this repo yet. The hook is Data Plane `mvn test` (also the ADP image build, which already runs `mvn test`). That includes:
-
-| Suite | Question |
-| --- | --- |
-| `RoutingEvalTest` | Chat: utterance + claims + channel → `route` / `clarify` / `abstain` |
-| `JobsEntitleEvalTest` | Jobs: named `route_id` + claims → `route` or fail-closed `abstain` |
-| `CataloguePinLintTest` | Every active row can pin: pointers resolve, Pattern 0 has no tools/workflow, high-risk writes still have a workflow |
-
-```bash
-./agent-fabric-evals/intent-router-evals/run.sh
-# same as:
-./agent-data-plane/run-eval.sh
-```
-
-Playbook (add an incident, do not delete a case to go green) and the break-a-label checklist: [agent-fabric-evals/intent-router-evals/README.md](agent-fabric-evals/intent-router-evals/README.md). Flip one `expected.route_id` in active `routing/<version>/cases/fee.json` and the gate must go red. Restore it.
-
-### What CI does not run
-
-Dummy `--all` needs a running stack. It is pin/hydrate smoke, **not** the routing labels.
-
-```bash
-WAIT=1 ./docs/run/dummy-request/run-job.sh --all
-```
-
-`WAIT=1` polls until `completed` and exits non-zero on `failed` or timeout.
-
-Plan / task list: [docs/tasks/eval-plan.md](docs/tasks/eval-plan.md), [docs/tasks/eval-todo.md](docs/tasks/eval-todo.md). Slice 3 route-quality: `./agent-fabric-evals/route-quality/run.sh` or `./agent-data-plane/run-eval.sh --quality`.
-
+Eval fixtures were removed in the shopassist-only cut. Design notes remain in [eval-plan.md](agent-fabric-docs/tasks/eval-plan.md) and [eval-todo.md](agent-fabric-docs/tasks/eval-todo.md).
 ## Ports and URLs
 
-Five Fabric folders: [`agent-front-door`](agent-front-door/README.md) · [`agent-control-plane`](agent-control-plane/README.md) · [`agent-data-plane`](agent-data-plane/README.md) · [`agent-runtime`](agent-runtime/README.md) · [`agent-capability-registry`](agent-capability-registry/README.md).
+Five Fabric folders: [`agent-fabric-front-door`](agent-fabric-front-door/README.md) · [`agent-fabric-plane/agent-control-plane`](agent-fabric-plane/agent-control-plane/README.md) · [`agent-fabric-plane/agent-data-plane`](agent-fabric-plane/agent-data-plane/README.md) · [`agent-fabric-runtime`](agent-fabric-runtime/README.md) · [`agent-fabric-capability-registry`](agent-fabric-capability-registry/README.md).
 
 | Port | What | URL |
 | --- | --- | --- |
@@ -217,14 +165,14 @@ Grafana: username **`admin`**, password **`admin`**. Dev/demo only — not a pro
 
 Compose includes [`grafana/otel-lgtm`](https://hub.docker.com/r/grafana/otel-lgtm): one container with OpenTelemetry Collector, Prometheus (metrics), Loki (logs), Tempo (traces), and Grafana. Collector receives OTLP and Grafana already has the data sources.
 
-**App services export OTLP** (Compose sets `OTEL_*` and Spring `MANAGEMENT_OTLP_*`). Service names: `agent-front-door`, `agent-data-plane`, `agent-runtime`, `agent-capability-registry`, `agent-control-plane`, `agent-mocks`. Each depends on `otel-lgtm`.
+**App services export OTLP** (Compose sets `OTEL_*` and Spring `MANAGEMENT_OTLP_*`). Service names: `agent-fabric-front-door`, `agent-fabric-plane/agent-data-plane`, `agent-fabric-runtime`, `agent-fabric-capability-registry`, `agent-fabric-plane/agent-control-plane`, `agent-mocks`. Each depends on `otel-lgtm`.
 
-Three-layer plan and tasks: [docs/tasks/observability-plan.md](docs/tasks/observability-plan.md), [docs/tasks/observability-todo.md](docs/tasks/observability-todo.md).
+Three-layer plan and tasks: [agent-fabric-docs/tasks/observability-plan.md](agent-fabric-docs/tasks/observability-plan.md), [agent-fabric-docs/tasks/observability-todo.md](agent-fabric-docs/tasks/observability-todo.md).
 
 Run Grafana with the fabric, or only the backend:
 
 ```bash
-docker compose -f docs/run/compose/docker-compose.yml up otel-lgtm
+docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml up otel-lgtm
 ```
 
 ### Send OpenTelemetry signals
@@ -296,7 +244,7 @@ Chat sequence: `chat.turn.received` → `intent.decide.*` → `chat.run.accepted
 
 ADP `journey_id` is `chat.{route_id}` / `job.{route_id}`, or `chat.decide` / `job.decide` if nothing bound. AR uses `chat.{route_id}` / `job.{route_id}` (or `chat.turn` / `job.turn`). Control Plane and Registry do not emit this family.
 
-Box READMEs: [Front Door](agent-front-door/README.md#business-events), [Data Plane](agent-data-plane/README.md#business-events). Loki: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"}` then filter `event` or `session_id` / `correlation_id`. Plan: [docs/tasks/observability-todo.md](docs/tasks/observability-todo.md) task O9.
+Box READMEs: [Front Door](agent-fabric-front-door/README.md#business-events), [Data Plane](agent-fabric-plane/agent-data-plane/README.md#business-events). Loki: `{service_name=~"agent-fabric-front-door|agent-fabric-plane/agent-data-plane|agent-fabric-runtime"}` then filter `event` or `session_id` / `correlation_id`. Plan: [agent-fabric-docs/tasks/observability-todo.md](agent-fabric-docs/tasks/observability-todo.md) task O9.
 
 ### Layer map (local)
 
@@ -308,16 +256,16 @@ Box READMEs: [Front Door](agent-front-door/README.md#business-events), [Data Pla
 
 ### See a journey
 
-Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.` Generate a `fee_explain` turn, then confirm signals in Grafana ([http://localhost:3000](http://localhost:3000), `admin` / `admin`):
+Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.` Generate a `shopassist_case` turn, then confirm signals in Grafana ([http://localhost:3000](http://localhost:3000), `admin` / `admin`):
 
-1. `./docs/run/dummy-request/job/1-autonomous/fee_explain.sh` or `./docs/run/dummy-request/chat/1-autonomous/fee_explain.sh`
-2. Explore → **Loki**: `{service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitle.accepted` → `intent.decide.*` → `chat.run.accepted` / `job.run.accepted` → `run.hydrate.*` / `run.started` / `run.completed`)
-3. Explore → **Tempo**: `{.service.name="agent-front-door"}` — children include `agent-data-plane` and `agent-runtime` (Registry on hydrate; `agent-mocks` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
-4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-front-door`
+1. `./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask`
+2. Explore → **Loki**: `{service_name=~"agent-fabric-front-door|agent-fabric-plane/agent-data-plane|agent-fabric-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitle.accepted` → `intent.decide.*` → `chat.run.accepted` / `job.run.accepted` → `run.hydrate.*` / `run.started` / `run.completed`)
+3. Explore → **Tempo**: `{.service.name="agent-fabric-front-door"}` — children include `agent-fabric-plane/agent-data-plane` and `agent-fabric-runtime` (Registry on hydrate; `agent-mocks` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
+4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-fabric-front-door`
 
-Stdout JSON is a backup: `docker compose -f docs/run/compose/docker-compose.yml logs -f`.
+Stdout JSON is a backup: `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f`.
 
-To force a hydrate failure: POST a Runtime start body with a bad `route_version` (workload headers `Authorization: Bearer fabric-internal`, `X-Workload: afd`). Expect HTTP 422 `HYDRATE_FAILED`. Then Loki `run.hydrate.failed` with `reason_class` (no tokens or claims), Tempo `hydrate` span on `agent-runtime` with error status, and Prometheus `fabric_journey_outcome_total` with `outcome="hydrate_failed"`. Spot-check: no bearer tokens in Loki, no `X-Stub-Claims` JSON in span attributes, no full utterance as a metric label.
+To force a hydrate failure: POST a Runtime start body with a bad `route_version` (workload headers `Authorization: Bearer fabric-internal`, `X-Workload: afd`). Expect HTTP 422 `HYDRATE_FAILED`. Then Loki `run.hydrate.failed` with `reason_class` (no tokens or claims), Tempo `hydrate` span on `agent-fabric-runtime` with error status, and Prometheus `fabric_journey_outcome_total` with `outcome="hydrate_failed"`. Spot-check: no bearer tokens in Loki, no `X-Stub-Claims` JSON in span attributes, no full utterance as a metric label.
 
 ### Explore in Grafana
 
@@ -336,7 +284,7 @@ fabric_journey_outcome_total
 **Traces** (Tempo / TraceQL):
 
 ```traceql
-{.service.name="agent-front-door"}
+{.service.name="agent-fabric-front-door"}
 ```
 
 ```traceql
@@ -352,35 +300,35 @@ fabric_journey_outcome_total
 ```
 
 ```traceql
-{.service.name="agent-front-door" && .http.response.status_code=500}
+{.service.name="agent-fabric-front-door" && .http.response.status_code=500}
 ```
 
 **Logs** (Loki / LogQL) — services export OTLP logs to LGTM (also still print JSON to stdout):
 
 ```logql
-{service_name="agent-front-door"}
+{service_name="agent-fabric-front-door"}
 ```
 
 ```logql
-{service_name="agent-runtime"} |= "run.hydrate"
+{service_name="agent-fabric-runtime"} |= "run.hydrate"
 ```
 
 ```logql
-{service_name="agent-front-door"} |= "chat.run.accepted"
+{service_name="agent-fabric-front-door"} |= "chat.run.accepted"
 ```
 
 ```logql
-{service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="sess-f71adfd75ad0"
+{service_name=~"agent-fabric-front-door|agent-fabric-plane/agent-data-plane|agent-fabric-runtime"} | session_id="sess-f71adfd75ad0"
 ```
 
 (Exact label may be `service_name` from the OTel resource; if empty, use Grafana label browser on the Loki data source.)
 
 Logs keep a single OTel pair `trace_id` / `span_id` (not Brave `traceId` / `spanId`). Resource does not include `telemetry.sdk.*`.
 
-After code changes that add log export, rebuild app images (`./docs/run/scripts/start-app.sh`) so the Logback/Python OTLP handlers are in the containers.
+After code changes that add log export, rebuild app images (`./agent-fabric-scripts/stack/start-app.sh`) so the Logback/Python OTLP handlers are in the containers.
 ### Persistence
 
-LGTM writes to `/data` in the container. Compose mounts named volume `lgtm-data`, so metrics, logs, traces, and Grafana state survive `down`. Only `docker compose -f docs/run/compose/docker-compose.yml down -v` deletes that volume (and Postgres).
+LGTM writes to `/data` in the container. Compose mounts named volume `lgtm-data`, so metrics, logs, traces, and Grafana state survive `down`. Only `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml down -v` deletes that volume (and Postgres).
 
 ## Components
 
@@ -401,26 +349,22 @@ What each box owns, how a turn/job flows, and how [Routes](#routes-v1), [Catalog
 
 | Folder | Job | Stack | Database |
 | --- | --- | --- | --- |
-| [`agent-front-door/README.md`](agent-front-door/README.md) | Channel ingress. Jobs `/v1/jobs*` + chat `/v1/assistant/*` on **3005**. Chat JSON does not include `route_id` or `run_id` (FR-5). | Java 21, Spring Boot, hexagonal | `afd` |
-| [`agent-data-plane/README.md`](agent-data-plane/README.md) | Routes, eligibility, decide (`/v1/intent/*`: eligible → ① rules → ② retrieve → ③ **off**), catalogue (`/v1/catalog/*`). No decision audit. Only Front Door may call decide. | Java 21, Spring Boot, hexagonal | `adp` |
-| [`agent-runtime/README.md`](agent-runtime/README.md) | Executes the pinned route (hydrate, LangGraph, tools, working/checkpoint). | Python 3.12, FastAPI, uv, LangGraph | `ar` |
-| [`agent-capability-registry/README.md`](agent-capability-registry/README.md) | Published capabilities and manifests (`id@version`). Runtime hydrates from here at pin. | Java 21, Spring Boot, hexagonal | `acr` |
-| [`agent-control-plane/README.md`](agent-control-plane/README.md) | Catalogue browser only. **No** decide API, **no** database. | TypeScript, Node 22 | none |
+| [`agent-fabric-front-door/README.md`](agent-fabric-front-door/README.md) | Channel ingress. Jobs `/v1/jobs*` + chat `/v1/assistant/*` on **3005**. Chat JSON does not include `route_id` or `run_id` (FR-5). | Java 21, Spring Boot, hexagonal | `afd` |
+| [`agent-fabric-plane/agent-data-plane/README.md`](agent-fabric-plane/agent-data-plane/README.md) | Routes, eligibility, decide (`/v1/intent/*`: eligible → ① rules → ② retrieve → ③ **off**), catalogue (`/v1/catalog/*`). No decision audit. Only Front Door may call decide. | Java 21, Spring Boot, hexagonal | `adp` |
+| [`agent-fabric-runtime/README.md`](agent-fabric-runtime/README.md) | Executes the pinned route (hydrate, LangGraph, tools, working/checkpoint). | Python 3.12, FastAPI, uv, LangGraph | `ar` |
+| [`agent-fabric-capability-registry/README.md`](agent-fabric-capability-registry/README.md) | Published capabilities and manifests (`id@version`). Runtime hydrates from here at pin. | Java 21, Spring Boot, hexagonal | `acr` |
+| [`agent-fabric-plane/agent-control-plane/README.md`](agent-fabric-plane/agent-control-plane/README.md) | Catalogue browser only. **No** decide API, **no** database. | TypeScript, Node 22 | none |
 
 Supporting pieces:
 
 | Path | Role |
 | --- | --- |
-| [`docs/run/`](docs/run/) | Local run tree — folders only |
-| [`docs/run/compose/`](docs/run/compose/) | Compose file, Postgres image, `.env.example` |
-| [`docs/run/scripts/`](docs/run/scripts/) | start / stop / catalogue seed SQL |
-| [`docs/run/dummy-request/`](docs/run/dummy-request/) | Dummy job and chat requests for every seed job route and chat-visible route (autonomy 0–3). Fresh ids each run |
-| [`agent-fabric-evals/`](agent-fabric-evals/) | CI eval fixtures: `intent-router-evals/` + `route-quality/` |
+| [`agent-fabric-scripts/`](agent-fabric-scripts/) | Local run tree: Compose, start/stop/seed scripts, dummy requests |
 | [`agent-fabric-mocks/`](agent-fabric-mocks/) | Local doubles — today [`agent-fabric-mocks/`](agent-fabric-mocks/tools/) (domain HTTP `:3010`) |
-| [`docs/README.md`](docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
-| [`docs/04-architecture/`](docs/04-architecture/) | Architecture packs |
-| [`docs/05-reference/`](docs/05-reference/) | Frozen request/response fixtures and [stub auth](docs/05-reference/stub-auth.md) |
-| [`docs/`](docs/) | [plan](docs/tasks/plan.md), [evals](docs/tasks/eval-plan.md), [intent router](docs/tasks/intent-plan.md), and [future-enhancement.md](docs/tasks/future-enhancement.md) |
+| [`agent-fabric-docs/README.md`](agent-fabric-docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
+| [`agent-fabric-docs/04-architecture/`](agent-fabric-docs/04-architecture/) | Architecture packs |
+| [`agent-fabric-docs/05-reference/`](agent-fabric-docs/05-reference/) | Frozen request/response fixtures and [stub auth](agent-fabric-docs/05-reference/stub-auth.md) |
+| [`agent-fabric-docs/`](agent-fabric-docs/) | [plan](agent-fabric-docs/tasks/plan.md), [evals](agent-fabric-docs/tasks/eval-plan.md), [intent router](agent-fabric-docs/tasks/intent-plan.md), and [future-enhancement.md](agent-fabric-docs/tasks/future-enhancement.md) |
 
 ## The four boxes (AFD, ADP, ACR, AR)
 
@@ -445,7 +389,7 @@ How the later README topics land on each box is summarized at the end of this se
 
 **Database `afd`.** Schema `frontdoor`. Freeze is route stickiness (`session_id` → pin + `correlation_id`), not conversation memory. Local jobs freeze is in-memory until the chat-path table; prod is Redis/Valkey. Outbound workload: `Authorization: Bearer fabric-internal`, `X-Workload: afd`.
 
-Pack: [agent-front-door](docs/04-architecture/agent-front-door.md). Service notes: [`agent-front-door/README.md`](agent-front-door/README.md).
+Pack: [agent-fabric-front-door](agent-fabric-docs/04-architecture/agent-front-door.md). Service notes: [`agent-fabric-front-door/README.md`](agent-fabric-front-door/README.md).
 
 ### ADP — Agent Data Plane (`adp`, :3007)
 
@@ -462,7 +406,7 @@ Pack: [agent-front-door](docs/04-architecture/agent-front-door.md). Service note
 
 **Database `adp`.** Schema `dataplane`. Policy lives here; memories do not. A down catalogue fails closed (no new starts). A down Runtime does not stop classify.
 
-Pack: [agent-plane](docs/04-architecture/agent-plane.md) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-data-plane/README.md`](agent-data-plane/README.md).
+Pack: [agent-plane](agent-fabric-docs/04-architecture/agent-plane.md) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-fabric-plane/agent-data-plane/README.md`](agent-fabric-plane/agent-data-plane/README.md).
 
 ### ACR — Agent Capability Registry (`acr`, :3009)
 
@@ -478,7 +422,7 @@ Pack: [agent-plane](docs/04-architecture/agent-plane.md) (Data Plane half; ACP i
 
 **Database `acr`.** Append-only versions. If ACR dies, **new** runs cannot hydrate; in-flight pins already have schemas on the run pin.
 
-Pack: [agent-capability-registry](docs/04-architecture/agent-capability-registry.md).
+Pack: [agent-fabric-capability-registry](agent-fabric-docs/04-architecture/agent-capability-registry.md).
 
 ### AR — Agent Runtime (`ar`, :3008)
 
@@ -497,7 +441,7 @@ Pack: [agent-capability-registry](docs/04-architecture/agent-capability-registry
 
 **Database `ar`.** Schema `runtime`. Run pin is authoritative for the loop (longer than freeze TTL). Shared Memory is a fifth store, not this database.
 
-Pack: [agent-runtime](docs/04-architecture/agent-runtime.md).
+Pack: [agent-fabric-runtime](agent-fabric-docs/04-architecture/agent-runtime.md).
 
 ### How README topics map onto the four boxes
 
@@ -518,15 +462,15 @@ Three routers stay separate: **ADP** picks the workflow/manifest, **AR** picks t
 
 ## Routes (v1)
 
-Each route is versioned on its own (`route_id` + `route_version`). One version per route is `active`. Classify uses the active mix. A follow-up pin is that route’s id and version, not a shared table snapshot. A later contest-board snapshot is proposed in [docs/tasks/future-enhancement.md](docs/tasks/future-enhancement.md).
+Each route is versioned on its own (`route_id` + `route_version`). One version per route is `active`. Classify uses the active mix. A follow-up pin is that route’s id and version, not a shared table snapshot. A later contest-board snapshot is proposed in [agent-fabric-docs/tasks/future-enhancement.md](agent-fabric-docs/tasks/future-enhancement.md).
 
 The catalogue seed is the Pattern 0–3 set (32 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. The same file also has extra published, draft, and retired cuts plus version history. Reload everything in one shot:
 
 ```bash
-./docs/run/scripts/seed-db.sh
+./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
 ```
 
-`seed-db.sh` deletes first, then inserts, so it is safe to run again. Each row has an `autonomy_mode` (0–3) from [Autonomy vs Control](https://jitendersharma.dev/insights/enterprise-ai-workflow-patterns-autonomy-vs-control). `fee_explain` needs claim `accounts:read` (stub user `jane`).
+`add-seed-data.sh` deletes first, then inserts, so it is safe to run again. Each row has an `autonomy_mode` (0–3) from [Autonomy vs Control](https://jitendersharma.dev/insights/enterprise-ai-workflow-patterns-autonomy-vs-control). `fee_explain` needs claim `accounts:read` (stub user `jane`).
 
 ## Catalogue statuses
 
@@ -640,7 +584,7 @@ Each LLM call is `llm.complete(system, user)`. Hydrate picks **one** system stri
 
 Same `llm_role` → same template. Two `synthesis` stages share one synthesis `text`. Seeded packs with more than one role: `llm_pipeline` (`classify` + `synthesis`); `clause_lookup`, `template_retrieve`, `msa_risk_review`, `claims_adjudicate` (`query_formulation` + `synthesis`); `purchase_refund` (`classify` + `synthesis`). Pattern 0/1 packs are `host` only. Most other Pattern 2/3 packs have a single `synthesis` template.
 
-Example (`llm_pipeline`): classify gets `"Extract the requested fields from the input only."` Synthesis gets `"Rewrite or format using the previous stage output only."` `host` (`"Pattern 2. Do only the current stage…"`) is unused because both roles have text. Any LLM stage with a bindable capability `output_schema` validates through `with_structured_output` (`purchase_refund` classify → receipt JSON in `slots` + `notes`; synthesis `{text}` schemas unwrap to prose). How to write that schema: [docs/02-understand/schemas.md](docs/02-understand/schemas.md). Route `output_schema_id=receipt_fields` is a pointer only — not loaded. On `json_to_http` routes, the next HTTP body merges **schema-named keys** from prior slots (see [Memory](#memory)); older paths may still pass classify prose on `payload["notes"]`.
+Example (`llm_pipeline`): classify gets `"Extract the requested fields from the input only."` Synthesis gets `"Rewrite or format using the previous stage output only."` `host` (`"Pattern 2. Do only the current stage…"`) is unused because both roles have text. Any LLM stage with a bindable capability `output_schema` validates through `with_structured_output` (`purchase_refund` classify → receipt JSON in `slots` + `notes`; synthesis `{text}` schemas unwrap to prose). How to write that schema: [docs/02-understand/schemas.md](agent-fabric-docs/02-understand/schemas.md). Route `output_schema_id=receipt_fields` is a pointer only — not loaded. On `json_to_http` routes, the next HTTP body merges **schema-named keys** from prior slots (see [Memory](#memory)); older paths may still pass classify prose on `payload["notes"]`.
 
 ### What prompt to put on a route
 
@@ -716,7 +660,7 @@ Publish is append-only. A second `PUT` of a published version is **409**. Runtim
 | `domain` | Domain HTTP (`http://agent-mocks:3010/fees/explain`) | Tools in [`agent-fabric-mocks/tools/`](agent-fabric-mocks/tools/) |
 | `agent` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
 
-Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`docs/02-understand/capabilities.md`](docs/02-understand/capabilities.md).
+Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`agent-fabric-docs/02-understand/capabilities.md`](agent-fabric-docs/02-understand/capabilities.md).
 
 Add a domain tool: add `agent-fabric-mocks/tools/tools/<id>.json` with unique `method`+`path`, point the capability `invoke.url` at `http://agent-mocks:3010{path}`, rebuild.
 
@@ -758,9 +702,9 @@ Three channels carry stage data inside one run. Do not conflate them with Shared
 
 When `working=session`, Runtime persists `{ "notes": [...], "slots": { ... } }` to `ar.runtime.runs.working` after each stage. `/v1/runs/{id}/turns` reloads both.
 
-**HTTP assembly** (`agent-runtime/app/graph/payload.py`): `payload = dict(goal)`, then merge keys from **all prior stage slots** whose names appear in the **next** capability `input_schema.properties` and are not already in `goal`. Fail closed if any `input_schema.required` key is missing. Do not dump every slot or every note onto HTTP.
+**HTTP assembly** (`agent-fabric-runtime/app/graph/payload.py`): `payload = dict(goal)`, then merge keys from **all prior stage slots** whose names appear in the **next** capability `input_schema.properties` and are not already in `goal`. Fail closed if any `input_schema.required` key is missing. Do not dump every slot or every note onto HTTP.
 
-**How stage 2 gets stage 1’s JSON:** stage 1 writes its result to `working.slots[<stage_1_id>]`. Stage 2’s HTTP invoke merges only the keys that stage 2’s `input_schema` declares. Example: `purchase_refund` — `extract_fields` (classify) supplies `merchant`, `amount`, `date` to `match_purchase`; the job payload has only `doc_id` and `account_id`. See [docs/dataflow/scenarios.md](docs/dataflow/scenarios.md) and the [verification checklist](docs/tasks/dataflow-plan.md#verification-checklist-d13).
+**How stage 2 gets stage 1’s JSON:** stage 1 writes its result to `working.slots[<stage_1_id>]`. Stage 2’s HTTP invoke merges only the keys that stage 2’s `input_schema` declares. Example: `purchase_refund` — `extract_fields` (classify) supplies `merchant`, `amount`, `date` to `match_purchase`; the job payload has only `doc_id` and `account_id`. See [agent-fabric-docs/dataflow/scenarios.md](agent-fabric-docs/dataflow/scenarios.md) and the [verification checklist](agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
 
 ### Where each type is stored
 
@@ -773,7 +717,7 @@ When `working=session`, Runtime persists `{ "notes": [...], "slots": { ... } }` 
 
 `adp.dataplane.memory_profiles` is the **policy** (which types the route asked for), not the memories. `afd.frontdoor.freeze` (Redis in prod) is route stickiness, not conversation.
 
-**Shared Memory (conversation + long_term):** a fifth store the architecture pack calls Shared. It is not built in this repo. Do not use Postgres `ar` for chat history or long-term facts — those outlive one `correlation_id` and must be isolated by tenant/user/session. Until Shared exists, those two fields are catalogue-only. Parked design: [docs/tasks/future-enhancement.md](docs/tasks/future-enhancement.md#shared-memory-conversation-and-long_term).
+**Shared Memory (conversation + long_term):** a fifth store the architecture pack calls Shared. It is not built in this repo. Do not use Postgres `ar` for chat history or long-term facts — those outlive one `correlation_id` and must be isolated by tenant/user/session. Until Shared exists, those two fields are catalogue-only. Parked design: [agent-fabric-docs/tasks/future-enhancement.md](agent-fabric-docs/tasks/future-enhancement.md#shared-memory-conversation-and-long_term).
 
 ### Types
 
@@ -828,17 +772,17 @@ Authorization: Bearer stub
 X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}
 ```
 
-Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of `afd` | `adp` | `acp` | `ar` | `acr`. Details: [stub-auth.md](docs/05-reference/stub-auth.md).
+Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of `afd` | `adp` | `acp` | `ar` | `acr`. Details: [stub-auth.md](agent-fabric-docs/05-reference/stub-auth.md).
 
 ## Docs
 
-- [Documentation map](docs/README.md) (start / understand / catalogue / architecture / reference)
+- [Documentation map](agent-fabric-docs/README.md) (start / understand / catalogue / architecture / reference)
 - [The four boxes](#the-four-boxes-afd-adp-acr-ar) (this README — AFD, ADP, ACR, AR)
 - [Workflows](#workflows), [Prompts](#prompts), [Retrieve](#retrieve), [Tools](#tools)
-- [Intent](docs/intent/enterprise-agent-fabric-v1.md)
-- [Architecture packs](docs/04-architecture/README.md)
-- [Plan](docs/tasks/plan.md)
-- [Evals](#evals) — [eval-plan.md](docs/tasks/eval-plan.md) / [eval-todo.md](docs/tasks/eval-todo.md) (routing golden set — not on the hot path)
-- [Intent router](docs/tasks/intent-plan.md) / [intent-todo.md](docs/tasks/intent-todo.md) (① rules, ② retrieve, ③ **off**; chat JSON still FR-5 slim)
-- [Observability](docs/tasks/observability-plan.md) / [observability-todo.md](docs/tasks/observability-todo.md)
-- [Future enhancements](docs/tasks/future-enhancement.md) (route table, Shared Memory)
+- [Intent](agent-fabric-docs/intent/enterprise-agent-fabric-v1.md)
+- [Architecture packs](agent-fabric-docs/04-architecture/README.md)
+- [Plan](agent-fabric-docs/tasks/plan.md)
+- [Evals](#evals) — [eval-plan.md](agent-fabric-docs/tasks/eval-plan.md) / [eval-todo.md](agent-fabric-docs/tasks/eval-todo.md) (routing golden set — not on the hot path)
+- [Intent router](agent-fabric-docs/tasks/intent-plan.md) / [intent-todo.md](agent-fabric-docs/tasks/intent-todo.md) (① rules, ② retrieve, ③ **off**; chat JSON still FR-5 slim)
+- [Observability](agent-fabric-docs/tasks/observability-plan.md) / [observability-todo.md](agent-fabric-docs/tasks/observability-todo.md)
+- [Future enhancements](agent-fabric-docs/tasks/future-enhancement.md) (route table, Shared Memory)

@@ -1,0 +1,30 @@
+{
+  "corpus_id": "product-disclosure",
+  "chunks": [
+    {
+      "id": "pd-everyday-od-1",
+      "text": "Everyday Account Product Disclosure Statement (PDS): Overdraft fees apply only when you have an arranged overdraft facility and your balance goes below zero. Unarranged overdrafts may incur a higher dishonour fee.",
+      "tags": ["everyday", "retail", "personal", "overdraft", "pds"]
+    },
+    {
+      "id": "pd-business-od-1",
+      "text": "Business Account PDS: Overdraft fees are charged per calendar day the account remains overdrawn beyond the fee-free buffer. A business overdraft facility must be approved before fees apply at the scheduled rate.",
+      "tags": ["business", "sme", "overdraft", "pds"]
+    },
+    {
+      "id": "pd-corporate-od-1",
+      "text": "Corporate Account PDS: Overdraft fees apply to approved corporate overdraft limits. Treasury-linked accounts may have bespoke fee schedules in the facility agreement.",
+      "tags": ["corporate", "commercial", "overdraft", "pds"]
+    },
+    {
+      "id": "pd-student-od-1",
+      "text": "Student Account PDS: A reduced overdraft fee schedule applies while the account holder is enrolled full-time. Proof of enrolment is required to maintain the student rate.",
+      "tags": ["student", "overdraft", "pds"]
+    },
+    {
+      "id": "pd-premier-od-1",
+      "text": "Premier Account PDS: Premier customers receive five fee-free overdraft days per month. After that, standard premier overdraft daily fees apply.",
+      "tags": ["premier", "private", "overdraft", "pds"]
+    }
+  ]
+}

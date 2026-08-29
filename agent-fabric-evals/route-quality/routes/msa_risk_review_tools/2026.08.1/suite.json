@@ -1,7 +1,0 @@
-{
-  "suite_id": "msa_risk_review_tools",
-  "suite_version": "2026.08.1",
-  "kind": "tool-sequence",
-  "route_id": "msa_risk_review",
-  "description": "Pattern 2: ocr \u2192 clause_search \u2192 policy_search \u2192 risk_engine \u2192 draft_memo."
-}

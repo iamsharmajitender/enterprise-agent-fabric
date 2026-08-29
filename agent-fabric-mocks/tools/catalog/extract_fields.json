@@ -1,9 +1,0 @@
-{
-  "id": "extract_fields",
-  "method": "POST",
-  "path": "/receipts/extract",
-  "status": 200,
-  "response": {
-    "text": "{\"merchant\":\"Acme Hardware\",\"amount\":45.36,\"currency\":\"USD\",\"date\":\"2026-08-12\",\"tax\":3.36}"
-  }
-}

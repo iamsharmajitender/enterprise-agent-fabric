@@ -1,9 +1,0 @@
-{
-  "id": "note_store",
-  "method": "POST",
-  "path": "/notes",
-  "status": 200,
-  "response": {
-    "text": "Note stored."
-  }
-}

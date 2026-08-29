@@ -1,9 +1,0 @@
-{
-  "id": "post_refund",
-  "method": "POST",
-  "path": "/receipts/refund",
-  "status": 200,
-  "response": {
-    "text": "Refund posted. Confirmation rfd-1001."
-  }
-}

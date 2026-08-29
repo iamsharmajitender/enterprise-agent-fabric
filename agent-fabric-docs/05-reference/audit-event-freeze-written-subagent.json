@@ -1,0 +1,16 @@
+{
+  "event_id": "22222222-2222-4222-8222-222222222223",
+  "event_type": "freeze.written",
+  "occurred_at": "2026-08-26T01:00:02Z",
+  "producer": "afd",
+  "correlation_id": "corr-child-1",
+  "session_id": "sub-22222222-2222-4222-8222-222222222222",
+  "decision_id": null,
+  "payload": {
+    "route_id": "contract_review",
+    "route_version": "2026.08.1",
+    "ingress": "jobs",
+    "freeze_key": "sub-22222222-2222-4222-8222-222222222222",
+    "parent_correlation_id": "corr-abcdef123456"
+  }
+}

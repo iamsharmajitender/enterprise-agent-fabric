@@ -1,9 +1,0 @@
-{
-  "id": "fetch_url",
-  "method": "POST",
-  "path": "/fetch",
-  "status": 200,
-  "response": {
-    "text": "Fetched page: fee schedule lists a $42 monthly account charge."
-  }
-}

@@ -1,7 +1,0 @@
-{
-  "suite_id": "template_retrieve_tools",
-  "suite_version": "2026.08.1",
-  "kind": "tool-sequence",
-  "route_id": "template_retrieve",
-  "description": "Pattern 2: clause_search \u2192 policy_search \u2192 risk_engine \u2192 synthesis."
-}

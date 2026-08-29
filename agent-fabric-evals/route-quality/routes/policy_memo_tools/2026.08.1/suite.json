@@ -1,7 +1,0 @@
-{
-  "suite_id": "policy_memo_tools",
-  "suite_version": "2026.08.1",
-  "kind": "tool-sequence",
-  "route_id": "policy_memo",
-  "description": "Pattern 2: prefetch placeholder then synthesis."
-}

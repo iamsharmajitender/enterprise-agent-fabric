@@ -4,6 +4,7 @@ COPY requirements.txt requirements-dev.txt ./
 RUN pip install --no-cache-dir -r requirements-dev.txt
 COPY server.py telemetry.py pytest.ini ./
 COPY catalog catalog
+COPY data data
 COPY tests tests
 ENV PYTHONPATH=/app TOOLS_DIR=/app/catalog
 RUN pytest
@@ -14,6 +15,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY server.py telemetry.py ./
 COPY catalog catalog
+COPY data data
 ENV TOOLS_DIR=/app/catalog PYTHONUNBUFFERED=1
 EXPOSE 3010
 CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "3010"]

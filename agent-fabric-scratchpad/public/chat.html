@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Chat scratchpad</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app app--chat">
+<div class="shell">
+  <header class="top">
+    <nav class="crumbs" aria-label="Scratchpad">
+      <span class="crumbs__here">Chat</span>
+      <span class="crumbs__sep" aria-hidden="true">·</span>
+      <a class="crumbs__link" href="/jobs">Jobs</a>
+    </nav>
+    <div class="top-row">
+      <div class="top-title">
+        <h1>Channel scratchpad</h1>
+        <p id="meta" class="top-meta"></p>
+      </div>
+      <div class="top-picker">
+        <label for="chat-type">Chat type</label>
+        <select id="chat-type" class="catalog-select" name="chat_type">
+          <option value="">Loading…</option>
+        </select>
+        <button type="button" id="new-chat" class="btn-secondary">New chat</button>
+      </div>
+    </div>
+  </header>
+  <main class="main">
+    <div id="thread" class="thread" role="log" aria-live="polite" aria-label="Conversation" tabindex="0">
+      <p class="empty" id="empty">Pick a chat type, edit the suggested message if you like, then send.</p>
+    </div>
+  </main>
+  <footer class="composer">
+    <form id="f">
+      <label for="m">Message</label>
+      <div class="composer-row">
+        <textarea id="m" name="message" rows="1" autocomplete="off" placeholder="Type a message…"></textarea>
+        <button type="submit" id="send" class="btn-primary">Send</button>
+      </div>
+      <p class="composer-hint">Enter to send · Shift+Enter for a new line</p>
+    </form>
+  </footer>
+</div>
+<script type="module" src="/client/chat-main.js"></script>
+</body>
+</html>

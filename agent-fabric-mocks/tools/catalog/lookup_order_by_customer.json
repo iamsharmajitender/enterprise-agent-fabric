@@ -1,0 +1,6 @@
+{
+  "id": "lookup_order_by_customer",
+  "method": "POST",
+  "path": "/shopassist/lookup_order_by_customer",
+  "status": 200
+}

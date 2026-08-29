@@ -1,0 +1,50 @@
+{
+  "_comment": "Each row is one dummy customer. lookup_order / lookup_order_by_customer / lookup_order_by_email all return the same order for any locator in the row.",
+  "customers": [
+    {
+      "order_id": "ORD-77819",
+      "customer_id": "CUS-1842",
+      "email": "jane.doe@shopassist.example",
+      "item_id": "jacket_blue_m",
+      "item_name": "Blue Jacket",
+      "price": 149.0,
+      "delivered_at": "2026-06-24"
+    },
+    {
+      "order_id": "ORD-22001",
+      "customer_id": "CUS-9001",
+      "email": "storecredit@shopassist.example",
+      "item_id": "bottle_40oz",
+      "item_name": "40oz Water Bottle",
+      "price": 40.0,
+      "delivered_at": "2026-06-20"
+    },
+    {
+      "order_id": "ORD-44100",
+      "customer_id": "CUS-3301",
+      "email": "alex.park@shopassist.example",
+      "item_id": "sneakers_run_10",
+      "item_name": "Run 10 Sneakers",
+      "price": 129.0,
+      "delivered_at": "2026-07-02"
+    },
+    {
+      "order_id": "ORD-55210",
+      "customer_id": "CUS-4412",
+      "email": "priya.nair@shopassist.example",
+      "item_id": "headphones_nc",
+      "item_name": "Noise-Cancel Headphones",
+      "price": 89.0,
+      "delivered_at": "2026-07-11"
+    },
+    {
+      "order_id": "ORD-66003",
+      "customer_id": "CUS-5508",
+      "email": "gifts@shopassist.example",
+      "item_id": "kettle_1l",
+      "item_name": "1L Electric Kettle",
+      "price": 55.0,
+      "delivered_at": "2026-07-18"
+    }
+  ]
+}

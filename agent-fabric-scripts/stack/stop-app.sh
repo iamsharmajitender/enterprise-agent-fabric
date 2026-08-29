@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+RUN="$(cd "$HERE/.." && pwd)"
+COMPOSE=(docker compose -f "$RUN/docker-compose/docker-compose.yml")
+
+echo "Stopping fabric (volumes kept)..."
+"${COMPOSE[@]}" down --remove-orphans
+echo "Fabric is down."

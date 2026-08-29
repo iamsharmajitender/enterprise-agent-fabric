@@ -1,9 +1,0 @@
-{
-  "id": "doc_intake",
-  "method": "POST",
-  "path": "/kyc/docs",
-  "status": 200,
-  "response": {
-    "text": "Documents stored for onboarding."
-  }
-}

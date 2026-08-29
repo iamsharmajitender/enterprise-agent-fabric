@@ -1,9 +1,0 @@
-{
-  "id": "risk_engine",
-  "method": "POST",
-  "path": "/legal/risk",
-  "status": 200,
-  "response": {
-    "text": "Risk score 0.31 (low). Exclusion 4.2 likely applies."
-  }
-}

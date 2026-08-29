@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Jobs scratchpad</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app app--jobs">
+<div class="shell">
+  <header class="top">
+    <nav class="crumbs" aria-label="Scratchpad">
+      <a class="crumbs__link" href="/chat">Chat</a>
+      <span class="crumbs__sep" aria-hidden="true">·</span>
+      <span class="crumbs__here">Jobs</span>
+    </nav>
+    <div class="top-row">
+      <div class="top-title">
+        <h1>Jobs scratchpad</h1>
+        <p id="meta" class="top-meta"></p>
+      </div>
+      <div class="top-picker">
+        <label for="job-type">Job type</label>
+        <select id="job-type" class="catalog-select" name="job_type">
+          <option value="">Loading…</option>
+        </select>
+        <button type="button" id="new-job" class="btn-secondary">New job</button>
+      </div>
+    </div>
+  </header>
+  <main class="main">
+    <div id="thread" class="thread" role="log" aria-live="polite" aria-label="Job log" tabindex="0">
+      <p class="empty" id="empty">Pick a job type, edit the payload if you like, then start.</p>
+    </div>
+  </main>
+  <footer class="composer">
+    <form id="f">
+      <label for="payload">Payload (JSON)</label>
+      <div class="composer-row">
+        <textarea id="payload" name="payload" rows="1" autocomplete="off" spellcheck="false" placeholder="{}"></textarea>
+        <button type="submit" id="start" class="btn-primary">Start job</button>
+      </div>
+      <p class="composer-hint">Enter to start · Shift+Enter for a new line · Green = accepted / result · Red = error</p>
+    </form>
+  </footer>
+</div>
+<script type="module" src="/client/jobs-main.js"></script>
+</body>
+</html>

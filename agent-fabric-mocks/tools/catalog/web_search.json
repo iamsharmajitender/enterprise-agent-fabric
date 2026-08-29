@@ -1,9 +1,0 @@
-{
-  "id": "web_search",
-  "method": "POST",
-  "path": "/search/web",
-  "status": 200,
-  "response": {
-    "text": "Search: three sources on monthly account fees and exclusion 4.2."
-  }
-}

@@ -1,0 +1,30 @@
+{
+  "corpus_id": "fee-schedule",
+  "chunks": [
+    {
+      "id": "fs-everyday-od-1",
+      "text": "Everyday Account overdraft fee: $10 per day when the balance is more than $10 below the approved overdraft limit. Monthly cap $50.",
+      "tags": ["everyday", "retail", "personal", "overdraft", "fee"]
+    },
+    {
+      "id": "fs-business-od-1",
+      "text": "Business Account overdraft fee: $15 per day when the balance is more than $50 below the approved limit. Monthly cap $150.",
+      "tags": ["business", "sme", "overdraft", "fee"]
+    },
+    {
+      "id": "fs-corporate-od-1",
+      "text": "Corporate Account overdraft fee: $25 per day when the balance is more than $500 below the approved limit. Monthly cap $500.",
+      "tags": ["corporate", "commercial", "overdraft", "fee"]
+    },
+    {
+      "id": "fs-student-od-1",
+      "text": "Student Account overdraft fee: $5 per day when the balance is more than $10 below the approved limit. Monthly cap $25.",
+      "tags": ["student", "overdraft", "fee"]
+    },
+    {
+      "id": "fs-premier-od-1",
+      "text": "Premier Account overdraft fee: waived for the first 5 days in any calendar month, then $5 per day. Monthly cap $75.",
+      "tags": ["premier", "private", "overdraft", "fee"]
+    }
+  ]
+}

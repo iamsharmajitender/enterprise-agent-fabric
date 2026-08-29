@@ -1,9 +1,0 @@
-{
-  "id": "draft_reply",
-  "method": "POST",
-  "path": "/tickets/reply",
-  "status": 200,
-  "response": {
-    "text": "Reply: the $42 posting is the monthly account charge."
-  }
-}

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" class="light" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Enterprise Agent Fabric</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css?v=manifest-kind-counts" />
+  </head>
+  <body>
+    <a class="skip" href="#page">Skip to content</a>
+    <header class="top">
+      <div class="brand">
+        <p class="kicker">Control Plane</p>
+        <a href="/" class="brand-home"><h1>Enterprise Agent Fabric</h1></a>
+      </div>
+      <p id="table-meta" class="meta" aria-live="polite">Loading catalogue…</p>
+      <nav class="header-actions" aria-label="Control plane tools">
+        <a
+          class="header-btn"
+          href="http://localhost:3013/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Audit</a>
+        <button
+          type="button"
+          class="header-btn"
+          id="glossary-open"
+          aria-haspopup="dialog"
+          aria-controls="glossary"
+          aria-expanded="false"
+        >Glossary</button>
+        <a
+          class="header-btn"
+          href="http://localhost:3000/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Observability</a>
+        <a
+          class="header-btn"
+          href="http://localhost:3014/chat"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Scratchpad</a>
+      </nav>
+    </header>
+    <div id="status" class="banner" role="alert" hidden></div>
+    <main class="page" id="page" tabindex="-1"></main>
+    <div
+      class="glossary"
+      id="glossary"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="glossary-title"
+    >
+      <div class="glossary__panel">
+      <div class="glossary__head">
+        <div>
+          <h2 id="glossary-title">Glossary</h2>
+          <p class="glossary__lead">What each catalogue row and field means. Click a section to open it; opening another closes this one.</p>
+        </div>
+        <button type="button" class="ghost-btn" id="glossary-close">Close</button>
+      </div>
+      <div class="glossary__body">
+        <details class="glossary__section">
+          <summary>Route</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">A named agent use case. Front Door asks Data Plane to decide; a <strong>route</strong> outcome freezes this row at a version and starts Agent Runtime. Chat never sees the route id. Jobs send it explicitly. This Control Plane lists those rows and their pointers to prompt, workflow, and manifest.</p>
+            <h4>Identity</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route identity fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Route<span class="glossary-key">route_id</span></th>
+                  <td>Stable name of the use case, for example <span class="mono">fee_explain</span>. Decide matches chat text onto this id. Jobs POST it. Changing behaviour is a new version of this id, not a rename in place.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Intent<span class="glossary-key">intent_label</span></th>
+                  <td>Classifier label for the user goal. Usually matches the route id. Used on decide and in clarify chips. Not shown to the chat client as an id.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Autonomy<span class="glossary-key">autonomy_mode</span></th>
+                  <td>Who chooses the next step inside the run after the route is chosen. Not classify. Options below. Does not choose how the run is started.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Route version<span class="glossary-key">route_version</span></th>
+                  <td>Pin unit. A freeze copies this version. In-flight runs keep it even if a newer row becomes Active. History on a route is these versions, newest first.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Description</th>
+                  <td>Human summary of what the route does. Shown on the list and detail. Not sent to the model as the prompt; that is the prompt pack.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Autonomy options</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Autonomy mode values</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Single inference<span class="glossary-key">0</span></th>
+                  <td>One LLM call. Prompt only. Cannot take tools, retrieve tools, a workflow, memory, or retrieval. Pattern 0 may return the inference body synchronously.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Autonomous<span class="glossary-key">1</span></th>
+                  <td>The model chooses tools from the hydrated manifest in a loop, up to max loop steps. No workflow stages.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Deterministic<span class="glossary-key">2</span></th>
+                  <td>Workflow stages run in a fixed order. The model does not pick the next tool. Prefetch can be a forced retrieve stage.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Guided<span class="glossary-key">3</span></th>
+                  <td>A workflow frames the run; the model may still choose within that frame. Use when some steps are fixed and some are judged.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Activation</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route activation fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Activation target<span class="glossary-key">activation_target</span></th>
+                  <td>Which Agent Runtime Front Door starts. Empty means the shared runtime. Channels never dial this URL. Isolate a box for PCI, release, or network; do not create a new target just to get a different identity.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Agent client<span class="glossary-key">agent_client_id</span></th>
+                  <td>Which robot mints the agent token for this route. User ≠ agent ≠ runtime workload. A new use case is a new route and a new client id, not a new runtime.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Policy and model</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route policy and model fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Policy<span class="glossary-key">policy_profile</span></th>
+                  <td>Policy profile copied onto the run pin. Runtime enforces it on tool calls; a published capability is still not permission.
+                    <span class="mono">high_risk_step_up</span> (High risk) — higher bar when the route can take costly or irreversible actions.
+                    <span class="mono">read_only_standard</span> (Read only) — default for most catalogue routes.
+                    <span class="mono">low_risk_chat</span> (Low risk) — cheap chat / single-inference with no tools.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Model<span class="glossary-key">model_profile</span></th>
+                  <td>Pointer into <span class="mono">dataplane.model_profiles</span>. Changing model is a catalogue edit, not a runtime flag.
+                    <span class="mono">reasoning-standard</span> — plan / multi-step / high-stakes synthesis.
+                    <span class="mono">fast-chat</span> — cheap synthesize / classify.
+                    <span class="mono">lightweight-chat</span> — no-tools / cheap chat.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Fallback<span class="glossary-key">fallback</span></th>
+                  <td>What to do if the primary path fails. Seed value: <span class="mono">clarify</span>. Does not start a different route by itself.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Max loop steps<span class="glossary-key">max_loop_steps</span></th>
+                  <td>Cap on autonomous loop iterations. Unused on single inference. Keeps a long tool loop from running without bound.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Tools and retrieval</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route tools and retrieval fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Manifest<span class="glossary-key">tool_manifest</span></th>
+                  <td>Pointer to the tool list. The route has no inlined <span class="mono">tools[]</span>. Runtime hydrates the whole pinned manifest before the LLM. Empty / omitted means no tools (typical for single inference).</td>
+                </tr>
+                <tr>
+                  <th scope="row">Retrieval<span class="glossary-key">retrieval</span></th>
+                  <td>How the route searches corpora. Omit the row when there is no index. Scope is corpus ids, not the capability catalog.
+                    <span class="mono">tool</span> (UI: Tool) — model or stage retrieves via a normal domain capability over the scope.
+                    <span class="mono">deterministic_prefetch</span> (UI: Prefetch) — designer-forced pack before generate; prefetch stage invoke is empty today.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Memory</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route memory fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Memory profile<span class="glossary-key">memory_profile</span></th>
+                  <td>What the run may keep. Fields: <span class="mono">conversation</span>, <span class="mono">working</span>, <span class="mono">loop</span>, <span class="mono">long_term</span>. Field values: <span class="mono">session</span>, <span class="mono">checkpoint</span>, <span class="mono">none</span>, <span class="mono">retrieve_only</span>. TTL is hours. Isolation options: <span class="mono">tenant</span>, <span class="mono">user</span>, <span class="mono">session</span>. Empty on routes that must not remember. Runtime honors working and loop today.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Artifacts</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route artifact pointers</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Workflow<span class="glossary-key">workflow_id</span></th>
+                  <td>Pointer to ordered stages. Required for deterministic and usual for guided. Empty when the model chooses tools freely (autonomous) or when there is a single inference.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Prompt<span class="glossary-key">prompt_id</span></th>
+                  <td>Pointer to the prompt pack the LLM sees. Host text plus optional per-role fragments. Not the route description field.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Output schema<span class="glossary-key">output_schema_id</span></th>
+                  <td>Expected structured output for the route, when one is pinned. Empty means free-form text is allowed.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Eval suite<span class="glossary-key">eval_suite_id</span></th>
+                  <td>Optional slice-3 quality suite for <em>this</em> route after start (tool order, citations). Empty is correct for free-form chat. The CI routing golden set is the catalogue board in Data Plane tests, not this pointer. Not used on the hot path.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Access</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Route access fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Required claims<span class="glossary-key">required_claims</span></th>
+                  <td>Entitlements the user or jobs caller must hold. Decide intersects the active table with these claims. Missing claims → not eligible, not a silent route.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Channels<span class="glossary-key">channels</span></th>
+                  <td>Where this route is eligible. Options: <span class="mono">web</span>, <span class="mono">api</span>. A route can be api-only (jobs) or web-only (chat).</td>
+                </tr>
+                <tr>
+                  <th scope="row">Chat<span class="glossary-key">chat_visible</span></th>
+                  <td>Whether the route appears as a chat option. Options: <span class="mono">true</span>, <span class="mono">false</span>. False means event-only or jobs-only; decide still entitles it when the caller sends the route id.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Capability</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">A published, versioned tool or API in the registry. Manifests refer by <span class="mono">id@version</span>. Runtime hydrates every ref once at pin, then invokes after policy check. A published capability is not permission to call it. Chat never sees this catalog as JSON.</p>
+            <table class="glossary-table">
+              <caption class="sr-only">Capability fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Capability<span class="glossary-key">id</span></th>
+                  <td>Stable product name, for example <span class="mono">ocr_extract</span> or <span class="mono">start_contract_review</span>. Not a vendor name. Agent developers copy this id into a manifest.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Kind<span class="glossary-key">kind</span></th>
+                  <td>Two kinds only. Do not add kinds for retrieve, prompts, workflows, memory, or MCP.
+                    <span class="chip kind-domain">Domain</span> <span class="mono">domain</span> — governed business API (method, path, auth).
+                    <span class="chip kind-agent">Agent</span> <span class="mono">agent</span> — starts another catalogue route via API Front Door jobs with a fixed route id. Not a direct Agent Runtime URL.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Owner</th>
+                  <td>Team that may publish the next version. Not the team that authored the parent route.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Version</th>
+                  <td>Immutable. Changing the contract is a new version, not an edit in place. Overwriting a published version is rejected. Manifests pin exact versions; never <span class="mono">latest</span>.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. Manifests may only refer to published. Deprecated shows as Retired in this UI.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Description</th>
+                  <td>For developers and later the model. Becomes part of the tool schema the LLM sees after hydrate.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Input schema</th>
+                  <td>JSON Schema for arguments the model must supply. Copied onto the run pin at hydrate. Not fetched when the model first names the tool.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Output schema</th>
+                  <td>JSON Schema for what the tool returns to the model. Separate from the route output schema.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Invoke</th>
+                  <td>How runtime calls the real API after policy check. Domain: method, path, auth to the business API. Agent: POST jobs with a fixed route id. Not an MCP URL and not an Agent Runtime URL.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Snippet</th>
+                  <td>Developer documentation on the capability. Not used at runtime and not sent to the model.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Corpus</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">A retrieve index row in Data Plane. Routes name corpus ids in <span class="mono">retrieval.scope</span>; workflow stages may pin one id in <span class="mono">stage.corpus</span>. Runtime looks up each id and POSTs to that row’s gateway <span class="mono">url</span> — the route never stores a retrieve URL. Not a capability kind and not <span class="mono">long_term</span> memory.</p>
+            <table class="glossary-table">
+              <caption class="sr-only">Corpus fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Corpus<span class="glossary-key">corpus_id</span></th>
+                  <td>Stable index name, for example <span class="mono">policy-engine</span> or <span class="mono">clause-index</span>. Appears in route <span class="mono">retrieval.scope</span> and on named retrieve stages. Two ids in scope are two lookups and two POSTs, then merge — never two indexes in one search call.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Display name</th>
+                  <td>Human label for operators and this Control Plane. Not sent to the model as a prompt.</td>
+                </tr>
+                <tr>
+                  <th scope="row">URL<span class="glossary-key">url</span></th>
+                  <td>Retrieve gateway endpoint. Agent Runtime POSTs <span class="mono">{collection, goal}</span> (and merged pack fields on prefetch routes). Local Compose uses agent-fabric-mocks <span class="mono">POST /v1/search</span>.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Collection<span class="glossary-key">collection</span></th>
+                  <td>Index or collection name when several corpora share one gateway host. Required on shared gateways; may match <span class="mono">corpus_id</span> when each index has its own row.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Auth<span class="glossary-key">auth</span></th>
+                  <td>How Runtime authenticates to the gateway, for example <span class="mono">workload-oauth</span>. Distinct from capability invoke auth on retrieve tools.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Owner</th>
+                  <td>Team that owns the index and may publish the next row cut.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. Runtime must POST only <span class="mono">published</span> rows. Unpublished or missing corpus → fail closed on prefetch. Deprecated shows as Retired in this UI.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Region<span class="glossary-key">region</span></th>
+                  <td>Optional residency or region hint for the index. Empty when not pinned.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Retrieval modes</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">How routes use corpora</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Prefetch<span class="glossary-key">deterministic_prefetch</span></th>
+                  <td>Route <span class="mono">retrieval.mode</span>. App packs every id in <span class="mono">scope</span> before generate. Empty-invoke prefetch stages write <span class="mono">working.slots.prefetch</span>; the model cannot skip search.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Retrieve tool<span class="glossary-key">tool</span></th>
+                  <td>Route <span class="mono">retrieval.mode</span>. Named retrieve capability over <span class="mono">scope</span>. Workflow <span class="mono">stage.corpus</span> picks which scoped id that stage uses. Still a normal domain capability HTTP call.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Prompt</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">Versioned instructions the LLM sees for a route. The route stores a prompt id pointer. Single inference routes are prompt-only: no tools, workflow, or retrieval.</p>
+            <table class="glossary-table">
+              <caption class="sr-only">Prompt fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Prompt<span class="glossary-key">prompt_id</span></th>
+                  <td>Stable pack name. Several routes may share one pack. A route pin copies the version current at freeze.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Version<span class="glossary-key">prompt_version</span></th>
+                  <td>Immutable cut of the pack. Edit the text by publishing a new version and pointing the route at it.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Owner</th>
+                  <td>Team that publishes the next pack version.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. New pins use the live published pack when the route points at it. Deprecated shows as Retired in this UI.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Host<span class="glossary-key">host</span></th>
+                  <td>System-level prompt text for the pack. This is what the model sees as the host / system message.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Roles<span class="glossary-key">by_llm_role</span></th>
+                  <td>Optional fragments keyed by LLM role. Empty when the host text is enough. Each fragment has <span class="mono">task_type</span>: <span class="mono">plan</span>, <span class="mono">synthesize</span>, or <span class="mono">classify</span>. Pack keys exclude <span class="mono">none</span>.
+                    <span class="mono">classify</span> — LLM only; skip HTTP; bindable <span class="mono">output_schema</span> validated.
+                    <span class="mono">synthesis</span> — LLM only; user-facing answer or memo; Pattern 0 host node.
+                    <span class="mono">query_formulation</span> — LLM writes the retrieve query, then HTTP.
+                    Stage-only <span class="mono">none</span> — HTTP if invoke url is set; otherwise no-op (not a pack key).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Workflow</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">Ordered stages for deterministic or guided runs. The route stores a workflow id pointer. Autonomous routes leave this empty so the model picks tools from the manifest. A stage is not a capability by itself; it names a tool or an LLM step. Control Plane columns: Stage, Tool, Type, LLM role, Corpus, Branch, Gates. Pattern 2/3 run stages in order today; <span class="mono">branch</span> and <span class="mono">human_gate</span> are catalogue-only until dataflow D8–D9.</p>
+            <h4>Identity</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Workflow fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Workflow<span class="glossary-key">workflow_id</span></th>
+                  <td>Stable name of the stage list. Several route versions may pin the same workflow.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Version<span class="glossary-key">workflow_version</span></th>
+                  <td>Immutable cut. Adding or reordering stages is a new version. The freeze copies this version.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">deprecated</span>. Deterministic routes should pin a published workflow. Deprecated shows as Retired in this UI.</td>
+                </tr>
+              </tbody>
+            </table>
+            <h4>Stage fields</h4>
+            <table class="glossary-table">
+              <caption class="sr-only">Workflow stage fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Stage<span class="glossary-key">id</span></th>
+                  <td>Stable step name inside the workflow, for example <span class="mono">ocr</span> or <span class="mono">manual_review</span>.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Tool<span class="glossary-key">tool</span></th>
+                  <td>Capability name on the route manifest. Empty on LLM-only, prefetch placeholder, or human_gate stages.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Type<span class="glossary-key">type</span></th>
+                  <td>Optional. Omitted = ordinary tool / LLM stage. Seed option: <span class="mono">human_gate</span> (pause for a human; no tool URL). Seed: <span class="mono">purchase_refund</span>, <span class="mono">kyc_onboarding</span>. Not executed in this Runtime yet.</td>
+                </tr>
+                <tr>
+                  <th scope="row">LLM role<span class="glossary-key">llm_role</span></th>
+                  <td>Options: <span class="mono">none</span> (HTTP if url set, else no-op), <span class="mono">classify</span>, <span class="mono">synthesis</span>, <span class="mono">query_formulation</span>. Same values as prompt pack roles (pack keys exclude <span class="mono">none</span>).</td>
+                </tr>
+                <tr>
+                  <th scope="row">Corpus<span class="glossary-key">corpus</span></th>
+                  <td>Optional corpus id for a retrieve stage, for example <span class="mono">clause-index</span>. Route retrieval scope is the full list; this names one corpus on the stage.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Branch<span class="glossary-key">branch</span></th>
+                  <td>Map from a slot value to the next stage id, for example <span class="mono">high → manual_review</span>, <span class="mono">low → activate_account</span>. Catalogue-only; Runtime stays linear today.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Side effect<span class="glossary-key">side_effect</span></th>
+                  <td>Set <span class="mono">true</span> for a write / money / freeze step. Gate chip: Side effect.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Approval<span class="glossary-key">requires_approval</span></th>
+                  <td>Set <span class="mono">true</span> to latch the write until a human packet exists. Pair with <span class="mono">human_gate</span>. Gate chip: Approval. Catalogue-only today.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Allowlist<span class="glossary-key">allowlist</span></th>
+                  <td>Guided (pattern 3) tool names the model may choose within this stage. Catalogue-only; Runtime does not enforce the list yet.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Max tool calls<span class="glossary-key">max_tool_calls</span></th>
+                  <td>Guided cap on tool calls inside the stage. Catalogue-only today.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Manifest</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">Named list of tools a route may call. Each tool is a capability reference. The route stores only the pointer. Adding a tool or bumping a capability version is a new manifest version. Runtime downloads the whole pinned manifest, then hydrates every ref before the LLM.</p>
+            <table class="glossary-table">
+              <caption class="sr-only">Manifest fields</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Manifest<span class="glossary-key">manifest_id</span></th>
+                  <td>Stable name of the tool list. <span class="mono">none</span> on a route means no tools.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Version<span class="glossary-key">manifest_version</span></th>
+                  <td>Immutable cut. Bump when a capability id or version on a tool row changes. Cache key is this pair.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Description</th>
+                  <td>Human summary of what this tool set is for. Not sent to the model as a prompt.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Status</th>
+                  <td>Options: <span class="mono">draft</span>, <span class="mono">published</span>, <span class="mono">retired</span>. Routes should pin a published manifest.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Tools</th>
+                  <td>Rows the model may call. Each has a name, capability id, capability version, policy action, and risk tier. No inlined OpenAPI; schemas come from hydrate.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Action<span class="glossary-key">pdp_action</span></th>
+                  <td>Policy action checked before invoke. Agent policy, not the publisher API contract. A published capability still fails if this check denies.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Risk<span class="glossary-key">risk_tier</span></th>
+                  <td>Risk tier on the manifest tool row. Checked with <span class="mono">pdp_action</span> before invoke.
+                    <span class="mono">low</span> — read or low-impact (search, OCR, confirm).
+                    <span class="mono">medium</span> — draft, score, match, or notify.
+                    <span class="mono">high</span> — side-effect or money-moving (freeze, post refund, activate, start child agent).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <details class="glossary__section">
+          <summary>Status</summary>
+          <div class="glossary__section-body">
+            <p class="glossary__intro">Lifecycle of a catalogue row. Home tiles and list tabs use these four. Decide reads the Active table for new turns. A freeze copies a version and never re-reads Active.</p>
+            <table class="glossary-table">
+              <caption class="sr-only">Catalogue status values</caption>
+              <thead>
+                <tr><th scope="col">Term</th><th scope="col">Meaning</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Active</th>
+                  <td>Live version used for new turns. For routes this is the live pointer. For registry rows, live published.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Published</th>
+                  <td>Released and eligible to pin, but not the live pointer. Older cuts stay here so history and in-flight pins still resolve.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Draft</th>
+                  <td>Not published. New turns do not use it. Safe to edit before a version is frozen.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Retired</th>
+                  <td>Deprecated or withdrawn. Kept for history. New manifests must not refer to retired capabilities.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+      </div>
+    </div>
+    <script src="/app.js?v=manifest-kind-counts" type="module"></script>
+  </body>
+</html>

@@ -1,9 +1,0 @@
-{
-  "id": "freeze_card",
-  "method": "POST",
-  "path": "/cards/freeze",
-  "status": 200,
-  "response": {
-    "text": "Card frozen."
-  }
-}

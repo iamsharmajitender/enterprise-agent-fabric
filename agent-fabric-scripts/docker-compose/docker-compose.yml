@@ -1,0 +1,313 @@
+# Local fabric only. One Compose file, one Postgres, five app databases (afd, adp, ar, acr, audit).
+# From repo root: ./agent-fabric-scripts/stack/start-app.sh
+# App services join this file. Control Plane UI is on 3006 (catalogue browser; no database).
+# Audit Control Plane UI is on 3013 (evidence browser; no database). Audit Data Plane :3012.
+# Adminer (Postgres GUI): http://localhost:8080 — System PostgreSQL, Server postgres, user/password fabric.
+# Grafana LGTM (OTel): http://localhost:3000 — admin/admin. OTLP gRPC 4317, OTLP HTTP 4318.
+# agent-mocks domain stubs: :3010 (not audit).
+
+name: EAF
+
+x-otel-env: &otel-env
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-lgtm:4318
+  OTEL_METRIC_EXPORT_INTERVAL: "500"
+  OTEL_RESOURCE_ATTRIBUTES: service.namespace=agent-fabric,deployment.environment=local
+  OTEL_RESOURCE_DISABLED_KEYS: telemetry.sdk.language,telemetry.sdk.name,telemetry.sdk.version
+  OTEL_EXPERIMENTAL_RESOURCE_DISABLED_KEYS: telemetry.sdk.language,telemetry.sdk.name,telemetry.sdk.version
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: http://otel-lgtm:4318/v1/traces
+  MANAGEMENT_OTLP_METRICS_EXPORT_URL: http://otel-lgtm:4318/v1/metrics
+  MANAGEMENT_OTLP_METRICS_EXPORT_STEP: 1s
+  MANAGEMENT_OTLP_LOGGING_ENDPOINT: http://otel-lgtm:4318/v1/logs
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    image: agent-fabric-postgres:16
+    labels:
+      fabric.role: database
+      fabric.owns: afd,adp,ar,acr,audit
+    environment:
+      POSTGRES_USER: fabric
+      POSTGRES_PASSWORD: fabric
+      POSTGRES_DB: afd
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fabric -d afd"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer:5
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  otel-lgtm:
+    build:
+      context: .
+      dockerfile: Dockerfile.otel-lgtm
+    image: agent-fabric-otel-lgtm:0.1.0
+    ports:
+      - "3000:3000"   # Grafana Web UI
+      - "4317:4317"   # OTLP gRPC ingestion
+      - "4318:4318"   # OTLP HTTP ingestion
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      OTELCOL_EXTRA_ARGS: --config=file:./otelcol-config-fabric.yaml
+    volumes:
+      - lgtm-data:/data
+    restart: unless-stopped
+
+  agent-capability-registry:
+    build:
+      context: ../../agent-fabric-capability-registry
+      dockerfile: Dockerfile
+    image: agent-fabric-registry:0.1.0
+    labels:
+      fabric.service: agent-capability-registry
+      fabric.db: acr
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-capability-registry
+      SPRING_APPLICATION_NAME: agent-capability-registry
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/acr
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+      AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
+    ports:
+      - "3009:3009"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      otel-lgtm:
+        condition: service_started
+      agent-audit-data-plane:
+        condition: service_started
+
+  agent-data-plane:
+    build:
+      context: ../../agent-fabric-plane/agent-data-plane
+      dockerfile: Dockerfile
+    image: agent-fabric-data-plane:0.1.0
+    labels:
+      fabric.service: agent-data-plane
+      fabric.db: adp
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-data-plane
+      SPRING_APPLICATION_NAME: agent-data-plane
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/adp
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+      AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
+    ports:
+      - "3007:3007"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      otel-lgtm:
+        condition: service_started
+      agent-audit-data-plane:
+        condition: service_started
+    restart: unless-stopped
+
+  agent-control-plane:
+    build:
+      context: ../../agent-fabric-plane/agent-control-plane
+      dockerfile: Dockerfile
+    image: agent-fabric-control-plane:0.1.0
+    labels:
+      fabric.service: agent-control-plane
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-control-plane
+      ADP_BASE_URL: http://agent-data-plane:3007
+      ACR_BASE_URL: http://agent-capability-registry:3009
+      PORT: "3006"
+    ports:
+      - "3006:3006"
+    depends_on:
+      agent-data-plane:
+        condition: service_started
+      agent-capability-registry:
+        condition: service_started
+      otel-lgtm:
+        condition: service_started
+    restart: unless-stopped
+
+  agent-fabric-scratchpad:
+    build:
+      context: ../../agent-fabric-scratchpad
+      dockerfile: Dockerfile
+    image: agent-fabric-scratchpad:0.1.0
+    labels:
+      fabric.service: agent-fabric-scratchpad
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-fabric-scratchpad
+      AFD_URL: http://agent-front-door:3005
+      PORT: "3014"
+    ports:
+      - "3014:3014"
+    depends_on:
+      agent-front-door:
+        condition: service_started
+    restart: unless-stopped
+
+  agent-mocks:
+    build:
+      context: ../../agent-fabric-mocks/tools
+      dockerfile: Dockerfile
+    image: agent-mocks:0.1.0
+    labels:
+      fabric.role: stub-domain
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-mocks
+      TOOLS_DIR: /app/catalog
+    ports:
+      - "3010:3010"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3010/health')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      otel-lgtm:
+        condition: service_started
+
+  agent-audit-data-plane:
+    build:
+      context: ../../agent-fabric-audit/agent-audit-data-plane
+      dockerfile: Dockerfile
+    image: agent-fabric-audit-data-plane:0.1.0
+    labels:
+      fabric.service: agent-audit-data-plane
+      fabric.db: audit
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-audit-data-plane
+      SPRING_APPLICATION_NAME: agent-audit-data-plane
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/audit
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+    ports:
+      - "3012:3012"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      otel-lgtm:
+        condition: service_started
+    restart: unless-stopped
+
+  agent-audit-control-plane:
+    build:
+      context: ../../agent-fabric-audit/agent-audit-control-plane
+      dockerfile: Dockerfile
+    image: agent-fabric-audit-control-plane:0.1.0
+    labels:
+      fabric.service: agent-audit-control-plane
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-audit-control-plane
+      AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
+      PORT: "3013"
+    ports:
+      - "3013:3013"
+    depends_on:
+      agent-audit-data-plane:
+        condition: service_started
+      otel-lgtm:
+        condition: service_started
+    restart: unless-stopped
+
+  agent-runtime:
+    build:
+      context: ../../agent-fabric-runtime
+      dockerfile: Dockerfile
+    image: agent-fabric-runtime:0.1.0
+    labels:
+      fabric.service: agent-runtime
+      fabric.db: ar
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-runtime
+      DATABASE_URL: postgresql+psycopg://fabric:fabric@postgres:5432/ar
+      DATA_PLANE_URL: http://agent-data-plane:3007
+      REGISTRY_URL: http://agent-capability-registry:3009
+      AFD_URL: http://agent-front-door:3005
+      AFD_JOBS_CLAIMS: '{"sub":"agent-runtime","emts":{"support:case":true}}'
+      AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+      FABRIC_LLM_MODEL: ${FABRIC_LLM_MODEL:-ollama:llama3.1:8b}
+      # Default 0 = ProviderLlm (host Ollama). Set 1 for deterministic SeedStubLlm demos.
+      FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3008:3008"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-data-plane:
+        condition: service_started
+      agent-capability-registry:
+        condition: service_started
+      agent-mocks:
+        condition: service_healthy
+      otel-lgtm:
+        condition: service_started
+
+  agent-front-door:
+    build:
+      context: ../../agent-fabric-front-door
+      dockerfile: Dockerfile
+    image: agent-fabric-front-door:0.1.0
+    labels:
+      fabric.service: agent-front-door
+      fabric.db: afd
+    environment:
+      <<: *otel-env
+      OTEL_SERVICE_NAME: agent-front-door
+      SPRING_APPLICATION_NAME: agent-front-door
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/afd
+      SPRING_DATASOURCE_USERNAME: fabric
+      SPRING_DATASOURCE_PASSWORD: fabric
+      DATA_PLANE_URL: http://agent-data-plane:3007
+      RUNTIME_URL: http://agent-runtime:3008
+      AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
+    ports:
+      - "3005:3005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-data-plane:
+        condition: service_started
+      agent-runtime:
+        condition: service_started
+      agent-audit-data-plane:
+        condition: service_started
+      otel-lgtm:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  lgtm-data:

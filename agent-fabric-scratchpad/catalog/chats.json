@@ -1,0 +1,32 @@
+{
+  "_source": "Chat demos for routes under catalogue-seed/route/.",
+  "chats": [
+    {
+      "id": "overdraft_fee_qa",
+      "route_id": "overdraft_fee_qa",
+      "autonomy_mode": 0,
+      "label": "Single inference",
+      "claims": [],
+      "message": "What is the overdraft fee on our Everyday account?",
+      "expected_status": "completed"
+    },
+    {
+      "id": "fee_explain",
+      "route_id": "fee_explain",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["accounts:read"],
+      "message": "Why was I charged $42?",
+      "expected_status": "completed"
+    },
+    {
+      "id": "shopassist_case_ask",
+      "route_id": "shopassist_case",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["support:case"],
+      "message": "Hi, I received my blue jacket yesterday and it arrived damaged. I also think I was charged twice. I want a full refund, not a replacement.",
+      "expected_status": "waiting"
+    }
+  ]
+}

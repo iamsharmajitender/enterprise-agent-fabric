@@ -4,6 +4,9 @@
   "path": "/fees/explain",
   "status": 200,
   "response": {
-    "text": "Fee of $42 is the monthly account charge."
+    "text": "Fee of $42 is the monthly account charge.",
+    "account_id": "acct-4412",
+    "fee_code": "MONTHLY_MAINTENANCE",
+    "amount": 42
   }
 }

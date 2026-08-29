@@ -1,7 +1,0 @@
-{
-  "suite_id": "clause_lookup_tools",
-  "suite_version": "2026.08.1",
-  "kind": "tool-sequence",
-  "route_id": "clause_lookup",
-  "description": "Pattern 2: clause_search (query_formulation) \u2192 synthesis."
-}

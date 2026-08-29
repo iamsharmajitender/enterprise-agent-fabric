@@ -1,9 +1,0 @@
-{
-  "id": "parse_ticket",
-  "method": "POST",
-  "path": "/tickets/parse",
-  "status": 200,
-  "response": {
-    "text": "Ticket parsed: billing question about a monthly fee."
-  }
-}

@@ -1,9 +1,0 @@
-{
-  "id": "draft_memo",
-  "method": "POST",
-  "path": "/legal/memo",
-  "status": 200,
-  "response": {
-    "text": "Deny claim: exclusion 4.2 applies; notice was late."
-  }
-}

@@ -1,6 +1,0 @@
-{
-  "suite_id": "routing",
-  "suite_version": "2026.08.1",
-  "kind": "routing",
-  "description": "Chat contest: utterance + claims + channel → route | clarify | abstain. Board for the catalogue cut, not eval_suite_id."
-}

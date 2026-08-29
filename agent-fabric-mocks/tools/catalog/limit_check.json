@@ -1,9 +1,0 @@
-{
-  "id": "limit_check",
-  "method": "POST",
-  "path": "/cards/limits",
-  "status": 200,
-  "response": {
-    "text": "Freeze is within product limits."
-  }
-}

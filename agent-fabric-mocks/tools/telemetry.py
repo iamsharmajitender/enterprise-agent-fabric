@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any
 
 _state: dict[str, Any] = {"ready": False, "fastapi": None}
+
+
+def quiet_framework_loggers() -> None:
+    """Reduce HTTP/SQL/pool noise (Python equivalents of Spring/Hibernate/Hikari)."""
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine").disabled = True
 
 
 def setup() -> None:

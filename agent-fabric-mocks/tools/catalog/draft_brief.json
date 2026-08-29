@@ -1,9 +1,0 @@
-{
-  "id": "draft_brief",
-  "method": "POST",
-  "path": "/briefs",
-  "status": 200,
-  "response": {
-    "text": "Brief: monthly fee is a posted account charge; cite the fee schedule."
-  }
-}
