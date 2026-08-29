@@ -184,6 +184,8 @@ HTTP payload = `goal` ∪ schema-selected **slots** ([payload.py](app/graph/payl
 
 ## Related docs
 
+- **Runtime options (deploy, transforms, observability):** [agent-fabric-runtime-options.md](./agent-fabric-runtime-options.md)
+- **Technical implementation (end-to-end):** [technical-implementation.md](./technical-implementation.md)
 - Fabric overview: [`../README.md`](../README.md)
 - Patterns 0–3: [`../agent-fabric-docs/06-patterns/`](../agent-fabric-docs/06-patterns/)
 - Dataflow: [`../agent-fabric-docs/tasks/dataflow-plan.md`](../agent-fabric-docs/tasks/dataflow-plan.md)
