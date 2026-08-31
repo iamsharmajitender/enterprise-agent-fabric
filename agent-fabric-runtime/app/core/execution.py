@@ -76,7 +76,7 @@ def _pause_waiting(
         result={"message": ask_text} if ask_text else None,
     )
     telemetry.emit(
-        "run.waiting",
+        "run.graph.waiting",
         journey_id=journey_id,
         correlation_id=pin.correlation_id,
         session_id=pin.session_id,
@@ -187,7 +187,7 @@ def run_loop(
                             {"message": str(exc), "recoverable": True},
                         )
                         telemetry.emit(
-                            "run.failed",
+                            "run.graph.failed",
                             journey_id=journey_id,
                             correlation_id=pin.correlation_id,
                             session_id=pin.session_id,
@@ -198,7 +198,7 @@ def run_loop(
                         return failed
                 store.fail(pin.correlation_id, {"message": str(exc)})
                 telemetry.emit(
-                    "run.failed",
+                    "run.graph.failed",
                     journey_id=journey_id,
                     correlation_id=pin.correlation_id,
                     session_id=pin.session_id,
@@ -210,7 +210,7 @@ def run_loop(
         message = str(output.get("result") or "")
         completed = store.complete(pin.correlation_id, {"message": message})
         telemetry.emit(
-            "run.completed",
+            "run.graph.completed",
             journey_id=journey_id,
             correlation_id=pin.correlation_id,
             session_id=pin.session_id,
@@ -222,7 +222,7 @@ def run_loop(
     except Exception:
         if not save_loop(profile or {}):
             telemetry.emit(
-                "run.failed",
+                "run.graph.failed",
                 journey_id=journey_id,
                 correlation_id=pin.correlation_id,
                 session_id=pin.session_id,

@@ -227,7 +227,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 **Description:** Emit allowlisted structured business events for the `fee_explain` journey so Layer ① drop-off is visible in Loki (and later KPIs).
 
 **Acceptance criteria:**
-- [x] Events exist with stable names: `chat.turn.received` (or `job.entitlement.accepted`), `chat.intent.*` / `job.intent.*`, `chat.run.started` / `job.run.started`, `run.hydrate.succeeded` | `run.hydrate.failed`, `run.stage.*`, `run.completed` | `run.failed`, and `chat.run.delivered` / `job.run.delivered` where applicable
+- [x] Events exist with stable names: `chat.turn.received` (or `job.entitlement.accepted`), `chat.intent.*` / `job.intent.*`, `chat.run.started` / `job.run.started`, `run.hydrate.succeeded` | `run.hydrate.failed`, `run.graph.*`, `run.stage.*`, and `chat.run.delivered` / `job.run.delivered` where applicable
 - [x] Fields include `journey_id`, `session_id` and/or `correlation_id`, `route_id`/`route_version` when known, `outcome` — never full message body or claims
 - [x] Jobs path uses the same event family with `ingress`/`channel` distinguishing job vs chat
 

@@ -206,7 +206,7 @@ Allowlisted journey breadcrumbs for Loki (line body is the event name; ids live 
 
 Java AFD / ADP: `BusinessEvents.emit`. Python AR: `telemetry.emit`. Same contract: structured log + a journey outcome counter.
 
-Chat sequence: `chat.turn.received` → `chat.intent.*` → `chat.run.started` → `run.hydrate.*` / `run.started` / `run.stage.*` / `run.completed` → `chat.run.delivered`.
+Chat sequence: `chat.turn.received` → `chat.intent.*` → `chat.run.started` → `run.hydrate.*` / `run.graph.*` / `run.stage.*` → `chat.run.delivered`.
 
 Jobs sequence: `job.entitlement.accepted` → `job.intent.*` → `job.run.started` → same `run.*` family → `job.run.delivered`.
 
@@ -243,15 +243,15 @@ Ingress-prefixed intent outcomes (`ingress` = `chat` or `jobs`):
 
 | Event | When |
 | --- | --- |
-| `run.hydrate.succeeded` | Catalogue + registry hydrate succeeded |
+| `run.hydrate.succeeded` | Catalogue + registry hydrate succeeded (pre-graph) |
 | `run.hydrate.failed` | Hydrate failed |
-| `run.started` | Pin saved, graph about to run |
+| `run.graph.started` | Pin saved, graph about to run |
 | `run.stage.started` | Before tool/LLM stage invoke |
 | `run.stage.completed` | After each stage (`on_stage`) |
 | `run.stage.failed` | Stage threw (not gate/wait) |
-| `run.waiting` | Graph paused on gate |
-| `run.completed` | Graph finished successfully |
-| `run.failed` | Graph threw |
+| `run.graph.waiting` | Graph paused on gate |
+| `run.graph.completed` | Graph finished successfully |
+| `run.graph.failed` | Graph threw |
 
 Stage events include `stage_id`, digests (`request_digest` / `response_digest`), and `latency_ms` on completed. Set `FABRIC_LOG_STAGE_PAYLOADS=1` locally for raw JSON in Loki (default `0` = digests only).
 
@@ -272,7 +272,7 @@ Box READMEs: [Front Door](agent-fabric-front-door/README.md#business-events), [D
 Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.` Generate a `shopassist_case` turn, then confirm signals in Grafana ([http://localhost:3000](http://localhost:3000), `admin` / `admin`):
 
 1. `./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask`
-2. Explore → **Loki**: `{service_name=~"agent-fabric-front-door|agent-fabric-plane/agent-data-plane|agent-fabric-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitlement.accepted` → `chat.intent.*` / `job.intent.*` → `chat.run.started` / `job.run.started` → `run.hydrate.*` / `run.started` / `run.stage.*` / `run.completed`)
+2. Explore → **Loki**: `{service_name=~"agent-fabric-front-door|agent-fabric-plane/agent-data-plane|agent-fabric-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitlement.accepted` → `chat.intent.*` / `job.intent.*` → `chat.run.started` / `job.run.started` → `run.hydrate.*` / `run.graph.*` / `run.stage.*`)
 3. Explore → **Tempo**: `{.service.name="agent-fabric-front-door"}` — children include `agent-fabric-plane/agent-data-plane` and `agent-fabric-runtime` (Registry on hydrate; `agent-mocks` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
 4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-fabric-front-door`
 
@@ -461,7 +461,7 @@ Pack: [agent-fabric-runtime](agent-fabric-docs/04-architecture/agent-runtime.md)
 | Topic in this README | AFD | ADP | ACR | AR |
 | --- | --- | --- | --- | --- |
 | [Ports](#ports-and-urls) | `:3005` public chat + jobs | `:3007` private | `:3009` private | `:3008` private |
-| [Observability](#observability-grafana-lgtm) | Mints/echoes `X-Request-Id`; `chat.turn.received` / `job.entitlement.accepted`; `chat.run.started` / `job.run.started`; `chat.run.delivered` / `job.run.delivered` | `chat.intent.*` / `job.intent.*` | Hydrate GETs on the Tempo path | `run.hydrate.*`, `run.started`, `run.stage.*`, `run.completed`; span attrs `correlation_id` |
+| [Observability](#observability-grafana-lgtm) | Mints/echoes `X-Request-Id`; `chat.turn.received` / `job.entitlement.accepted`; `chat.run.started` / `job.run.started`; `chat.run.delivered` / `job.run.delivered` | `chat.intent.*` / `job.intent.*` | Hydrate GETs on the Tempo path | `run.hydrate.*`, `run.graph.*`, `run.stage.*`; span attrs `correlation_id` |
 | [Routes](#routes-v1) | Freezes the pin AFD got from decide; jobs name `route_id` | Owns versioned rows; classify = **active** mix | Manifest pointer only — no `tools[]` on the route | Executes the **pinned** version; never re-reads `active` |
 | [Catalogue statuses](#catalogue-statuses) | After `route`, GET that version | `active` vs `published` vs `draft` / `retired` on routes; prompts/workflows/corpora | Capability + manifest `draft` / `published` / `retired`; hydrate `published` | Hydrates the pin; 422 if the cut is missing or still draft |
 | [Workflows](#workflows) | None. Pin already has `workflow_id` on the row | Owns `dataplane.workflows` (stages, `llm_role`, allowlist). Route points at `workflow_id` | None | Hydrate: with a manifest, stamp `llm_role` onto tools; when a stage declares `branch`, graph order follows workflow stages and conditional edges read prior slots. Pattern 0/2/3 stay linear except branch routes; Pattern 1 is CALL/DONE. `human_gate` pauses (D9); stage `allowlist` and approval flags are catalogue-only |

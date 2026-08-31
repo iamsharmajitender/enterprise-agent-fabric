@@ -232,10 +232,10 @@ chat.turn.received          (AFD)
 chat.intent.*               (ADP)
 chat.run.started            (AFD)
 run.hydrate.succeeded|failed (Runtime)
-run.started                 (Runtime)
-run.stage.*                 (Runtime)
-run.waiting                 (Runtime, if gate)
-run.completed|failed        (Runtime)
+run.graph.started                 (Runtime)
+run.stage.*                       (Runtime)
+run.graph.waiting                 (Runtime, if gate)
+run.graph.completed|failed        (Runtime)
 chat.run.delivered          (AFD)
 ```
 
@@ -251,10 +251,10 @@ Use [`telemetry.emit()`](./app/telemetry.py). Implementation: [`agent_core.py`](
 | --- | --- | --- |
 | `run.hydrate.succeeded` | After hydrate, before 202 | `journey_id`, `session_id`, `route_id`, `route_version`, `outcome=hydrate_ok` |
 | `run.hydrate.failed` | HydrateError | + `reason_class` (`not_found`, `missing_pin`, `upstream`) |
-| `run.started` | Pin inserted, graph scheduled | `correlation_id`, `outcome=started` |
-| `run.completed` | Graph success | `correlation_id`, `outcome=completed` |
-| `run.waiting` | Gate pause | `correlation_id`, `outcome=waiting` |
-| `run.failed` | Graph error | `outcome=failed` or `failed_recoverable` |
+| `run.graph.started` | Pin inserted, graph scheduled | `correlation_id`, `outcome=started` |
+| `run.graph.completed` | Graph success | `correlation_id`, `outcome=completed` |
+| `run.graph.waiting` | Gate pause | `correlation_id`, `outcome=waiting` |
+| `run.graph.failed` | Graph error | `outcome=failed` or `failed_recoverable` |
 
 **`journey_id` convention:**
 
@@ -271,9 +271,9 @@ Emit the **same event names and fields** from your service when equivalent lifec
 
 | Lifecycle point | Emit |
 | --- | --- |
-| Run accepted / pinned | `run.started` |
+| Run accepted / pinned | `run.graph.started` |
 | Tool list frozen | `run.hydrate.succeeded` or skip if no hydrate — document choice |
-| Terminal | `run.completed` / `run.failed` / `run.waiting` |
+| Terminal | `run.graph.completed` / `run.graph.failed` / `run.graph.waiting` |
 
 Use `telemetry.emit` pattern or equivalent structured JSON log + `fabric_journey_outcome_total` counter with labels `journey_id`, `outcome`, `channel`.
 
@@ -390,13 +390,13 @@ Use this when standing up **Option B** or **Option C**:
 
 | Checkpoint | Business event | Audit | OTel |
 | --- | --- | --- | --- |
-| Run pinned / started | `run.started` | — | span start |
+| Run pinned / started | `run.graph.started` | — | span start |
 | Tools frozen | `run.hydrate.succeeded` | `hydrate.snapshot` | `hydrate` span |
 | Each legacy / tool call | — | `stage.completed` + digests | `tool.invoke` |
 | In-process transform | — | `stage.completed` (`stage_id=map_*`) | `transform.apply` (optional) |
-| Gate pause | `run.waiting` | `run.terminal` (`waiting`) | span OK + `waiting_for` |
-| Success | `run.completed` | `run.terminal` (`completed`) | span OK |
-| Failure | `run.failed` | `run.terminal` (`failed`) | span error |
+| Gate pause | `run.graph.waiting` | `run.terminal` (`waiting`) | span OK + `waiting_for` |
+| Success | `run.graph.completed` | `run.terminal` (`completed`) | span OK |
+| Failure | `run.graph.failed` | `run.terminal` (`failed`) | span error |
 
 **Shared ids across all three:** `correlation_id`, `session_id`, `route_id`, `route_version`, `X-Request-Id` / trace id.
 

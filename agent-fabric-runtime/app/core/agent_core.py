@@ -258,7 +258,7 @@ class RunService:
             )
         )
         telemetry.emit(
-            "run.started",
+            "run.graph.started",
             journey_id=journey_id,
             correlation_id=saved.correlation_id,
             session_id=session_id,

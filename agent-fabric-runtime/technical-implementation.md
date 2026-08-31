@@ -154,7 +154,7 @@ Responses:
 6. Mint correlation_id = "corr-" + uuid4()
 7. insert RunPin(status=running, hydrated_tools frozen)
 8. emit audit hydrate.snapshot (async)
-9. emit telemetry run.started
+9. emit telemetry run.graph.started
 10. schedule_run(_execute_new_run) on background thread
 11. return correlation_id (HTTP 202)
 ```
@@ -1084,7 +1084,7 @@ AFD projects this as `GET /v1/jobs/{correlation_id}` for job sessions.
 - Waiting spans stay OK with attributes `waiting_for`, `stage_id`, `subagent_ids`
 - Business events via `telemetry.emit()`:
   - `run.hydrate.succeeded` / `run.hydrate.failed`
-  - `run.started`, `run.completed`, `run.waiting`, `run.failed`
+  - `run.graph.started`, `run.graph.completed`, `run.graph.waiting`, `run.graph.failed`
 
 ### 14.2 Audit events
 

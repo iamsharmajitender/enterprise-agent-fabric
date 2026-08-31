@@ -78,16 +78,16 @@ def test_json_formatter_includes_request_id() -> None:
             level=logging.INFO,
             pathname=__file__,
             lineno=1,
-            msg="run.started",
+            msg="run.graph.started",
             args=(),
             exc_info=None,
         )
-        record.event = "run.started"
+        record.event = "run.graph.started"
         record.correlation_id = "corr-abc"
         payload = json.loads(formatter.format(record))
         assert payload["request_id"] == "req-edge-1"
         assert payload["correlation_id"] == "corr-abc"
-        assert payload["event"] == "run.started"
+        assert payload["event"] == "run.graph.started"
         assert "trace_id" not in payload
     finally:
         telemetry.reset_request_id(token)

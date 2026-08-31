@@ -81,7 +81,7 @@ Related: [overview](overview.md) · [memory](memory.md) · [README observability
 
 ## 3. Jobs — success
 
-Happy path: entitle → decide `route` → hydrate → start → LLM (and tools) → `run.completed`.
+Happy path: entitle → decide `route` → hydrate → start → LLM (and tools) → `run.graph.completed`.
 
 ### What AFD mints on `POST /v1/jobs`
 
@@ -119,13 +119,13 @@ sequenceDiagram
   AR->>ADP: GET route prompt workflow
   AR->>ACR: GET manifest and capabilities
   AR->>Loki: run.hydrate.succeeded
-  AR->>Loki: run.started
+  AR->>Loki: run.graph.started
   AFD->>Loki: job.run.started
   AFD-->>Caller: 202 correlation_id
   AR->>LLM: llm.complete
   Note over AR,LLM: may also tool.invoke in a Pattern 1 loop
   LLM-->>AR: text
-  AR->>Loki: run.completed
+  AR->>Loki: run.graph.completed
   Caller->>AFD: GET /v1/jobs/correlation_id
   AFD->>AR: GET /v1/runs/correlation_id
 ```
@@ -134,9 +134,9 @@ sequenceDiagram
 | --- | --- | --- |
 | Entitle | `job.entitlement.accepted` | `session_id=job-19268885-…`, `request_id=req-f4cfcc86-b8ed-45c7-…`, `journey_id=job.fee_explain`, `trace_id=9af5f0a0…` — **no** `correlation_id` |
 | Decide | `job.intent.routed` | same + `route_id=fee_explain` — still **no** `correlation_id` |
-| Hydrate / start | `run.hydrate.succeeded` → `run.started` → `job.run.started` | **`correlation_id=corr-550e8400-e29b-41d4-a716-446655440000` appears** |
+| Hydrate / start | `run.hydrate.succeeded` → `run.graph.started` → `job.run.started` | **`correlation_id=corr-550e8400-e29b-41d4-a716-446655440000` appears** |
 | Graph | Tempo `llm.complete` / `tool.invoke` | same start `trace_id` + `session_id` + `correlation_id` |
-| Done | `run.completed` | `session_id=job-19268885-…` + `correlation_id=corr-550e8400-…` |
+| Done | `run.graph.completed` | `session_id=job-19268885-…` + `correlation_id=corr-550e8400-…` |
 | Poll | *(no business event)* | `GET /v1/jobs/corr-550e8400-e29b-41d4-a716-446655440000` |
 
 ---
@@ -147,7 +147,7 @@ sequenceDiagram
 | --- | --- | --- | --- | --- |
 | Not entitled | Decide not `route` | `job.intent.abstained` → `job.entitlement.rejected` | **403** | `session_id=job-…` present; **no** `corr-…` |
 | Hydrate miss | Bad pin / registry 404 | `run.hydrate.failed` | AFD **503** / AR **422** `HYDRATE_FAILED` | AFD does **not** invent `corr-550e8400-…` |
-| Graph error | e.g. loop exceeded steps | `run.started` … then `run.failed` | Poll `status=failed` (`recoverable` may be true) | `202` already returned `corr-550e8400-…`; Loki `run.failed` |
+| Graph error | e.g. loop exceeded steps | `run.graph.started` … then `run.graph.failed` | Poll `status=failed` (`recoverable` may be true) | `202` already returned `corr-550e8400-…`; Loki `run.graph.failed` |
 | Duplicate idempotency key | Replay `job-fee-explain:v1` | No second robot | Same `202` body | Same `correlation_id=corr-550e8400-…` |
 | Status poll | `GET /v1/jobs/{corr}` | *(none)* | Slim status JSON | New `request_id=req-…`; lookup `corr-550e8400-…` |
 
@@ -159,8 +159,8 @@ flowchart TD
   HYDRATE -->|no| HF[run.hydrate.failed<br/>no fake corr]
   HYDRATE -->|yes| ACC[job.run.started<br/>202 + corr-UUID]
   ACC --> GRAPH{graph ok?}
-  GRAPH -->|yes| OK[run.completed]
-  GRAPH -->|no| FAIL[run.failed]
+  GRAPH -->|yes| OK[run.graph.completed]
+  GRAPH -->|no| FAIL[run.graph.failed]
 ```
 
 ---
@@ -194,14 +194,14 @@ sequenceDiagram
   AR->>ADP: GET route prompt workflow
   AR->>ACR: GET manifest and capabilities
   AR->>Loki: run.hydrate.succeeded
-  AR->>Loki: run.started
+  AR->>Loki: run.graph.started
   AFD->>Loki: chat.run.started
   AFD-->>User: FR-5 slim body session_id only
   Note over AFD: wire hides route_id and correlation_id
   AR->>LLM: llm.complete
   Note over AR,LLM: may also tool.invoke
   LLM-->>AR: text
-  AR->>Loki: run.completed
+  AR->>Loki: run.graph.completed
   AFD->>Loki: chat.run.delivered
 ```
 
@@ -210,10 +210,10 @@ sequenceDiagram
 | Turn in | `chat.turn.received` | `session_id=chat-11111111-…`, `request_id=req-a1b2c3d4-e5f6-0718-…`, `trace_id=dad8eff1…` — **no** `correlation_id` |
 | Decide | `job.intent.routed` | same + `route_id=fee_explain` — still **no** `correlation_id` |
 | Start key | *(AFD local)* | `idempotency_key=chat-11111111-…:fee_explain:v1`; `journey_id=chat.fee_explain` |
-| Hydrate / start | `run.hydrate.succeeded` → `run.started` → `chat.run.started` | **`correlation_id=corr-7c9e6679-7425-40de-944b-e07fc1f90ae7`**; freeze `chat-11111111-…` → pin + corr |
+| Hydrate / start | `run.hydrate.succeeded` → `run.graph.started` → `chat.run.started` | **`correlation_id=corr-7c9e6679-7425-40de-944b-e07fc1f90ae7`**; freeze `chat-11111111-…` → pin + corr |
 | User reply | FR-5 JSON | `{"session_id":"chat-11111111-…","status":"accepted"}` — **no** `route_id` / `correlation_id` on the wire |
 | Graph | Tempo `llm.complete` / `tool.invoke` | `trace_id=dad8eff1…` + `session_id` + `correlation_id=corr-7c9e6679-…` |
-| Done | `run.completed` → `chat.run.delivered` | `session_id=chat-11111111-…` + `correlation_id=corr-7c9e6679-…` |
+| Done | `run.graph.completed` → `chat.run.delivered` | `session_id=chat-11111111-…` + `correlation_id=corr-7c9e6679-…` |
 
 ### Follow-up turn (freeze live)
 
@@ -236,7 +236,7 @@ sequenceDiagram
   AFD->>AR: POST /v1/runs/correlation_id/turns
   AR->>LLM: llm.complete
   LLM-->>AR: text
-  AR->>Loki: run.completed
+  AR->>Loki: run.graph.completed
   AFD->>Loki: chat.run.delivered
 ```
 
@@ -245,7 +245,7 @@ sequenceDiagram
 | Turn in | `chat.turn.received` | **same** `session_id=chat-11111111-…`; **new** `request_id=req-99aa88bb-ccdd-eeff-0011-223344556677`, **new** `trace_id=…` |
 | Resume | *(no decide / no ACR)* | freeze → existing `correlation_id=corr-7c9e6679-…` + `fee_explain` pin |
 | Graph | Tempo `llm.complete` | `session_id=chat-11111111-…` + `correlation_id=corr-7c9e6679-…` |
-| Done | `run.completed` → `chat.run.delivered` | same journey ids; **no** second `corr-` mint |
+| Done | `run.graph.completed` → `chat.run.delivered` | same journey ids; **no** second `corr-` mint |
 
 ---
 
@@ -256,7 +256,7 @@ sequenceDiagram
 | Clarify | Decide needs options | `chat.intent.clarified` | `session_id=chat-11111111-…` + `option_id=opt-e5f60718` | Not started |
 | Abstain | No safe route | `chat.intent.abstained` | `{"session_id":"chat-11111111-…","status":"abstain"}` | Not started |
 | Hydrate miss | Pin/registry fail | `run.hydrate.failed` | Start fails closed | Not invented by AFD |
-| Graph error | Loop / stage throw | `run.failed` | Events / poll show failed | Yes if `chat.run.started` already returned (e.g. `corr-7c9e6679-…`) |
+| Graph error | Loop / stage throw | `run.graph.failed` | Events / poll show failed | Yes if `chat.run.started` already returned (e.g. `corr-7c9e6679-…`) |
 | Hints only | `GET .../hints` | *(none required)* | `session_id=chat-11111111-…`, `hint_id=hint-a1b2c3d4` | No run |
 
 ```mermaid
@@ -264,8 +264,8 @@ flowchart TD
   TURN([POST /v1/assistant/turns]) --> FREEZE{freeze live?}
   FREEZE -->|yes| RESUME[resume turns]
   RESUME --> G1{graph ok?}
-  G1 -->|yes| OK1[run.completed + chat.run.delivered]
-  G1 -->|no| F1[run.failed]
+  G1 -->|yes| OK1[run.graph.completed + chat.run.delivered]
+  G1 -->|no| F1[run.graph.failed]
   FREEZE -->|no| DECIDE{decide outcome}
   DECIDE -->|clarify| CL[chat.intent.clarified]
   DECIDE -->|abstain| AB[chat.intent.abstained]
@@ -273,8 +273,8 @@ flowchart TD
   HYDRATE -->|no| HF[run.hydrate.failed]
   HYDRATE -->|yes| ACC[chat.run.started]
   ACC --> G2{graph ok?}
-  G2 -->|yes| OK2[run.completed + chat.run.delivered]
-  G2 -->|no| F2[run.failed]
+  G2 -->|yes| OK2[run.graph.completed + chat.run.delivered]
+  G2 -->|no| F2[run.graph.failed]
 ```
 
 ---
@@ -346,9 +346,9 @@ Login: [http://localhost:3000](http://localhost:3000) (`admin` / `admin`).
 | --- | --- |
 | `job.entitlement.accepted` | `session_id=job-19268885-…`, `request_id=req-f4cfcc86-b8ed-45c7-…`, `journey_id=job.fee_explain`, `trace_id=9af5f0a0…` — no `correlation_id` |
 | `job.intent.routed` | + `route_id=fee_explain` — still no `correlation_id` |
-| `run.hydrate.succeeded` / `run.started` | + `correlation_id=corr-550e8400-…` |
+| `run.hydrate.succeeded` / `run.graph.started` | + `correlation_id=corr-550e8400-…` |
 | `job.run.started` | `session_id=job-19268885-…` + `correlation_id=corr-550e8400-…` |
-| `run.completed` / `run.failed` | `session_id=job-19268885-…` + `correlation_id=corr-550e8400-…` |
+| `run.graph.completed` / `run.graph.failed` | `session_id=job-19268885-…` + `correlation_id=corr-550e8400-…` |
 
 ```logql
 {service_name=~"agent-front-door|agent-data-plane|agent-runtime"} | session_id="job-19268885-49db-3eb1-a2a9-cf65e30048f7"
@@ -364,7 +364,7 @@ Login: [http://localhost:3000](http://localhost:3000) (`admin` / `admin`).
 
 Prefer the `trace_id` on **start** events (e.g. `9af5f0a0c9c181acfcd5d0ce42efc599`) for the full AFD → ADP → ACR → AR → `llm.complete` tree — not later status-poll traces.
 
-`graph.invoke` pausing for a specialist join (`waiting_for=subagent`) or `human_gate` is control flow, not a span error. Those spans stay OK and carry `waiting_for` / `stage_id` (and `subagent_ids` when joining). Look for `run.waiting`, not `exception.message`.
+`graph.invoke` pausing for a specialist join (`waiting_for=subagent`) or `human_gate` is control flow, not a span error. Those spans stay OK and carry `waiting_for` / `stage_id` (and `subagent_ids` when joining). Look for `run.graph.waiting`, not `exception.message`.
 
 ---
 
