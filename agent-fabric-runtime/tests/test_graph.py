@@ -954,8 +954,8 @@ def test_agent_loop_calls_tool_then_done() -> None:
     assert output["result"] == "Fee of $42 is the monthly account charge."
 
 
-def test_agent_loop_escalate_to_human_completes_without_done() -> None:
-    """Successful escalate opens an async handoff; parent completes (no loop burn)."""
+def test_agent_loop_handoff_then_done() -> None:
+    """LLM calls a handoff tool then DONE with the tool response."""
     calls: list[str] = []
 
     class Invoker:
@@ -969,123 +969,30 @@ def test_agent_loop_escalate_to_human_completes_without_done() -> None:
 
         def complete(self, system: str, user: str) -> str:
             self.turns += 1
-            assert self.turns == 1, "must not ask the model again after escalate"
-            return "CALL escalate_to_human"
-
-    tools = [
-        {
-            "id": "escalate_to_human",
-            "output_schema": {
-                "type": "object",
-                "required": ["text"],
-                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
-            },
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
-        }
-    ]
-    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
-    output = graph.invoke({"result": "", "goal": {"utterance": "need refund"}, "notes": []})
-    assert calls == ["http://agent-mocks:3010/handoff/escalate"]
-    assert "hof-1" in output["result"]
-    assert "escalated" in output["result"].lower()
-    assert (output.get("slots") or {}).get("escalate_to_human", {}).get("handoff_id") == "hof-1"
-
-
-def test_agent_loop_escalate_idempotent_on_repeat_call() -> None:
-    """Repeat CALL escalate_to_human must not POST again; reuse handoff and complete."""
-    calls: list[str] = []
-
-    class Invoker:
-        def call(self, invoke: dict, payload: dict) -> dict:
-            calls.append(invoke["url"])
-            return {"handoff_id": f"hof-{len(calls)}", "text": f"Handoff opened: hof-{len(calls)}."}
-
-    class Llm:
-        def complete(self, system: str, user: str) -> str:
-            return "CALL escalate_to_human"
-
-    tools = [
-        {
-            "id": "escalate_to_human",
-            "output_schema": {
-                "type": "object",
-                "required": ["text"],
-                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
-            },
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
-        }
-    ]
-    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
-    # Prior successful escalate already in slots — model tries CALL again.
-    output = graph.invoke(
-        {
-            "result": "Handoff opened: hof-1.",
-            "goal": {"utterance": "need refund"},
-            "notes": ["Handoff opened: hof-1."],
-            "slots": {
-                "escalate_to_human": {
-                    "handoff_id": "hof-1",
-                    "text": "Handoff opened: hof-1.",
-                }
-            },
-        }
-    )
-    assert calls == [], "idempotent replay must not POST handoff again"
-    assert (output.get("slots") or {}).get("escalate_to_human", {}).get("handoff_id") == "hof-1"
-    assert "hof-1" in output["result"]
-    assert "hof-2" not in output["result"]
-
-
-def test_agent_loop_escalate_idempotent_while_join_pending() -> None:
-    """While joins pending, repeat CALL escalate skips HTTP and stays in the loop."""
-    calls: list[str] = []
-
-    class Invoker:
-        def call(self, invoke: dict, payload: dict) -> dict:
-            calls.append(invoke["url"])
-            return {"handoff_id": "hof-should-not", "text": "should not post"}
-
-    class Llm:
-        def __init__(self) -> None:
-            self.turns = 0
-
-        def complete(self, system: str, user: str) -> str:
-            self.turns += 1
             if self.turns == 1:
-                return "CALL escalate_to_human"
-            return "DONE still waiting on subagent"
+                return "CALL open_handoff"
+            return "DONE Handoff opened: hof-1."
 
     tools = [
         {
-            "id": "escalate_to_human",
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+            "id": "open_handoff",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/open"},
         }
     ]
     graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
-    output = graph.invoke(
-        {
-            "result": "Handoff opened: hof-1.",
-            "goal": {"utterance": "need refund"},
-            "notes": [],
-            "slots": {
-                "escalate_to_human": {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."},
-                "start_contract_review": {
-                    "correlation_id": "corr-pending-1",
-                    "route_id": "contract_review",
-                    "status": "running",
-                },
-            },
-        }
-    )
-    assert calls == []
-    assert "idempotent" in " ".join(output.get("notes") or []).lower() or "hof-1" in str(
-        output.get("slots")
-    )
-    assert output["result"] == "still waiting on subagent"
+    output = graph.invoke({"result": "", "goal": {"utterance": "need help"}, "notes": []})
+    assert calls == ["http://agent-mocks:3010/handoff/open"]
+    assert output["result"] == "Handoff opened: hof-1."
+    assert (output.get("slots") or {}).get("open_handoff", {}).get("handoff_id") == "hof-1"
 
 
-def test_agent_loop_escalate_waits_when_subagent_join_pending() -> None:
-    """Do not auto-complete escalate while a child job join is still pending."""
+def test_agent_loop_handoff_with_subagent_pending() -> None:
+    """Handoff can run while a child join is still pending; LLM closes with DONE."""
     calls: list[str] = []
 
     class Invoker:
@@ -1100,25 +1007,25 @@ def test_agent_loop_escalate_waits_when_subagent_join_pending() -> None:
         def complete(self, system: str, user: str) -> str:
             self.turns += 1
             if self.turns == 1:
-                return "CALL escalate_to_human"
+                return "CALL open_handoff"
             return "DONE waiting on subagent then closing"
 
     tools = [
         {
-            "id": "escalate_to_human",
+            "id": "open_handoff",
             "output_schema": {
                 "type": "object",
                 "required": ["text"],
                 "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
             },
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/open"},
         }
     ]
     graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
     output = graph.invoke(
         {
             "result": "",
-            "goal": {"utterance": "need refund"},
+            "goal": {"utterance": "need help"},
             "notes": [],
             "slots": {
                 "start_contract_review": {
@@ -1129,7 +1036,7 @@ def test_agent_loop_escalate_waits_when_subagent_join_pending() -> None:
             },
         }
     )
-    assert calls == ["http://agent-mocks:3010/handoff/escalate"]
+    assert calls == ["http://agent-mocks:3010/handoff/open"]
     assert output["result"] == "waiting on subagent then closing"
 
 
@@ -1175,7 +1082,7 @@ def test_agent_loop_call_args_are_schema_only() -> None:
     class Invoker:
         def call(self, invoke: dict, payload: dict) -> dict:
             seen.append(payload)
-            return {"text": "Order ORD-77819: Blue Jacket."}
+            return {"text": "Record REC-77819: widget."}
 
     class Llm:
         def __init__(self) -> None:
@@ -1184,26 +1091,73 @@ def test_agent_loop_call_args_are_schema_only() -> None:
         def complete(self, system: str, user: str) -> str:
             self.turns += 1
             if self.turns == 1:
-                return 'CALL lookup_order\n{"order_id":"ORD-77819"}'
-            return "DONE Order ORD-77819: Blue Jacket."
+                return 'CALL fetch_record\n{"record_id":"REC-77819"}'
+            return "DONE Record REC-77819: widget."
 
     tools = [
         {
-            "id": "lookup_order",
+            "id": "fetch_record",
             "input_schema": {
                 "type": "object",
-                "required": ["order_id"],
-                "properties": {"order_id": {"type": "string"}},
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
             },
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
         }
     ]
     graph = build_agent_loop(tools, Invoker(), Llm())
     output = graph.invoke(
-        {"result": "", "goal": {"utterance": "jacket damaged"}, "notes": []}
+        {"result": "", "goal": {"utterance": "need help"}, "notes": []}
     )
-    assert seen == [{"order_id": "ORD-77819"}]
-    assert "ORD-77819" in output["result"]
+    assert seen == [{"record_id": "REC-77819"}]
+    assert "REC-77819" in output["result"]
+
+
+def test_agent_loop_calls_fetch_with_llm_json_after_customer_note() -> None:
+    seen: list[dict] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            seen.append(payload)
+            return {"text": "Record REC-77819: widget $149."}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if "Record REC-77819" in user:
+                return "DONE Record REC-77819: widget $149."
+            if "customer: REC-77819" in user:
+                return 'CALL fetch_record\n{"record_id":"REC-77819"}'
+            return "CALL fetch_record"
+
+    tools = [
+        {
+            "id": "fetch_record",
+            "input_schema": {
+                "type": "object",
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "need help"},
+            "notes": [
+                "Please provide a record id.",
+                "customer: REC-77819",
+            ],
+            "_resume_loop_step": 1,
+        }
+    )
+    assert seen == [{"record_id": "REC-77819"}]
+    assert "REC-77819" in output["result"]
 
 
 def test_agent_loop_ask_raises_customer_ask_waiting() -> None:
@@ -1213,19 +1167,19 @@ def test_agent_loop_ask_raises_customer_ask_waiting() -> None:
 
     class Llm:
         def complete(self, system: str, user: str) -> str:
-            return "ASK Please provide an order id, customer id, or email."
+            return "ASK Please provide a record id."
 
     tools = [
         {
-            "id": "lookup_order",
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+            "id": "fetch_record",
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
         }
     ]
     graph = build_agent_loop(tools, Invoker(), Llm())
     try:
-        graph.invoke({"result": "", "goal": {"utterance": "jacket damaged"}, "notes": []})
+        graph.invoke({"result": "", "goal": {"utterance": "need help"}, "notes": []})
     except CustomerAskWaiting as exc:
-        assert "order id" in exc.message
+        assert "record id" in exc.message
         assert exc.state.get("result")
         return
     raise AssertionError("expected CustomerAskWaiting")
@@ -1238,40 +1192,166 @@ def test_agent_loop_uses_llm_call_after_customer_note() -> None:
     class Invoker:
         def call(self, invoke: dict, payload: dict) -> dict:
             seen.append(payload)
-            return {"text": "Order ORD-55210: Headphones $89."}
+            return {"text": "Record REC-55210: item $89."}
 
     class Llm:
         def complete(self, system: str, user: str) -> str:
             llm_calls.append(user)
-            if "Order ORD-55210" in user:
-                return "DONE Order ORD-55210: Headphones $89."
-            if "customer: ORD-55210" in user:
-                return 'CALL lookup_order\n{"order_id":"ORD-55210"}'
-            return "ASK Please provide an order id, customer id, or email."
+            if "Record REC-55210" in user:
+                return "DONE Record REC-55210: item $89."
+            if "customer: REC-55210" in user:
+                return 'CALL fetch_record\n{"record_id":"REC-55210"}'
+            return "ASK Please provide a record id."
 
     tools = [
         {
-            "id": "lookup_order",
+            "id": "fetch_record",
             "input_schema": {
                 "type": "object",
-                "required": ["order_id"],
-                "properties": {"order_id": {"type": "string"}},
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
             },
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
         }
     ]
     graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
     output = graph.invoke(
         {
             "result": "",
-            "goal": {"utterance": "headphones missing"},
+            "goal": {"utterance": "missing item"},
             "notes": [
-                "Please provide an order id, customer id, or email.",
-                "customer: ORD-55210",
+                "Please provide a record id.",
+                "customer: REC-55210",
             ],
             "_resume_loop_step": 1,
         }
     )
-    assert seen == [{"order_id": "ORD-55210"}]
-    assert any("customer: ORD-55210" in call for call in llm_calls)
-    assert "ORD-55210" in output["result"]
+    assert seen == [{"record_id": "REC-55210"}]
+    assert any("customer: REC-55210" in call for call in llm_calls)
+    assert "REC-55210" in output["result"]
+
+
+def test_agent_loop_multi_tool_flow_completes() -> None:
+    """Scripted LLM walks fetch → billing → policy → handoff."""
+    seen: list[tuple[str, dict]] = []
+    stages: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            seen.append((invoke["url"], payload))
+            url = invoke["url"]
+            if url.endswith("/tools/fetch"):
+                return {
+                    "record_id": "REC-77819",
+                    "item_id": "item_blue_m",
+                    "price": 149.0,
+                    "text": "Record REC-77819: widget $149.",
+                }
+            if url.endswith("/tools/check_billing"):
+                return {"duplicate_found": False, "text": "No duplicate capture on REC-77819."}
+            if url.endswith("/tools/check_policy"):
+                return {
+                    "eligible": True,
+                    "automatic_limit": 75.0,
+                    "text": "Policy v7: eligible; $149 requires human review.",
+                }
+            if url.endswith("/handoff/open"):
+                return {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."}
+            raise AssertionError(url)
+
+    class Llm:
+        def complete(self, system: str, user: str) -> str:
+            if "Record REC-77819" not in user:
+                return 'CALL fetch_record\n{"record_id":"REC-77819"}'
+            if "No duplicate capture" not in user and "duplicate_found" not in user:
+                return 'CALL check_billing\n{"record_id":"REC-77819"}'
+            if "Policy v7" not in user:
+                return (
+                    'CALL check_policy\n'
+                    '{"record_id":"REC-77819","item_id":"item_blue_m","reason":"damaged"}'
+                )
+            if "Handoff opened" not in user:
+                return (
+                    'CALL open_handoff\n'
+                    '{"record_id":"REC-77819","reason":"above automatic limit"}'
+                )
+            return "DONE Handoff opened: hof-1."
+
+    tools = [
+        {
+            "id": "fetch_record",
+            "input_schema": {
+                "type": "object",
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
+            },
+            "output_schema": {
+                "type": "object",
+                "properties": {
+                    "record_id": {"type": "string"},
+                    "item_id": {"type": "string"},
+                    "price": {"type": "number"},
+                    "text": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
+        },
+        {
+            "id": "check_billing",
+            "input_schema": {
+                "type": "object",
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
+            },
+            "output_schema": {"type": "object"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/check_billing"},
+        },
+        {
+            "id": "check_policy",
+            "input_schema": {
+                "type": "object",
+                "required": ["record_id"],
+                "properties": {
+                    "record_id": {"type": "string"},
+                    "item_id": {"type": "string"},
+                    "reason": {"type": "string"},
+                },
+            },
+            "output_schema": {"type": "object"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/check_policy"},
+        },
+        {
+            "id": "open_handoff",
+            "output_schema": {
+                "type": "object",
+                "properties": {"text": {"type": "string"}, "handoff_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/open"},
+        },
+    ]
+
+    def on_stage(step: int, stage_id: str, state: dict) -> None:
+        stages.append(stage_id)
+
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=12, on_stage=on_stage)
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "damaged widget, charged twice, full refund"},
+            "notes": [
+                "Please provide a record id.",
+                "customer: REC-77819",
+            ],
+            "_resume_loop_step": 1,
+        }
+    )
+    assert [url for url, _ in seen] == [
+        "http://agent-mocks:3010/tools/fetch",
+        "http://agent-mocks:3010/tools/check_billing",
+        "http://agent-mocks:3010/tools/check_policy",
+        "http://agent-mocks:3010/handoff/open",
+    ]
+    assert output["result"] == "Handoff opened: hof-1."
+    assert stages[-1] == "respond"
+    assert "Handoff opened: hof-1." in output["notes"]
+    assert any("Policy v7" in note for note in output["notes"])

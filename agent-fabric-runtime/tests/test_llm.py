@@ -36,47 +36,17 @@ def test_seed_stub_calls_then_dones() -> None:
     ) == "DONE memo text"
 
 
-def test_seed_stub_asks_then_calls_lookup(monkeypatch) -> None:
+def test_seed_stub_calls_first_tool_then_dones() -> None:
     llm = SeedStubLlm()
     system = (
         "You are an agent with domain tools. Reply with exactly one of:\n"
-        "Tools: escalate_to_human, lookup_order, lookup_order_by_customer, lookup_order_by_email"
+        "Tools: fetch_record, check_policy"
     )
-    asked = llm.complete(system, "goal: {'utterance': 'jacket damaged'}")
-    assert asked.startswith("ASK ")
-    called = llm.complete(
+    assert llm.complete(system, "goal: {'utterance': 'need help'}") == "CALL fetch_record"
+    assert llm.complete(
         system,
-        "goal: {'utterance': 'jacket damaged'}\nprior stage outputs:\n- Please provide an order id\n- customer: ORD-77819",
-    )
-    assert called.startswith("CALL lookup_order")
-    assert "ORD-77819" in called
-
-
-def test_seed_stub_calls_domain_apis_after_lookup() -> None:
-    llm = SeedStubLlm()
-    system = (
-        "You are an agent with domain tools.\n"
-        "Tools: lookup_order, investigate_duplicate_charge, check_return_policy, escalate_to_human"
-    )
-    after_lookup = (
-        "goal: {'utterance': 'charged twice, full refund'}\n"
-        "prior stage outputs:\n"
-        "- Order ORD-77819: Blue Jacket $149."
-    )
-    billing = llm.complete(system, after_lookup)
-    assert billing.startswith("CALL investigate_duplicate_charge")
-    assert "ORD-77819" in billing
-
-    after_billing = after_lookup + "\n- No duplicate capture on ORD-77819."
-    policy = llm.complete(system, after_billing)
-    assert policy.startswith("CALL check_return_policy")
-
-    after_policy = (
-        after_billing
-        + "\n- Policy returns-v7: eligible. Auto limit $75; $149 requires human escalation."
-    )
-    escalate = llm.complete(system, after_policy)
-    assert escalate.startswith("CALL escalate_to_human")
+        "goal: {'utterance': 'need help'}\nprior stage outputs:\n- Record REC-77819: widget.",
+    ) == "DONE Record REC-77819: widget."
 
 
 def test_provider_llm_binds_structured_output() -> None:
@@ -118,17 +88,17 @@ def test_provider_llm_binds_structured_output() -> None:
     assert seen[1][0] == "invoke"
 
 
-def test_seed_stub_prefetch_overdraft_answer() -> None:
+def test_seed_stub_prefetch_synthesis_echoes_chunks() -> None:
     llm = SeedStubLlm()
     user = (
-        "goal: {'utterance': 'What is the overdraft fee on our Everyday account?'}\n"
+        "goal: {'utterance': 'Summarize the fee schedule.'}\n"
         "packed chunks:\n"
-        "- [fee-schedule:fs-everyday-od-1] Everyday Account overdraft fee: $10 per day\n"
-        "- [product-disclosure:pd-everyday-od-1] Fees apply only with arranged overdraft"
+        "- [fee-schedule:fs-1] Daily fee is $10 per day\n"
+        "- [product-disclosure:pd-1] Fees apply with approved facility"
     )
     text = llm.complete("Pattern 0. Cite chunk ids.", user)
-    assert "$10" in text
-    assert "[fee-schedule:fs-everyday-od-1]" in text
+    assert "$10 per day" in text
+    assert "[fee-schedule:fs-1]" in text
 
 
 def test_seed_stub_returns_schema_json() -> None:

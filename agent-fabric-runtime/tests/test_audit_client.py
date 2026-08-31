@@ -10,7 +10,7 @@ def test_hydrate_and_terminal_envelope() -> None:
     snap = hydrate_snapshot(
         "corr-1",
         "sess-1",
-        "shopassist_case",
+        "pattern1_case",
         "2026.08.1",
         [
             {
@@ -19,16 +19,16 @@ def test_hydrate_and_terminal_envelope() -> None:
                 "invoke": {"url": "http://x/fee"},
             }
         ],
-        manifest_id="shopassist_case_v1",
+        manifest_id="pattern1_case_v1",
         manifest_version="2026.08.1",
-        prompt_id="shopassist_case",
+        prompt_id="pattern1_case",
     )
     assert snap["producer"] == "ar"
     assert snap["event_type"] == "hydrate.snapshot"
     assert snap["payload"]["capabilities"][0]["capability_id"] == "account_fee_lookup"
-    assert snap["payload"]["prompt_id"] == "shopassist_case"
+    assert snap["payload"]["prompt_id"] == "pattern1_case"
     assert snap["payload"]["retrieval"] is None
-    term = run_terminal("corr-1", "sess-1", "completed", "shopassist_case", "2026.08.1")
+    term = run_terminal("corr-1", "sess-1", "completed", "pattern1_case", "2026.08.1")
     assert term["event_type"] == "run.terminal"
     stage = stage_completed("corr-1", "sess-1", "account_fee_lookup", "none", "completed", 3, {}, {"ok": True})
     assert stage["event_type"] == "stage.completed"

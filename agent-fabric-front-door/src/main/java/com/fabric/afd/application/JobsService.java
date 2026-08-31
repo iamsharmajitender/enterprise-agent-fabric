@@ -140,7 +140,9 @@ public class JobsService {
       TraceIds.put("session_id", live.sessionId());
       TraceIds.put("route_id", live.routeId());
     }
-    Map<String, Object> body = runtime.status(correlationId);
+    Map<String, Object> body =
+        runtime.status(
+            correlationId, live == null ? null : live.activationTarget());
     if (live != null && "completed".equals(String.valueOf(body.get("status")))) {
       String journeyId =
           live.routeId() == null ? "job.turn" : "job." + live.routeId();

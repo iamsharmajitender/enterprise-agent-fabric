@@ -8,13 +8,13 @@ def test_hydrate_fetches_manifest_and_each_capability() -> None:
     catalogue = FakeCatalogue()
     registry = FakeRegistry()
     tools = hydrate(START_BODY, catalogue, registry)
-    assert catalogue.route_calls == [("shopassist_case", "2026.08.1")]
-    assert registry.manifest_calls == [("shopassist_case", "2026.08.1")]
+    assert catalogue.route_calls == [("pattern1_case", "2026.08.1")]
+    assert registry.manifest_calls == [("pattern1_case", "2026.08.1")]
     assert registry.capability_calls == [
-        ("lookup_order", "1.0.0"),
-        ("escalate_to_human", "1.0.0"),
+        ("fetch_record", "1.0.0"),
+        ("open_handoff", "1.0.0"),
     ]
-    assert [tool["id"] for tool in tools] == ["lookup_order", "escalate_to_human"]
+    assert [tool["id"] for tool in tools] == ["fetch_record", "open_handoff"]
     assert tools[0]["llm_role"] == "none"
     assert catalogue.decide_calls == []
     assert catalogue.workflow_calls == []

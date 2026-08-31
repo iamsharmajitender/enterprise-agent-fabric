@@ -36,7 +36,10 @@ ON CONFLICT (id) DO NOTHING;
 \c afd
 TRUNCATE frontdoor.freeze, frontdoor.opaque_ids CASCADE;
 
-\c ar
+\c ar_shared
+TRUNCATE runtime.runs CASCADE;
+
+\c ar_custom
 TRUNCATE runtime.runs CASCADE;
 
 \c audit

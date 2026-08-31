@@ -345,7 +345,7 @@ Control Plane browse: same URLs, `X-Workload: acp`. Swap `afd` → `ar` on decid
 | `adapters.in.http` | Controllers, workload filter, stub claims |
 | `adapters.out.jdbc` | Flyway-backed stores |
 
-Tests seed **in-memory** twins of the Flyway demo. Keep them aligned; `CataloguePinLintTest` and `SeedCatalogueSqlTest` exist so they cannot drift in silence.
+Tests seed **in-memory** twins of the catalogue-seed route packs. Keep them aligned; `SeedCatalogueSqlTest` guards against Flyway accidentally re-seeding routes.
 
 ---
 

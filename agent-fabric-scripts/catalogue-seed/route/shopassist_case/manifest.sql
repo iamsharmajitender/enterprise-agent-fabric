@@ -6,7 +6,7 @@ INSERT INTO registry.manifests (
 ) VALUES
 (
   'shopassist_case', '2026.08.1', $$[
-    {"name":"lookup_order","capability_id":"lookup_order","capability_version":"1.0.0","pdp_action":"lookup_order","risk_tier":"low"},
+    {"name":"lookup_order_by_order_id","capability_id":"lookup_order_by_order_id","capability_version":"1.0.0","pdp_action":"lookup_order_by_order_id","risk_tier":"low"},
     {"name":"lookup_order_by_customer","capability_id":"lookup_order_by_customer","capability_version":"1.0.0","pdp_action":"lookup_order_by_customer","risk_tier":"low"},
     {"name":"lookup_order_by_email","capability_id":"lookup_order_by_email","capability_version":"1.0.0","pdp_action":"lookup_order_by_email","risk_tier":"low"},
     {"name":"investigate_duplicate_charge","capability_id":"investigate_duplicate_charge","capability_version":"1.0.0","pdp_action":"investigate_duplicate_charge","risk_tier":"low"},
@@ -24,7 +24,7 @@ INSERT INTO dataplane.manifests (
 (
   'shopassist_case', '2026.08.1', 'ShopAssist front-line support: ASK for a locator, lookup order, billing/policy domain APIs, escalate',
   $$[
-    {"name":"lookup_order","capability_id":"lookup_order","capability_version":"1.0.0","pdp_action":"lookup_order","risk_tier":"low"},
+    {"name":"lookup_order_by_order_id","capability_id":"lookup_order_by_order_id","capability_version":"1.0.0","pdp_action":"lookup_order_by_order_id","risk_tier":"low"},
     {"name":"lookup_order_by_customer","capability_id":"lookup_order_by_customer","capability_version":"1.0.0","pdp_action":"lookup_order_by_customer","risk_tier":"low"},
     {"name":"lookup_order_by_email","capability_id":"lookup_order_by_email","capability_version":"1.0.0","pdp_action":"lookup_order_by_email","risk_tier":"low"},
     {"name":"investigate_duplicate_charge","capability_id":"investigate_duplicate_charge","capability_version":"1.0.0","pdp_action":"investigate_duplicate_charge","risk_tier":"low"},

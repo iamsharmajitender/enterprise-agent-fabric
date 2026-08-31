@@ -2,7 +2,7 @@
 
 How to read [routes.md](routes.md) and [use-cases.md](use-cases.md). This is the **active seed** from [`route/shopassist_case/`](../../agent-fabric-scripts/catalogue-seed/route/shopassist_case/) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
 
-**32** `route_id`s. Payload files are [`chats.json`](../../agent-fabric-scripts/catalogue-seed/chats.json). Run demos with [`run-chat.sh`](../../agent-fabric-scripts/catalogue-seed/run-chat.sh).
+**32** `route_id`s. Payload files are [`chats.json`](../../agent-fabric-scratchpad/catalog/chats.json). Run demos at [http://localhost:3014/chat](http://localhost:3014/chat).
 
 ## How to read the matrix
 
@@ -18,7 +18,7 @@ Each row is one `route_id`. Columns are facts from seed + dummy payloads, plus a
 | retrieval | Omitted when there is no `dataplane.retrieval` row. Else `mode` + corpus ids in `scope`. |
 | memory | Omitted when there is no `dataplane.memory_profiles` row. Else the four flags (only `working` and `loop` are honored today). |
 | status | What Runtime actually does vs what the row names. Vocabulary below. |
-| demo | `run-chat.sh <id>` from [`catalogue-seed/`](../../agent-fabric-scripts/catalogue-seed/README.md) when a chat row exists. |
+| demo | [chat scratchpad](http://localhost:3014/chat) when a row exists in `chats.json`. |
 
 **Status vocabulary** (same words as [`../02-understand/status.md`](../02-understand/status.md)):
 
@@ -30,12 +30,11 @@ Each row is one `route_id`. Columns are facts from seed + dummy payloads, plus a
 
 ## How to run a row
 
-Fabric up, then `run-chat.sh <id>` from repo root. See [catalogue-seed/README.md](../../agent-fabric-scripts/catalogue-seed/README.md).
+Fabric up, then open [http://localhost:3014/chat](http://localhost:3014/chat). See [catalogue-seed/README.md](../../agent-fabric-scripts/catalogue-seed/README.md).
 
 ```bash
 ./agent-fabric-scripts/stack/start-app.sh
-./agent-fabric-scripts/catalogue-seed/run-chat.sh --list
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
+./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
 ```
 
 Tool-only HTTP paths can finish against agent-fabric-mocks. LLM stages still need Ollama.
@@ -46,5 +45,5 @@ Rewrite these three files when **seed** or **dummy payloads/scripts** change. No
 
 1. Active seed `INSERT`s in [`route/shopassist_case/`](../../agent-fabric-scripts/catalogue-seed/route/shopassist_case/) (`dataplane.routes`, `dataplane.prompt_packs`, `dataplane.memory_profiles`, ACR capabilities/manifests).
 2. Payload keys, channels, and **route_id spelling** from `jobs.json` / `chats.json` (source of demo wrappers).
-3. Demo ids from `chats.json` and `run-chat.sh`.
+3. Demo ids from `chats.json` and the [chat scratchpad](http://localhost:3014/chat).
 4. Status against Runtime ([status](../02-understand/status.md), [D13 verification](../tasks/dataflow-plan.md#verification-checklist-d13)) — not against dummy `completed` alone.

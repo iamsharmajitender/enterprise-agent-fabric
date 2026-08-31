@@ -94,13 +94,13 @@ public class AssistantService {
     }
     if (blank(hintId) && blank(optionId)) {
       FrozenRoute live = freeze.get(sid);
-      if (live != null && live.correlationId() != null && isWaiting(live.correlationId())) {
+      if (live != null && live.correlationId() != null && isWaiting(live)) {
         return resume(live, message);
       }
       Optional<FrozenRoute> open = runtime.openRun(sid);
       if (open.isPresent()
           && open.get().correlationId() != null
-          && isWaiting(open.get().correlationId())) {
+          && isWaiting(open.get())) {
         freeze.save(open.get());
         return resume(open.get(), message);
       }
@@ -180,7 +180,7 @@ public class AssistantService {
     TraceIds.put("session_id", sessionId);
     TraceIds.put("correlation_id", live.correlationId());
     TraceIds.put("route_id", live.routeId());
-    Map<String, Object> status = runtime.status(live.correlationId());
+    Map<String, Object> status = runtime.status(live.correlationId(), live.activationTarget());
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", sessionId);
     body.put("status", status.get("status"));
@@ -217,7 +217,7 @@ public class AssistantService {
     TraceIds.put("session_id", live.sessionId());
     TraceIds.put("correlation_id", live.correlationId());
     TraceIds.put("route_id", live.routeId());
-    runtime.resume(live.correlationId(), message);
+    runtime.resume(live.correlationId(), message, live.activationTarget());
     freeze.save(live);
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", live.sessionId());
@@ -225,8 +225,11 @@ public class AssistantService {
     return body;
   }
 
-  private boolean isWaiting(String correlationId) {
-    return "waiting".equals(String.valueOf(runtime.status(correlationId).get("status")));
+  private boolean isWaiting(FrozenRoute live) {
+    return "waiting"
+        .equals(
+            String.valueOf(
+                runtime.status(live.correlationId(), live.activationTarget()).get("status")));
   }
 
   private Map<String, Object> clarify(String sid, DecideOutcome outcome) {

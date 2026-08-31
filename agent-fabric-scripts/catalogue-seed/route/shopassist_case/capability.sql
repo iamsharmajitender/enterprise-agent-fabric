@@ -1,16 +1,16 @@
 -- shopassist_case — ACR capabilities (domain tools).
--- Apply: ./agent-fabric-scripts/catalogue-seed/add-seed-data.sh shopassist_case
+-- Apply: ./add.sh or ../../add-seed-data.sh shopassist_case
 
 \c acr
 INSERT INTO registry.capabilities (
   id, version, kind, description, input_schema, output_schema, invoke, snippet, owner, status
 ) VALUES
 (
-  'lookup_order',
+  'lookup_order_by_order_id',
   '1.0.0',
   'domain',
-  'Look up order status, item, and price.',
-  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string"},"customer_id":{"type":"string"}}}'::jsonb,
+  'Look up order details by order id (ORD-*). Use when the customer provides an order number.',
+  '{"type":"object","required":["order_id"],"properties":{"order_id":{"type":"string","description":"ShopAssist order id (ORD-*)"}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"},"order_id":{"type":"string"},"item_id":{"type":"string"},"price":{"type":"number"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/shopassist/lookup_order","auth":"domain-oauth"}'::jsonb,
   NULL,

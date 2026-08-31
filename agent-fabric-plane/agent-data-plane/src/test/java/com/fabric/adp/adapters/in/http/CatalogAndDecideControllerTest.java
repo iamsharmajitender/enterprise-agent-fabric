@@ -61,7 +61,7 @@ class CatalogAndDecideControllerTest {
         .andExpect(jsonPath("$.active").value(true))
         .andExpect(jsonPath("$.model_profile").value("reasoning-standard"))
         .andExpect(jsonPath("$.manifest.manifest_id").value("shopassist_case"))
-        .andExpect(jsonPath("$.manifest.tools[0].name").value("lookup_order"))
+        .andExpect(jsonPath("$.manifest.tools[0].name").value("lookup_order_by_order_id"))
         .andExpect(jsonPath("$.prompt_id").value("shopassist_case"))
         .andExpect(jsonPath("$.autonomy_mode").value(1));
   }

@@ -150,10 +150,6 @@ mvn -q -B test
 
 Covers jobs start, entitle miss (403, no Runtime start), duplicate idempotency key, GET status, FR-5 forbidden keys on assistant JSON, chat turn / continuation.
 
-Live proof (compose up):
-
-```bash
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
-```
+Live proof (compose up): open [http://localhost:3014/chat](http://localhost:3014/chat) and run `shopassist_case_ask`.
 
 Chats mint a new `session_id`. `shopassist_case_ask` needs claim `support:case`.

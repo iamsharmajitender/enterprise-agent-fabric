@@ -154,7 +154,7 @@ class AssistantControllerTest {
     }
 
     @Override
-    public Map<String, Object> status(String correlationId) {
+    public Map<String, Object> status(String correlationId, String activationTarget) {
       Map<String, Object> body = new LinkedHashMap<>();
       body.put("correlation_id", correlationId);
       body.put("status", "completed");
@@ -163,7 +163,7 @@ class AssistantControllerTest {
     }
 
     @Override
-    public void resume(String correlationId, String message) {}
+    public void resume(String correlationId, String message, String activationTarget) {}
 
     @Override
     public Optional<FrozenRoute> openRun(String sessionId) {

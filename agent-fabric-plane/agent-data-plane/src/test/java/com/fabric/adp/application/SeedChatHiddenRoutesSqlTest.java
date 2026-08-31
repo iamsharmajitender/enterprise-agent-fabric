@@ -9,8 +9,8 @@ import org.springframework.util.StreamUtils;
 class SeedChatHiddenRoutesSqlTest {
 
   @Test
-  void flywayBaselineIncludesShopassistChatRoute() throws Exception {
-    String seed = read("/db/migration/V1__dataplane.sql");
+  void catalogueSeedIncludesShopassistChatRoute() throws Exception {
+    String seed = SeedCatalogueSqlTest.readRoutePackForTest("shopassist_case", "route.sql");
     assertThat(seed).contains("'shopassist_case'");
     assertThat(seed).contains("TRUE");
     assertThat(seed).contains("support:case");
@@ -23,6 +23,7 @@ class SeedChatHiddenRoutesSqlTest {
     String seed = read("/db/migration/V1__dataplane.sql");
     assertThat(seed).contains("CREATE TABLE dataplane.workflows");
     assertThat(seed).contains("CREATE TABLE dataplane.corpora");
+    assertThat(seed).doesNotContain("INSERT INTO dataplane.routes");
   }
 
   private static String read(String path) throws Exception {

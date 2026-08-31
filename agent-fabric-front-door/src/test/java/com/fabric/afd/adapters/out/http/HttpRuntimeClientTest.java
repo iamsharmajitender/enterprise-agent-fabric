@@ -30,15 +30,19 @@ class HttpRuntimeClientTest {
 
   @BeforeEach
   void setUp() {
-    RestClient.Builder builder = RestClient.builder().baseUrl("http://ar");
+    RestClient.Builder builder = RestClient.builder();
     server = MockRestServiceServer.bindTo(builder).build();
-    client = new HttpRuntimeClient(builder.build());
+    client =
+        new HttpRuntimeClient(
+            builder,
+            "http://agent-runtime-shared:3008",
+            "http://agent-runtime-shared:3008,http://agent-runtime-custom:3008");
   }
 
   @Test
-  void startPostsNewRunAndReadsCorrelationId() {
+  void startUsesActivationTargetBaseUrl() {
     server
-        .expect(requestTo("http://ar/v1/runs"))
+        .expect(requestTo("http://agent-runtime-custom:3008/v1/runs"))
         .andExpect(method(HttpMethod.POST))
         .andRespond(
             MockRestResponseCreators.withStatus(HttpStatus.ACCEPTED)
@@ -51,16 +55,16 @@ class HttpRuntimeClientTest {
                 "job-fee-explain:v1",
                 SessionIds.mintJobOrSub("job-fee-explain:v1"),
                 new CatalogRoute(
-                    "fee_explain",
+                    "shopassist_case",
                     "2026.08.1",
-                    "http://agent-runtime:3008/v1/runs",
-                    "fee-explain-v1",
-                    "fee_explain_v1",
+                    "http://agent-runtime-custom:3008/v1/runs",
+                    "agent-shopassist-case",
+                    "shopassist_case",
                     "2026.08.1",
-                    "accounts_read",
+                    "support:case",
                     "stub",
                     12),
-                Map.of("account_id", "acc-42")));
+                Map.of("utterance", "ORD-77819")));
 
     assertThat(id).isEqualTo("corr-9f3c");
     server.verify();
@@ -69,7 +73,7 @@ class HttpRuntimeClientTest {
   @Test
   void statusReturnsSlimBody() {
     server
-        .expect(requestTo("http://ar/v1/runs/corr-9f3c"))
+        .expect(requestTo("http://agent-runtime-shared:3008/v1/runs/corr-9f3c"))
         .andExpect(method(HttpMethod.GET))
         .andRespond(
             withSuccess(
@@ -78,7 +82,8 @@ class HttpRuntimeClientTest {
                 """,
                 MediaType.APPLICATION_JSON));
 
-    Map<String, Object> body = client.status("corr-9f3c");
+    Map<String, Object> body =
+        client.status("corr-9f3c", "http://agent-runtime-shared:3008/v1/runs");
     assertThat(body.get("status")).isEqualTo("completed");
     server.verify();
   }
@@ -86,45 +91,60 @@ class HttpRuntimeClientTest {
   @Test
   void missingRunIsNotFound() {
     server
-        .expect(requestTo("http://ar/v1/runs/missing"))
+        .expect(requestTo("http://agent-runtime-shared:3008/v1/runs/missing"))
         .andExpect(method(HttpMethod.GET))
         .andRespond(withResourceNotFound());
 
-    assertThatThrownBy(() -> client.status("missing")).isInstanceOf(NotFoundException.class);
+    assertThatThrownBy(
+            () -> client.status("missing", "http://agent-runtime-shared:3008/v1/runs"))
+        .isInstanceOf(NotFoundException.class);
     server.verify();
   }
 
   @Test
   void resumePostsTurnOnExistingRun() {
     server
-        .expect(requestTo("http://ar/v1/runs/corr-9f3c/turns"))
+        .expect(requestTo("http://agent-runtime-custom:3008/v1/runs/corr-9f3c/turns"))
         .andExpect(method(HttpMethod.POST))
         .andRespond(MockRestResponseCreators.withSuccess());
 
-    client.resume("corr-9f3c", "yes");
+    client.resume("corr-9f3c", "yes", "http://agent-runtime-custom:3008/v1/runs");
     server.verify();
   }
 
   @Test
   void openRunReadsPinBySessionId() {
     server
-        .expect(requestTo("http://ar/v1/runs?session_id=chat-11111111-1111-4111-8111-111111111111"))
+        .expect(
+            requestTo(
+                "http://agent-runtime-shared:3008/v1/runs?session_id=chat-11111111-1111-4111-8111-111111111111"))
+        .andExpect(method(HttpMethod.GET))
+        .andRespond(withSuccess("{\"runs\":[]}", MediaType.APPLICATION_JSON));
+    server
+        .expect(
+            requestTo(
+                "http://agent-runtime-custom:3008/v1/runs?session_id=chat-11111111-1111-4111-8111-111111111111"))
         .andExpect(method(HttpMethod.GET))
         .andRespond(
             withSuccess(
                 """
-                {"correlation_id":"corr-9f3c","session_id":"chat-11111111-1111-4111-8111-111111111111","route_id":"fee_explain","route_version":"2026.08.1"}
+                {"correlation_id":"corr-9f3c","session_id":"chat-11111111-1111-4111-8111-111111111111","route_id":"shopassist_case","route_version":"2026.08.1","activation_target":"http://agent-runtime-custom:3008/v1/runs"}
                 """,
                 MediaType.APPLICATION_JSON));
 
-    assertThat(client.openRun("chat-11111111-1111-4111-8111-111111111111").orElseThrow().correlationId()).isEqualTo("corr-9f3c");
+    assertThat(
+            client
+                .openRun("chat-11111111-1111-4111-8111-111111111111")
+                .orElseThrow()
+                .correlationId())
+        .isEqualTo("corr-9f3c");
     server.verify();
   }
 
   @Test
   void startHydrateFailedIsUnprocessable() {
     server
-        .expect(requestTo("http://ar/v1/runs"))
+        .expect(requestTo("http://agent-runtime-shared:3008/v1/runs"))
         .andExpect(method(HttpMethod.POST))
         .andRespond(
             MockRestResponseCreators.withStatus(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -143,7 +163,7 @@ class HttpRuntimeClientTest {
   @Test
   void startServerErrorIsUnavailable() {
     server
-        .expect(requestTo("http://ar/v1/runs"))
+        .expect(requestTo("http://agent-runtime-shared:3008/v1/runs"))
         .andExpect(method(HttpMethod.POST))
         .andRespond(MockRestResponseCreators.withStatus(HttpStatus.SERVICE_UNAVAILABLE));
 
@@ -158,7 +178,7 @@ class HttpRuntimeClientTest {
         new CatalogRoute(
             "fee_explain",
             "2026.08.1",
-            "http://agent-runtime:3008/v1/runs",
+            "http://agent-runtime-shared:3008/v1/runs",
             "fee-explain-v1",
             "fee_explain_v1",
             "2026.08.1",

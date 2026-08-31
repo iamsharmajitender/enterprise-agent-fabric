@@ -15,8 +15,11 @@ Answers grounded overdraft fee questions from `fee-schedule` and `product-disclo
 Mock corpora live under [`agent-fabric-mocks/tools/data/corpora/`](../../../../agent-fabric-mocks/tools/data/corpora/).
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/add-seed-data.sh --clean overdraft_fee_qa
-WAIT=1 FABRIC_LLM_STUB=1 ./agent-fabric-scripts/catalogue-seed/run-chat.sh overdraft_fee_qa
+./add.sh
 ```
+
+Then open [http://localhost:3014/chat](http://localhost:3014/chat) and run `overdraft_fee_qa` (set `FABRIC_LLM_STUB=1` on Runtime for stub LLM).
+
+Remove: `./remove.sh`
 
 Example utterance: *What is the overdraft fee on our Everyday account?*

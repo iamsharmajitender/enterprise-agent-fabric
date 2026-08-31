@@ -200,7 +200,7 @@ class JobsServiceTest {
     }
 
     @Override
-    public Map<String, Object> status(String correlationId) {
+    public Map<String, Object> status(String correlationId, String activationTarget) {
       statusIds.add(correlationId);
       if (missing) {
         throw new NotFoundException(correlationId);
@@ -213,7 +213,7 @@ class JobsServiceTest {
     }
 
     @Override
-    public void resume(String correlationId, String message) {
+    public void resume(String correlationId, String message, String activationTarget) {
       throw new UnsupportedOperationException("jobs do not resume");
     }
 

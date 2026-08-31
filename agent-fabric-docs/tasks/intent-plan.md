@@ -108,8 +108,7 @@ Stack up (`./agent-fabric-scripts/stack/start-app.sh`), then:
 
 ```bash
 # Pattern 1 shopassist chat (ASK → lookup → policy/billing)
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
+# Open http://localhost:3014/chat and run shopassist_case_ask twice (locator turn, then resume)
 ```
 
 `/hr` is covered by the unit test above (dummy `agent-chat` uses `hello`, which clarifies). Chat JSON must still omit `router_layer`.

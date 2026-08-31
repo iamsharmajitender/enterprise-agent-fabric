@@ -249,7 +249,7 @@ class AssistantServiceTest {
     }
 
     @Override
-    public Map<String, Object> status(String correlationId) {
+    public Map<String, Object> status(String correlationId, String activationTarget) {
       statusIds.add(correlationId);
       Map<String, Object> body = new LinkedHashMap<>();
       body.put("correlation_id", correlationId);
@@ -259,7 +259,7 @@ class AssistantServiceTest {
     }
 
     @Override
-    public void resume(String correlationId, String message) {
+    public void resume(String correlationId, String message, String activationTarget) {
       resumes.add(correlationId + ":" + message);
     }
 

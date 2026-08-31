@@ -31,7 +31,7 @@ def test_persist_stage_writes_working_and_checkpoint() -> None:
         correlation_id="corr-1",
         idempotency_key="k",
         session_id="sess-1",
-        route_id="shopassist_case",
+        route_id="pattern1_case",
         route_version="2026.08.1",
         activation_target=None,
         agent_client_id=None,

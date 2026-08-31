@@ -55,8 +55,28 @@ public class FrontDoorConfig {
   }
 
   @Bean
-  RuntimePort runtimePort(RestClient.Builder builder, @Value("${fabric.runtime-url}") String baseUrl) {
-    return new HttpRuntimeClient(workloadClient(builder, baseUrl, Duration.ofSeconds(310)));
+  RuntimePort runtimePort(
+      RestClient.Builder builder,
+      @Value("${fabric.runtime-url}") String baseUrl,
+      @Value("${fabric.runtime-urls:}") String runtimeUrls) {
+    RestClient.Builder template =
+        builder
+            .requestInterceptor(new RequestIdInterceptor())
+            .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer fabric-internal")
+            .defaultHeader("X-Workload", "afd")
+            .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+    HttpClient jdk =
+        HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
+    JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(jdk);
+    factory.setReadTimeout(Duration.ofSeconds(310));
+    template.requestFactory(factory);
+    return new HttpRuntimeClient(
+        template,
+        baseUrl,
+        runtimeUrls.isBlank() ? baseUrl : runtimeUrls);
   }
 
   @Bean

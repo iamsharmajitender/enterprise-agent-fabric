@@ -1,5 +1,5 @@
 {
-  "id": "lookup_order",
+  "id": "lookup_order_by_order_id",
   "method": "POST",
   "path": "/shopassist/lookup_order",
   "status": 200

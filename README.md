@@ -81,11 +81,7 @@ Reload catalogue seed (deletes, then inserts):
 ./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
 ```
 
-**Demo path (Task 24):**
-
-```bash
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
-```
+**Demo path (Task 24):** open [http://localhost:3014/chat](http://localhost:3014/chat) and run `shopassist_case_ask`.
 
 Both hit Front Door **:3005** (`/v1/jobs*` and `/v1/assistant/*`). Stub IdP: `Bearer stub` + `X-Stub-Claims`. Decide Layer ③ stays **off**. Runtime LLM may use local Ollama or `FABRIC_LLM_STUB=1`. Kafka is not used (HTTP poll).
 
@@ -102,7 +98,7 @@ Both hit Front Door **:3005** (`/v1/jobs*` and `/v1/assistant/*`). Stub IdP: `Be
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Editing an already-applied local seed migration (common while iterating on `V1__*.sql`) is fine: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable history; use `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` to reload catalogue rows without touching Flyway.
+`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Flyway applies **schema only**; load routes with `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh`. Editing an already-applied migration is fine locally: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable schema history.
 
 ### Check it is up
 
@@ -120,21 +116,9 @@ Grafana LGTM can take a minute. Wait until logs print `The OpenTelemetry collect
 
 ### Dummy requests
 
-Chat demo routes live under [`agent-fabric-scripts/catalogue-seed/`](agent-fabric-scripts/catalogue-seed/). Catalogue and flags: [agent-fabric-scripts/catalogue-seed/README.md](agent-fabric-scripts/catalogue-seed/README.md).
+Chat demo routes live under [`agent-fabric-scripts/catalogue-seed/`](agent-fabric-scripts/catalogue-seed/). Demo catalog: [`agent-fabric-scratchpad/catalog/chats.json`](agent-fabric-scratchpad/catalog/chats.json).
 
-```bash
-./agent-fabric-scripts/catalogue-seed/run-chat.sh --list
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
-./agent-fabric-scripts/catalogue-seed/run-chat.sh --all
-```
-
-`--all` posts every row in `chats.json`. `--mode 1` is the autonomous band. Both **only POST** unless you poll:
-
-```bash
-WAIT=1 ./agent-fabric-scripts/catalogue-seed/run-chat.sh --all
-```
-
-One chat (polls until done): `./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask`.
+Open [http://localhost:3014/chat](http://localhost:3014/chat) (included in Compose). Pick a demo from the catalog dropdown and send.
 
 ## Evals
 
@@ -271,7 +255,7 @@ Box READMEs: [Front Door](agent-fabric-front-door/README.md#business-events), [D
 
 Wait until LGTM logs print `The OpenTelemetry collector and the Grafana LGTM stack are up and running.` Generate a `shopassist_case` turn, then confirm signals in Grafana ([http://localhost:3000](http://localhost:3000), `admin` / `admin`):
 
-1. `./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask`
+1. Open [http://localhost:3014/chat](http://localhost:3014/chat) and run `shopassist_case_ask`
 2. Explore → **Loki**: `{service_name=~"agent-fabric-front-door|agent-fabric-plane/agent-data-plane|agent-fabric-runtime"} | session_id="sess-…"` (field filter — the line body is only the event name, so `|= "sess-…"` is empty). Look for the [business events](#business-events) sequence (`chat.turn.received` / `job.entitlement.accepted` → `chat.intent.*` / `job.intent.*` → `chat.run.started` / `job.run.started` → `run.hydrate.*` / `run.graph.*` / `run.stage.*`)
 3. Explore → **Tempo**: `{.service.name="agent-fabric-front-door"}` — children include `agent-fabric-plane/agent-data-plane` and `agent-fabric-runtime` (Registry on hydrate; `agent-mocks` and `llm.complete` / `tool.invoke` under `graph.invoke`). Search by the id you hold: `{.session_id="sess-…"}`, `{.correlation_id="corr-…"}`, or `{.request_id="req-…"}`.
 4. Explore → **Prometheus**: `fabric_journey_outcome_total` or HTTP server duration for `agent-fabric-front-door`

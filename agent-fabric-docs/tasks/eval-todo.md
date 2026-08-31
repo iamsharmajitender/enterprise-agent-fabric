@@ -126,7 +126,7 @@ A misroute in production becomes a new case. CI replays the whole active eligibl
 
 ## Task E5: Jobs entitle golden set (thinner suite)
 
-**Description:** Jobs skip classify. Label named `route_id` + claims only. Positive rows from [chats.json](../../agent-fabric-scripts/catalogue-seed/chats.json); negatives omit the required claim.
+**Description:** Jobs skip classify. Label named `route_id` + claims only. Positive rows from [chats.json](../../agent-fabric-scratchpad/catalog/chats.json); negatives omit the required claim.
 
 **Acceptance criteria:**
 - [x] `agent-fabric-evals/intent-router-evals/jobs-entitle/<version>/cases/*.json` covers every dummy-request `route_id` with its seed claims → `route`
@@ -215,7 +215,7 @@ For each active route: pointers resolve, manifest refs are published, retrieval 
 
 ## Task E8: Dummy `--all` fail-closed smoke
 
-**Description:** Turn `run-chat.sh --all` into the Compose half of slice 2: every dummy chat must complete (or fail controlled) at the pinned route version. Not the routing golden set.
+**Description:** Turn the chat scratchpad catalog into the Compose half of slice 2: every dummy chat must complete (or fail controlled) at the pinned route version. Not the routing golden set.
 
 **Acceptance criteria:**
 - [x] Documented command: `./agent-fabric-scripts/route-runs/run-job.sh --all` with `WAIT=1` (or equivalent) exits non-zero on hydrate/start/loop failure

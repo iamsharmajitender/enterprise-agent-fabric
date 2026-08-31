@@ -78,15 +78,15 @@ def test_successful_start_writes_hydrated_tools(client: TestClient, store) -> No
     pin = store.get(response.json()["correlation_id"])
     assert pin is not None
     assert pin.hydrated_tools
-    assert pin.hydrated_tools[0]["id"] == "lookup_order"
-    assert pin.hydrated_tools[0]["invoke"]["url"] == "http://agent-mocks:3010/shopassist/lookup_order"
+    assert pin.hydrated_tools[0]["id"] == "fetch_record"
+    assert pin.hydrated_tools[0]["invoke"]["url"] == "http://agent-mocks:3010/tools/fetch"
 
 
 def test_catalogue_get_uses_pinned_version_never_active(
     client: TestClient, catalogue: FakeCatalogue
 ) -> None:
     client.post("/v1/runs", headers=AFD, json=START_BODY)
-    assert catalogue.route_calls == [("shopassist_case", "2026.08.1")]
+    assert catalogue.route_calls == [("pattern1_case", "2026.08.1")]
     assert catalogue.decide_calls == []
 
 
@@ -188,7 +188,7 @@ def test_open_run_by_session_id(client: TestClient) -> None:
     body = response.json()
     assert body["correlation_id"] == correlation_id
     assert body["session_id"] == "sess-88"
-    assert body["route_id"] == "shopassist_case"
+    assert body["route_id"] == "pattern1_case"
     assert body["route_version"] == "2026.08.1"
 
 
@@ -284,8 +284,8 @@ def test_dynamic_graph_posts_goal_to_hydrated_tool(store, catalogue: FakeCatalog
     correlation_id = started.json()["correlation_id"]
     assert calls == [
         (
-            {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
-            {"order_id": "ORD-77819"},
+            {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
+            {"record_id": "REC-77819"},
         )
     ]
     status = client.get(f"/v1/runs/{correlation_id}", headers=AFD)
@@ -317,14 +317,13 @@ def test_working_session_saves_notes_on_the_run_pin(
     assert pin is not None
     assert pin.working == {
         "notes": [
-            "Order ORD-77819: blue jacket $89 delivered yesterday.",
+            "Record REC-77819: widget $89.",
             CANNED,
         ],
         "slots": {
-            "lookup_order": {
-                "text": "Order ORD-77819: blue jacket $89 delivered yesterday.",
-                "order_id": "ORD-77819",
-                "item_id": "ITM-JACKET",
+            "fetch_record": {
+                "text": "Record REC-77819: widget $89.",
+                "record_id": "REC-77819",
             }
         },
     }
@@ -407,7 +406,7 @@ def test_resume_reloads_working_notes(
     assert pin is not None
     assert pin.working == {
         "notes": [CANNED, CANNED, CANNED],
-        "slots": {"lookup_order": {"text": CANNED}},
+        "slots": {"fetch_record": {"text": CANNED}},
     }
 
 
@@ -423,7 +422,7 @@ def test_resume_turn_does_not_start_a_second_run(client: TestClient, store, cata
     assert response.json()["correlation_id"] == correlation_id
     assert response.json()["status"] == "completed"
     assert len(store.all()) == 1
-    assert catalogue.route_calls == [("shopassist_case", "2026.08.1"), ("shopassist_case", "2026.08.1")]
+    assert catalogue.route_calls == [("pattern1_case", "2026.08.1"), ("pattern1_case", "2026.08.1")]
 
 
 def test_resume_unknown_run_is_404(client: TestClient) -> None:
@@ -740,7 +739,7 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
     class Invoker:
         def call(self, invoke: dict, payload: dict) -> dict:
             payloads.append(payload)
-            return {"text": "Order ORD-77819: Blue Jacket $149."}
+            return {"text": "Record REC-77819: widget $149."}
 
     class Llm:
         def __init__(self) -> None:
@@ -748,36 +747,36 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
 
         def complete(self, system: str, user: str, schema=None) -> str:
             self.turns += 1
-            if "Order ORD-77819" in user:
-                return "DONE Order ORD-77819: Blue Jacket $149."
-            if "customer: ORD-77819" in user:
-                return 'CALL lookup_order\n{"order_id":"ORD-77819"}'
-            return "ASK Please provide an order id, customer id, or email."
+            if "Record REC-77819" in user:
+                return "DONE Record REC-77819: widget $149."
+            if "customer: REC-77819" in user:
+                return 'CALL fetch_record\n{"record_id":"REC-77819"}'
+            return "ASK Please provide a record id."
 
     tools = [
         {
-            "id": "lookup_order",
+            "id": "fetch_record",
             "input_schema": {
                 "type": "object",
-                "required": ["order_id"],
-                "properties": {"order_id": {"type": "string"}},
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
             },
-            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
         }
     ]
     row = {
-        "route_id": "shopassist_case",
+        "route_id": "pattern1_case",
         "route_version": "2026.08.1",
         "autonomy_mode": 1,
         "max_loop_steps": 6,
-        "prompt_id": "shopassist_case",
+        "prompt_id": "pattern1_case",
         "memory_profile": {"working": "session", "loop": "checkpoint"},
     }
     pin = RunPin(
         correlation_id="corr-ask-1",
         idempotency_key="chat-ask-1",
         session_id="chat-ask-1",
-        route_id="shopassist_case",
+        route_id="pattern1_case",
         route_version="2026.08.1",
         activation_target=None,
         agent_client_id=None,
@@ -789,7 +788,7 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
         build_agent_loop(tools, Invoker(), Llm(), max_steps=6),
         store,
         pin,
-        goal={"utterance": "jacket damaged"},
+        goal={"utterance": "need help"},
         profile=row["memory_profile"],
     )
     assert paused.status == "waiting"
@@ -797,7 +796,7 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
     assert paused.result["message"].startswith("Please provide")
 
     catalogue = FakeCatalogue(row)
-    catalogue.prompt = {"host": "ShopAssist coordinator."}
+    catalogue.prompt = {"host": "Pattern 1 coordinator."}
     service = RunService(
         store,
         catalogue,
@@ -805,7 +804,7 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
         invoker=Invoker(),
         llm=Llm(),
     )
-    body = service.resume("corr-ask-1", {"message": "ORD-77819"})
+    body = service.resume("corr-ask-1", {"message": "REC-77819"})
     assert body is not None
     assert body["status"] == "completed"
-    assert payloads == [{"order_id": "ORD-77819"}]
+    assert payloads == [{"record_id": "REC-77819"}]

@@ -1,10 +1,11 @@
-# Local fabric only. One Compose file, one Postgres, five app databases (afd, adp, ar, acr, audit).
+# Local fabric only. One Compose file, one Postgres, six app databases (afd, adp, ar_shared, ar_custom, acr, audit).
 # From repo root: ./agent-fabric-scripts/stack/start-app.sh
 # App services join this file. Control Plane UI is on 3006 (catalogue browser; no database).
 # Audit Control Plane UI is on 3013 (evidence browser; no database). Audit Data Plane :3012.
 # Adminer (Postgres GUI): http://localhost:8080 — System PostgreSQL, Server postgres, user/password fabric.
 # Grafana LGTM (OTel): http://localhost:3000 — admin/admin. OTLP gRPC 4317, OTLP HTTP 4318.
 # agent-mocks domain stubs: :3010 (not audit).
+# agent-runtime-shared :3008 (catalogue default) · agent-runtime-custom :3015 (per-route activation_target).
 
 name: EAF
 
@@ -20,6 +21,30 @@ x-otel-env: &otel-env
   MANAGEMENT_OTLP_LOGGING_ENDPOINT: http://otel-lgtm:4318/v1/logs
   MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
 
+x-agent-runtime-env: &agent-runtime-env
+  <<: *otel-env
+  DATA_PLANE_URL: http://agent-data-plane:3007
+  REGISTRY_URL: http://agent-capability-registry:3009
+  AFD_URL: http://agent-front-door:3005
+  AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-}
+  FABRIC_LLM_MODEL: ${FABRIC_LLM_MODEL:-ollama:llama3.1:8b}
+  FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
+  FABRIC_LOG_STAGE_PAYLOADS: ${FABRIC_LOG_STAGE_PAYLOADS:-1}
+
+x-agent-runtime-depends: &agent-runtime-depends
+  postgres:
+    condition: service_healthy
+  agent-data-plane:
+    condition: service_started
+  agent-capability-registry:
+    condition: service_started
+  agent-mocks:
+    condition: service_healthy
+  otel-lgtm:
+    condition: service_started
+
 services:
   postgres:
     build:
@@ -28,7 +53,7 @@ services:
     image: agent-fabric-postgres:16
     labels:
       fabric.role: database
-      fabric.owns: afd,adp,ar,acr,audit
+      fabric.owns: afd,adp,ar_shared,ar_custom,acr,audit
     environment:
       POSTGRES_USER: fabric
       POSTGRES_PASSWORD: fabric
@@ -238,45 +263,45 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  agent-runtime:
+  agent-runtime-shared:
     build:
       context: ../../agent-fabric-runtime
       dockerfile: Dockerfile
-    image: agent-fabric-runtime:0.1.0
+    image: agent-fabric-runtime-shared:0.1.0
     labels:
-      fabric.service: agent-runtime
-      fabric.db: ar
+      fabric.service: agent-runtime-shared
+      fabric.db: ar_shared
     environment:
-      <<: *otel-env
-      OTEL_SERVICE_NAME: agent-runtime
-      DATABASE_URL: postgresql+psycopg://fabric:fabric@postgres:5432/ar
-      DATA_PLANE_URL: http://agent-data-plane:3007
-      REGISTRY_URL: http://agent-capability-registry:3009
-      AFD_URL: http://agent-front-door:3005
-      AFD_JOBS_CLAIMS: '{"sub":"agent-runtime","emts":{"support:case":true}}'
-      AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-}
-      FABRIC_LLM_MODEL: ${FABRIC_LLM_MODEL:-ollama:llama3.1:8b}
-      # 0 = ProviderLlm (host Ollama). Set 1 for deterministic SeedStubLlm demos.
-      FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
-      # 1 = include raw request/response JSON on run.stage.* business events (local dev only).
-      FABRIC_LOG_STAGE_PAYLOADS: ${FABRIC_LOG_STAGE_PAYLOADS:-0}
+      <<: *agent-runtime-env
+      DATABASE_URL: postgresql+psycopg://fabric:fabric@postgres:5432/ar_shared
+      OTEL_SERVICE_NAME: agent-runtime-shared
+      AFD_JOBS_CLAIMS: '{"sub":"agent-runtime-shared","emts":{"support:case":true}}'
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "3008:3008"
     depends_on:
-      postgres:
-        condition: service_healthy
-      agent-data-plane:
-        condition: service_started
-      agent-capability-registry:
-        condition: service_started
-      agent-mocks:
-        condition: service_healthy
-      otel-lgtm:
-        condition: service_started
+      <<: *agent-runtime-depends
+
+  agent-runtime-custom:
+    build:
+      context: ../../agent-fabric-runtime
+      dockerfile: Dockerfile
+    image: agent-fabric-runtime-custom:0.1.0
+    labels:
+      fabric.service: agent-runtime-custom
+      fabric.db: ar_custom
+    environment:
+      <<: *agent-runtime-env
+      DATABASE_URL: postgresql+psycopg://fabric:fabric@postgres:5432/ar_custom
+      OTEL_SERVICE_NAME: agent-runtime-custom
+      AFD_JOBS_CLAIMS: '{"sub":"agent-runtime-custom","emts":{"support:case":true}}'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3015:3008"
+    depends_on:
+      <<: *agent-runtime-depends
 
   agent-front-door:
     build:
@@ -294,7 +319,8 @@ services:
       SPRING_DATASOURCE_USERNAME: fabric
       SPRING_DATASOURCE_PASSWORD: fabric
       DATA_PLANE_URL: http://agent-data-plane:3007
-      RUNTIME_URL: http://agent-runtime:3008
+      RUNTIME_URL: http://agent-runtime-shared:3008
+      RUNTIME_URLS: http://agent-runtime-shared:3008,http://agent-runtime-custom:3008
       AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
     ports:
       - "3005:3005"
@@ -303,7 +329,9 @@ services:
         condition: service_healthy
       agent-data-plane:
         condition: service_started
-      agent-runtime:
+      agent-runtime-shared:
+        condition: service_started
+      agent-runtime-custom:
         condition: service_started
       agent-audit-data-plane:
         condition: service_started

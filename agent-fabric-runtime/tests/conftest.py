@@ -10,72 +10,72 @@ AFD = {"Authorization": "Bearer fabric-internal", "X-Workload": "afd"}
 
 START_BODY: dict[str, Any] = {
     "mode": "new",
-    "idempotency_key": "sess-88:shopassist_case:v1",
+    "idempotency_key": "sess-88:pattern1_case:v1",
     "session_id": "sess-88",
-    "route_id": "shopassist_case",
+    "route_id": "pattern1_case",
     "route_version": "2026.08.1",
     "activation_target": "http://agent-runtime:3008/v1/runs",
-    "agent_client_id": "agent-shopassist-case",
+    "agent_client_id": "agent-pattern1-case",
     "contract": {
-        "tool_manifest": "shopassist_case",
+        "tool_manifest": "pattern1_case",
         "manifest_version": "2026.08.1",
         "policy_profile": "read_only_standard",
         "model_profile": "stub",
         "max_loop_steps": 12,
     },
     "goal": {
-        "message": "My blue jacket ORD-77819 arrived damaged and I was charged twice. Full refund please."
+        "message": "Please look up record REC-77819 and open a handoff."
     },
 }
 
 CANNED = "Handoff opened: hof-1."
 
 CATALOGUE_ROW = {
-    "route_id": "shopassist_case",
+    "route_id": "pattern1_case",
     "route_version": "2026.08.1",
     "activation_target": "http://agent-runtime:3008/v1/runs",
-    "agent_client_id": "agent-shopassist-case",
-    "tool_manifest": "shopassist_case",
+    "agent_client_id": "agent-pattern1-case",
+    "tool_manifest": "pattern1_case",
     "tool_manifest_version": "2026.08.1",
     "autonomy_mode": 1,
     "max_loop_steps": 12,
-    "prompt_id": "shopassist_case",
+    "prompt_id": "pattern1_case",
 }
 
 MANIFEST = {
-    "manifest_id": "shopassist_case",
+    "manifest_id": "pattern1_case",
     "manifest_version": "2026.08.1",
     "status": "published",
     "tools": [
         {
-            "name": "lookup_order",
-            "capability_id": "lookup_order",
+            "name": "fetch_record",
+            "capability_id": "fetch_record",
             "capability_version": "1.0.0",
-            "pdp_action": "lookup_order",
+            "pdp_action": "fetch_record",
             "risk_tier": "low",
         },
         {
-            "name": "escalate_to_human",
-            "capability_id": "escalate_to_human",
+            "name": "open_handoff",
+            "capability_id": "open_handoff",
             "capability_version": "1.0.0",
-            "pdp_action": "escalate_to_human",
+            "pdp_action": "open_handoff",
             "risk_tier": "high",
         },
     ],
 }
 
 CAPABILITY = {
-    "id": "lookup_order",
+    "id": "fetch_record",
     "version": "1.0.0",
     "kind": "domain",
     "status": "published",
     "input_schema": {
         "type": "object",
-        "required": ["order_id"],
-        "properties": {"order_id": {"type": "string"}},
+        "required": ["record_id"],
+        "properties": {"record_id": {"type": "string"}},
     },
     "output_schema": {"type": "object"},
-    "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+    "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
 }
 
 
@@ -89,9 +89,9 @@ class FakeCatalogue:
         self.prompt_calls: list[str] = []
         self.workflow: dict[str, Any] = {}
         self.prompt: dict[str, Any] = {
-            "prompt_id": "shopassist_case",
+            "prompt_id": "pattern1_case",
             "prompt_version": "2026.08.1",
-            "host": "Pattern 1 shopassist stub",
+            "host": "Pattern 1 host prompt from catalogue.",
         }
         self.corpora: dict[str, dict[str, Any]] = {}
 
@@ -165,11 +165,10 @@ class FakeRegistry:
 class FakeInvoker:
     def call(self, invoke: dict[str, Any], payload: dict[str, Any]) -> dict[str, Any]:
         url = str(invoke.get("url") or "")
-        if "lookup_order" in url:
+        if "/tools/fetch" in url:
             return {
-                "text": "Order ORD-77819: blue jacket $89 delivered yesterday.",
-                "order_id": "ORD-77819",
-                "item_id": "ITM-JACKET",
+                "text": "Record REC-77819: widget $89.",
+                "record_id": "REC-77819",
             }
         return {"text": CANNED, "handoff_id": "hof-1"}
 
@@ -179,10 +178,10 @@ class FakeLlm:
         self.turns = 0
 
     def complete(self, system: str, user: str) -> str:
-        """Pattern 1 stub: CALL lookup_order when ORD is in goal, then DONE."""
+        """Pattern 1 stub: CALL fetch_record then DONE."""
         self.turns += 1
         if self.turns == 1:
-            return 'CALL lookup_order\n{"order_id": "ORD-77819"}'
+            return 'CALL fetch_record\n{"record_id": "REC-77819"}'
         return f"DONE {CANNED}"
 
 

@@ -16,6 +16,9 @@ Answers “Why was I charged?” via the `account_fee_lookup` domain API (`POST 
 Required claim: `accounts:read` (stub user `jane`).
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/add-seed-data.sh fee_explain
-./agent-fabric-scripts/catalogue-seed/run-chat.sh fee_explain
+./add.sh
 ```
+
+Then open [http://localhost:3014/chat](http://localhost:3014/chat) and run `fee_explain`.
+
+Remove: `./remove.sh`

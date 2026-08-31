@@ -22,7 +22,7 @@ With Compose up, Front Door is proxied automatically inside the container. From 
 | `src/client/` | Browser TypeScript (compiled to `public/client/` and `public/shared/`) |
 | `src/server/` | Static file server + AFD proxy |
 | `src/shared/` | Catalog helpers shared by client and tests |
-| `catalog/` | `chats.json` / `jobs.json` copies of catalogue-seed demos |
+| `catalog/` | Chat and job demo definitions (`chats.json`, `jobs.json`) |
 | `public/` | HTML shells, CSS, compiled client JS |
 
 ## Tests
@@ -31,7 +31,7 @@ With Compose up, Front Door is proxied automatically inside the container. From 
 npm test
 ```
 
-Keeps bundled catalogs in sync with `agent-fabric-scripts/catalogue-seed/` and checks the HTML shells.
+Keeps bundled catalogs present and checks the HTML shells.
 
 ## Non-goals
 

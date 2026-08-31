@@ -73,17 +73,7 @@ def _node_name(tool: dict[str, Any], index: int) -> str:
 
 def _message(body: dict[str, Any]) -> str:
     """Pull a human-readable string from a tool HTTP body."""
-    text = str(body.get("text") or body.get("message") or "").strip()
-    if text:
-        return text
-    order_id = str(body.get("order_id") or "").strip()
-    if order_id:
-        item = str(body.get("item_name") or body.get("item_id") or "item").strip()
-        price = body.get("price")
-        if price is not None:
-            return f"Order {order_id}: {item} ${price:g}."
-        return f"Order {order_id}: {item}."
-    return ""
+    return str(body.get("text") or body.get("message") or "").strip()
 
 
 def _user_blob(goal: dict[str, Any], notes: list[str], slots: dict[str, Any] | None = None) -> str:
@@ -559,22 +549,17 @@ _LOOP_SYSTEM = (
     "ASK <question>\n"
     "DONE <answer>\n"
     "CALL may include a JSON object of input_schema fields on the next line "
-    "(or after the tool id). Never send the customer utterance to a tool. "
-    "ASK when a required locator (order id, customer id, or email) is missing. "
-    "If prior stage outputs include a note starting with `customer:`, the customer "
-    "just provided a locator — infer whether it is an order id (ORD-*), customer id "
-    "(CUS-*), or email, then CALL the matching lookup tool with JSON args; do not ASK again. "
+    "(or after the tool id). Populate CALL args from input_schema; do not send "
+    "the raw goal utterance to a tool. ASK when required inputs are missing. "
+    "If prior stage outputs include a note starting with `customer:`, treat it "
+    "as the customer's reply and continue the workflow. "
     "CALL a tool before DONE when tools can answer the goal. "
     "Do not invent tool results. After a tool output, CALL another tool or DONE. "
-    "When DONE after a tool result, use that tool output as the answer unless the goal needs another tool. "
-    "After escalate_to_human succeeds, you MUST DONE with a customer-facing summary that includes the handoff id. "
-    "Never CALL escalate_to_human more than once."
+    "When DONE after a tool result, use that tool output as the answer unless the "
+    "goal needs another tool."
 )
 
-_ESCALATE_TOOL_ID = "escalate_to_human"
-_ASK_DEFAULT = (
-    "Please provide an order id, customer id, or email so I can look up your order."
-)
+_ASK_DEFAULT = "Please provide the information needed to continue."
 
 
 def _parse_json_object(raw: str) -> dict[str, Any] | None:
@@ -612,108 +597,6 @@ def _parse_agent_line(text: str) -> tuple[str, str, dict[str, Any]]:
     if token == "DONE":
         return "done", rest.strip(), {}
     return "done", blob, {}
-
-
-def _handoff_id_from_slots(slots: dict[str, Any]) -> str:
-    """Return handoff_id from escalate_to_human slot when present."""
-    slot = slots.get(_ESCALATE_TOOL_ID)
-    if not isinstance(slot, dict):
-        return ""
-    return str(slot.get("handoff_id") or "").strip()
-
-
-def _escalate_succeeded(slots: dict[str, Any]) -> bool:
-    """True when escalate_to_human produced a handoff (async ticket opened)."""
-    return bool(_handoff_id_from_slots(slots))
-
-
-def _pending_agent_joins(slots: dict[str, Any]) -> bool:
-    """True when a kind=agent child was started but has not joined terminal yet."""
-    for key, slot in slots.items():
-        if key == _ESCALATE_TOOL_ID or not isinstance(slot, dict):
-            continue
-        corr = str(slot.get("correlation_id") or "").strip()
-        if not corr and not slot.get("route_id"):
-            continue
-        # Joined packet shape: status + result. Bare start / in-flight child is pending.
-        status = str(slot.get("status") or "").strip().lower()
-        if status in {"completed", "failed"} and "result" in slot:
-            continue
-        if corr or slot.get("route_id"):
-            return True
-    return False
-
-
-def _escalation_complete_message(slots: dict[str, Any], result: str) -> str:
-    """Customer-facing summary after a successful escalation handoff."""
-    handoff = _handoff_id_from_slots(slots)
-    if handoff:
-        return (
-            f"I've escalated your case for human review. Reference {handoff}. "
-            "Someone will follow up."
-        )
-    text = (result or "").strip()
-    if text:
-        return (
-            f"I've escalated your case for human review. {text} "
-            "Someone will follow up."
-        )
-    return "I've escalated your case for human review. Someone will follow up."
-
-
-def _complete_after_escalate(
-    current: GraphState,
-    step: int,
-    on_stage: Callable[[int, str, GraphState], None] | None,
-) -> GraphState | None:
-    """Auto-complete parent when escalate succeeded and no child join is still pending."""
-    slots = _slots(current)
-    if not _escalate_succeeded(slots):
-        return None
-    if _pending_agent_joins(slots):
-        return None
-    text = _escalation_complete_message(slots, str(current.get("result") or ""))
-    out: GraphState = {
-        **current,
-        "result": text,
-        "notes": list(current.get("notes") or []) + [text],
-    }
-    if on_stage is not None:
-        on_stage(step, "respond", out)
-    return out
-
-
-def _idempotent_escalate_replay(
-    current: GraphState,
-    step: int,
-    on_stage: Callable[[int, str, GraphState], None] | None,
-) -> tuple[str, GraphState]:
-    """Handle a repeated CALL escalate_to_human after a successful handoff.
-
-    Returns (action, state):
-    - ``complete`` — parent should finish now (no pending joins)
-    - ``skip`` — do not POST again; keep looping (joins still pending)
-    - ``call`` — no prior handoff; proceed with HTTP
-    """
-    slots = _slots(current)
-    if not _escalate_succeeded(slots):
-        return "call", current
-    done = _complete_after_escalate(current, step, on_stage)
-    if done is not None:
-        return "complete", done
-    handoff = _handoff_id_from_slots(slots)
-    note = (
-        f"escalate_to_human idempotent: handoff {handoff} already open; "
-        "not creating another ticket"
-    )
-    skipped: GraphState = {
-        **current,
-        "result": str(current.get("result") or note),
-        "notes": list(current.get("notes") or []) + [note],
-    }
-    if on_stage is not None:
-        on_stage(step, _ESCALATE_TOOL_ID, skipped)
-    return "skip", skipped
 
 
 def build_agent_loop(
@@ -786,13 +669,6 @@ def build_agent_loop(
                 pinned = dict(by_id.get(payload) or {})
                 if not pinned:
                     raise RuntimeError(f"unknown tool {payload!r}")
-                # Idempotent escalate: never POST a second handoff after success.
-                if payload == _ESCALATE_TOOL_ID:
-                    action_esc, current = _idempotent_escalate_replay(current, step, on_stage)
-                    if action_esc == "complete":
-                        return current
-                    if action_esc == "skip":
-                        continue
                 http = dict(pinned)
                 http["llm_role"] = "none"
                 http["_graph_index"] = step
@@ -832,11 +708,6 @@ def build_agent_loop(
                 current = {**current, **stage_out}
                 if on_stage is not None:
                     on_stage(step, payload, current)
-                # First successful escalate + no pending joins → parent completes.
-                if payload == _ESCALATE_TOOL_ID:
-                    done = _complete_after_escalate(current, step, on_stage)
-                    if done is not None:
-                        return done
             raise RuntimeError(f"agent loop exceeded {max_steps} steps")
 
     return AgentLoop()

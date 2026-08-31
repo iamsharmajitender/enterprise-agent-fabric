@@ -11,7 +11,7 @@ INSERT INTO dataplane.routes (
 (
   'overdraft_fee_qa', '2026.08.1', TRUE, 'active', 'overdraft_fee_qa',
   'Pattern 0 (single inference): one LLM call after catalogue prefetch of fee-schedule and product-disclosure. Grounded overdraft fee Q&A. No tools, no workflow, no session memory.',
-  'http://agent-runtime:3008/v1/runs', 'agent-overdraft-fee-qa', NULL, NULL,
+  'http://agent-runtime-shared:3008/v1/runs', 'agent-overdraft-fee-qa', NULL, NULL,
   'read_only_standard', 'fast-chat', NULL, 'overdraft_fee_qa', 'cited_answer', 'overdraft_fee_qa_golden', 1, 'clarify',
   '[]'::jsonb, '["web","api"]'::jsonb, TRUE,
   '["overdraft","fee","everyday","business","corporate","student","premier","account fee"]'::jsonb,

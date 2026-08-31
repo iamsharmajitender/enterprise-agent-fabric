@@ -1,5 +1,5 @@
 -- fee_explain — ACR capability (domain tool: account_fee_lookup).
--- Apply: ./agent-fabric-scripts/catalogue-seed/add-seed-data.sh fee_explain
+-- Apply: ./add.sh or ../../add-seed-data.sh fee_explain
 
 \c acr
 INSERT INTO registry.capabilities (

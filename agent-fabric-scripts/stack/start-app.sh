@@ -91,14 +91,14 @@ bring_up() {
 # existing volumes never pick it up — create missing DBs idempotently after Postgres is up.
 ensure_postgres_databases() {
   local db
-  echo "Ensuring Postgres app databases exist (adp, ar, acr, audit)…"
+  echo "Ensuring Postgres app databases exist (adp, ar_shared, ar_custom, acr, audit)…"
   for _ in $(seq 1 30); do
     if "${COMPOSE[@]}" exec -T postgres pg_isready -U fabric -d afd >/dev/null 2>&1; then
       break
     fi
     sleep 1
   done
-  for db in adp ar acr audit; do
+  for db in adp ar_shared ar_custom acr audit; do
     "${COMPOSE[@]}" exec -T postgres \
       psql -U fabric -d afd -v ON_ERROR_STOP=1 \
       -c "SELECT 'ok' FROM pg_database WHERE datname = '${db}'" 2>/dev/null \

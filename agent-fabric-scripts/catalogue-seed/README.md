@@ -1,6 +1,6 @@
 # Catalogue seed
 
-Load route catalogue rows into Postgres and run chat demos. Stack must be running (`../stack/start-app.sh`).
+Load route catalogue rows into Postgres. Stack must be running (`../stack/start-app.sh`). Flyway migrations create schema only; route data loads from `route/` via `add-seed-data.sh` or per-route `add.sh`.
 
 ## Commands
 
@@ -10,19 +10,21 @@ Load route catalogue rows into Postgres and run chat demos. Stack must be runnin
 | [`add-seed-data.sh`](add-seed-data.sh) | Wipe + reload **all** route packs under `route/` |
 | [`add-seed-data.sh <route_id>`](add-seed-data.sh) | Load one route pack only (no wipe) |
 | [`add-seed-data.sh --clean <route_id>`](add-seed-data.sh) | Wipe all DBs, then load one route pack |
-| [`run-chat.sh`](run-chat.sh) | Post a chat demo from [`chats.json`](chats.json) |
 
 ```bash
 ./agent-fabric-scripts/stack/start-app.sh
 ./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
 ```
+
+Open [http://localhost:3014/chat](http://localhost:3014/chat) to run chat demos from [`agent-fabric-scratchpad/catalog/chats.json`](../../agent-fabric-scratchpad/catalog/chats.json).
 
 Wipe and seed a single route while iterating:
 
 ```bash
 ./agent-fabric-scripts/catalogue-seed/add-seed-data.sh --clean shopassist_case
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
+# or from inside the route pack:
+./agent-fabric-scripts/catalogue-seed/route/shopassist_case/add.sh
+./agent-fabric-scripts/catalogue-seed/route/shopassist_case/remove.sh
 ```
 
 ## SQL layout
@@ -33,14 +35,11 @@ sql/
 
 route/
 ├── fee_explain/
+│   ├── add.sh / remove.sh   # load or drop this route only
+│   └── *.sql
 └── shopassist_case/
-    ├── capability.sql   # ACR tools
-    ├── manifest.sql     # ACR + ADP manifest
-    ├── prompt.sql       # ADP prompt_pack
-    ├── route.sql        # ADP route row
-    ├── retrieval.sql    # optional
-    ├── memory.sql       # optional
-    └── workflow.sql     # only when workflow_id is set
+    ├── add.sh / remove.sh
+    └── *.sql
 ```
 
 Apply order: `capability` → `manifest` → `prompt` → `route` → `retrieval` → `memory` → `workflow`.
@@ -48,16 +47,9 @@ Apply order: `capability` → `manifest` → `prompt` → `route` → `retrieval
 ## Add a route
 
 1. Copy `route/shopassist_case/` → `route/<route_id>/`, edit the SQL files.
-2. Mirror in Flyway for clean `start-app.sh`.
-3. Run `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh <route_id>` (or `--clean` to wipe first).
-4. Add a chat row to [`chats.json`](chats.json), then `./run-chat.sh <id>`.
+2. Run `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh <route_id>` (or `./add.sh` / `--clean` to wipe first).
+3. Add a chat row to [`agent-fabric-scratchpad/catalog/chats.json`](../../agent-fabric-scratchpad/catalog/chats.json), then try it at [http://localhost:3014/chat](http://localhost:3014/chat).
 
 ## Chat demos
 
-| File | Role |
-| --- | --- |
-| [`chats.json`](chats.json) | Demo definitions (message, claims, expectations) |
-| [`run-chat.sh`](run-chat.sh) | Shell entrypoint |
-| [`run_chat.py`](run_chat.py) | Posts to Front Door, polls events |
-
-Environment: `AFD_URL` (default `http://localhost:3005`), `WAIT=1` with `--all`, `FABRIC_LLM_STUB=1` for stub LLM.
+Chat demo definitions live in [`agent-fabric-scratchpad/catalog/chats.json`](../../agent-fabric-scratchpad/catalog/chats.json). Run them from the [chat scratchpad](http://localhost:3014/chat) (included in Compose via `start-app.sh`).

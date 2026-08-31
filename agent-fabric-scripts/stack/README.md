@@ -10,4 +10,4 @@ Start and stop the local fabric. Does **not** seed catalogue data.
 
 Compose file: [`../docker-compose/docker-compose.yml`](../docker-compose/docker-compose.yml).
 
-After start, load routes with [`../catalogue-seed/add-seed-data.sh`](../catalogue-seed/add-seed-data.sh), then try chats with [`../catalogue-seed/run-chat.sh`](../catalogue-seed/run-chat.sh).
+After start, load routes with [`../catalogue-seed/add-seed-data.sh`](../catalogue-seed/add-seed-data.sh), then try chats at [http://localhost:3014/chat](http://localhost:3014/chat).

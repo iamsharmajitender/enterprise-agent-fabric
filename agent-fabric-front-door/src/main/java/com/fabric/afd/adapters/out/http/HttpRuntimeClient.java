@@ -9,9 +9,13 @@ import com.fabric.afd.domain.RunStart;
 import com.fabric.afd.domain.UnavailableException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -29,10 +33,16 @@ public class HttpRuntimeClient implements RuntimePort {
   private static final ParameterizedTypeReference<Map<String, Object>> MAP =
       new ParameterizedTypeReference<>() {};
 
-  private final RestClient http;
+  private final RestClient.Builder clientTemplate;
+  private final String defaultBaseUrl;
+  private final List<String> knownBaseUrls;
+  private final ConcurrentHashMap<String, RestClient> clientsByBase = new ConcurrentHashMap<>();
 
-  public HttpRuntimeClient(RestClient http) {
-    this.http = http;
+  public HttpRuntimeClient(
+      RestClient.Builder clientTemplate, String defaultRuntimeUrl, String runtimeUrlsCsv) {
+    this.clientTemplate = clientTemplate;
+    this.defaultBaseUrl = normalizeBaseUrl(defaultRuntimeUrl);
+    this.knownBaseUrls = parseKnownBaseUrls(defaultRuntimeUrl, runtimeUrlsCsv);
   }
 
   @Override
@@ -55,7 +65,8 @@ public class HttpRuntimeClient implements RuntimePort {
     body.put("contract", contract);
     body.put("goal", start.payload());
     try {
-      Map<String, Object> response = http.post().uri("/v1/runs").body(body).retrieve().body(MAP);
+      Map<String, Object> response =
+          client(route.activationTarget()).post().uri("/v1/runs").body(body).retrieve().body(MAP);
       if (response == null || response.get("correlation_id") == null) {
         throw new UnavailableException("runtime start unavailable");
       }
@@ -74,10 +85,10 @@ public class HttpRuntimeClient implements RuntimePort {
   }
 
   @Override
-  public Map<String, Object> status(String correlationId) {
+  public Map<String, Object> status(String correlationId, String activationTarget) {
     try {
       Map<String, Object> body =
-          http.get().uri("/v1/runs/{id}", correlationId).retrieve().body(MAP);
+          client(activationTarget).get().uri("/v1/runs/{id}", correlationId).retrieve().body(MAP);
       if (body == null) {
         throw new UnavailableException("runtime status unavailable");
       }
@@ -93,9 +104,10 @@ public class HttpRuntimeClient implements RuntimePort {
   }
 
   @Override
-  public void resume(String correlationId, String message) {
+  public void resume(String correlationId, String message, String activationTarget) {
     try {
-      http.post()
+      client(activationTarget)
+          .post()
           .uri("/v1/runs/{id}/turns", correlationId)
           .body(Map.of("message", message == null ? "" : message))
           .retrieve()
@@ -112,9 +124,20 @@ public class HttpRuntimeClient implements RuntimePort {
 
   @Override
   public Optional<FrozenRoute> openRun(String sessionId) {
+    for (String baseUrl : knownBaseUrls) {
+      Optional<FrozenRoute> found = openRunOn(baseUrl, sessionId);
+      if (found.isPresent()) {
+        return found;
+      }
+    }
+    return Optional.empty();
+  }
+
+  private Optional<FrozenRoute> openRunOn(String baseUrl, String sessionId) {
     try {
       Map<String, Object> body =
-          http.get()
+          clientForBase(baseUrl)
+              .get()
               .uri(uri -> uri.path("/v1/runs").queryParam("session_id", sessionId).build())
               .retrieve()
               .body(MAP);
@@ -131,9 +154,75 @@ public class HttpRuntimeClient implements RuntimePort {
               string(body.get("activation_target")),
               string(body.get("agent_client_id")),
               string(body.get("correlation_id"))));
+    } catch (RestClientResponseException e) {
+      if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
+        return Optional.empty();
+      }
+      throw new UnavailableException("runtime open-run unavailable", e);
     } catch (RestClientException e) {
       throw new UnavailableException("runtime open-run unavailable", e);
     }
+  }
+
+  private RestClient client(String activationTarget) {
+    return clientForBase(baseFor(activationTarget));
+  }
+
+  private RestClient clientForBase(String baseUrl) {
+    return clientsByBase.computeIfAbsent(baseUrl, base -> clientTemplate.clone().baseUrl(base).build());
+  }
+
+  static String baseFor(String activationTarget, String defaultBaseUrl) {
+    if (activationTarget == null || activationTarget.isBlank()) {
+      return normalizeBaseUrl(defaultBaseUrl);
+    }
+    String trimmed = activationTarget.trim();
+    int schemeEnd = trimmed.indexOf("://");
+    if (schemeEnd < 0) {
+      return normalizeBaseUrl(defaultBaseUrl);
+    }
+    int pathStart = trimmed.indexOf('/', schemeEnd + 3);
+    if (pathStart < 0) {
+      return stripTrailingSlash(trimmed);
+    }
+    return stripTrailingSlash(trimmed.substring(0, pathStart));
+  }
+
+  private String baseFor(String activationTarget) {
+    return baseFor(activationTarget, defaultBaseUrl);
+  }
+
+  static List<String> parseKnownBaseUrls(String defaultRuntimeUrl, String runtimeUrlsCsv) {
+    LinkedHashSet<String> bases = new LinkedHashSet<>();
+    bases.add(normalizeBaseUrl(defaultRuntimeUrl));
+    if (runtimeUrlsCsv != null && !runtimeUrlsCsv.isBlank()) {
+      for (String entry : runtimeUrlsCsv.split(",")) {
+        if (entry == null || entry.isBlank()) {
+          continue;
+        }
+        String trimmed = entry.trim();
+        if (trimmed.contains("://") && trimmed.indexOf('/', trimmed.indexOf("://") + 3) >= 0) {
+          bases.add(baseFor(trimmed, defaultRuntimeUrl));
+        } else {
+          bases.add(normalizeBaseUrl(trimmed));
+        }
+      }
+    }
+    return List.copyOf(bases);
+  }
+
+  static String normalizeBaseUrl(String runtimeUrl) {
+    if (runtimeUrl == null || runtimeUrl.isBlank()) {
+      throw new IllegalArgumentException("runtime base url is required");
+    }
+    return baseFor(runtimeUrl, runtimeUrl);
+  }
+
+  private static String stripTrailingSlash(String value) {
+    if (value == null || value.isEmpty()) {
+      return value;
+    }
+    return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
   }
 
   private static String string(Object value) {

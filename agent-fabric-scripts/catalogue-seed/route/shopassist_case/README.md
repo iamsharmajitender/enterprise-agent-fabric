@@ -9,10 +9,14 @@ Route id: `shopassist_case` · version `2026.08.1` · Pattern 1 (autonomous chat
 | [`prompt.sql`](prompt.sql) | Host prompt | `adp.dataplane.prompt_packs` |
 | [`route.sql`](route.sql) | Route pin | `adp.dataplane.routes` |
 | [`memory.sql`](memory.sql) | Memory profile | `adp.dataplane.memory_profiles` |
+| [`intent.sql`](intent.sql) | `/shopassist` command | `adp.dataplane.intent_rules` |
 
 No `workflow.sql` — this route uses manifest tools + prompt, not a fixed workflow.
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/add-seed-data.sh shopassist_case
-./agent-fabric-scripts/catalogue-seed/run-chat.sh shopassist_case_ask
+./agent-fabric-scripts/catalogue-seed/route/shopassist_case/add.sh
 ```
+
+Then open [http://localhost:3014/chat](http://localhost:3014/chat) and run `shopassist_case_ask`.
+
+Remove this route from Postgres only: `./remove.sh` (same directory).

@@ -65,7 +65,7 @@ Customer: damaged jacket ORD-77819, possible double charge, wants full refund.
 4. Parent **completes** (auto) with the handoff reference.  
 5. Ops works `hof-1` later; this chat run is already done.
 
-[`run-chat.sh shopassist_case_ask`](../../agent-fabric-scripts/catalogue-seed/run-chat.sh).
+[chat scratchpad — `shopassist_case_ask`](http://localhost:3014/chat).
 
 ## Contrast
 

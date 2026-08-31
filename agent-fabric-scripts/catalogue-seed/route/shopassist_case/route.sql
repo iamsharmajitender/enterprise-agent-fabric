@@ -11,7 +11,7 @@ INSERT INTO dataplane.routes (
 (
   'shopassist_case', '2026.08.1', TRUE, 'active', 'shopassist_case',
   'Pattern 1 (autonomous): ShopAssist front-line support. ASK for order/customer/email if missing, lookup order, then billing and policy domain APIs. Escalate when needed.',
-  'http://agent-runtime:3008/v1/runs', 'agent-shopassist-case', 'shopassist_case', '2026.08.1',
+  'http://agent-runtime-custom:3008/v1/runs', 'agent-shopassist-case', 'shopassist_case', '2026.08.1',
   'read_only_standard', 'reasoning-standard', NULL, 'shopassist_case', NULL, NULL, 12, 'clarify',
   '["support:case"]'::jsonb, '["web","api"]'::jsonb, TRUE, '["damaged","damage","refund","jacket","charged twice","duplicate charge","ORD-77819"]'::jsonb, 1
 )

@@ -8,7 +8,7 @@ def database_url() -> str:
     """Postgres URL from DATABASE_URL, or the local fabric default."""
     return os.environ.get(
         "DATABASE_URL",
-        "postgresql+psycopg://fabric:fabric@localhost:5432/ar",
+        "postgresql+psycopg://fabric:fabric@localhost:5432/ar_shared",
     )
 
 

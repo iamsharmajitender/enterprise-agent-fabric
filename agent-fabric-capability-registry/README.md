@@ -80,7 +80,7 @@ Flyway `V1__registry.sql` on database `acr`:
 | `registry.capabilities` | `(id, version)` | kind, schemas, invoke JSON, status |
 | `registry.manifests` | `(manifest_id, manifest_version)` | tools JSON, status |
 
-Seed includes **`account_fee_lookup@1.0.0`** (published domain tool) and manifest **`fee_explain@2026.08.1`** that refs it. Operational reload: `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` (and Compose migrations).
+Flyway creates the tables only. Route capabilities and manifests load from [`agent-fabric-scripts/catalogue-seed/route/`](../agent-fabric-scripts/catalogue-seed/route/) via `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` or per-route `./add.sh`.
 
 ## Sibling calls
 

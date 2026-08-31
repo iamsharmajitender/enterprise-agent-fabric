@@ -14,7 +14,7 @@ _DEFAULT_CORPORA_DIR = Path(__file__).with_name("data") / "corpora"
 _SHOPASSIST_CUSTOMERS = Path(__file__).with_name("data") / "shopassist_customers.json"
 _CORPORA_PATH = re.compile(r"^corpora/([^/]+)/search$")
 _LOOKUP_NEEDLE = {
-    "lookup_order": "order_id",
+    "lookup_order_by_order_id": "order_id",
     "lookup_order_by_customer": "customer_id",
     "lookup_order_by_email": "email",
 }
