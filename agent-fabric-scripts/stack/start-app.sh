@@ -185,5 +185,11 @@ if [[ "$rc" -ne 0 ]]; then
 fi
 
 save_flyway_stamp
-echo "Fabric is up. Front Door http://localhost:3005  Chat/Jobs scratchpad http://localhost:3014  Control Plane http://localhost:3006"
+CONTROL_PLANE_URL="http://localhost:3006"
+echo "Fabric is up. Front Door http://localhost:3005  Chat/Jobs scratchpad http://localhost:3014  Control Plane ${CONTROL_PLANE_URL}"
 echo "Audit Control Plane http://localhost:3013  (data plane :3012). Java unit tests: ./agent-fabric-scripts/stack/test-java.sh"
+if command -v open >/dev/null 2>&1; then
+  open "${CONTROL_PLANE_URL}"
+elif command -v xdg-open >/dev/null 2>&1; then
+  xdg-open "${CONTROL_PLANE_URL}" >/dev/null 2>&1 || true
+fi

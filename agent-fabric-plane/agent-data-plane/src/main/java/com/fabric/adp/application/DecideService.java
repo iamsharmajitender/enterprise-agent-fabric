@@ -274,9 +274,9 @@ public class DecideService {
         result.routeId() != null ? prefix + "." + result.routeId() : prefix + ".decide";
     String event =
         switch (result.outcome()) {
-          case "route" -> "intent.decide.routed";
-          case "clarify" -> "intent.decide.clarified";
-          default -> "intent.decide.abstained";
+          case "route" -> prefix + ".intent.routed";
+          case "clarify" -> prefix + ".intent.clarified";
+          default -> prefix + ".intent.abstained";
         };
     events.emit(
         event,

@@ -258,8 +258,10 @@ services:
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-}
       FABRIC_LLM_MODEL: ${FABRIC_LLM_MODEL:-ollama:llama3.1:8b}
-      # Default 0 = ProviderLlm (host Ollama). Set 1 for deterministic SeedStubLlm demos.
+      # 0 = ProviderLlm (host Ollama). Set 1 for deterministic SeedStubLlm demos.
       FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
+      # 1 = include raw request/response JSON on run.stage.* business events (local dev only).
+      FABRIC_LOG_STAGE_PAYLOADS: ${FABRIC_LOG_STAGE_PAYLOADS:-0}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

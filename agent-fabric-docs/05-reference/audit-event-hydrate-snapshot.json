@@ -11,6 +11,8 @@
     "route_version": "2026.08.1",
     "manifest_id": "fee_explain_v1",
     "manifest_version": "2026.08.1",
+    "prompt_id": "fee_explain",
+    "retrieval": null,
     "capabilities": [
       {
         "capability_id": "account_fee_lookup",

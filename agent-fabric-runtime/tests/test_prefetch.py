@@ -35,7 +35,7 @@ def test_run_prefetch_merges_scope_and_builds_note() -> None:
         }
     }
     prefetch = FakePrefetch()
-    slot, note = run_prefetch(
+    slot, note, per_corpus = run_prefetch(
         catalogue,
         prefetch,
         {"mode": "deterministic_prefetch", "scope": ["policy-engine"]},
@@ -46,7 +46,12 @@ def test_run_prefetch_merges_scope_and_builds_note() -> None:
     ]
     assert slot["chunks"][0]["corpus_id"] == "policy-engine"
     assert "Refund window" in note
-
+    assert per_corpus == [
+        {
+            "corpus_id": "policy-engine",
+            "chunks": [{"id": "policy-engine-1", "text": "Refund window is 30 days.", "corpus_id": "policy-engine"}],
+        }
+    ]
 
 def test_run_prefetch_fails_on_unpublished_corpus() -> None:
     catalogue = FakeCatalogue()

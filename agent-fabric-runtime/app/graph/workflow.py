@@ -8,6 +8,7 @@ from app.agents.prefetch import (
     PREFETCH_SLOT_ID,
     PrefetchPort,
     is_prefetch_stage,
+    prefetch_corpus_stage_id,
     prefetch_pack_text,
     require_prefetch_pack,
     run_prefetch,
@@ -35,6 +36,7 @@ from app.graph.payload import (
     project_slot,
     validate_input_schema,
 )
+from app import telemetry
 from app.tools.invoker import ToolInvoker
 
 
@@ -152,6 +154,30 @@ def _llm_complete(
     return llm.complete(prompt, user)
 
 
+def _stage_request_preview(
+    pinned: dict[str, Any],
+    goal: dict[str, Any],
+    notes: list[str],
+    slots: dict[str, Any],
+    input_schema: dict[str, Any] | None,
+    role: str,
+    retrieval: dict[str, Any] | None,
+    call_args: dict[str, Any] | None,
+) -> Any:
+    """Best-effort request body for run.stage.started digests (before side effects)."""
+    invoke = _mapping(pinned.get("invoke"))
+    if role in _LLM_ONLY_ROLES:
+        return _user_blob(goal, notes, slots)
+    payload = merge_http_payload(goal, slots, input_schema, call_args)
+    if str(pinned.get("kind") or "") == "agent":
+        return project_child_goal(goal, slots, input_schema, call_args)
+    if is_prefetch_stage(pinned, retrieval):
+        return goal
+    if not str(invoke.get("url") or "").strip():
+        return goal
+    return payload
+
+
 def _run_stage(
     pinned: dict[str, Any],
     state: GraphState,
@@ -166,6 +192,53 @@ def _run_stage(
     call_args: dict[str, Any] | None = None,
 ) -> GraphState:
     """Run one hydrated capability: LLM-only, LLM-then-HTTP, HTTP, or no-op."""
+    goal = _mapping(state.get("goal"))
+    notes = list(state.get("notes") or [])
+    slots = _slots(state)
+    stage_id = _stage_id(pinned)
+    role = _llm_role(pinned.get("llm_role"))
+    input_schema = pinned.get("input_schema") if isinstance(pinned.get("input_schema"), dict) else None
+    request_body = _stage_request_preview(
+        pinned, goal, notes, slots, input_schema, role, retrieval, call_args
+    )
+    telemetry.emit_stage_started(stage_id, role, request_body)
+    try:
+        return _run_stage_impl(
+            pinned,
+            state,
+            invoker,
+            llm,
+            retrieval=retrieval,
+            prefetch=prefetch,
+            catalogue=catalogue,
+            expects_prefetch=expects_prefetch,
+            jobs=jobs,
+            call_args=call_args,
+        )
+    except (HumanGateWaiting, SubagentWaiting, CustomerAskWaiting):
+        raise
+    except RuntimeError:
+        telemetry.emit_stage_failed(stage_id, role, request_body, "runtime_error")
+        raise
+    except Exception:
+        telemetry.emit_stage_failed(stage_id, role, request_body, "stage_error")
+        raise
+
+
+def _run_stage_impl(
+    pinned: dict[str, Any],
+    state: GraphState,
+    invoker: ToolInvoker,
+    llm: LlmPort | None,
+    *,
+    retrieval: dict[str, Any] | None = None,
+    prefetch: PrefetchPort | None = None,
+    catalogue: Any = None,
+    expects_prefetch: bool = False,
+    jobs: JobsPort | None = None,
+    call_args: dict[str, Any] | None = None,
+) -> GraphState:
+    """Internal stage runner (telemetry started/failed wraps _run_stage)."""
     invoke = _mapping(pinned.get("invoke"))
     goal = _mapping(state.get("goal"))
     notes = list(state.get("notes") or [])
@@ -276,12 +349,26 @@ def _run_stage(
         if is_prefetch_stage(pinned, retrieval):
             if prefetch is None or catalogue is None:
                 raise RuntimeError("prefetch client required")
-            slot_body, note = run_prefetch(catalogue, prefetch, retrieval or {}, goal)
+            slot_body, note, per_corpus = run_prefetch(
+                catalogue, prefetch, retrieval or {}, goal
+            )
             notes.append(note)
+            new_slots = _write_slot(slots, stage_id, slot_body, pinned)
+            for hit in per_corpus:
+                corpus_id = str(hit.get("corpus_id") or "")
+                if not corpus_id:
+                    continue
+                new_slots = {
+                    **new_slots,
+                    prefetch_corpus_stage_id(corpus_id): {
+                        "corpus_id": corpus_id,
+                        "chunks": hit.get("chunks") or [],
+                    },
+                }
             return {
                 "result": note,
                 "notes": notes,
-                "slots": _write_slot(slots, stage_id, slot_body, pinned),
+                "slots": new_slots,
             }
         result = notes[-1] if notes else str(state.get("result") or "")
         return {"result": result, "notes": notes, "slots": slots}
@@ -335,9 +422,19 @@ def _make_stage_node(
         )
         if on_stage is not None:
             merged: GraphState = {**state, **output}
-            on_stage(index, str(tool.get("id") or name), merged)
+            if is_prefetch_stage(tool, retrieval):
+                slots = merged.get("slots") if isinstance(merged.get("slots"), dict) else {}
+                emitted = False
+                for key in slots:
+                    key_s = str(key)
+                    if key_s.startswith(f"{tool.get('id') or 'prefetch'}:"):
+                        on_stage(index, key_s, merged)
+                        emitted = True
+                if not emitted:
+                    on_stage(index, str(tool.get("id") or name), merged)
+            else:
+                on_stage(index, str(tool.get("id") or name), merged)
         return output
-
     return node
 
 
@@ -666,6 +763,7 @@ def build_agent_loop(
                         "result": text,
                         "notes": list(current.get("notes") or []) + [text],
                     }
+                    telemetry.emit_stage_started("customer_ask", "none", user)
                     if on_stage is not None:
                         on_stage(step, "customer_ask", asked)
                     raise CustomerAskWaiting(
@@ -681,6 +779,7 @@ def build_agent_loop(
                         "result": text,
                         "notes": list(current.get("notes") or []) + [text],
                     }
+                    telemetry.emit_stage_started("respond", "synthesis", user)
                     if on_stage is not None:
                         on_stage(step, "respond", current)
                     return current
@@ -721,6 +820,7 @@ def build_agent_loop(
                 except RuntimeError as exc:
                     # Pattern 1: missing schema fields / tool HTTP → observe and continue (chat goal may only have utterance).
                     note = f"tool error ({payload}): {exc}"
+                    telemetry.emit_stage_failed(payload, "none", call_args or current.get("goal") or {}, "runtime_error")
                     current = {
                         **current,
                         "result": note,

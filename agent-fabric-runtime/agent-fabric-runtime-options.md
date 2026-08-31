@@ -229,17 +229,17 @@ Custom runtimes may skip hydrate if they resolve tools another way — but AFD s
 
 ```text
 chat.turn.received          (AFD)
-intent.decide.*             (ADP)
-chat.run.accepted           (AFD)
+chat.intent.*               (ADP)
+chat.run.started            (AFD)
 run.hydrate.succeeded|failed (Runtime)
 run.started                 (Runtime)
+run.stage.*                 (Runtime)
 run.waiting                 (Runtime, if gate)
 run.completed|failed        (Runtime)
-run.terminal                (Audit — parallel)
-chat.events.delivered       (AFD)
+chat.run.delivered          (AFD)
 ```
 
-Jobs: `job.entitle.*` → `job.run.accepted` → same `run.*` family.
+Jobs: `job.entitlement.*` → `job.run.started` → same `run.*` family → `job.run.delivered`.
 
 ### 6.2 What each model must emit
 
@@ -285,8 +285,8 @@ You do **not** re-emit these from runtime — but custom runtimes should **not b
 
 | Producer | Events |
 | --- | --- |
-| **AFD** | `chat.turn.received`, `chat.run.accepted`, `chat.events.delivered`, `job.entitle.*`, `job.run.accepted` |
-| **ADP** | `intent.decide.routed`, `intent.decide.clarified`, `intent.decide.abstained` |
+| **AFD** | `chat.turn.received`, `chat.run.started`, `chat.run.delivered`, `job.entitlement.*`, `job.run.started`, `job.run.delivered` |
+| **ADP** | `chat.intent.routed`, `chat.intent.clarified`, `chat.intent.abstained`, `job.intent.*` |
 
 Full list: [root README — Business events](../README.md#business-events).
 

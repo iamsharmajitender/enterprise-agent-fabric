@@ -7,6 +7,8 @@ public interface FreezeStore {
 
   FrozenRoute get(String sessionId);
 
+  FrozenRoute findByCorrelationId(String correlationId);
+
   void putOpaque(String sessionId, String opaqueId, String routeId);
 
   String resolveOpaque(String sessionId, String opaqueId);

@@ -513,6 +513,59 @@ def test_prefetch_stage_packs_scope_into_slot_and_notes() -> None:
     assert output["result"] == "Memo from pack."
     assert "packed chunks:" in Llm.last_user
     assert "Refund window" in Llm.last_user
+    assert "prefetch:policy-engine" in output["slots"]
+    assert output["slots"]["prefetch:policy-engine"]["corpus_id"] == "policy-engine"
+
+
+def test_prefetch_on_stage_emits_per_corpus() -> None:
+    from tests.conftest import FakeCatalogue
+    from tests.test_prefetch import FakePrefetch
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("prefetch stage must not call domain tools")
+
+    class Llm:
+        def complete(self, system: str, user: str, schema=None) -> str:
+            return "ok"
+
+    catalogue = FakeCatalogue()
+    catalogue.corpora = {
+        "fee-schedule": {
+            "corpus_id": "fee-schedule",
+            "url": "http://mocks/fee",
+            "collection": "fee-schedule",
+            "status": "published",
+        },
+        "product-disclosure": {
+            "corpus_id": "product-disclosure",
+            "url": "http://mocks/pds",
+            "collection": "product-disclosure",
+            "status": "published",
+        },
+    }
+    seen: list[str] = []
+
+    def on_stage(step: int, stage_id: str, state: dict) -> None:
+        seen.append(stage_id)
+
+    graph = build_tool_graph(
+        [
+            {"id": "prefetch", "llm_role": "none", "invoke": {}},
+            {"id": "generate", "llm_role": "synthesis", "llm_prompt": "Answer", "invoke": {}},
+        ],
+        Invoker(),
+        llm=Llm(),
+        retrieval={
+            "mode": "deterministic_prefetch",
+            "scope": ["fee-schedule", "product-disclosure"],
+        },
+        prefetch=FakePrefetch(),
+        catalogue=catalogue,
+        on_stage=on_stage,
+    )
+    graph.invoke({"result": "", "goal": {"q": "fee"}})
+    assert seen == ["prefetch:fee-schedule", "prefetch:product-disclosure", "generate"]
 
 
 def test_prefetch_route_synthesis_fails_when_pack_missing() -> None:

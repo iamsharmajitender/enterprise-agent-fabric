@@ -102,16 +102,25 @@ class RunService:
             tool = tools[step] if 0 <= step < len(tools) else {}
             slots = state.get("slots") if isinstance(state.get("slots"), dict) else {}
             slot = slots.get(stage_id) if isinstance(slots, dict) else None
+            response_body = slot if slot is not None else state.get("notes") or []
+            llm_role = str(tool.get("llm_role") or "none")
+            request_body = state.get("goal") or {}
+            latency_ms = telemetry.emit_stage_completed(
+                stage_id,
+                response_body,
+                outcome="completed",
+                llm_role=llm_role,
+            )
             emit_async(
                 stage_completed(
                     correlation_id,
                     session_id,
                     stage_id,
-                    str(tool.get("llm_role") or "none"),
+                    llm_role,
                     "completed",
-                    0,
-                    state.get("goal") or {},
-                    slot if slot is not None else state.get("notes") or [],
+                    latency_ms,
+                    request_body,
+                    response_body,
                 )
             )
 
@@ -234,6 +243,7 @@ class RunService:
             telemetry.attach(correlation_id=saved.correlation_id)
             return saved.correlation_id
         telemetry.attach(correlation_id=saved.correlation_id)
+        retrieval = row.get("retrieval") if isinstance(row.get("retrieval"), dict) else None
         emit_async(
             hydrate_snapshot(
                 saved.correlation_id,
@@ -243,6 +253,8 @@ class RunService:
                 tools,
                 manifest_id=str(row.get("tool_manifest") or ""),
                 manifest_version=str(row.get("tool_manifest_version") or ""),
+                prompt_id=str(row.get("prompt_id") or ""),
+                retrieval=retrieval,
             )
         )
         telemetry.emit(

@@ -114,6 +114,16 @@ def run_loop(
     }
     if resume_loop_step is not None:
         invoke_state["_resume_loop_step"] = resume_loop_step
+    ingress = "jobs" if is_jobs_session(pin.session_id) else "chat"
+    run_ctx_token = telemetry.bind_run_event_context(
+        journey_id=journey_id,
+        correlation_id=pin.correlation_id,
+        session_id=pin.session_id,
+        route_id=pin.route_id or "",
+        route_version=pin.route_version or "",
+        channel="web",
+        ingress=ingress,
+    )
     try:
         with telemetry.tracer().start_as_current_span("graph.invoke") as span:
             span.set_attribute("correlation_id", pin.correlation_id)
@@ -220,3 +230,5 @@ def run_loop(
                 outcome="failed",
             )
         raise
+    finally:
+        telemetry.reset_run_event_context(run_ctx_token)

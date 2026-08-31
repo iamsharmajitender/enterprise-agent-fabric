@@ -86,18 +86,24 @@ def require_prefetch_pack(
         raise RuntimeError("prefetch pack required but prefetch slot is empty")
 
 
+def prefetch_corpus_stage_id(corpus_id: str) -> str:
+    """Audit / slot key for one corpus search inside the prefetch stage."""
+    return f"{PREFETCH_SLOT_ID}:{corpus_id}"
+
+
 def run_prefetch(
     catalogue: Any,
     prefetch: PrefetchPort,
     retrieval: dict[str, Any],
     goal: dict[str, Any],
-) -> tuple[dict[str, Any], str]:
-    """POST each scoped corpus and return a slot body plus packed note text."""
+) -> tuple[dict[str, Any], str, list[dict[str, Any]]]:
+    """POST each scoped corpus and return a slot body, packed note, and per-corpus hits."""
     scope = retrieval_scope(retrieval)
     if not scope:
         raise RuntimeError("prefetch scope empty")
 
     chunks: list[dict[str, Any]] = []
+    per_corpus: list[dict[str, Any]] = []
     for corpus_id in scope:
         corpus = catalogue.get_corpus(corpus_id)
         status = str(corpus.get("status") or "").strip()
@@ -107,9 +113,13 @@ def run_prefetch(
         collection = str(corpus.get("collection") or corpus_id).strip()
         if not url or not collection:
             raise RuntimeError(f"corpus {corpus_id!r} missing url or collection")
+        found: list[dict[str, Any]] = []
         for chunk in prefetch.search(url, collection, goal):
             if isinstance(chunk, dict):
-                chunks.append({**chunk, "corpus_id": corpus_id})
+                tagged = {**chunk, "corpus_id": corpus_id}
+                found.append(tagged)
+                chunks.append(tagged)
+        per_corpus.append({"corpus_id": corpus_id, "chunks": found})
 
     if not chunks:
         raise RuntimeError("prefetch returned no chunks")
@@ -117,4 +127,4 @@ def run_prefetch(
     note = packed_note(chunks)
     if not note:
         raise RuntimeError("prefetch returned empty pack")
-    return {"chunks": chunks}, note
+    return {"chunks": chunks}, note, per_corpus

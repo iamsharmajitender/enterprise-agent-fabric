@@ -85,17 +85,18 @@ Front Door emits **only** these, from `BusinessEvents.emit`. Not Kafka. No utter
 
 | Event | When |
 | --- | --- |
-| `chat.turn.received` | Jane posts a turn (before decide) |
-| `chat.run.accepted` | Freeze + Runtime start succeeded |
-| `chat.events.delivered` | Poll sees run completed |
+| `chat.turn.received` | User posts a turn (before decide) |
+| `chat.run.started` | Freeze + Runtime start succeeded |
+| `chat.run.delivered` | Poll sees run completed |
 
 ### Jobs (`JobsService`)
 
 | Event | When |
 | --- | --- |
-| `job.entitle.accepted` | Job POST accepted for entitle |
-| `job.entitle.rejected` | Decide did not return `route` |
-| `job.run.accepted` | Runtime start succeeded |
+| `job.entitlement.accepted` | Job POST accepted for entitle |
+| `job.entitlement.rejected` | Decide did not return `route` |
+| `job.run.started` | Runtime start succeeded |
+| `job.run.delivered` | Status poll sees run completed |
 
 Full journey list: [root README — Business events](../README.md#business-events).
 

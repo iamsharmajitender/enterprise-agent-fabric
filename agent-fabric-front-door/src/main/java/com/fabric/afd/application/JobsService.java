@@ -55,7 +55,7 @@ public class JobsService {
     TraceIds.put("route_id", routeId);
     TraceIds.put("journey_id", journeyId);
     events.emit(
-        "job.entitle.accepted",
+        "job.entitlement.accepted",
         journeyId,
         BusinessEvents.fields(
             "session_id",
@@ -65,15 +65,27 @@ public class JobsService {
             "channel",
             "web",
             "ingress",
-            "jobs"));
+            "jobs",
+            "outcome",
+            "accepted"));
     DecideOutcome outcome =
         decide.decide(new DecideCall("jobs", "web", sessionId, null, routeId, claims));
     TraceIds.put("outcome", outcome.outcome());
     if (!outcome.routed()) {
       events.emit(
-          "job.entitle.rejected",
+          "job.entitlement.rejected",
           journeyId,
-          BusinessEvents.fields("route_id", routeId, "outcome", outcome.outcome()));
+          BusinessEvents.fields(
+              "session_id",
+              sessionId,
+              "route_id",
+              routeId,
+              "channel",
+              "web",
+              "ingress",
+              "jobs",
+              "outcome",
+              outcome.outcome()));
       events.countOutcome(journeyId, "rejected", "web");
       throw new ForbiddenException("not entitled for route");
     }
@@ -100,7 +112,7 @@ public class JobsService {
             "jobs",
             SessionIds.parentCorrelationId(idempotencyKey)));
     events.emit(
-        "job.run.accepted",
+        "job.run.started",
         journeyId,
         BusinessEvents.fields(
             "session_id",
@@ -114,14 +126,47 @@ public class JobsService {
             "channel",
             "web",
             "ingress",
-            "jobs"));
-    events.countOutcome(journeyId, "accepted", "web");
+            "jobs",
+            "outcome",
+            "started"));
+    events.countOutcome(journeyId, "started", "web");
     return correlationId;
   }
 
   public Map<String, Object> status(String correlationId) {
     TraceIds.put("correlation_id", correlationId);
-    return runtime.status(correlationId);
+    FrozenRoute live = freeze.findByCorrelationId(correlationId);
+    if (live != null) {
+      TraceIds.put("session_id", live.sessionId());
+      TraceIds.put("route_id", live.routeId());
+    }
+    Map<String, Object> body = runtime.status(correlationId);
+    if (live != null && "completed".equals(String.valueOf(body.get("status")))) {
+      String journeyId =
+          live.routeId() == null ? "job.turn" : "job." + live.routeId();
+      events.emit(
+          "job.run.delivered",
+          journeyId,
+          BusinessEvents.fields(
+              "session_id",
+              live.sessionId(),
+              "correlation_id",
+              correlationId,
+              "route_id",
+              live.routeId(),
+              "route_version",
+              live.routeVersion(),
+              "channel",
+              "web",
+              "ingress",
+              "jobs",
+              "outcome",
+              "delivered",
+              "status",
+              "completed"));
+      events.countOutcome(journeyId, "completed", "web");
+    }
+    return body;
   }
 
   private static boolean blank(String value) {

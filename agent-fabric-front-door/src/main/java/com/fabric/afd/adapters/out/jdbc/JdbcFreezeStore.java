@@ -77,6 +77,32 @@ public class JdbcFreezeStore implements FreezeStore {
   }
 
   @Override
+  public FrozenRoute findByCorrelationId(String correlationId) {
+    if (correlationId == null || correlationId.isBlank()) {
+      return null;
+    }
+    List<FrozenRoute> rows =
+        jdbc.query(
+            """
+            SELECT session_id, idempotency_key, route_id, route_version,
+                   activation_target, agent_client_id, correlation_id
+              FROM frontdoor.freeze
+             WHERE correlation_id = :correlation_id AND expires_at > now()
+            """,
+            new MapSqlParameterSource("correlation_id", correlationId),
+            (rs, n) ->
+                new FrozenRoute(
+                    rs.getString("session_id"),
+                    rs.getString("idempotency_key"),
+                    rs.getString("route_id"),
+                    rs.getString("route_version"),
+                    rs.getString("activation_target"),
+                    rs.getString("agent_client_id"),
+                    rs.getString("correlation_id")));
+    return rows.isEmpty() ? null : rows.getFirst();
+  }
+
+  @Override
   public void putOpaque(String sessionId, String opaqueId, String routeId) {
     var params =
         new MapSqlParameterSource()

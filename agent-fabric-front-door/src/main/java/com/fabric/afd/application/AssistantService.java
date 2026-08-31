@@ -142,7 +142,7 @@ public class AssistantService {
         AuditEvents.freezeWritten(
             correlationId, sid, row.routeId(), row.routeVersion(), INGRESS));
     events.emit(
-        "chat.run.accepted",
+        "chat.run.started",
         journeyId,
         BusinessEvents.fields(
             "session_id",
@@ -156,8 +156,10 @@ public class AssistantService {
             "channel",
             CHANNEL,
             "ingress",
-            INGRESS));
-    events.countOutcome(journeyId, "accepted", CHANNEL);
+            INGRESS,
+            "outcome",
+            "started"));
+    events.countOutcome(journeyId, "started", CHANNEL);
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", sid);
     body.put("status", "accepted");
@@ -189,7 +191,7 @@ public class AssistantService {
     String journeyId = live.routeId() == null ? "chat.turn" : "chat." + live.routeId();
     if ("completed".equals(String.valueOf(status.get("status")))) {
       events.emit(
-          "chat.events.delivered",
+          "chat.run.delivered",
           journeyId,
           BusinessEvents.fields(
               "session_id",
@@ -198,6 +200,12 @@ public class AssistantService {
               live.correlationId(),
               "route_id",
               live.routeId(),
+              "channel",
+              CHANNEL,
+              "ingress",
+              INGRESS,
+              "outcome",
+              "delivered",
               "status",
               "completed"));
       events.countOutcome(journeyId, "completed", CHANNEL);

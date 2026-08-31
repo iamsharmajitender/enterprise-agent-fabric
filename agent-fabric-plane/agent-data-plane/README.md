@@ -140,13 +140,13 @@ Data Plane never reads `frontdoor.freeze`. Decide-side continuation re-entitle i
 
 ## Business events
 
-Data Plane emits **only** these three, from `DecideService` after the outcome is known (`BusinessEvents.emit`). Not Kafka. No utterance, tokens, or claims.
+Data Plane emits ingress-prefixed intent outcomes from `DecideService` after the outcome is known (`BusinessEvents.emit`). Not Kafka. No utterance, tokens, or claims.
 
 | Event | When |
 | --- | --- |
-| `intent.decide.routed` | Outcome is `route` |
-| `intent.decide.clarified` | Outcome is `clarify` |
-| `intent.decide.abstained` | Outcome is `abstain` |
+| `chat.intent.routed` / `job.intent.routed` | Outcome is `route` |
+| `chat.intent.clarified` / `job.intent.clarified` | Outcome is `clarify` |
+| `chat.intent.abstained` / `job.intent.abstained` | Outcome is `abstain` |
 
 Chat/jobs start, hydrate, and run complete are Front Door and Runtime, not this box. Same Event / When layout: [Front Door](../../agent-fabric-front-door/README.md#business-events). Full journey: [root README — Business events](../../README.md#business-events).
 

@@ -69,6 +69,46 @@ def envelope(
     }
 
 
+def _is_registry_capability(tool: dict[str, Any]) -> bool:
+    """True for ACR-pinned tools (id@version). Synthetic stages (prefetch, prompt, gates) omit version."""
+    cap_id = str(tool.get("id") or tool.get("capability_id") or "").strip()
+    version = str(tool.get("version") or tool.get("capability_version") or "").strip()
+    return bool(cap_id and version)
+
+
+def _capability_audit_entry(tool: dict[str, Any]) -> dict[str, Any] | None:
+    """Digest one registry capability pin; None for non-capability graph stages."""
+    if not _is_registry_capability(tool):
+        return None
+    cap_id = str(tool.get("id") or tool.get("capability_id") or "").strip()
+    version = str(tool.get("version") or tool.get("capability_version") or "").strip()
+    invoke = tool.get("invoke") if isinstance(tool.get("invoke"), dict) else {}
+    url = str(invoke.get("url") or "")
+    return {
+        "capability_id": cap_id,
+        "capability_version": version,
+        "invoke_url_digest": sha256_digest(url) if url else None,
+        "input_schema_digest": sha256_digest(tool.get("input_schema") or {}),
+        "output_schema_digest": sha256_digest(tool.get("output_schema") or {}),
+    }
+
+
+def _retrieval_audit(retrieval: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Catalogue retrieval pin for evidence (mode + corpus scope ids only)."""
+    if not isinstance(retrieval, dict):
+        return None
+    mode = str(retrieval.get("mode") or "").strip()
+    if not mode:
+        return None
+    raw_scope = retrieval.get("scope")
+    scope = (
+        [str(item) for item in raw_scope if str(item).strip()]
+        if isinstance(raw_scope, list)
+        else []
+    )
+    return {"mode": mode, "scope": scope}
+
+
 def hydrate_snapshot(
     correlation_id: str,
     session_id: str | None,
@@ -77,32 +117,31 @@ def hydrate_snapshot(
     tools: list[dict[str, Any]],
     manifest_id: str = "",
     manifest_version: str = "",
+    prompt_id: str = "",
+    retrieval: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    caps: list[dict[str, Any]] = []
-    for tool in tools:
-        invoke = tool.get("invoke") if isinstance(tool.get("invoke"), dict) else {}
-        url = str(invoke.get("url") or "")
-        caps.append(
-            {
-                "capability_id": str(tool.get("id") or ""),
-                "capability_version": str(tool.get("version") or ""),
-                "invoke_url_digest": sha256_digest(url) if url else None,
-                "input_schema_digest": sha256_digest(tool.get("input_schema") or {}),
-                "output_schema_digest": sha256_digest(tool.get("output_schema") or {}),
-            }
-        )
+    caps = [
+        entry
+        for tool in tools
+        if isinstance(tool, dict)
+        for entry in [_capability_audit_entry(tool)]
+        if entry is not None
+    ]
+    payload: dict[str, Any] = {
+        "route_id": route_id,
+        "route_version": route_version,
+        "manifest_id": manifest_id or None,
+        "manifest_version": manifest_version or None,
+        "prompt_id": prompt_id or None,
+        "retrieval": _retrieval_audit(retrieval),
+        "capabilities": caps,
+    }
     return envelope(
         "hydrate.snapshot",
         correlation_id=correlation_id,
         session_id=session_id,
         decision_id=None,
-        payload={
-            "route_id": route_id,
-            "route_version": route_version,
-            "manifest_id": manifest_id or None,
-            "manifest_version": manifest_version or None,
-            "capabilities": caps,
-        },
+        payload=payload,
     )
 
 

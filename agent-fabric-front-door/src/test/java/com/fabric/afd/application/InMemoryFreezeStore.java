@@ -28,6 +28,24 @@ public class InMemoryFreezeStore implements FreezeStore {
   }
 
   @Override
+  public FrozenRoute findByCorrelationId(String correlationId) {
+    if (correlationId == null || correlationId.isBlank()) {
+      return null;
+    }
+    Instant now = Instant.now();
+    for (Entry entry : bySession.values()) {
+      if (now.isAfter(entry.expiresAt())) {
+        continue;
+      }
+      FrozenRoute freeze = entry.freeze();
+      if (correlationId.equals(freeze.correlationId())) {
+        return freeze;
+      }
+    }
+    return null;
+  }
+
+  @Override
   public void putOpaque(String sessionId, String opaqueId, String routeId) {
     opaques.put(key(sessionId, opaqueId), new Opaque(routeId, Instant.now().plus(TTL)));
   }
