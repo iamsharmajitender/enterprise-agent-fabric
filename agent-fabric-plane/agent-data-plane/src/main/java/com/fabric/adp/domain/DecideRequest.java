@@ -11,7 +11,6 @@ public record DecideRequest(
     String routeId,
     Map<String, Object> claims) {
 
-  @SuppressWarnings("unchecked")
   public Set<String> entitledClaims() {
     if (claims == null) {
       return Set.of();

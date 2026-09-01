@@ -24,30 +24,25 @@ class SeedCapabilitiesSqlTest {
     for (String id :
         new String[] {
           "lookup_order_by_order_id",
-          "lookup_order_by_customer",
-          "lookup_order_by_email",
           "investigate_duplicate_charge",
           "check_return_policy",
           "escalate_to_human"
         }) {
       assertThat(seed).contains("'" + id + "'");
     }
+    assertThat(seed).contains("x-ground-in-user-context");
+    assertThat(seed).contains("^ORD-\\\\d+$");
     assertThat(readRoutePack("shopassist_case", "manifest.sql")).contains("'shopassist_case'");
     assertThat(seed).doesNotContain("'fee_explain'");
     assertThat(seed).doesNotContain("'web_search'");
   }
 
   @Test
-  void lookupOrderByEmailSchemaIsLocatorOnly() throws Exception {
-    String seed = readRoutePack("shopassist_case", "capability.sql");
-    int start = seed.indexOf("'lookup_order_by_email'");
-    int end = seed.indexOf("'investigate_duplicate_charge'", start);
-    assertThat(start).isGreaterThanOrEqualTo(0);
-    assertThat(end).isGreaterThan(start);
-    String block = seed.substring(start, end);
-    assertThat(block).contains("\"email\"");
-    assertThat(block).contains("\"required\":[\"email\"]");
-    assertThat(block).doesNotContain("utterance");
+  void catalogueSeedFeeExplainAccountIdPattern() throws Exception {
+    String seed = readRoutePack("fee_explain", "capability.sql");
+    assertThat(seed).contains("account_fee_lookup");
+    assertThat(seed).contains("^acct-\\\\d+$");
+    assertThat(seed).contains("x-ground-in-user-context");
   }
 
   private static String readClasspath(String path) throws Exception {

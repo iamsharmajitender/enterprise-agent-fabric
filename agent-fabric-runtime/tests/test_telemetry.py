@@ -55,6 +55,62 @@ def test_emit_stage_started_and_completed() -> None:
         telemetry.reset_run_event_context(token)
 
 
+def test_emit_llm_started_and_completed() -> None:
+    token = telemetry.bind_run_event_context(
+        journey_id="chat.pattern1_case",
+        correlation_id="corr-2",
+        session_id="chat-xyz",
+        route_id="pattern1_case",
+        route_version="2026.08.1",
+        channel="web",
+        ingress="chat",
+    )
+    llm_token = telemetry.bind_llm_call_context(stage_id="agent_decision", llm_role="agent")
+    try:
+        telemetry.emit_llm_started(
+            "system prompt",
+            "user blob",
+            structured=True,
+            schema_name="AgentDecision",
+            llm_model="seed-stub",
+        )
+        telemetry.emit_llm_completed(
+            {"action": "done", "message": "ok"},
+            latency_ms=42,
+            llm_model="seed-stub",
+        )
+    finally:
+        telemetry.reset_llm_call_context(llm_token)
+        telemetry.reset_run_event_context(token)
+
+
+def test_json_formatter_includes_llm_fields() -> None:
+    formatter = telemetry._JsonFormatter()
+    record = logging.LogRecord(
+        name="fabric.events",
+        level=logging.INFO,
+        pathname=__file__,
+        lineno=1,
+        msg="run.llm.completed",
+        args=(),
+        exc_info=None,
+    )
+    record.event = "run.llm.completed"
+    record.stage_id = "agent_decision"
+    record.llm_role = "agent"
+    record.llm_model = "seed-stub"
+    record.llm_schema = "AgentDecision"
+    record.latency_ms = "15"
+    record.request_digest = "sha256:abc"
+    record.response_digest = "sha256:def"
+    record.llm_messages = '[{"role":"system","content":"sys"},{"role":"user","content":"usr"}]'
+    payload = json.loads(formatter.format(record))
+    assert payload["stage_id"] == "agent_decision"
+    assert payload["llm_model"] == "seed-stub"
+    assert payload["llm_schema"] == "AgentDecision"
+    assert "system" in payload["llm_messages"]
+
+
 def test_stage_payloads_enabled() -> None:
     import os
 

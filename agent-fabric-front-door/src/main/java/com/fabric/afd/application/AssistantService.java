@@ -184,10 +184,7 @@ public class AssistantService {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", sessionId);
     body.put("status", status.get("status"));
-    Object result = status.get("result");
-    if (result instanceof Map<?, ?> map && map.get("message") != null) {
-      body.put("message", map.get("message"));
-    }
+    putResultMessages(body, status.get("result"));
     String journeyId = live.routeId() == null ? "chat.turn" : "chat." + live.routeId();
     if ("completed".equals(String.valueOf(status.get("status")))) {
       events.emit(
@@ -295,5 +292,19 @@ public class AssistantService {
 
   private static String string(Object value) {
     return value == null ? null : String.valueOf(value);
+  }
+
+  private static void putResultMessages(Map<String, Object> body, Object result) {
+    if (!(result instanceof Map<?, ?> map)) {
+      return;
+    }
+    Object message = map.get("message");
+    if (message != null) {
+      body.put("message", message);
+    }
+    Object messages = map.get("messages");
+    if (messages instanceof List<?> list && !list.isEmpty()) {
+      body.put("messages", list);
+    }
   }
 }

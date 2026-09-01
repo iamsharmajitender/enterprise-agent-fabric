@@ -1,0 +1,12 @@
+{
+  "id": "parse_ticket",
+  "method": "POST",
+  "path": "/support/parse_ticket",
+  "status": 200,
+  "response": {
+    "text": "Parsed billing inquiry about order ORD-77819.",
+    "category": "billing",
+    "order_ref": "ORD-77819",
+    "customer_email": "jane.doe@shopassist.example"
+  }
+}

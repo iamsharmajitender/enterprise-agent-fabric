@@ -1,0 +1,11 @@
+{
+  "id": "tag_intent",
+  "method": "POST",
+  "path": "/support/tag_intent",
+  "status": 200,
+  "response": {
+    "text": "Intent: duplicate_charge inquiry, priority: normal.",
+    "intent": "duplicate_charge",
+    "priority": "normal"
+  }
+}

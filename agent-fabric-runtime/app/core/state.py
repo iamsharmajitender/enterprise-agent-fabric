@@ -78,6 +78,7 @@ class RunStore(Protocol):
         *,
         working: dict[str, Any] | None = None,
         checkpoint: dict[str, Any] | None = None,
+        result: dict[str, Any] | None = None,
     ) -> None: ...
 
     def all(self) -> list[RunPin]: ...

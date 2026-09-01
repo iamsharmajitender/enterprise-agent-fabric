@@ -5,8 +5,14 @@ import {
   type EventsResponse,
   type HintsResponse,
   type TurnResponse,
+  resultMessages,
 } from "./front-door.js";
 import { addMessage, clearThread, showTyping, hideTyping, type ThreadElements } from "./thread.js";
+
+/** Runtime Ollama client timeout is 300s; keep poll window above that plus stage overhead. */
+const POLL_INTERVAL_MS = 500;
+const POLL_MAX_WAIT_MS = 330_000;
+const POLL_MAX_ATTEMPTS = Math.ceil(POLL_MAX_WAIT_MS / POLL_INTERVAL_MS);
 
 type ChatElements = ThreadElements & {
   typeSelect: HTMLSelectElement;
@@ -50,31 +56,50 @@ export async function mountChat(root: ChatElements): Promise<void> {
     root.meta.textContent = parts.join(" · ");
   };
 
-  const pickHint = async (needle: string): Promise<string> => {
+  const resolveHintId = async (): Promise<string | null> => {
+    if (!selected) return null;
     const hints = await client.fetchJson<HintsResponse>("/v1/assistant/hints");
     sessionId = hints.session_id ?? sessionId;
-    const hit = (hints.hints ?? []).find((h) =>
-      String(h.label ?? "").toLowerCase().includes(needle.toLowerCase()),
-    );
-    if (!hit) throw new Error(`no hint matching ${needle}`);
-    return hit.hint_id;
+    const list = hints.hints ?? [];
+    if (selected.hint_contains) {
+      const hit = list.find((h) =>
+        String(h.label ?? "").toLowerCase().includes(selected!.hint_contains!.toLowerCase()),
+      );
+      if (!hit) throw new Error(`no hint matching ${selected.hint_contains}`);
+      return hit.hint_id;
+    }
+    // Demo catalog rows pin a route via claims; when only one chip is eligible, bind layer ①.
+    if (selected.route_id && list.length === 1) {
+      return list[0]!.hint_id;
+    }
+    return null;
   };
 
   const poll = async (id: string) => {
+    const seen = new Set<string>();
+    const flush = (ev: EventsResponse) => {
+      for (const msg of resultMessages(ev)) {
+        if (seen.has(msg)) continue;
+        seen.add(msg);
+        addMessage(root, "assistant", msg);
+      }
+    };
     showTyping(root.thread, root.empty);
-    for (let i = 0; i < 40; i += 1) {
+    for (let i = 0; i < POLL_MAX_ATTEMPTS; i += 1) {
       const ev = await client.fetchJson<EventsResponse>(
         `/v1/assistant/sessions/${encodeURIComponent(id)}/events`,
       );
-      const msg = ev.message ?? ev.result?.message;
-      if (ev.status === "completed" || ev.status === "waiting" || ev.status === "failed" || msg) {
+      flush(ev);
+      const terminal =
+        ev.status === "completed" || ev.status === "waiting" || ev.status === "failed";
+      if (terminal) {
         hideTyping(root.thread);
-        if (msg) addMessage(root, "assistant", String(msg));
-        else if (ev.status === "failed") addMessage(root, "error", JSON.stringify(ev));
-        else addMessage(root, "system", `Status: ${ev.status ?? "unknown"}`);
+        if (ev.status === "failed" && seen.size === 0) {
+          addMessage(root, "error", JSON.stringify(ev));
+        }
         return;
       }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     }
     hideTyping(root.thread);
     addMessage(root, "error", "Timed out waiting for a reply.");
@@ -89,10 +114,7 @@ export async function mountChat(root: ChatElements): Promise<void> {
     setBusy(true);
     const isFirstTurn = !sessionId;
     try {
-      let hintId: string | null = null;
-      if (isFirstTurn && !optionId && selected?.hint_contains) {
-        hintId = await pickHint(selected.hint_contains);
-      }
+      const hintId = isFirstTurn && !optionId ? await resolveHintId() : null;
       const turn = await client.fetchJson<TurnResponse>("/v1/assistant/turns", {
         method: "POST",
         body: JSON.stringify({

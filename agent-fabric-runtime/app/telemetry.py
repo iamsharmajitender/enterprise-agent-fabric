@@ -11,6 +11,7 @@ from typing import Any
 _LOG = logging.getLogger("fabric.events")
 _REQUEST_ID: ContextVar[str | None] = ContextVar("request_id", default=None)
 _RUN_EVENT_CTX: ContextVar[dict[str, str] | None] = ContextVar("run_event_ctx", default=None)
+_LLM_CALL_CTX: ContextVar[dict[str, str] | None] = ContextVar("llm_call_ctx", default=None)
 _STAGE_STARTS: ContextVar[dict[str, float] | None] = ContextVar("stage_starts", default=None)
 
 _state: dict[str, Any] = {"ready": False, "fastapi": None, "log_handler": None}
@@ -123,8 +124,23 @@ def reset_run_event_context(token: Token[dict[str, str] | None]) -> None:
     _STAGE_STARTS.set(None)
 
 
+def bind_llm_call_context(**fields: str | None) -> Token[dict[str, str] | None]:
+    """Bind stage_id / llm_role for run.llm.* events during one completion."""
+    ctx = {key: value for key, value in fields.items() if value is not None and value != ""}
+    return _LLM_CALL_CTX.set(ctx or None)
+
+
+def reset_llm_call_context(token: Token[dict[str, str] | None]) -> None:
+    """Clear per-call LLM context after complete / complete_structured."""
+    _LLM_CALL_CTX.reset(token)
+
+
 def _run_event_fields() -> dict[str, str]:
     return dict(_RUN_EVENT_CTX.get() or {})
+
+
+def _llm_call_fields() -> dict[str, str]:
+    return dict(_LLM_CALL_CTX.get() or {})
 
 
 def _stage_digest(raw: Any) -> str:
@@ -143,6 +159,31 @@ def _stage_payload_field(name: str, raw: Any) -> dict[str, str]:
     else:
         text = json.dumps(raw, sort_keys=True, default=str)
     return {name: text}
+
+
+_LLM_STAGE_ROLES = frozenset({"classify", "synthesis", "query_formulation"})
+
+
+def _llm_payload_fields(request_preview: dict[str, Any]) -> dict[str, str]:
+    """Attach request_body and llm_messages when stage payloads are enabled."""
+    fields = _stage_payload_field("request_body", request_preview)
+    messages = request_preview.get("messages")
+    if isinstance(messages, list):
+        fields.update(_stage_payload_field("llm_messages", messages))
+    return fields
+
+
+def _stage_llm_payload_fields(request_body: Any) -> dict[str, str]:
+    """Log full LLM chat messages for stage events (flat or query_formulation hybrid)."""
+    if isinstance(request_body, dict) and "messages" in request_body:
+        return _llm_payload_fields(request_body)
+    if isinstance(request_body, dict) and isinstance(request_body.get("llm"), dict):
+        fields = _stage_payload_field("request_body", request_body)
+        messages = request_body["llm"].get("messages")
+        if isinstance(messages, list):
+            fields.update(_stage_payload_field("llm_messages", messages))
+        return fields
+    return _stage_payload_field("request_body", request_body)
 
 
 def mark_stage_started(stage_id: str) -> None:
@@ -173,7 +214,10 @@ def emit_stage_started(stage_id: str, llm_role: str, request_body: Any) -> None:
         "request_digest": _stage_digest(request_body),
         "outcome": "started",
     }
-    fields.update(_stage_payload_field("request_body", request_body))
+    if llm_role in _LLM_STAGE_ROLES:
+        fields.update(_stage_llm_payload_fields(request_body))
+    else:
+        fields.update(_stage_payload_field("request_body", request_body))
     journey_id = fields.pop("journey_id", None)
     emit("run.stage.started", journey_id=journey_id, **fields)
 
@@ -200,6 +244,114 @@ def emit_stage_completed(
     journey_id = fields.pop("journey_id", None)
     emit("run.stage.completed", journey_id=journey_id, **fields)
     return latency_ms
+
+
+def _llm_request_preview(
+    system: str,
+    user: str,
+    *,
+    structured: bool,
+    schema_name: str | None,
+    output_schema: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    from app.graph.llm.messages import llm_messages_preview
+
+    return llm_messages_preview(
+        system,
+        user,
+        structured=structured,
+        schema_name=schema_name,
+        output_schema=output_schema,
+    )
+
+
+def emit_llm_started(
+    system: str,
+    user: str,
+    *,
+    structured: bool = False,
+    schema_name: str | None = None,
+    output_schema: dict[str, Any] | None = None,
+    llm_model: str | None = None,
+) -> None:
+    """Business event before an LLM completion (system + user prompt)."""
+    request_body = _llm_request_preview(
+        system,
+        user,
+        structured=structured,
+        schema_name=schema_name,
+        output_schema=output_schema,
+    )
+    fields = {
+        **_run_event_fields(),
+        **_llm_call_fields(),
+        "request_digest": _stage_digest(request_body),
+        "outcome": "started",
+        "llm_structured": "true" if structured else "false",
+    }
+    if schema_name:
+        fields["llm_schema"] = schema_name
+    if llm_model:
+        fields["llm_model"] = llm_model
+    fields.update(_llm_payload_fields(request_body))
+    journey_id = fields.pop("journey_id", None)
+    emit("run.llm.started", journey_id=journey_id, **fields)
+
+
+def emit_llm_completed(
+    response_body: Any,
+    *,
+    latency_ms: int,
+    llm_model: str | None = None,
+) -> None:
+    """Business event after a successful LLM completion."""
+    fields = {
+        **_run_event_fields(),
+        **_llm_call_fields(),
+        "latency_ms": str(latency_ms),
+        "response_digest": _stage_digest(response_body),
+        "outcome": "completed",
+    }
+    if llm_model:
+        fields["llm_model"] = llm_model
+    fields.update(_stage_payload_field("response_body", response_body))
+    journey_id = fields.pop("journey_id", None)
+    emit("run.llm.completed", journey_id=journey_id, **fields)
+
+
+def emit_llm_failed(
+    system: str,
+    user: str,
+    reason_class: str,
+    *,
+    structured: bool = False,
+    schema_name: str | None = None,
+    output_schema: dict[str, Any] | None = None,
+    llm_model: str | None = None,
+) -> None:
+    """Business event when an LLM completion throws."""
+    request_body = _llm_request_preview(
+        system,
+        user,
+        structured=structured,
+        schema_name=schema_name,
+        output_schema=output_schema,
+    )
+    fields = {
+        **_run_event_fields(),
+        **_llm_call_fields(),
+        "request_digest": _stage_digest(request_body),
+        "outcome": "failed",
+        "reason_class": reason_class,
+        "llm_structured": "true" if structured else "false",
+    }
+    if schema_name:
+        fields["llm_schema"] = schema_name
+    if llm_model:
+        fields["llm_model"] = llm_model
+    fields.update(_llm_payload_fields(request_body))
+    journey_id = fields.pop("journey_id", None)
+    emit("run.llm.failed", journey_id=journey_id, **fields)
 
 
 def emit_stage_failed(
@@ -396,6 +548,10 @@ class _JsonFormatter(logging.Formatter):
             "response_digest",
             "request_body",
             "response_body",
+            "llm_messages",
+            "llm_model",
+            "llm_schema",
+            "llm_structured",
         ):
             value = getattr(record, key, None)
             if value is not None:

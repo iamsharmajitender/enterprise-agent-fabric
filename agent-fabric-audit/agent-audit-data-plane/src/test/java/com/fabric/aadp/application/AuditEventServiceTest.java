@@ -2,7 +2,6 @@ package com.fabric.aadp.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fabric.aadp.domain.AuditEvent;
 import com.fabric.aadp.domain.AuditValidationException;

@@ -23,4 +23,6 @@ test("claimsFor builds jane stub claims", () => {
 test("bundled chat catalog is present and seeded", () => {
   const chatPkg = readFileSync(join(pkgRoot, "catalog/chats.json"), "utf8");
   assert.match(chatPkg, /"id": "shopassist_case_ask"/);
+  assert.match(chatPkg, /"id": "duplicate_charge_review"/);
+  assert.match(chatPkg, /"id": "ticket_triage"/);
 });

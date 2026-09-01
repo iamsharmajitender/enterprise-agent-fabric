@@ -14,6 +14,11 @@
     { "route_id": "overdraft_fee_qa", "text": "How much is the business account overdraft fee per day?" },
     { "route_id": "overdraft_fee_qa", "text": "Corporate account overdraft charges and monthly cap" },
     { "route_id": "overdraft_fee_qa", "text": "Student account overdraft fee schedule" },
-    { "route_id": "overdraft_fee_qa", "text": "Premier overdraft fee free days" }
+    { "route_id": "overdraft_fee_qa", "text": "Premier overdraft fee free days" },
+    { "route_id": "fee_explain", "text": "Why was I charged $42?" },
+    { "route_id": "fee_explain", "text": "Why was I charged a fee?" },
+    { "route_id": "fee_explain", "text": "Explain the $42 monthly charge on my account" },
+    { "route_id": "fee_explain", "text": "What is this $42 fee on my statement?" },
+    { "route_id": "fee_explain", "text": "I was charged $42 and do not understand why" }
   ]
 }

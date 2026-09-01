@@ -6,7 +6,7 @@ import {
   groupByLabel,
 } from "../shared/catalog.js";
 import type { JobRow } from "../shared/types.js";
-import { FrontDoorClient, type JobAccepted, type JobStatus } from "./front-door.js";
+import { FrontDoorClient, type JobAccepted, type JobStatus, resultMessages } from "./front-door.js";
 import {
   addJobEvent,
   clearThread,
@@ -14,6 +14,12 @@ import {
   showTyping,
   type ThreadElements,
 } from "./thread.js";
+
+/** Local Ollama (e.g. qwen3:14b) can take 30–90s on cold start; keep poll window above that. */
+/** Match chat poll window — local LLM stages can exceed 120s. */
+const POLL_INTERVAL_MS = 500;
+const POLL_MAX_WAIT_MS = 330_000;
+const POLL_MAX_ATTEMPTS = Math.ceil(POLL_MAX_WAIT_MS / POLL_INTERVAL_MS);
 
 type JobElements = ThreadElements & {
   typeSelect: HTMLSelectElement;
@@ -55,21 +61,31 @@ export async function mountJobs(root: JobElements): Promise<void> {
   };
 
   const poll = async (id: string) => {
+    const seen = new Set<string>();
+    const flush = (ev: JobStatus) => {
+      for (const msg of resultMessages(ev)) {
+        if (seen.has(msg)) continue;
+        seen.add(msg);
+        addJobEvent(root, "info", "Update", msg);
+      }
+    };
     showTyping(root.thread, root.empty);
-    for (let i = 0; i < 40; i += 1) {
+    for (let i = 0; i < POLL_MAX_ATTEMPTS; i += 1) {
       const ev = await client.fetchJson<JobStatus>(`/v1/jobs/${encodeURIComponent(id)}`);
-      const msg = ev.message ?? ev.result?.message;
-      if (ev.status === "completed" || msg) {
+      flush(ev);
+      if (ev.status === "completed") {
         hideTyping(root.thread);
-        addJobEvent(root, "success", "Result", msg ?? JSON.stringify(ev));
+        if (seen.size === 0) {
+          addJobEvent(root, "success", "Result", JSON.stringify(ev));
+        }
         return;
       }
       if (ev.status === "failed") {
         hideTyping(root.thread);
-        addJobEvent(root, "error", "Failed", msg ?? JSON.stringify(ev));
+        addJobEvent(root, "error", "Failed", seen.size ? "" : JSON.stringify(ev));
         return;
       }
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
     }
     hideTyping(root.thread);
     addJobEvent(root, "error", "Timeout", "Timed out waiting for job completion.");

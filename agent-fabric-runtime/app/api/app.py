@@ -1,3 +1,9 @@
+"""FastAPI application factory for Agent Runtime (AR).
+
+``app`` is the module-level FastAPI instance uvicorn loads via ``app.main:app``.
+``create_app`` injects dependencies for tests; ``build_app`` wires production
+clients from environment variables and is invoked once at import time.
+"""
 import os
 from typing import Any
 
@@ -16,6 +22,7 @@ from app.core.run_store import PersistentRunStore
 from app.graph.llm import llm_from_env
 from app.tools.invoker import HttpToolClient
 
+# Known fabric workload identities (X-Workload header). Only AFD may start runs.
 WORKLOADS = frozenset({"afd", "adp", "acp", "ar", "acr"})
 
 app = FastAPI(title="agent-runtime")
@@ -30,6 +37,7 @@ async def workload_auth(request: Request, call_next):  # type: ignore[no-untyped
     workload = request.headers.get("x-workload")
     if authorization != "Bearer fabric-internal" or workload not in WORKLOADS:
         return error_response(401, "UNAUTHORIZED", "workload identity required")
+    # Channels reach AR only through AFD freeze/start; sibling services must not dial runs.
     if workload != "afd":
         return error_response(403, "FORBIDDEN", "only afd may call runtime")
     return await call_next(request)
@@ -64,6 +72,7 @@ def create_app(
 ) -> FastAPI:
     """Attach run dependencies (store, catalogue, tools, LLM) onto the app.
 
+    Mutates the shared module-level ``app`` instance (same object uvicorn serves).
     ``schedule_run`` defaults to inline execution so TestClient callers see
     completion on the same thread. Production ``build_app`` uses a background thread.
     """
@@ -91,6 +100,7 @@ def build_app() -> FastAPI:
     registry_url = os.environ.get("REGISTRY_URL")
     return create_app(
         store=PersistentRunStore(engine()),
+        # Optional in local tests; hydrate/pin fail fast if catalogue or registry is missing.
         catalogue=HttpCatalogueClient(data_plane) if data_plane else None,
         registry=HttpRegistryClient(registry_url) if registry_url else None,
         tool_invoker=HttpToolClient(),
@@ -101,4 +111,5 @@ def build_app() -> FastAPI:
     )
 
 
+# Eager init so ``uvicorn app.main:app`` serves a fully wired app without a factory arg.
 build_app()

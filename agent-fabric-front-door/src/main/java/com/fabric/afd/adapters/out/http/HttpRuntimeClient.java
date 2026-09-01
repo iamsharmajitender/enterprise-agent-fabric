@@ -9,7 +9,6 @@ import com.fabric.afd.domain.RunStart;
 import com.fabric.afd.domain.UnavailableException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;

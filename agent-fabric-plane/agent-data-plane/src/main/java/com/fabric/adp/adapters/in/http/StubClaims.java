@@ -16,8 +16,8 @@ final class StubClaims {
     try {
       JsonNode emts = mapper.readTree(header).path("emts");
       Set<String> claims = new HashSet<>();
-      emts.fields()
-          .forEachRemaining(
+      emts.properties()
+          .forEach(
               e -> {
                 if (e.getValue().asBoolean()) {
                   claims.add(e.getKey());

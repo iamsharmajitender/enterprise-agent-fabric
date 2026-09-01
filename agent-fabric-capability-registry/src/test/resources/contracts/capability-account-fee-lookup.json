@@ -6,7 +6,14 @@
   "input_schema": {
     "type": "object",
     "required": ["account_id"],
-    "properties": { "account_id": { "type": "string" } }
+    "properties": {
+      "account_id": {
+        "type": "string",
+        "pattern": "^acct-\\d+$",
+        "description": "Customer account id (acct-*)",
+        "x-ground-in-user-context": true
+      }
+    }
   },
   "output_schema": {
     "type": "object",

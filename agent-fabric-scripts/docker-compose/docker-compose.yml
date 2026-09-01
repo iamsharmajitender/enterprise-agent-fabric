@@ -29,7 +29,8 @@ x-agent-runtime-env: &agent-runtime-env
   AUDIT_DATA_PLANE_URL: http://agent-audit-data-plane:3012
   OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
   OLLAMA_MODEL: ${OLLAMA_MODEL:-}
-  FABRIC_LLM_MODEL: ${FABRIC_LLM_MODEL:-ollama:llama3.1:8b}
+  FABRIC_LLM_MODEL: ${FABRIC_LLM_MODEL:-google_genai:gemini-3.5-flash-lite}
+  GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
   FABRIC_LLM_STUB: ${FABRIC_LLM_STUB:-0}
   FABRIC_LOG_STAGE_PAYLOADS: ${FABRIC_LOG_STAGE_PAYLOADS:-1}
 

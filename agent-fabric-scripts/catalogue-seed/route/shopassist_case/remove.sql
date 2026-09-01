@@ -11,8 +11,6 @@ DELETE FROM dataplane.manifests WHERE manifest_id = 'shopassist_case';
 DELETE FROM registry.manifests WHERE manifest_id = 'shopassist_case';
 DELETE FROM registry.capabilities WHERE id IN (
   'lookup_order_by_order_id',
-  'lookup_order_by_customer',
-  'lookup_order_by_email',
   'investigate_duplicate_charge',
   'check_return_policy',
   'escalate_to_human'

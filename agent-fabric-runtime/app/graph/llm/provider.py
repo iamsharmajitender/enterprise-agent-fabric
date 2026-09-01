@@ -5,14 +5,18 @@ replacing ``_build_default_backend`` only — callers use ``ProviderLlm`` / ``ll
 """
 
 import os
-from typing import Any, Protocol
+from typing import Any, Protocol, TypeVar
+
+from pydantic import BaseModel
 
 from app import telemetry
 from app.graph.llm.schema import dump_structured, model_from_json_schema
 from app.graph.llm.text import plain_text
 
-_DEFAULT_MODEL = "ollama:llama3.1:8b"
-_DEFAULT_SYSTEM = "Follow the user request. Reply with the result only."
+T = TypeVar("T", bound=BaseModel)
+
+_DEFAULT_MODEL = "ollama:qwen3:14b"
+from app.graph.llm.messages import DEFAULT_SYSTEM as _DEFAULT_SYSTEM
 
 
 class _ChatBackend(Protocol):
@@ -42,6 +46,36 @@ class ProviderLlm:
             message = self._backend.invoke(messages)
             return plain_text(getattr(message, "content", message))
 
+    def complete_structured(
+        self,
+        system: str,
+        user: str,
+        schema: type[T],
+    ) -> T:
+        """Run one completion with a Pydantic schema bound via the chat backend."""
+        with telemetry.tracer().start_as_current_span("llm.complete") as span:
+            span.set_attribute("llm.system", "provider")
+            model = os.environ.get("OLLAMA_MODEL") or os.environ.get("FABRIC_LLM_MODEL") or _DEFAULT_MODEL
+            span.set_attribute("llm.model", model)
+            span.set_attribute("llm.structured", True)
+            span.set_attribute("llm.schema", schema.__name__)
+            messages = [
+                ("system", system or _DEFAULT_SYSTEM),
+                ("human", user),
+            ]
+            bind = getattr(self._backend, "with_structured_output", None)
+            if bind is None:
+                raise RuntimeError("llm backend does not support structured output")
+            structured = bind(schema)
+            result = structured.invoke(messages)
+            if isinstance(result, schema):
+                return result
+            if isinstance(result, BaseModel):
+                return schema.model_validate(result.model_dump())
+            if isinstance(result, dict):
+                return schema.model_validate(result)
+            raise RuntimeError(f"structured llm returned unexpected type {type(result)!r}")
+
 
 def _structured_invoke(backend: Any, schema: dict[str, Any], messages: list) -> Any:
     """Bind the backend with with_structured_output; fail if the backend cannot.
@@ -69,15 +103,16 @@ def _build_default_backend() -> _ChatBackend:
     # https://reference.langchain.com/python/langchain-ollama/chat_models/ChatOllama
     from langchain.chat_models import init_chat_model
 
+    model = os.environ.get("OLLAMA_MODEL") or os.environ.get("FABRIC_LLM_MODEL") or _DEFAULT_MODEL
     kwargs: dict[str, Any] = {
         "temperature": 0.1,
         "timeout": 300,
         "max_tokens": 4096,
-        "num_predict": 4096,
-        "client_kwargs": {"timeout": 300.0},
     }
-    base_url = os.environ.get("OLLAMA_BASE_URL", "").strip()
-    if base_url:
-        kwargs["base_url"] = base_url
-    model = os.environ.get("OLLAMA_MODEL") or os.environ.get("FABRIC_LLM_MODEL") or _DEFAULT_MODEL
+    if model.startswith("ollama:"):
+        kwargs["num_predict"] = 4096
+        kwargs["client_kwargs"] = {"timeout": 300.0}
+        base_url = os.environ.get("OLLAMA_BASE_URL", "").strip()
+        if base_url:
+            kwargs["base_url"] = base_url
     return init_chat_model(model, **kwargs)

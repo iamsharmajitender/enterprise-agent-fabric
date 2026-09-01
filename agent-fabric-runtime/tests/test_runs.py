@@ -8,6 +8,7 @@ from app.core.execution import run_loop
 from app.core.memory import persist_stage
 from app.core.state import RunPin
 from app.graph.workflow import build_agent_loop, build_tool_graph
+from tests.llm_fakes import TextLlm
 from app.main import create_app
 from tests.conftest import (
     AFD,
@@ -390,13 +391,20 @@ def test_resume_reloads_working_notes(
         def call(self, invoke: dict, payload: dict) -> dict:
             return {"text": CANNED}
 
+    class Llm(FakeLlm):
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns in (1, 3):
+                return 'CALL fetch_record\n{"record_id": "REC-77819"}'
+            return f"DONE {CANNED}"
+
     client = TestClient(
         create_app(
             store=store,
             catalogue=catalogue,
             registry=registry,
             tool_invoker=Invoker(),
-            llm=FakeLlm(),
+            llm=Llm(),
         )
     )
     started = client.post("/v1/runs", headers=AFD, json=START_BODY)
@@ -405,7 +413,11 @@ def test_resume_reloads_working_notes(
     pin = store.get(correlation_id)
     assert pin is not None
     assert pin.working == {
-        "notes": [CANNED, CANNED, CANNED],
+        "notes": [
+            CANNED,
+            "fetch_record: already completed; use prior stage outputs and choose the next tool or done.",
+            CANNED,
+        ],
         "slots": {"fetch_record": {"text": CANNED}},
     }
 
@@ -741,7 +753,7 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
             payloads.append(payload)
             return {"text": "Record REC-77819: widget $149."}
 
-    class Llm:
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -808,3 +820,76 @@ def test_customer_ask_pauses_then_resumes_with_message(store) -> None:
     assert body is not None
     assert body["status"] == "completed"
     assert payloads == [{"record_id": "REC-77819"}]
+
+
+def test_customer_ask_resume_is_idempotent_when_reply_already_recorded(store) -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            return {"text": "Record REC-77819: widget $149."}
+
+    class Llm(TextLlm):
+        def complete(self, system: str, user: str, schema=None) -> str:
+            if "Record REC-77819" in user:
+                return "DONE Record REC-77819: widget $149."
+            if "customer: REC-77819" in user:
+                return 'CALL fetch_record\n{"record_id":"REC-77819"}'
+            return "ASK Please provide a record id."
+
+    tools = [
+        {
+            "id": "fetch_record",
+            "input_schema": {
+                "type": "object",
+                "required": ["record_id"],
+                "properties": {"record_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/fetch"},
+        }
+    ]
+    row = {
+        "route_id": "pattern1_case",
+        "route_version": "2026.08.1",
+        "autonomy_mode": 1,
+        "max_loop_steps": 6,
+        "prompt_id": "pattern1_case",
+        "memory_profile": {"working": "session", "loop": "checkpoint"},
+    }
+    pin = RunPin(
+        correlation_id="corr-ask-dup",
+        idempotency_key="chat-ask-dup",
+        session_id="chat-ask-dup",
+        route_id="pattern1_case",
+        route_version="2026.08.1",
+        activation_target=None,
+        agent_client_id=None,
+        hydrated_tools=tools,
+        status="waiting",
+        checkpoint={
+            "waiting_for": "customer_ask",
+            "stage_id": "customer_ask",
+            "resume_loop_step": 1,
+            "goal": {"utterance": "need help"},
+        },
+        working={
+            "notes": ["ask: Please provide a record id.", "customer: REC-77819"],
+            "slots": {},
+        },
+        result={"message": "Please provide a record id."},
+    )
+    store.insert(pin)
+    catalogue = FakeCatalogue(row)
+    catalogue.prompt = {"host": "Pattern 1 coordinator."}
+    service = RunService(
+        store,
+        catalogue,
+        FakeRegistry(),
+        invoker=Invoker(),
+        llm=Llm(),
+    )
+    body = service.resume("corr-ask-dup", {"message": "REC-77819"})
+    assert body is not None
+    assert body["status"] == "completed"
+    finished = store.get("corr-ask-dup")
+    assert finished is not None
+    notes = finished.working["notes"] if finished.working else []
+    assert notes.count("customer: REC-77819") == 1

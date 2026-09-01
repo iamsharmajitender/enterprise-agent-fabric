@@ -1,7 +1,10 @@
 from typing import Any
 
+import pytest
+
 from app.graph.customer_ask import CustomerAskWaiting
 from app.graph.workflow import build_agent_loop, build_tool_graph
+from tests.llm_fakes import TextLlm
 
 
 def test_tool_graph_calls_each_hydrated_tool_in_order() -> None:
@@ -378,6 +381,282 @@ def test_classify_slot_persisted_for_next_stage() -> None:
         "amount": 45.36,
         "date": "2026-08-12",
     }
+
+
+def test_duplicate_charge_review_passes_customer_id_from_lookup_to_dup_check() -> None:
+    """Pattern 2 seed: classify order_id → lookup → dup_check gets customer_id from lookup slot."""
+    calls: list[dict] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(dict(payload))
+            url = str(invoke.get("url") or "")
+            if "lookup_order" in url:
+                return {
+                    "text": "Order ORD-77819 for Jane Doe.",
+                    "order_id": "ORD-77819",
+                    "customer_id": "CUS-1842",
+                    "item_id": "jacket_blue_m",
+                }
+            return {
+                "text": "No duplicate capture on ORD-77819.",
+                "duplicate_charge_found": False,
+            }
+
+    class Llm:
+        def complete(self, system: str, user: str, schema: dict | None = None) -> str:
+            if schema and "order_id" in schema.get("properties", {}):
+                return '{"order_id":"ORD-77819"}'
+            return (
+                "Order ORD-77819 was not double-charged; the second authorization is pending."
+            )
+
+    tools = [
+        {
+            "id": "duplicate_charge_intake",
+            "llm_role": "classify",
+            "llm_prompt": "Extract order_id from the goal utterance only.",
+            "output_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {"order_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/intake"},
+        },
+        {
+            "id": "lookup_order_by_order_id",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {"order_id": {"type": "string"}},
+            },
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "customer_id": {"type": "string", "x-agent-context": True},
+                },
+            },
+            "invoke": {
+                "method": "POST",
+                "url": "http://agent-mocks:3010/shopassist/lookup_order",
+            },
+        },
+        {
+            "id": "investigate_duplicate_charge",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id", "customer_id"],
+                "properties": {
+                    "order_id": {"type": "string"},
+                    "customer_id": {"type": "string"},
+                },
+            },
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "duplicate_charge_found": {"type": "boolean", "x-agent-context": True},
+                },
+            },
+            "invoke": {
+                "method": "POST",
+                "url": "http://agent-mocks:3010/shopassist/investigate_duplicate_charge",
+            },
+        },
+        {
+            "id": "duplicate_charge_respond",
+            "llm_role": "synthesis",
+            "llm_prompt": "Write the customer reply from prior stage outputs only.",
+            "invoke": {},
+        },
+    ]
+    graph = build_tool_graph(tools, Invoker(), llm=Llm())
+    goal = {"utterance": "I was charged twice on order ORD-77819"}
+    output = graph.invoke({"result": "", "goal": goal, "slots": {}})
+    assert calls == [
+        {"order_id": "ORD-77819"},
+        {"order_id": "ORD-77819", "customer_id": "CUS-1842"},
+    ]
+    assert output["slots"]["duplicate_charge_intake"] == {"order_id": "ORD-77819"}
+    assert "not double-charged" in output["result"]
+
+
+def test_ticket_triage_passes_parse_fields_to_tag_intent() -> None:
+    """Pattern 3 seed: parse_ticket slot → tag_intent HTTP body (guided outer walk)."""
+    calls: list[dict] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(dict(payload))
+            url = str(invoke.get("url") or "")
+            if "parse_ticket" in url:
+                return {
+                    "text": "Parsed billing inquiry.",
+                    "category": "billing",
+                    "order_ref": "ORD-77819",
+                    "customer_email": "jane.doe@shopassist.example",
+                }
+            return {
+                "text": "Intent tagged.",
+                "intent": "duplicate_charge",
+                "priority": "normal",
+            }
+
+    class FakeJobs:
+        def start(self, *_args, **_kwargs) -> dict[str, Any]:
+            raise AssertionError("child agent runs after tag_intent in a separate test")
+
+    tools = [
+        {
+            "id": "parse_ticket",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "properties": {"utterance": {"type": "string"}},
+            },
+            "output_schema": {
+                "type": "object",
+                "required": ["text", "category", "order_ref"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "category": {"type": "string"},
+                    "order_ref": {"type": "string"},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/support/parse_ticket"},
+        },
+        {
+            "id": "tag_intent",
+            "llm_role": "none",
+            "input_schema": {
+                "type": "object",
+                "required": ["category", "order_ref"],
+                "properties": {
+                    "category": {"type": "string"},
+                    "order_ref": {"type": "string"},
+                },
+            },
+            "output_schema": {
+                "type": "object",
+                "required": ["text", "intent", "priority"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "intent": {"type": "string", "x-agent-context": True},
+                    "priority": {"type": "string", "x-agent-context": True},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/support/tag_intent"},
+        },
+    ]
+    graph = build_tool_graph(tools, Invoker(), jobs=FakeJobs())
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "Customer charged twice on ORD-77819"},
+            "slots": {},
+        }
+    )
+    assert calls[1] == {"category": "billing", "order_ref": "ORD-77819"}
+    assert output["slots"]["parse_ticket"]["order_ref"] == "ORD-77819"
+
+
+def test_ticket_triage_starts_draft_reply_child_with_projected_payload() -> None:
+    """Pattern 3 reply stage: kind=agent posts ticket_draft_reply child job with join."""
+    from app.graph.subagent_gate import SubagentWaiting
+
+    calls: list[tuple[str, str, dict[str, Any]]] = []
+
+    class FakeJobs:
+        def start(
+            self,
+            route_id: str,
+            idempotency_key: str,
+            payload: dict[str, Any],
+            *,
+            invoke: dict[str, Any] | None = None,
+        ) -> dict[str, Any]:
+            calls.append((route_id, idempotency_key, payload))
+            return {"correlation_id": "corr-child-draft-1"}
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("draft_reply is kind=agent, not domain HTTP")
+
+    graph = build_tool_graph(
+        [
+            {
+                "id": "draft_reply",
+                "kind": "agent",
+                "llm_role": "none",
+                "input_schema": {
+                    "type": "object",
+                    "required": [
+                        "utterance",
+                        "category",
+                        "order_ref",
+                        "intent",
+                        "priority",
+                    ],
+                    "properties": {
+                        "utterance": {"type": "string"},
+                        "category": {"type": "string"},
+                        "order_ref": {"type": "string"},
+                        "intent": {"type": "string"},
+                        "priority": {"type": "string"},
+                    },
+                },
+                "invoke": {
+                    "method": "POST",
+                    "url": "https://api-afd.internal/v1/jobs",
+                    "join": True,
+                    "body": {"route_id": "ticket_draft_reply"},
+                },
+            }
+        ],
+        Invoker(),
+        jobs=FakeJobs(),
+    )
+    try:
+        graph.invoke(
+            {
+                "result": "",
+                "goal": {"utterance": "Customer charged twice on ORD-77819"},
+                "notes": ["parse_ticket: category=billing, order_ref=ORD-77819", "tag_intent: intent=duplicate_charge, priority=normal"],
+                "slots": {
+                    "parse_ticket": {
+                        "category": "billing",
+                        "order_ref": "ORD-77819",
+                    },
+                    "tag_intent": {
+                        "intent": "duplicate_charge",
+                        "priority": "normal",
+                    },
+                },
+                "correlation_id": "corr-parent-triage-1",
+            }
+        )
+    except SubagentWaiting as exc:
+        assert calls == [
+            (
+                "ticket_draft_reply",
+                "subagent-corr-parent-triage-1-draft_reply",
+                {
+                    "utterance": "Customer charged twice on ORD-77819",
+                    "category": "billing",
+                    "order_ref": "ORD-77819",
+                    "intent": "duplicate_charge",
+                    "priority": "normal",
+                },
+            )
+        ]
+        assert exc.stage_id == "draft_reply"
+        return
+    raise AssertionError("expected subagent join waiting after kind=agent start")
 
 
 def test_classify_uses_llm_and_skips_tool() -> None:
@@ -930,7 +1209,7 @@ def test_agent_loop_calls_tool_then_done() -> None:
             calls.append(invoke["url"])
             return {"text": "Fee of $42 is the monthly account charge."}
 
-    class Llm:
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -954,8 +1233,122 @@ def test_agent_loop_calls_tool_then_done() -> None:
     assert output["result"] == "Fee of $42 is the monthly account charge."
 
 
-def test_agent_loop_handoff_then_done() -> None:
-    """LLM calls a handoff tool then DONE with the tool response."""
+def test_agent_loop_tool_call_message_emits_on_progress() -> None:
+    from app.graph.agent_loop.decision import AgentDecision
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            return {"order_id": "ORD-77819", "text": "Order found."}
+
+    class Llm:
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str, schema=None) -> str:
+            raise AssertionError("structured only")
+
+        def complete_structured(self, system: str, user: str, schema) -> AgentDecision:
+            self.turns += 1
+            if self.turns == 1:
+                return AgentDecision(
+                    action="tool_call",
+                    tool_name="lookup_order_by_order_id",
+                    arguments={"order_id": "ORD-77819"},
+                    message="Thank you. Let me look up your order ORD-77819 right away.",
+                )
+            return AgentDecision(action="done", message="Order ORD-77819 found.")
+
+    progress: list[str] = []
+
+    def on_progress(message: str) -> None:
+        progress.append(message)
+
+    tools = [
+        {
+            "id": "lookup_order_by_order_id",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {"order_id": {"type": "string"}},
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/tools/lookup_order"},
+        }
+    ]
+    graph = build_agent_loop(
+        tools,
+        Invoker(),
+        Llm(),
+        max_steps=4,
+        on_progress=on_progress,
+    )
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "lookup ORD-77819"},
+            "notes": ["customer: ORD-77819"],
+        }
+    )
+    assert progress == ["Thank you. Let me look up your order ORD-77819 right away."]
+    assert output["result"]
+
+
+def test_agent_loop_skips_repeat_lookup_without_second_http_call() -> None:
+    """Repeat lookup tool_call does not POST again when the slot already exists."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {
+                "order_id": "ORD-77819",
+                "item_id": "jacket_blue_m",
+                "text": "Order ORD-77819: Blue Jacket $149.",
+            }
+
+    class Llm(TextLlm):
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns <= 2:
+                return 'CALL lookup_order_by_order_id\n{"order_id":"ORD-77819"}'
+            return "DONE Order found."
+
+    tools = [
+        {
+            "id": "lookup_order_by_order_id",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {"order_id": {"type": "string"}},
+            },
+            "output_schema": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string"},
+                    "order_id": {"type": "string", "x-agent-context": True},
+                    "item_id": {"type": "string", "x-agent-context": True},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=6)
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "damaged jacket ORD-77819"},
+            "notes": ["customer: ORD-77819"],
+        }
+    )
+    assert calls == ["http://agent-mocks:3010/shopassist/lookup_order"]
+    assert any("already completed" in note for note in output["notes"])
+    assert sum(1 for note in output["notes"] if note.startswith("lookup_order_by_order_id:")) == 2
+
+
+def test_agent_loop_escalate_auto_completes_without_further_llm_turns() -> None:
+    """After escalate_to_human succeeds, the parent run ends without another LLM turn."""
     calls: list[str] = []
 
     class Invoker:
@@ -963,7 +1356,86 @@ def test_agent_loop_handoff_then_done() -> None:
             calls.append(invoke["url"])
             return {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."}
 
-    class Llm:
+    class Llm(TextLlm):
+        def __init__(self) -> None:
+            self.turns = 0
+
+        def complete(self, system: str, user: str) -> str:
+            self.turns += 1
+            if self.turns == 1:
+                return 'CALL escalate_to_human\n{"order_id":"ORD-1"}'
+            raise AssertionError("LLM should not run again after handoff auto-complete")
+
+    tools = [
+        {
+            "id": "escalate_to_human",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "handoff_id": {"type": "string", "x-agent-context": True},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=6)
+    output = graph.invoke({"result": "", "goal": {"utterance": "need help"}, "notes": []})
+    assert calls == ["http://agent-mocks:3010/handoff/escalate"]
+    assert "hof-1" in output["result"]
+
+
+def test_agent_loop_escalate_idempotent_skips_second_post() -> None:
+    """Re-CALL escalate_to_human after success does not POST again and completes the run."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"handoff_id": "hof-99", "text": "Handoff opened: hof-99."}
+
+    class Llm(TextLlm):
+        def complete(self, system: str, user: str) -> str:
+            return 'CALL escalate_to_human\n{"order_id":"ORD-1"}'
+
+    tools = [
+        {
+            "id": "escalate_to_human",
+            "output_schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {"type": "string"},
+                    "handoff_id": {"type": "string", "x-agent-context": True},
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/handoff/escalate"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    output = graph.invoke(
+        {
+            "result": "",
+            "goal": {"utterance": "need help"},
+            "notes": [],
+            "slots": {"escalate_to_human": {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."}},
+        }
+    )
+    assert calls == []
+    assert "hof-1" in output["result"]
+
+
+def test_agent_loop_handoff_then_done() -> None:
+    """Successful handoff auto-completes the parent without a second LLM turn."""
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."}
+
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -971,7 +1443,7 @@ def test_agent_loop_handoff_then_done() -> None:
             self.turns += 1
             if self.turns == 1:
                 return "CALL open_handoff"
-            return "DONE Handoff opened: hof-1."
+            raise AssertionError("handoff should auto-complete without another LLM turn")
 
     tools = [
         {
@@ -987,7 +1459,7 @@ def test_agent_loop_handoff_then_done() -> None:
     graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
     output = graph.invoke({"result": "", "goal": {"utterance": "need help"}, "notes": []})
     assert calls == ["http://agent-mocks:3010/handoff/open"]
-    assert output["result"] == "Handoff opened: hof-1."
+    assert "hof-1" in output["result"]
     assert (output.get("slots") or {}).get("open_handoff", {}).get("handoff_id") == "hof-1"
 
 
@@ -1000,7 +1472,7 @@ def test_agent_loop_handoff_with_subagent_pending() -> None:
             calls.append(invoke["url"])
             return {"handoff_id": "hof-2", "text": "Handoff opened: hof-2."}
 
-    class Llm:
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -1048,7 +1520,7 @@ def test_agent_loop_tool_schema_miss_observes_and_continues() -> None:
             calls.append(invoke["url"])
             return {"text": "should-not-run"}
 
-    class Llm:
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -1076,6 +1548,116 @@ def test_agent_loop_tool_schema_miss_observes_and_continues() -> None:
     assert output["result"] == "Fee of $42 is the monthly account charge."
 
 
+def test_agent_loop_preflight_rejects_ungrounded_order_id() -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"text": "should-not-run"}
+
+    class Llm(TextLlm):
+        def complete(self, system: str, user: str) -> str:
+            return 'CALL lookup_order_by_order_id\n{"order_id":"ORD-99999"}'
+
+    tools = [
+        {
+            "id": "lookup_order_by_order_id",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {
+                    "order_id": {
+                        "type": "string",
+                        "pattern": "^ORD-\\d+$",
+                        "x-ground-in-user-context": True,
+                    }
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    with pytest.raises(CustomerAskWaiting):
+        graph.invoke({"result": "", "goal": {"utterance": "jacket damaged"}, "notes": []})
+    assert calls == []
+
+
+def test_agent_loop_preflight_rejects_placeholder_order_id() -> None:
+    calls: list[str] = []
+
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            calls.append(invoke["url"])
+            return {"text": "should-not-run"}
+
+    class Llm(TextLlm):
+        def complete(self, system: str, user: str) -> str:
+            return 'CALL lookup_order_by_order_id\n{"order_id":"ask"}'
+
+    tools = [
+        {
+            "id": "lookup_order_by_order_id",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {
+                    "order_id": {
+                        "type": "string",
+                        "pattern": "^ORD-\\d+$",
+                        "x-ground-in-user-context": True,
+                    }
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    with pytest.raises(CustomerAskWaiting) as exc_info:
+        graph.invoke({"result": "", "goal": {"utterance": "jacket damaged"}, "notes": []})
+    assert calls == []
+    assert "order number" in exc_info.value.message.lower()
+
+
+def test_agent_loop_keeps_waiting_after_ask_without_customer_reply() -> None:
+    class Invoker:
+        def call(self, invoke: dict, payload: dict) -> dict:
+            raise AssertionError("must not invoke tools while waiting for customer reply")
+
+    class Llm(TextLlm):
+        def complete(self, system: str, user: str) -> str:
+            raise AssertionError("must not call LLM while waiting for customer reply")
+
+    tools = [
+        {
+            "id": "lookup_order_by_order_id",
+            "input_schema": {
+                "type": "object",
+                "required": ["order_id"],
+                "properties": {
+                    "order_id": {
+                        "type": "string",
+                        "pattern": "^ORD-\\d+$",
+                        "x-ground-in-user-context": True,
+                    }
+                },
+            },
+            "invoke": {"method": "POST", "url": "http://agent-mocks:3010/shopassist/lookup_order"},
+        }
+    ]
+    graph = build_agent_loop(tools, Invoker(), Llm(), max_steps=4)
+    ask = "What is your order number? It should look like ORD-77819."
+    with pytest.raises(CustomerAskWaiting) as exc_info:
+        graph.invoke(
+            {
+                "result": ask,
+                "goal": {"utterance": "jacket damaged"},
+                "notes": [f"ask: {ask}"],
+            }
+        )
+    assert exc_info.value.message == ask
+
+
 def test_agent_loop_call_args_are_schema_only() -> None:
     seen: list[dict] = []
 
@@ -1084,7 +1666,7 @@ def test_agent_loop_call_args_are_schema_only() -> None:
             seen.append(payload)
             return {"text": "Record REC-77819: widget."}
 
-    class Llm:
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -1121,7 +1703,7 @@ def test_agent_loop_calls_fetch_with_llm_json_after_customer_note() -> None:
             seen.append(payload)
             return {"text": "Record REC-77819: widget $149."}
 
-    class Llm:
+    class Llm(TextLlm):
         def __init__(self) -> None:
             self.turns = 0
 
@@ -1165,7 +1747,7 @@ def test_agent_loop_ask_raises_customer_ask_waiting() -> None:
         def call(self, invoke: dict, payload: dict) -> dict:
             raise AssertionError("ASK must not invoke tools")
 
-    class Llm:
+    class Llm(TextLlm):
         def complete(self, system: str, user: str) -> str:
             return "ASK Please provide a record id."
 
@@ -1194,7 +1776,7 @@ def test_agent_loop_uses_llm_call_after_customer_note() -> None:
             seen.append(payload)
             return {"text": "Record REC-55210: item $89."}
 
-    class Llm:
+    class Llm(TextLlm):
         def complete(self, system: str, user: str) -> str:
             llm_calls.append(user)
             if "Record REC-55210" in user:
@@ -1259,7 +1841,7 @@ def test_agent_loop_multi_tool_flow_completes() -> None:
                 return {"handoff_id": "hof-1", "text": "Handoff opened: hof-1."}
             raise AssertionError(url)
 
-    class Llm:
+    class Llm(TextLlm):
         def complete(self, system: str, user: str) -> str:
             if "Record REC-77819" not in user:
                 return 'CALL fetch_record\n{"record_id":"REC-77819"}'
@@ -1351,7 +1933,7 @@ def test_agent_loop_multi_tool_flow_completes() -> None:
         "http://agent-mocks:3010/tools/check_policy",
         "http://agent-mocks:3010/handoff/open",
     ]
-    assert output["result"] == "Handoff opened: hof-1."
+    assert "hof-1" in output["result"]
     assert stages[-1] == "respond"
-    assert "Handoff opened: hof-1." in output["notes"]
+    assert any("hof-1" in note for note in output["notes"])
     assert any("Policy v7" in note for note in output["notes"])

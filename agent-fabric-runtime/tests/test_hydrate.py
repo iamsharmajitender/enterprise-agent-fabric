@@ -438,3 +438,119 @@ def test_hydrate_kyc_onboarding_uses_workflow_order_when_branch_present() -> Non
     assert tools[4]["stage_type"] == "human_gate"
     assert tools[-1]["llm_role"] == "synthesis"
 
+
+def test_hydrate_duplicate_charge_review_stamps_roles_and_order() -> None:
+    catalogue = FakeCatalogue(
+        {
+            "route_id": "duplicate_charge_review",
+            "route_version": "2026.08.1",
+            "tool_manifest": "duplicate_charge_review",
+            "tool_manifest_version": "2026.08.1",
+            "workflow_id": "duplicate_charge_review",
+            "prompt_id": "duplicate_charge_review",
+            "autonomy_mode": 2,
+        }
+    )
+    catalogue.workflow = {
+        "stages": [
+            {"id": "intake", "tool": "duplicate_charge_intake", "llm_role": "classify"},
+            {"id": "order_lookup", "tool": "lookup_order_by_order_id", "llm_role": "none"},
+            {"id": "dup_check", "tool": "investigate_duplicate_charge", "llm_role": "none"},
+            {"id": "respond", "tool": "duplicate_charge_respond", "llm_role": "synthesis"},
+        ]
+    }
+    catalogue.prompt = {
+        "host": "Pattern 2. Do only the current stage.",
+        "by_llm_role": {
+            "classify": {"text": "Extract order_id from the goal utterance only."},
+            "synthesis": {"text": "Write the customer reply from prior stage outputs only."},
+        },
+    }
+    registry = FakeRegistry(
+        manifest={
+            "tools": [
+                {"capability_id": "duplicate_charge_intake", "capability_version": "1.0.0"},
+                {"capability_id": "lookup_order_by_order_id", "capability_version": "1.0.0"},
+                {"capability_id": "investigate_duplicate_charge", "capability_version": "1.0.0"},
+                {"capability_id": "duplicate_charge_respond", "capability_version": "1.0.0"},
+            ]
+        }
+    )
+    tools = hydrate(
+        {**START_BODY, "route_id": "duplicate_charge_review"},
+        catalogue,
+        registry,
+    )
+    assert [tool["id"] for tool in tools] == [
+        "duplicate_charge_intake",
+        "lookup_order_by_order_id",
+        "investigate_duplicate_charge",
+        "duplicate_charge_respond",
+    ]
+    assert [tool["llm_role"] for tool in tools] == ["classify", "none", "none", "synthesis"]
+    assert tools[0]["llm_prompt"] == "Extract order_id from the goal utterance only."
+    assert tools[-1]["llm_prompt"] == "Write the customer reply from prior stage outputs only."
+
+
+def test_hydrate_ticket_triage_stamps_guided_roles() -> None:
+    catalogue = FakeCatalogue(
+        {
+            "route_id": "ticket_triage",
+            "route_version": "2026.08.1",
+            "tool_manifest": "ticket_triage",
+            "tool_manifest_version": "2026.08.1",
+            "workflow_id": "ticket_triage",
+            "prompt_id": "ticket_triage",
+            "autonomy_mode": 3,
+        }
+    )
+    catalogue.workflow = {
+        "stages": [
+            {
+                "id": "extract",
+                "tool": "parse_ticket",
+                "llm_role": "none",
+                "allowlist": ["parse_ticket"],
+                "max_tool_calls": 2,
+            },
+            {
+                "id": "analyse",
+                "tool": "tag_intent",
+                "llm_role": "none",
+                "allowlist": ["parse_ticket", "tag_intent"],
+                "max_tool_calls": 4,
+            },
+            {
+                "id": "reply",
+                "tool": "draft_reply",
+                "llm_role": "none",
+                "allowlist": ["draft_reply"],
+                "max_tool_calls": 2,
+            },
+        ]
+    }
+    catalogue.prompt = {
+        "host": "Pattern 3. Outer stages are fixed.",
+    }
+    registry = FakeRegistry(
+        manifest={
+            "tools": [
+                {"capability_id": "parse_ticket", "capability_version": "1.0.0"},
+                {"capability_id": "tag_intent", "capability_version": "1.0.0"},
+                {"capability_id": "draft_reply", "capability_version": "1.0.0"},
+            ]
+        }
+    )
+    tools = hydrate(
+        {**START_BODY, "route_id": "ticket_triage"},
+        catalogue,
+        registry,
+    )
+    assert [tool["id"] for tool in tools] == [
+        "parse_ticket",
+        "tag_intent",
+        "draft_reply",
+        "respond",
+    ]
+    assert [tool["llm_role"] for tool in tools] == ["none", "none", "none", "synthesis"]
+

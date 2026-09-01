@@ -23,7 +23,7 @@ public class InMemoryRouteStore implements RouteStore {
         "shopassist_case",
         1,
         "shopassist_case",
-        "Pattern 1 (autonomous): ShopAssist front-line support. ASK for order/customer/email if missing, lookup order, then billing and policy domain APIs. Escalate when needed.",
+        "Pattern 1 (autonomous): ShopAssist front-line support. ASK for order id if missing, lookup order, then billing and policy domain APIs. Escalate when needed.",
         RUNS,
         InMemoryManifestStore.shopassistCase(),
         null,
@@ -98,14 +98,6 @@ public class InMemoryRouteStore implements RouteStore {
             chatVisible,
             keywords,
             AutonomyPattern.fromCode(pattern)));
-  }
-
-  private static MemoryProfile conversationMemory() {
-    return new MemoryProfile("session", "session", "none", "none", 24, List.of("tenant", "user", "session"));
-  }
-
-  private static MemoryProfile loopMemory() {
-    return loopMemory("retrieve_only", 24);
   }
 
   private static MemoryProfile loopMemory(String longTerm, int ttlHours) {

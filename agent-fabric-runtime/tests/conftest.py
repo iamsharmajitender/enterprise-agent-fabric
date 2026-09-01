@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.main import create_app
 from in_memory_store import InMemoryRunStore
+from tests.llm_fakes import TextLlm
 
 AFD = {"Authorization": "Bearer fabric-internal", "X-Workload": "afd"}
 
@@ -173,7 +174,7 @@ class FakeInvoker:
         return {"text": CANNED, "handoff_id": "hof-1"}
 
 
-class FakeLlm:
+class FakeLlm(TextLlm):
     def __init__(self) -> None:
         self.turns = 0
 

@@ -10,7 +10,7 @@ INSERT INTO registry.capabilities (
   '1.0.0',
   'domain',
   'Look up why an account was charged a fee.',
-  '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string"}}}'::jsonb,
+  '{"type":"object","required":["account_id"],"properties":{"account_id":{"type":"string","pattern":"^acct-\\d+$","description":"Customer account id (acct-*)","x-ground-in-user-context":true}}}'::jsonb,
   '{"type":"object","required":["text"],"properties":{"text":{"type":"string"}}}'::jsonb,
   '{"method":"POST","url":"http://agent-mocks:3010/fees/explain","auth":"domain-oauth"}'::jsonb,
   NULL,

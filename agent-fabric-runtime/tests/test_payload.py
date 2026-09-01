@@ -1,4 +1,12 @@
-from app.graph.payload import merge_http_payload, parse_llm_slot, project_child_goal, project_slot, validate_input_schema
+from app.graph.payload import (
+    merge_http_payload,
+    parse_llm_slot,
+    project_child_goal,
+    project_slot,
+    stage_note_from_response,
+    validate_input_schema,
+    validate_tool_payload,
+)
 
 
 def test_merge_http_payload_injects_packed_text_when_schema_allows() -> None:
@@ -68,6 +76,40 @@ def test_merge_http_payload_call_args_win_over_goal() -> None:
     assert payload == {"order_id": "ORD-77819"}
 
 
+def test_stage_note_from_response_uses_x_agent_context_fields() -> None:
+    schema = {
+        "type": "object",
+        "properties": {
+            "text": {"type": "string"},
+            "policy_id": {"type": "string", "x-agent-context": True},
+            "eligible": {"type": "boolean", "x-agent-context": True},
+            "automatic_refund_limit": {"type": "number"},
+            "recommended_action": {"type": "string", "x-agent-context": True},
+        },
+    }
+    body = {
+        "policy_id": "returns-v7",
+        "eligible": True,
+        "automatic_refund_limit": 75.0,
+        "recommended_action": "escalate_to_human",
+        "text": "Policy returns-v7: eligible for refund.",
+    }
+    note = stage_note_from_response(body, schema, stage_id="check_return_policy")
+    assert note == (
+        "check_return_policy: policy_id=returns-v7, eligible=true, "
+        "recommended_action=escalate_to_human"
+    )
+
+
+def test_stage_note_from_response_falls_back_to_text_without_agent_context() -> None:
+    schema = {
+        "type": "object",
+        "properties": {"text": {"type": "string"}, "order_id": {"type": "string"}},
+    }
+    body = {"text": "Order ORD-1 ready.", "order_id": "ORD-1"}
+    assert stage_note_from_response(body, schema) == "Order ORD-1 ready."
+
+
 def test_project_slot_keeps_output_schema_subset() -> None:
     body = {"text": "ok", "card_id": "c-1", "secret": "drop-me"}
     schema = {
@@ -112,3 +154,154 @@ def test_validate_input_schema_fails_closed() -> None:
         assert "amount" in str(exc)
         return
     raise AssertionError("expected validation failure")
+
+
+def test_validate_input_schema_rejects_pattern_mismatch() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {"order_id": {"type": "string", "pattern": "^ORD-\\d+$"}},
+    }
+    try:
+        validate_input_schema({"order_id": "BAD-1"}, schema)
+    except RuntimeError as exc:
+        assert "validation failed" in str(exc)
+        return
+    raise AssertionError("expected pattern validation failure")
+
+
+def test_validate_input_schema_accepts_matching_pattern() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {"order_id": {"type": "string", "pattern": "^ORD-\\d+$"}},
+    }
+    validate_input_schema({"order_id": "ORD-77819"}, schema)
+
+
+def test_validate_grounding_rejects_hallucinated_order_id() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+            "order_id": {
+                "type": "string",
+                "pattern": "^ORD-\\d+$",
+                "x-ground-in-user-context": True,
+            }
+        },
+    }
+    goal = {"utterance": "My jacket arrived damaged"}
+    try:
+        validate_input_schema(
+            {"order_id": "ORD-99999"},
+            schema,
+            goal=goal,
+            notes=[],
+            slots={},
+        )
+    except RuntimeError as exc:
+        assert "not grounded" in str(exc)
+        return
+    raise AssertionError("expected grounding failure")
+
+
+def test_validate_grounding_accepts_order_id_from_customer_note() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+            "order_id": {
+                "type": "string",
+                "pattern": "^ORD-\\d+$",
+                "x-ground-in-user-context": True,
+            }
+        },
+    }
+    validate_input_schema(
+        {"order_id": "ORD-77819"},
+        schema,
+        goal={"utterance": "help"},
+        notes=["customer: ORD-77819"],
+        slots={},
+    )
+
+
+def test_validate_grounding_skips_slot_sourced_order_id() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+            "order_id": {
+                "type": "string",
+                "pattern": "^ORD-\\d+$",
+                "x-ground-in-user-context": True,
+            }
+        },
+    }
+    validate_input_schema(
+        {"order_id": "ORD-77819"},
+        schema,
+        goal={"utterance": "check policy"},
+        notes=[],
+        slots={"lookup_order_by_order_id": {"order_id": "ORD-77819", "item_id": "jacket_blue_m"}},
+    )
+
+
+def test_validate_tool_payload_merges_and_validates() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+            "order_id": {
+                "type": "string",
+                "pattern": "^ORD-\\d+$",
+                "x-ground-in-user-context": True,
+            }
+        },
+    }
+    payload = validate_tool_payload(
+        {"utterance": "order ORD-22001 refund"},
+        {},
+        schema,
+        {"order_id": "ORD-22001"},
+        notes=[],
+    )
+    assert payload == {"order_id": "ORD-22001"}
+
+
+def test_grounding_ask_message_for_lookup() -> None:
+    from app.graph.payload import grounding_ask_message, is_grounding_preflight_error, is_locator_preflight_error
+
+    assert is_grounding_preflight_error(
+        "input_schema field 'order_id' value is not grounded in customer context"
+    )
+    assert is_locator_preflight_error("input_schema validation failed: pattern")
+    assert not is_locator_preflight_error("input_schema missing required field 'order_id'")
+    assert "ORD" in grounding_ask_message("lookup_order_by_order_id", None)
+
+
+def test_validate_grounding_rejects_placeholder_order_id() -> None:
+    schema = {
+        "type": "object",
+        "required": ["order_id"],
+        "properties": {
+            "order_id": {
+                "type": "string",
+                "pattern": "^ORD-\\d+$",
+                "x-ground-in-user-context": True,
+            }
+        },
+    }
+    try:
+        validate_input_schema(
+            {"order_id": "ask"},
+            schema,
+            goal={"utterance": "jacket damaged"},
+            notes=[],
+            slots={},
+        )
+    except RuntimeError as exc:
+        assert "not grounded" in str(exc)
+        return
+    raise AssertionError("expected placeholder grounding failure")

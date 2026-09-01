@@ -1,3 +1,10 @@
+"""Turn a pinned catalogue route into the ordered graph node list.
+
+Called once at start() before the RunPin is inserted. Pattern differences
+show up here (prompt-only + prefetch, manifest tools, workflow order, ensure
+synthesis) — not in the HTTP layer.
+"""
+
 from typing import Any, Protocol
 
 from app.agents.prefetch import PREFETCH_SLOT_ID, retrieval_mode
@@ -29,28 +36,71 @@ def hydrate(
     registry: RegistryPort,
     row: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    """Resolve a pinned route into capability records plus llm_role / llm_prompt."""
+    """Resolve a pinned route into graph nodes (capabilities + llm_role / llm_prompt).
+
+    Decision tree:
+    1. Load the catalogue route row (or use the caller-supplied pin).
+    2. If a tool manifest is pinned → resolve capabilities from the registry,
+       then stamp (or reorder) stages from the workflow when present.
+    3. Else → build nodes from a workflow or a prompt-only Pattern 0 pack.
+    4. Ensure Pattern 2/3 graphs still have a synthesis answer stage.
+    """
+    route_id, route_version = _require_route_pin(start)
+    if row is None:
+        row = catalogue.get_route(route_id, route_version)
+
+    manifest_id, manifest_version = _manifest_pin(row, start)
+    if manifest_id and manifest_version:
+        tools = _hydrate_from_manifest(catalogue, registry, row, manifest_id, manifest_version)
+    else:
+        tools = _hydrate_without_manifest(catalogue, row)
+    return _ensure_llm(catalogue, row, tools)
+
+
+def _require_route_pin(start: dict[str, Any]) -> tuple[str, str]:
+    """Require route_id + route_version on the start body."""
     route_id = str(start.get("route_id") or "")
     route_version = str(start.get("route_version") or "")
     if not route_id or not route_version:
         raise HydrateError("pinned route_id and route_version are required")
-    if row is None:
-        row = catalogue.get_route(route_id, route_version)
-    contract = start.get("contract") if isinstance(start.get("contract"), dict) else {}
+    return route_id, route_version
+
+
+def _contract(start: dict[str, Any]) -> dict[str, Any]:
+    """Optional Front Door contract overlay on the start body."""
+    raw = start.get("contract")
+    return raw if isinstance(raw, dict) else {}
+
+
+def _manifest_pin(row: dict[str, Any], start: dict[str, Any]) -> tuple[str, str]:
+    """Manifest id/version from the route row, falling back to the start contract."""
+    contract = _contract(start)
     manifest_id = str(row.get("tool_manifest") or contract.get("tool_manifest") or "")
     manifest_version = str(
         row.get("tool_manifest_version") or contract.get("manifest_version") or ""
     )
-    if manifest_id and manifest_version:
-        hydrated = _hydrate_manifest(registry, manifest_id, manifest_version)
-        workflow_id = str(row.get("workflow_id") or "")
-        workflow = catalogue.get_workflow(workflow_id) if workflow_id else {"stages": []}
-        if workflow_id and _workflow_has_branch(workflow):
-            hydrated = _hydrate_workflow_ordered(catalogue, row, hydrated, workflow)
-        else:
-            _attach_llm_roles(catalogue, row, hydrated, workflow)
-        return _ensure_llm(catalogue, row, hydrated)
-    return _ensure_llm(catalogue, row, _hydrate_without_manifest(catalogue, row))
+    return manifest_id, manifest_version
+
+
+def _hydrate_from_manifest(
+    catalogue: CataloguePort,
+    registry: RegistryPort,
+    row: dict[str, Any],
+    manifest_id: str,
+    manifest_version: str,
+) -> list[dict[str, Any]]:
+    """Capabilities from the registry, ordered/stamped by workflow when present."""
+    tools = _hydrate_manifest(registry, manifest_id, manifest_version)
+    workflow_id = str(row.get("workflow_id") or "")
+    workflow = catalogue.get_workflow(workflow_id) if workflow_id else {"stages": []}
+
+    # Branched workflows rebuild the node list in stage order (gates, LLM-only, tools).
+    # Linear workflows keep manifest order and only stamp llm_role / llm_prompt.
+    if workflow_id and _workflow_has_branch(workflow):
+        return _hydrate_workflow_ordered(catalogue, row, tools, workflow)
+
+    _attach_llm_roles(catalogue, row, tools, workflow)
+    return tools
 
 
 def _hydrate_manifest(

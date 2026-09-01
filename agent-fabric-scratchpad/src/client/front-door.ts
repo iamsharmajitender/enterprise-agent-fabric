@@ -41,8 +41,27 @@ export type TurnResponse = {
 export type EventsResponse = {
   status?: string;
   message?: string;
-  result?: { message?: string };
+  messages?: string[];
+  result?: { message?: string; messages?: string[] };
 };
+
+export function resultMessages(
+  ev: Pick<EventsResponse, "message" | "result">,
+): string[] {
+  const out: string[] = [];
+  const result = ev.result;
+  if (result && Array.isArray(result.messages)) {
+    for (const item of result.messages) {
+      out.push(String(item));
+    }
+  } else if (result?.message) {
+    out.push(String(result.message));
+  }
+  if (ev.message) {
+    out.push(String(ev.message));
+  }
+  return out;
+}
 
 export type HintsResponse = {
   session_id?: string;
@@ -56,5 +75,6 @@ export type JobAccepted = {
 export type JobStatus = {
   status?: string;
   message?: string;
-  result?: { message?: string };
+  messages?: string[];
+  result?: { message?: string; messages?: string[] };
 };

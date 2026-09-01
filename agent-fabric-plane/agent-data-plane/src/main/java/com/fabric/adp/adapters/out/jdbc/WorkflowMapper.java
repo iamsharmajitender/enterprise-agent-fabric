@@ -86,7 +86,7 @@ public final class WorkflowMapper {
       return Map.of();
     }
     Map<String, String> out = new LinkedHashMap<>();
-    node.fields().forEachRemaining(entry -> out.put(entry.getKey(), entry.getValue().asText()));
+    node.properties().forEach(entry -> out.put(entry.getKey(), entry.getValue().asText()));
     return out;
   }
 }

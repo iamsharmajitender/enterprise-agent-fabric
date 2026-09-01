@@ -27,6 +27,24 @@
       "claims": ["support:case"],
       "message": "Hi, I received my blue jacket yesterday and it arrived damaged. I also think I was charged twice. I want a full refund, not a replacement.",
       "expected_status": "waiting"
+    },
+    {
+      "id": "duplicate_charge_review",
+      "route_id": "duplicate_charge_review",
+      "autonomy_mode": 2,
+      "label": "Deterministic",
+      "claims": ["support:case"],
+      "message": "I was charged twice on order ORD-77819. Can you check if it's a duplicate charge?",
+      "expected_status": "completed"
+    },
+    {
+      "id": "ticket_triage",
+      "route_id": "ticket_triage",
+      "autonomy_mode": 3,
+      "label": "Guided",
+      "claims": ["support:case"],
+      "message": "Customer ticket: charged twice on order ORD-77819. Please triage and draft a reply.",
+      "expected_status": "completed"
     }
   ]
 }

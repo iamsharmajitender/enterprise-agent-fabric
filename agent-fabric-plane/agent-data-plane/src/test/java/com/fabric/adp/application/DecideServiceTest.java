@@ -2,7 +2,6 @@ package com.fabric.adp.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fabric.adp.application.layers.ClassifierLayer;
 import com.fabric.adp.application.layers.DecideLayer;
 import com.fabric.adp.application.layers.LlmFallbackLayer;
 import com.fabric.adp.application.layers.LlmFallbackPool;

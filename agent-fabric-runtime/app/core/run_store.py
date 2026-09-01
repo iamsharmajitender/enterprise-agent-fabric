@@ -180,6 +180,7 @@ class PersistentRunStore:
         *,
         working: dict[str, Any] | None = None,
         checkpoint: dict[str, Any] | None = None,
+        result: dict[str, Any] | None = None,
     ) -> None:
         """Flush working notes and/or loop checkpoint while the run is in flight."""
         values: dict[str, Any] = {"updated_at": datetime.now(timezone.utc)}
@@ -187,6 +188,8 @@ class PersistentRunStore:
             values["working"] = working
         if checkpoint is not None:
             values["checkpoint"] = checkpoint
+        if result is not None:
+            values["result"] = result
         if len(values) == 1:
             return
         with self._engine.begin() as conn:

@@ -29,3 +29,19 @@ export class FrontDoorClient {
         return body;
     }
 }
+export function resultMessages(ev) {
+    const out = [];
+    const result = ev.result;
+    if (result && Array.isArray(result.messages)) {
+        for (const item of result.messages) {
+            out.push(String(item));
+        }
+    }
+    else if (result?.message) {
+        out.push(String(result.message));
+    }
+    if (ev.message) {
+        out.push(String(ev.message));
+    }
+    return out;
+}

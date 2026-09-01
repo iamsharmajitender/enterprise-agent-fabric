@@ -73,12 +73,15 @@ class InMemoryRunStore:
         *,
         working: dict | None = None,
         checkpoint: dict | None = None,
+        result: dict | None = None,
     ) -> None:
         pin = self._by_id[correlation_id]
         if working is not None:
             pin.working = working
         if checkpoint is not None:
             pin.checkpoint = checkpoint
+        if result is not None:
+            pin.result = result
         pin.updated_at = utcnow()
 
     def all(self) -> list[RunPin]:

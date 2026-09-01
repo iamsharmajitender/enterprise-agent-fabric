@@ -17,6 +17,11 @@ class RetrieveIndexTest {
   }
 
   @Test
+  void feeExplainUtteranceScoresOneAgainstFeeExplain() {
+    assertThat(index.bestScore("Why was I charged $42?", "fee_explain")).isEqualTo(1.0);
+  }
+
+  @Test
   void unrelatedUtteranceScoresBelowThreshold() {
     assertThat(index.bestScore("hello there", "shopassist_case"))
         .isLessThan(RetrieveIndex.OOD_THRESHOLD);
