@@ -1240,7 +1240,7 @@ Notable test suites:
 
 - Service README: [README.md](./README.md)
 - This doc: [technical-implementation.md](./technical-implementation.md)
-- Architecture pack: [agent-fabric-docs/04-architecture/agent-runtime.mdx](../agent-fabric-docs/04-architecture/agent-runtime.mdx)
+- Architecture pack: [agent-fabric-docs/04-architecture/agent-fabric-runtime.mdx](../agent-fabric-docs/04-architecture/agent-fabric-runtime.mdx)
 - Patterns 0–3:
   - [deterministic.md](../agent-fabric-docs/06-patterns/deterministic.md) (Pattern 0)
   - [autonomous.md](../agent-fabric-docs/06-patterns/autonomous.md) (Pattern 1)

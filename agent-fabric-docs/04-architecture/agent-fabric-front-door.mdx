@@ -1,24 +1,24 @@
 ---
-title: "Agent Front Door (AFD)"
-sidebar_label: Agent Front Door
+title: "Agent Fabric Front Door (AFD)"
+sidebar_label: Agent Fabric Front Door
 sidebar_position: 1
-slug: /enterprise-agent-fabric/agent-front-door
-description: "Agent Front Door: two fleets, one contract. Chat AFD and API AFD entitle, freeze, and start. Only way into Enterprise Agent Fabric."
+slug: /enterprise-agent-fabric/agent-fabric-front-door
+description: "Agent Fabric Front Door: two fleets, one contract. Chat AFD and API AFD entitle, freeze, and start. Only way into Enterprise Agent Fabric."
 ---
 
 import Details from '@theme/Details';
 
-# Agent Front Door (AFD)
+# Agent Fabric Front Door (AFD)
 
 **Box:** Chat AFD (BFF) + API AFD (HTTP handler + Kafka job-start worker)
 
-Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Plane](./agent-plane.mdx) · [Agent Runtime](./agent-runtime.mdx) · [Agent Capability Registry](./agent-capability-registry.mdx)
+Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)
 
 **Two fleets. One contract. Only way in.** · **Status:** Draft · **Date:** 2026-09-02
 
 **Behaviour source:** [status](../02-understand/status.md). This pack may be ahead of code.
 
-Chat AFD is BFF-shaped (Chat/UI). API AFD is handler-shaped (HTTP jobs + Kafka ingest). They share [Agent Plane](./agent-plane.mdx), the frozen-route/session store, and the start contract. They do not share a process (FR-9). Kafka `{runs_topic}` is [AR](./agent-runtime.mdx) return, not a third AFD.
+Chat AFD is BFF-shaped (Chat/UI). API AFD is handler-shaped (HTTP jobs + Kafka ingest). They share [Agent Fabric Plane](./agent-fabric-plane.mdx), the frozen-route/session store, and the start contract. They do not share a process (FR-9). Kafka `{runs_topic}` is [AR](./agent-fabric-runtime.mdx) return, not a third AFD.
 
 **Pin split:** AFD **calls** the Agent Data Plane (catalogue + classify). On `route`, this AFD **pins** `route_id` + versions and async-starts AR.
 
@@ -245,7 +245,7 @@ Continuation: skip decide. Resume AR.
 | Jobs HTTP / Kafka / AR agent-start | Decide with explicit `route_id`. Catalogue row on `route` | Start |
 | `{runs_topic}` consume / `GET` job | None | Status only |
 
-Decide JSON: [Agent Plane](./agent-plane.mdx#apis). Start / `202`: [Agent Runtime](./agent-runtime.mdx#apis).
+Decide JSON: [Agent Fabric Plane](./agent-fabric-plane.mdx#apis). Start / `202`: [Agent Fabric Runtime](./agent-fabric-runtime.mdx#apis).
 
 ---
 
@@ -345,10 +345,10 @@ Decide capacity is turns/s × (entitle + classify + pin + start-ack). Run capaci
 
 **Start edge.** Wait only for `202` + `correlation_id`, never the memo.
 
-Plane and AR scale: [Agent Plane §12](./agent-plane.mdx#scaling) · [Agent Runtime §12](./agent-runtime.mdx#scaling).
+Plane and AR scale: [Agent Fabric Plane §12](./agent-fabric-plane.mdx#scaling) · [Agent Fabric Runtime §12](./agent-fabric-runtime.mdx#scaling).
 
 ---
 
 ## Read next
 
-**[Agent Plane](./agent-plane.mdx)** · [Agent Runtime](./agent-runtime.mdx) · [Agent Capability Registry](./agent-capability-registry.mdx) · [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)
+**[Agent Fabric Plane](./agent-fabric-plane.mdx)** · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)

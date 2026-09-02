@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="plane-solution-title plane-solution-desc">
       <title id="plane-solution-title">Catalogue plus classify. Does not start NAR.</title>
-      <desc id="plane-solution-desc">Agent Front Door calls the Data Plane to decide. The Data Plane classifies against the versioned catalogue. ACP writes the decision audit asynchronously. Neither box pins or starts NAR.</desc>
+      <desc id="plane-solution-desc">Agent Fabric Front Door calls the Data Plane to decide. The Data Plane classifies against the versioned catalogue. ACP writes the decision audit asynchronously. Neither box pins or starts NAR.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="plane-solution-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>

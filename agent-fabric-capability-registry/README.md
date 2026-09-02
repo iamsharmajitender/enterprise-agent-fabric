@@ -16,7 +16,7 @@ Own the immutable catalogue of tool schemas and `invoke` URLs. Publishers `PUT` 
 | Compose | `agent-capability-registry` |
 | Auth | Workload only: `Authorization: Bearer fabric-internal` + `X-Workload` |
 
-Docs map: [docs/README.md](../agent-fabric-docs/README.md). Box pack: [docs/04-architecture/agent-capability-registry.mdx](../agent-fabric-docs/04-architecture/agent-capability-registry.mdx). Stub auth: [05-reference/stub-auth.md](../agent-fabric-docs/05-reference/stub-auth.md).
+Docs map: [docs/README.md](../agent-fabric-docs/README.md). Box pack: [docs/04-architecture/agent-fabric-capability-registry.mdx](../agent-fabric-docs/04-architecture/agent-fabric-capability-registry.mdx). Stub auth: [05-reference/stub-auth.md](../agent-fabric-docs/05-reference/stub-auth.md).
 
 ## Hexagonal layout
 

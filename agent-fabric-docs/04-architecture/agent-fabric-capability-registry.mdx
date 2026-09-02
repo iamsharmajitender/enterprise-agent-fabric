@@ -1,24 +1,24 @@
 ---
-title: "Agent Capability Registry"
-sidebar_label: Agent Capability Registry
+title: "Agent Fabric Capability Registry"
+sidebar_label: Agent Fabric Capability Registry
 sidebar_position: 4
-slug: /enterprise-agent-fabric/agent-capability-registry
-description: "Agent Capability Registry: publishers append id@version. Agent developers refer from the tool manifest. AR hydrates at pin. Domain APIs and agent-start invoke go through PEP."
+slug: /enterprise-agent-fabric/agent-fabric-capability-registry
+description: "Agent Fabric Capability Registry: publishers append id@version. Agent developers refer from the tool manifest. AR hydrates at pin. Domain APIs and agent-start invoke go through PEP."
 ---
 
 import Details from '@theme/Details';
 
-# Agent Capability Registry
+# Agent Fabric Capability Registry
 
-**Box:** Agent Capability Registry (with Agent Plane; AR hydrates at pin)
+**Box:** Agent Fabric Capability Registry (with Agent Fabric Plane; AR hydrates at pin)
 
-Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Agent Runtime](./agent-runtime.mdx)
+Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx)
 
 **Publishers publish versions. Agent developers refer. AR hydrates once, then calls `invoke`.** · **Status:** Draft · **Date:** 2026-09-02
 
 **Behaviour source:** [status](../02-understand/status.md). This pack may be ahead of code.
 
-The registry sits **with Agent Plane** (beside ACP and Data Plane). Memory, RAG, and Tools / PEP stay in Shared. It is a catalog, not a third AFD, not MCP `list_tools`, and not a client the loop calls on every turn.
+The registry sits **with Agent Fabric Plane** (beside ACP and Data Plane). Memory, RAG, and Tools / PEP stay in Shared. It is a catalog, not a third AFD, not MCP `list_tools`, and not a client the loop calls on every turn.
 
 **Local v1:** Java service on port **3009**. Hydrate is real at pin. Capability kinds: [capabilities](../02-understand/capabilities.md).
 
@@ -63,7 +63,7 @@ Three objects, two writers. Three moments — only the last is the AR loop.
 | Hydrate whole manifest at pin | No mid-loop registry GET. Cache `(manifest_id, manifest_version)`. |
 | Two `kind`s, one catalog | `domain` = governed business API. `agent` = start another catalogue row via API AFD. |
 | PEP then invoke | A published capability is not permission. Dual check still runs. |
-| Registry with Agent Plane | Same band as catalogue. Shared stays Memory / RAG / Tools. |
+| Registry with Agent Fabric Plane | Same band as catalogue. Shared stays Memory / RAG / Tools. |
 
 ### Expected outcomes
 
@@ -100,7 +100,7 @@ Three objects, two writers. The route row still has no `tools[]`.
 | **Refer** | Agent developer | Copies `{ "id", "version" }` into their `tool_manifest`. |
 | **Call** | AR | After freeze: download the **whole** pinned manifest, hydrate every ref onto the run pin, then schemas only to the LLM. `invoke` runs after PEP. |
 
-**Same freeze vs new route.** A summarizer helper is a **domain** capability on this manifest. Legal MSA review is an **agent-start** capability. The second one's `invoke` is the [API AFD](./agent-front-door.mdx) jobs URL, not Legal's `activation_target`.
+**Same freeze vs new route.** A summarizer helper is a **domain** capability on this manifest. Legal MSA review is an **agent-start** capability. The second one's `invoke` is the [API AFD](./agent-fabric-front-door.mdx) jobs URL, not Legal's `activation_target`.
 
 ---
 
@@ -268,7 +268,7 @@ The registry is not a channel API. UI, pipeline, and **one hydrate at pin** call
 | `GET` | `/v1/capabilities/{id}/versions` | UI version history |
 | `GET` | `/v1/capabilities?q=` | UI search of `published` |
 
-AR start still goes to `{activation_target}` from [Runtime §5](./agent-runtime.mdx#apis). Agent-start `invoke` is a later `POST` to `{jobs_url}` on [API AFD](./agent-front-door.mdx#apis).
+AR start still goes to `{activation_target}` from [Runtime §5](./agent-fabric-runtime.mdx#apis). Agent-start `invoke` is a later `POST` to `{jobs_url}` on [API AFD](./agent-fabric-front-door.mdx#apis).
 
 ---
 
@@ -347,4 +347,4 @@ Hydrate is pin-time, not turn-time. Scale with new starts and catalog reads, not
 
 ## Read next
 
-**[Agent Runtime](./agent-runtime.mdx)** · [Agent Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Capabilities](../02-understand/capabilities.md) · [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)
+**[Agent Fabric Runtime](./agent-fabric-runtime.mdx)** · [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Capabilities](../02-understand/capabilities.md) · [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)

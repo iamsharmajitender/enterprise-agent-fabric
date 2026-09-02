@@ -8,7 +8,7 @@ Work this list **after** (or in parallel with the fixture half of) [eval-plan.md
 
 **Not in this plan:** Layer ④ safety (injection / PII / veto) as a full input-plane gate; decision-audit store; `route_tables` snapshots ([future-enhancement](./future-enhancement.md#versioned-route-table)); Kafka as a real bus; a second AFD fleet; putting Layer ③ on the Layer ② CPU pool; showing `router_layer` / `route_id` / `confidence` on chat JSON (FR-5).
 
-**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [layered classifier](https://jitendersharma.dev/playbooks/agents/intent-router/layered-classifier), [agent-plane](../04-architecture/agent-plane.mdx). Do not reopen locked fabric rules (AFD-only decide, jobs skip ②/③, chat-slim FR-5).
+**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [layered classifier](https://jitendersharma.dev/playbooks/agents/intent-router/layered-classifier), [agent-plane](../04-architecture/agent-fabric-plane.mdx). Do not reopen locked fabric rules (AFD-only decide, jobs skip ②/③, chat-slim FR-5).
 
 ---
 

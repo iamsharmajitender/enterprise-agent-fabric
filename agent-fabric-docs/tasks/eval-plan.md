@@ -12,7 +12,7 @@ Target: examiners can show adversarial routing cases pass at 100% before release
 
 **Not in this plan:** LLM-as-judge, output-schema validation, eval on the decide/start/loop hot path, a decision-audit store, `route_tables` snapshots ([future-enhancement](./future-enhancement.md#versioned-route-table)), production eval SaaS, scoring free-form chat prose, implementing `policy_profile` / PDP. Replacing keyword Layer ② / adding ① rules and ③ fallback is [intent-plan.md](./intent-plan.md) — this eval plan only freezes the labels those layers must still hit.
 
-**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [agent-plane](../04-architecture/agent-plane.mdx), [enterprise-agent-fabric](../04-architecture/enterprise-agent-fabric-architecture.mdx) (Agent evals box). Do not reopen locked fabric rules.
+**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [agent-plane](../04-architecture/agent-fabric-plane.mdx), [enterprise-agent-fabric](../04-architecture/enterprise-agent-fabric-architecture.mdx) (Agent evals box). Do not reopen locked fabric rules.
 
 ## Architecture Decisions
 

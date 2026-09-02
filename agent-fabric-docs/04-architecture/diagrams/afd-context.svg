@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="afd-context-title afd-context-desc">
       <title id="afd-context-title">Who talks to the Front Door</title>
-      <desc id="afd-context-desc">Humans hit Chat AFD. Partners, systems, and parent NAR hit API AFD. Both fleets call Agent Plane and start NAR. Channels never dial Plane or NAR.</desc>
+      <desc id="afd-context-desc">Humans hit Chat AFD. Partners, systems, and parent NAR hit API AFD. Both fleets call Agent Fabric Plane and start NAR. Channels never dial Plane or NAR.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="afd-context-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -59,7 +59,7 @@
       <rect x="584" y="120" width="320" height="64" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
       <rect x="592" y="126" width="28" height="12" rx="2" fill="transparent" stroke="#1e293b" stroke-opacity="0.40" stroke-width="0.8"/>
       <text x="606" y="135" fill="#1e293b" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DP</text>
-      <text x="744" y="156" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Plane</text>
+      <text x="744" y="156" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Plane</text>
       <text x="744" y="172" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">catalogue · classify</text>
       <rect x="584" y="248" width="320" height="64" rx="6" fill="#f8fafc"/>
       <rect x="584" y="248" width="320" height="64" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>

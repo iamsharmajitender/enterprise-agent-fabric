@@ -1,18 +1,18 @@
 ---
-title: "Agent Runtime (AR)"
-sidebar_label: Agent Runtime
+title: "Agent Fabric Runtime (AR)"
+sidebar_label: Agent Fabric Runtime
 sidebar_position: 3
-slug: /enterprise-agent-fabric/agent-runtime
-description: "Agent Runtime: specialised agents underneath. Run pin, LangGraph loop, Patterns 0-3. Calls Shared for Memory, RAG, and Tools. Hydrates from the Agent Capability Registry."
+slug: /enterprise-agent-fabric/agent-fabric-runtime
+description: "Agent Fabric Runtime: specialised agents underneath. Run pin, LangGraph loop, Patterns 0-3. Calls Shared for Memory, RAG, and Tools. Hydrates from the Agent Fabric Capability Registry."
 ---
 
 import Details from '@theme/Details';
 
-# Agent Runtime (AR)
+# Agent Fabric Runtime (AR)
 
-**Box:** AR (Agent Runtime) + calls into Shared (Memory, RAG, Tools / PEP)
+**Box:** AR (Agent Fabric Runtime) + calls into Shared (Memory, RAG, Tools / PEP)
 
-Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Agent Capability Registry](./agent-capability-registry.mdx)
+Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)
 
 **Specialised agents underneath. Does the work. Does not classify the next utterance.** · **Status:** Draft · **Date:** 2026-09-02
 
@@ -191,15 +191,15 @@ Not a public URL. `202` comes from AR. AFD does not send `correlation_id` on `mo
 
 </Details>
 
-Who calls start: [Agent Front Door call map](./agent-front-door.mdx#call-map).
+Who calls start: [Agent Fabric Front Door call map](./agent-fabric-front-door.mdx#call-map).
 
 ---
 
 ## 6. Shared
 
-**Memory**, **RAG**, and **Tools** sit in Shared. The **Agent Capability Registry** sits with Agent Plane. AR calls them. They are not inside AR.
+**Memory**, **RAG**, and **Tools** sit in Shared. The **Agent Fabric Capability Registry** sits with Agent Fabric Plane. AR calls them. They are not inside AR.
 
-After freeze, AR **downloads the whole pinned manifest**, hydrates each `id@version` onto the run pin, then sends schemas only to the LLM. Domain `invoke` hits a governed business API. Agent-start `invoke` hits the API AFD jobs URL. [Agent Capability Registry](./agent-capability-registry.mdx).
+After freeze, AR **downloads the whole pinned manifest**, hydrates each `id@version` onto the run pin, then sends schemas only to the LLM. Domain `invoke` hits a governed business API. Agent-start `invoke` hits the API AFD jobs URL. [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx).
 
 Every tool call dual-checks **user** and **agent**. If Shared is down, routing still works and AR degrades.
 
@@ -291,10 +291,10 @@ Run capacity is a different fleet from decide. AR instances scale per `activatio
 | **Shared** | In-flight AR calls | Per-capability latency / error rate |
 | **Registry** | Pin hydrates (refs per new run) | Hydrate p99, catalog QPS |
 
-AFD and Plane scale: [Agent Front Door §12](./agent-front-door.mdx#scaling) · [Agent Plane §12](./agent-plane.mdx#scaling).
+AFD and Plane scale: [Agent Fabric Front Door §12](./agent-fabric-front-door.mdx#scaling) · [Agent Fabric Plane §12](./agent-fabric-plane.mdx#scaling).
 
 ---
 
 ## Read next
 
-**[Agent Capability Registry](./agent-capability-registry.mdx)** · [Agent Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Patterns](../06-patterns/README.md) · [Runtime status](../02-understand/status.md)
+**[Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)** · [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Patterns](../06-patterns/README.md) · [Runtime status](../02-understand/status.md)

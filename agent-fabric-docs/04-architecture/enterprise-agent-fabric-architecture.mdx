@@ -8,7 +8,7 @@ description: "Enterprise Agent Fabric. Agent Front Door (AFD), Agent Plane (ACP 
 
 # Enterprise Agent Fabric
 
-**Agent Front Door (AFD) · Agent Plane · Agent Control Plane (ACP) · Agent Data Plane · Agent Runtime (AR) · Shared**
+**Agent Fabric Front Door (AFD) · Agent Fabric Plane · Agent Control Plane (ACP) · Agent Data Plane · Agent Fabric Runtime (AR) · Shared**
 
 One fabric. One front door. One agent plane. Specialised agents underneath.
 
@@ -26,11 +26,11 @@ Local architecture paper. How-to stays in playbooks and box packs. This page is 
 
 | Playbooks | This paper |
 | --- | --- |
-| Front door | **[AFD](./agent-front-door.mdx)** — entitles, freezes, starts. Only way in. |
-| Intent router | **[Agent Plane](./agent-plane.mdx)** — AFD calls **Agent Data Plane** (catalogue + classify). **ACP** is the control box. Does not do the work. |
-| Agentic app | **[AR](./agent-runtime.mdx)** — specialised agents underneath. Pin, hydrate, LangGraph loop. |
+| Front door | **[AFD](./agent-fabric-front-door.mdx)** — entitles, freezes, starts. Only way in. |
+| Intent router | **[Agent Fabric Plane](./agent-fabric-plane.mdx)** — AFD calls **Agent Data Plane** (catalogue + classify). **ACP** is the control box. Does not do the work. |
+| Agentic app | **[AR](./agent-fabric-runtime.mdx)** — specialised agents underneath. Pin, hydrate, LangGraph loop. |
 | Memory / RAG / tools | **Shared** — called from AR. Not inside AR. |
-| Tool manifests | **[Agent Capability Registry](./agent-capability-registry.mdx)** — sits with Agent Plane. Publishers append `id@version`. AR hydrates at pin. Agent-start `invoke` is API AFD. |
+| Tool manifests | **[Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)** — sits with Agent Fabric Plane. Publishers append `id@version`. AR hydrates at pin. Agent-start `invoke` is API AFD. |
 
 ---
 
@@ -40,11 +40,11 @@ Five processes prove the fabric chain. Channels talk only to Front Door.
 
 | Port | Box | Job |
 | --- | --- | --- |
-| 3005 | **Agent Front Door** | Chat `/v1/assistant/*` and jobs `/v1/jobs*` on one process |
+| 3005 | **Agent Fabric Front Door** | Chat `/v1/assistant/*` and jobs `/v1/jobs*` on one process |
 | 3006 | **Agent Control Plane** | Catalogue UI only — no database, no decide API |
 | 3007 | **Agent Data Plane** | Catalogue + classify (`POST /v1/intent/decide`) |
-| 3008 | **Agent Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
-| 3009 | **Agent Capability Registry** | Published capabilities; hydrate once at pin |
+| 3008 | **Agent Fabric Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
+| 3009 | **Agent Fabric Capability Registry** | Published capabilities; hydrate once at pin |
 
 **32 routes** in the seed catalogue. Four autonomy patterns (`autonomy_mode` 0–3). Pin → hydrate → graph is wired; gaps vs the full design are listed in [status](../../02-understand/status.md).
 
@@ -84,7 +84,7 @@ Agent Data Plane classifies against the route/workflow catalogue. ACP is the con
 
 ## 2. Functional requirements
 
-Testable statements for this trust domain. Classifier layers, JSON bodies, and field dictionaries live in playbooks. Channel and internal APIs: [Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Runtime](./agent-runtime.mdx).
+Testable statements for this trust domain. Classifier layers, JSON bodies, and field dictionaries live in playbooks. Channel and internal APIs: [Front Door](./agent-fabric-front-door.mdx) · [Agent Plane](./agent-fabric-plane.mdx) · [Runtime](./agent-fabric-runtime.mdx).
 
 <div className="gain-table-fit-col1">
 
@@ -132,7 +132,7 @@ Tune per trust domain.
 | Route pin TTL | 30–60 min on AFD, keyed by `session_id` |
 | AR instances | Per `activation_target`, independent of Agent Plane |
 
-How those numbers become fleets: [Front Door scaling](./agent-front-door.mdx#scaling) · [Agent Plane scaling](./agent-plane.mdx#scaling) · [Runtime scaling](./agent-runtime.mdx#scaling).
+How those numbers become fleets: [Front Door scaling](./agent-fabric-front-door.mdx#scaling) · [Agent Plane scaling](./agent-fabric-plane.mdx#scaling) · [Runtime scaling](./agent-fabric-runtime.mdx#scaling).
 
 ---
 
@@ -144,11 +144,11 @@ How those numbers become fleets: [Front Door scaling](./agent-front-door.mdx#sca
 
 <div className="gain-diagram-wrap">
 
-![Enterprise Agent Fabric: Agent security and Agent evals on the left. Events at the top. Agent Plane sits above the middle with Agent Control Plane stacked on Agent Data Plane and the Agent Capability Registry beside them. Chat/UI and API enter through Agent Front Door. Front Door asks Agent Data Plane to classify, pins the route, then starts Agent Runtime. Agent Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Capability Registry. Small database marks sit inside Front Door, Agent Plane, and Runtime. Agent Data Plane does not start Agent Runtime. Shared sits to the right (Memory, RAG, Tools). Observability feeds Dashboard then Responsible / Governed AI. Direct skips to Agent Plane are blocked.](./diagrams/agent-fabric-architecture.svg)
+![Enterprise Agent Fabric: Agent security and Agent evals on the left. Events at the top. Agent Fabric Plane sits above the middle with Agent Control Plane stacked on Agent Data Plane and the Agent Fabric Capability Registry beside them. Chat/UI and API enter through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the route, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Shared sits to the right (Memory, RAG, Tools). Observability feeds Dashboard then Responsible / Governed AI.](./diagrams/agent-fabric-architecture.svg)
 
 </div>
 
-Child pages: [Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Runtime](./agent-runtime.mdx) · [Registry](./agent-capability-registry.mdx).
+Child pages: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx).
 
 ### Roles and responsibilities
 
@@ -170,7 +170,7 @@ Child pages: [Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane
 | **Memory** (in Shared) | Short / long term via `session_id` | Ingress classify | Platform | Runs degrade; routing still works |
 | **RAG** (in Shared) | Corpus retrieve | Ingress classify | Platform | Grounding degrades; routing still works |
 | **Tools / PEP** (in Shared) | Actions scoped by pinned manifest. Dual check: user entitlements (or approval) and agent scopes | Route choice, mint | With AR | Side effects stop |
-| **Agent Capability Registry** (with Agent Plane) | Immutable `id@version`. Domain `invoke` and agent-start `invoke`. AR hydrates at pin | Pin, start, PEP permit | Platform | New runs cannot hydrate; in-flight pins still have schemas |
+| **Agent Fabric Capability Registry** (with Agent Fabric Plane) | Immutable `id@version`. Domain `invoke` and agent-start `invoke`. AR hydrates at pin | Pin, start, PEP permit | Platform | New runs cannot hydrate; in-flight pins still have schemas |
 | **Model router** | Which LLM. Called by AR | Which `route_id` | LLM gateway | Inference fails; decide unaffected |
 
 ### Three routers (do not collapse)
@@ -259,7 +259,7 @@ The Agent Data Plane **classifies**. Agent Front Door **calls it**, then **freez
 
 </div>
 
-Channel APIs and swim lanes: [Front Door](./agent-front-door.mdx). Decide JSON: [Agent Plane](./agent-plane.mdx). Start / `202` / `{runs_topic}`: [Runtime](./agent-runtime.mdx).
+Channel APIs and swim lanes: [Front Door](./agent-fabric-front-door.mdx). Decide JSON: [Agent Plane](./agent-fabric-plane.mdx). Start / `202` / `{runs_topic}`: [Runtime](./agent-fabric-runtime.mdx).
 
 ---
 
@@ -355,4 +355,4 @@ FRs above are the testable form.
 
 ## Read next
 
-**[Agent Front Door](./agent-front-door.mdx)** · [Agent Plane](./agent-plane.mdx) · [Agent Runtime](./agent-runtime.mdx) · [Agent Capability Registry](./agent-capability-registry.mdx) · [Catalogue matrix](../../03-catalogue/README.md) · [Runtime status](../../02-understand/status.md) · [Patterns](../../06-patterns/README.md) · [Executive brief](./enterprise-agent-fabric-pitch.mdx)
+**[Agent Fabric Front Door](./agent-fabric-front-door.mdx)** · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Catalogue matrix](../../03-catalogue/README.md) · [Runtime status](../../02-understand/status.md) · [Patterns](../../06-patterns/README.md) · [Executive brief](./enterprise-agent-fabric-pitch.mdx)

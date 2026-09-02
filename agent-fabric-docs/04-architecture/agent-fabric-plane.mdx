@@ -1,24 +1,24 @@
 ---
-title: "Agent Plane"
-sidebar_label: Agent Plane
+title: "Agent Fabric Plane"
+sidebar_label: Agent Fabric Plane
 sidebar_position: 2
-slug: /enterprise-agent-fabric/agent-plane
-description: "Agent Plane: Agent Control Plane (ACP) and Agent Data Plane. Catalogue plus classify. Does not pin or start AR."
+slug: /enterprise-agent-fabric/agent-fabric-plane
+description: "Agent Fabric Plane: Agent Control Plane (ACP) and Agent Data Plane. Catalogue plus classify. Does not pin or start AR."
 ---
 
 import Details from '@theme/Details';
 
-# Agent Plane
+# Agent Fabric Plane
 
 **Box:** Agent Control Plane (ACP) + Agent Data Plane
 
-Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Front Door](./agent-front-door.mdx) · [Agent Runtime](./agent-runtime.mdx) · [Agent Capability Registry](./agent-capability-registry.mdx)
+Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)
 
 **One plane per trust domain. Two boxes inside it. Does not do the work.** · **Status:** Draft · **Date:** 2026-09-02
 
 **Behaviour source:** [status](../02-understand/status.md). This pack may be ahead of code.
 
-[Agent Front Door](./agent-front-door.mdx) **calls** the **Agent Data Plane** (catalogue + classify). **ACP** is the sibling **control** box (policy, versions, decision audit). Neither box pins. Neither box starts AR.
+[Agent Fabric Front Door](./agent-fabric-front-door.mdx) **calls** the **Agent Data Plane** (catalogue + classify). **ACP** is the sibling **control** box (policy, versions, decision audit). Neither box pins. Neither box starts AR.
 
 **Local v1:** ACP is a **catalogue UI only** (port 3006) — no database, no decide API. Data Plane serves decide and catalogue on port **3007**. Decision audit is production target, not local yet.
 
@@ -106,7 +106,7 @@ AFD calls classify, then freezes and starts. This plane does not call AR.
 | **Decision** | ACP | Audit store (target) | Why this turn routed, clarified, or abstained |
 | **Route/workflow catalogue** | Platform / domain teams | Agent Data Plane | Versioned rows. Includes `agent_client_id` per row. |
 
-Frozen route/session is on the [AFD](./agent-front-door.mdx#frozen-route-session). Run pin is on [AR](./agent-runtime.mdx). Capability versions are on the [Registry](./agent-capability-registry.mdx) (same Agent Plane band).
+Frozen route/session is on the [AFD](./agent-fabric-front-door.mdx#frozen-route-session). Run pin is on [AR](./agent-fabric-runtime.mdx). Capability versions are on the [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) (same Agent Fabric Plane band).
 
 ---
 
@@ -226,7 +226,7 @@ Chat with a frozen route/session and a continuation **does not** call decide.
 
 </Details>
 
-AFD channel APIs: [Agent Front Door §6](./agent-front-door.mdx#apis).
+AFD channel APIs: [Agent Fabric Front Door §6](./agent-fabric-front-door.mdx#apis).
 
 ---
 
@@ -321,10 +321,10 @@ Scale Chat AFD, API AFD, and Agent Plane as three fleets. Decide must not wait o
 | **Agent Data Plane** | Catalogue reads at pinned version | Version bump, not turn rate |
 | **Decision audit** | Decide RPS (async) | Queue depth. Lag is OK |
 
-AFD and AR scale: [Agent Front Door §12](./agent-front-door.mdx#scaling) · [Agent Runtime §12](./agent-runtime.mdx#scaling).
+AFD and AR scale: [Agent Fabric Front Door §12](./agent-fabric-front-door.mdx#scaling) · [Agent Fabric Runtime §12](./agent-fabric-runtime.mdx#scaling).
 
 ---
 
 ## Read next
 
-**[Agent Runtime](./agent-runtime.mdx)** · [Agent Capability Registry](./agent-capability-registry.mdx) · [Agent Front Door](./agent-front-door.mdx) · [Catalogue matrix](../03-catalogue/README.md)
+**[Agent Fabric Runtime](./agent-fabric-runtime.mdx)** · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Catalogue matrix](../03-catalogue/README.md)

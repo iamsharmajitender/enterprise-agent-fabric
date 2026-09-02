@@ -1,6 +1,6 @@
 # Task list: Layered intent router (local Fabric)
 
-Plan: [intent-plan.md](./intent-plan.md) (includes **Present vs remaining**). Playbook: [Layered classifier](https://jitendersharma.dev/playbooks/agents/intent-router/layered-classifier). Docs map: [README.md](../README.md). Architecture: [agent-plane](../04-architecture/agent-plane.mdx).
+Plan: [intent-plan.md](./intent-plan.md) (includes **Present vs remaining**). Playbook: [Layered classifier](https://jitendersharma.dev/playbooks/agents/intent-router/layered-classifier). Docs map: [README.md](../README.md). Architecture: [agent-plane](../04-architecture/agent-fabric-plane.mdx).
 
 **Execution order:**
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1260 790" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-arch-title hir-arch-desc">
       <title id="hir-arch-title">Enterprise Agent Fabric</title>
-      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Events sits at the top. Agent Plane sits above the middle: Agent Control Plane stacked on Agent Data Plane, with the Agent Capability Registry beside them. A small database mark sits inside Agent Front Door, Agent Plane, and Agent Runtime. Chat/UI and API enter only through Agent Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Runtime. Agent Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Capability Registry. Agent Data Plane does not start Agent Runtime. Shared holds Memory, RAG, and Tools. Observability feeds Dashboard then Responsible / Governed AI.</desc>
+      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Events sits at the top. Agent Fabric Plane sits above the middle: Agent Control Plane stacked on Agent Data Plane, with the Agent Fabric Capability Registry beside them. A small database mark sits inside Agent Fabric Front Door, Agent Fabric Plane, and Agent Fabric Runtime. Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Agent Data Plane does not start Agent Fabric Runtime. Shared holds Memory, RAG, and Tools. Observability feeds Dashboard then Responsible / Governed AI.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="hir-arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -146,7 +146,7 @@
       <rect x="272" y="210" width="44" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
       <text x="294" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAFD</text>
       <use href="#hir-db" x="428" y="208" width="16" height="16"/>
-      <text x="360" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Front Door</text>
+      <text x="360" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
       <text x="360" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · pin · start</text>
 
       <rect x="560" y="204" width="184" height="124" rx="6" fill="#f8fafc"/>
@@ -154,7 +154,7 @@
       <rect x="564" y="210" width="36" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
       <text x="582" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAR</text>
       <use href="#hir-db" x="720" y="208" width="16" height="16"/>
-      <text x="652" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Runtime</text>
+      <text x="652" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
       <text x="652" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fetch · hydrate · loop</text>
 
       <line x1="744" y1="268" x2="792" y2="268" stroke="#64748b" stroke-width="1" marker-end="url(#hir-arch-arrow)"/>

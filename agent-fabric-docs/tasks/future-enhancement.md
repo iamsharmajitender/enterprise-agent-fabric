@@ -247,7 +247,7 @@ Honor `ttl_hours` (seed: 24 typical, 8 for KYC/dispute) and `isolation`. Prove *
 
 **Status:** Future enhancement (architecture is bank-shaped; binary is a local foundation)  
 **Date:** 2026-08-26  
-**See also:** [status.md](../02-understand/status.md), [agent-runtime.mdx](../04-architecture/agent-runtime.mdx), [dataflow-plan.md](./dataflow-plan.md), hydrate in `agent-runtime/app/agents/hydrate.py`
+**See also:** [status.md](../02-understand/status.md), [agent-fabric-runtime.mdx](../04-architecture/agent-fabric-runtime.mdx), [dataflow-plan.md](./dataflow-plan.md), hydrate in `agent-runtime/app/agents/hydrate.py`
 
 EAF’s locked fabric rules (AFD pin → ADP catalogue → ACR capabilities → AR execute) are a credible **target platform spine** for bank agentic work. The gaps below are what turn “compose demo + content plugs” into a platform a bank can **standardize on and harden**. They are **not** more Patterns; they are fidelity, evidence, publish, and production posture.
 
