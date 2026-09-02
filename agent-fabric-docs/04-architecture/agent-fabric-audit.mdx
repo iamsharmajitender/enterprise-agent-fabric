@@ -1,0 +1,346 @@
+---
+title: "Agent Fabric Audit"
+sidebar_label: Agent Fabric Audit
+sidebar_position: 5
+slug: /enterprise-agent-fabric/agent-fabric-audit
+description: "Agent Fabric Audit: AADP append-only evidence store and AACP ops UI. Producers emit async. Examine chains by correlation_id. Not the decide hot path."
+---
+
+import Details from '@theme/Details';
+
+# Agent Fabric Audit
+
+**Box:** Agent Audit Data Plane (AADP) + Agent Audit Control Plane (AACP)
+
+Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)
+
+**Producers emit async. AADP appends once. AACP examines by correlation.** · **Status:** Draft · **Date:** 2026-09-02
+
+**Behaviour source:** [status](../02-understand/status.md). This pack may be ahead of code.
+
+The audit boxes sit **beside** the request path. They are not a channel API, not OTel, and not folded into ACP catalogue or ADP schema. **AFD, ADP, AR, and ACR** POST events to **AADP**. **AACP** queries only. Decide, freeze, pin, and start **never wait** on audit commit.
+
+**Local v1:** AADP Java service on port **3012** (Postgres DB `audit`). AACP TypeScript UI on port **3013** (no database). Envelope and examples: [audit-event-envelope](../05-reference/audit-event-envelope.json).
+
+---
+
+## 1. Solution on a page
+
+### Business problem
+
+Freeze keys, OTel spans, and in-process decide results help operators debug a run — but they are not an append-only, queryable exam trail. Risk and compliance need to answer: why this route, under what entitlement snapshot, which frozen contract ran, what each stage saw/wrote, and how the run ended. Chat wire JSON must stay slim (FR-5). Evidence is a separate audience.
+
+### Key requirements
+
+| ID | Requirement (this box) |
+| --- | --- |
+| FR-5 | Chat/UI never sees audit fields. Evidence is server-side only. |
+| — | Append-only events. No UPDATE/DELETE APIs that rewrite history. |
+| — | Query by `correlation_id`, `session_id`, and workflow list for ops. |
+| — | Producers POST async. Decide / freeze / `202` start **must not await** audit 2xx. |
+| — | Default-deny payload: hashes and digests, not raw utterance, claims, tokens, or LLM I/O. |
+| — | Idempotent ingest on `event_id`. Duplicate POST → same row / 200. |
+
+Audit lag is acceptable. Decide and start success is not gated on evidence commit.
+
+### Architecture
+
+<div className="gain-diagram-wrap">
+
+![AFD, ADP, AR, and ACR emit audit events asynchronously to AADP. AADP appends to Postgres audit. AACP queries chains for ops. Observability is a separate ops path.](./diagrams/audit-solution.svg)
+
+</div>
+
+[Editorial source](./diagrams/audit-solution.html)
+
+Two boxes, four producers, one examiner. Three moments — only the last is human ops.
+
+### Key technology decisions
+
+| Choice | Why |
+| --- | --- |
+| Separate AADP + AACP | Evidence durability and ops UI must not share ADP/AR/ACP databases or hot paths. |
+| Async fail-open HTTP | Matches Plane packs: audit lag OK; decide SLO excludes audit commit. |
+| Postgres append-only | Queryable chains with retention policy. Not "grep Loki and hope." |
+| Same envelope for HTTP and Kafka (later) | Producers stay stable when bus durability lands. |
+| AACP is UI-only | Pattern matches catalogue ACP → ADP: query client, no Fabric DB. |
+| Ops ≠ evidence | OTel/LGTM is the ops path. Audit is the evidence path. Same ids may link them. |
+
+### Expected outcomes
+
+- Ops paste a `correlation_id` and see decide → freeze/pin → hydrate → stages → terminal.
+- Risk reviewers see hashes and digests, not raw PII or bearer tokens on the wire.
+- A down AADP does not block new decides or starts; gaps show in metrics.
+- Agent-start families nest under a parent `correlation_id` in AACP.
+
+### This box owns / does not own
+
+| Owns | Does not own |
+| --- | --- |
+| Append-only event ingest and query (AADP) | Decide, pin, start, loop, PEP |
+| Ops evidence UI (AACP) | Chat channel JSON, catalogue mutate |
+| Envelope validation and payload deny-list | IdP, real JWT, Kafka (first cut) |
+| Workflow list (completed / in progress) | Full SIEM / legal-hold product |
+
+If AADP dies: **new** events may drop (fail-open); in-flight runs continue. If AACP dies: ingest unaffected; ops loses browse until UI returns.
+
+---
+
+## 2. Job
+
+Two boxes inside Agent Fabric Audit. Four producers, one examiner.
+
+| Box | Port | Stack | Job |
+| --- | --- | --- | --- |
+| **Agent Audit Data Plane (AADP)** | **3012** | Java 21 hexagonal + Flyway + Postgres `audit` | Ingest append-only events; query APIs |
+| **Agent Audit Control Plane (AACP)** | **3013** | TypeScript UI/client; **no database** | Ops UI; **only** calls AADP over HTTP |
+
+| Moment | Who | What happens |
+| --- | --- | --- |
+| **Emit** | AFD / ADP / AR / ACR | Async `POST /v1/audit/events` after decide, freeze, hydrate, stage, terminal, or publish. |
+| **Append** | AADP | Validate envelope, reject denied payload keys, idempotent insert. |
+| **Examine** | AACP (or other ops client) | `GET` chain, session, or workflow list. Never called by producers. |
+
+**Evidence path vs ops path.** OTel traces and metrics help SREs. AADP holds the durable exam chain. Same `correlation_id` / `session_id` may appear in both; they are not the same store.
+
+---
+
+## 3. What an audit event is
+
+| Field | Why it exists |
+| --- | --- |
+| `event_id` | UUID. Idempotent insert key. Duplicate POST → 200, same row. |
+| `event_type` | Stable name: `decide.completed`, `freeze.written`, `hydrate.snapshot`, `run.terminal`, `stage.completed`, … |
+| `occurred_at` | Producer clock (ISO-8601). Ordering within a chain. |
+| `producer` | `afd` \| `adp` \| `ar` \| `acr`. Who emitted. |
+| `correlation_id` | Run key when known. Primary chain lookup. Nullable on early decide. |
+| `session_id` | Chat session (`chat-{uuid}`) or jobs/sub freeze key when known. |
+| `decision_id` | Optional join from decide → freeze when `correlation_id` does not exist yet. |
+| `payload` | Allowlisted JSON per `event_type`. Hashes/digests by default. |
+
+**Default deny (payload keys):** `utterance`, `message`, `claims`, `authorization`, `prompt`, `completion`. Prefer `*_hash` / `*_digest` fields.
+
+### Phase A event types
+
+| `event_type` | Producer | Payload gist |
+| --- | --- | --- |
+| `decide.completed` / `.clarify` / `.abstain` | ADP | `outcome`, `route_id` / `route_version` when route, `candidates`, `router_layer`, `claims_hash`, `utterance_hash`, `channel`, `ingress` |
+| `freeze.written` / `pin.started` | AFD | freeze key, `route_id@version`, `correlation_id`, `ingress` (chat/jobs) |
+| `hydrate.snapshot` | AR | `capability_id@version` list, invoke/schema digests, `manifest_id@version`, `route_id@version` |
+| `run.terminal` | AR | `status` (`completed` / `failed` / `waiting`), reason codes, `route_id@version` |
+
+### Phase B event types
+
+| `event_type` | Producer | Payload gist |
+| --- | --- | --- |
+| `stage.started` / `stage.completed` / `stage.failed` | AR | `stage_id`, tool or LLM role, request/response **digests**, latency_ms, status |
+| `capability.published` / `manifest.published` | ACR | `id`, `version`, publisher workload, content digest |
+
+<Details summary="decide.completed (JSON)">
+
+```json
+{
+  "event_id": "11111111-1111-4111-8111-111111111111",
+  "event_type": "decide.completed",
+  "occurred_at": "2026-08-26T01:00:00Z",
+  "producer": "adp",
+  "correlation_id": null,
+  "session_id": "chat-11111111-1111-4111-8111-111111111111",
+  "decision_id": "dec-fee-1",
+  "payload": {
+    "outcome": "route",
+    "route_id": "fee_explain",
+    "route_version": "2026.08.1",
+    "candidates": ["fee_explain"],
+    "router_layer": "retrieve",
+    "claims_hash": "sha256:aaaa…",
+    "utterance_hash": "sha256:bbbb…",
+    "channel": "web",
+    "ingress": "chat"
+  }
+}
+```
+
+</Details>
+
+<Details summary="hydrate.snapshot (JSON)">
+
+```json
+{
+  "event_id": "33333333-3333-4333-8333-333333333333",
+  "event_type": "hydrate.snapshot",
+  "occurred_at": "2026-08-26T01:00:02Z",
+  "producer": "ar",
+  "correlation_id": "corr-fee-1",
+  "session_id": "chat-11111111-1111-4111-8111-111111111111",
+  "payload": {
+    "route_id": "fee_explain",
+    "route_version": "2026.08.1",
+    "manifest_id": "fee_explain_v1",
+    "manifest_version": "2026.08.1",
+    "capabilities": [
+      {
+        "capability_id": "account_fee_lookup",
+        "capability_version": "2026.08.1",
+        "invoke_url_digest": "sha256:cccc…",
+        "input_schema_digest": "sha256:dddd…",
+        "output_schema_digest": "sha256:eeee…"
+      }
+    ]
+  }
+}
+```
+
+</Details>
+
+More examples: [05-reference/](../05-reference/) (`audit-event-*.json`).
+
+---
+
+## 4. Evidence chain {#evidence-chain}
+
+A **chain** is all events sharing a `correlation_id`, ordered by `occurred_at` (then insert order).
+
+Typical Phase A story for one run:
+
+1. **ADP** — `decide.*` (may have `decision_id` before `correlation_id` exists)
+2. **AFD** — `freeze.written` / `pin.started` (links session → correlation)
+3. **AR** — `hydrate.snapshot` (frozen manifest + capability digests)
+4. **AR** — `stage.*` (Phase B; per LangGraph step)
+5. **AR** — `run.terminal`
+
+**Agent-start families.** When a parent AR invokes an agent-start capability, the child run gets its own `correlation_id`. AACP shows `parent_correlation_id` on nested workflows so ops can expand the family tree.
+
+**Join keys.** Reuse W3C `traceparent` (ops), AR `correlation_id`, AFD `session_id`, jobs idempotency key. Optional `decision_id` bridges decide → pin when correlation is minted later.
+
+---
+
+## 5. Context
+
+| Actor | Relationship |
+| --- | --- |
+| AFD | Emits `freeze.*` / `pin.*` after entitle + record. Never calls AACP. |
+| ADP | Emits `decide.*` after classify. Never blocks decide on audit. |
+| AR | Emits `hydrate.snapshot`, `stage.*`, `run.terminal`. Never blocks loop on audit. |
+| ACR | Emits `*.published` (Phase B). Registry DB stays authoritative for catalog. |
+| AADP | Validates, appends, serves query APIs. Not on channel or decide path. |
+| AACP | Ops UI: workflows, search, chain timeline. Only calls AADP. |
+| Chat/UI | **None.** FR-5 wire JSON does not grow audit fields. |
+
+---
+
+## 6. How producers emit
+
+| Step | Producer | When |
+| --- | --- | --- |
+| 1. Decide | ADP | After Layer ②/③ outcome. Async client; metric on drop. |
+| 2. Freeze / pin | AFD | After freeze write / AR start POST. Fail-open if AADP down. |
+| 3. Hydrate | AR | After whole manifest hydrated onto run pin. Digests only. |
+| 4. Stages | AR | After each LangGraph stage (Phase B). Request/response digests. |
+| 5. Terminal | AR | On `completed`, `failed`, or `waiting`. |
+| 6. Publish | ACR | On capability or manifest publish (Phase B). |
+
+Producers may send `X-Workload` (`afd`, `adp`, `ar`, `acr`, `aacp`). Local stub auth; IdP later.
+
+---
+
+## 7. APIs {#apis}
+
+AADP is not a channel API. Producers POST async. AACP and ops tools GET.
+
+### AADP (data plane)
+
+| Method | Path | Who / when |
+| --- | --- | --- |
+| `POST` | `/v1/audit/events` | Producers (async). Idempotent on `event_id` |
+| `GET` | `/v1/audit/chains/{correlation_id}` | AACP chain view. Ordered events |
+| `GET` | `/v1/audit/sessions/{session_id}` | Session-scoped events |
+| `GET` | `/v1/audit/workflows?limit&offset&status` | Workflow list. `status=completed` (default) or `in_progress` |
+| `GET` | `/health` | Compose / k8s probe |
+
+### AACP (control plane)
+
+| Surface | Role |
+| --- | --- |
+| `http://localhost:3013` | Landing: completed + in-progress tabs (50/page) |
+| Search | Chain lookup by `correlation_id` / `session_id` |
+| Nested / Flat | Agent-start families with `parent_correlation_id` |
+| Route link | Opens catalogue row in ACP (`:3006/routes/…`) |
+
+Env: `AUDIT_DATA_PLANE_URL` (default `http://localhost:3012`). AACP never calls ADP, AR, AFD, or ACR for audit data.
+
+---
+
+## 8. Deployment architecture
+
+| Concern | Stance |
+| --- | --- |
+| Ingress | Internal only. Not a channel API. |
+| Scale | Ingest RPS from producer emits + query QPS from AACP. Does **not** grow with LLM tokens. |
+| Fail-open producers | Bounded queue / fire-and-forget. Metric on drop or non-2xx. |
+| Failover | AADP read replicas for query. In-flight runs do not need AADP to complete. |
+| Isolation | Independent of decide CPU and AR loop workers. |
+| Ports | AADP **3012**, AACP **3013** (`agent-mocks` keeps **3010**). |
+
+---
+
+## 9. Data architecture
+
+**Schema:** `audit.events` — PK `event_id`, envelope columns + `payload` JSONB, `received_at`.
+
+**Indexes:** `(correlation_id, occurred_at, received_at)`, `(session_id, occurred_at, received_at)`, `(event_type, occurred_at)`.
+
+**Consistency:** Append-only. Application code must not UPDATE/DELETE rows to rewrite history. Redact via policy/tombstone later, not silent mutation.
+
+**Retention:** Local demos keep events indefinitely. Production should set TTL (e.g. 30–90 days) and archive. Run-pin TTL ≠ audit retention.
+
+**Idempotency:** Duplicate `event_id` → same row / 200. Safe for at-least-once producers and future Kafka consumer.
+
+---
+
+## 10. Sequence diagrams
+
+### Phase A evidence chain
+
+<div className="gain-diagram-wrap">
+
+![ADP, AFD, and AR emit audit events asynchronously to AADP. Decide and start do not wait. AACP queries the chain by correlation_id.](./diagrams/audit-seq-chain.svg)
+
+</div>
+
+[Editorial source](./diagrams/audit-seq-chain.html)
+
+---
+
+## 11. Failure and resilience
+
+| Failure | Behaviour |
+| --- | --- |
+| AADP down at decide | Decide still succeeds. Event may drop; metric fires. |
+| AADP down at start | Freeze + AR start still succeed. Chain may have gaps. |
+| AADP down mid-loop | Run continues. Later events may drop until AADP returns. |
+| Denied payload key | Ingest 400. Producer must emit hashes, not raw secrets. |
+| Duplicate `event_id` | 200, same row. Safe retry. |
+| AACP down | Ingest unaffected. Ops loses browse until UI returns. |
+| Unknown `correlation_id` | Empty chain. UI shows not-found state. |
+
+**Anti-patterns:** blocking decide/start on audit 2xx; putting audit tables on `adp` or `ar`; raw utterance or bearer in payload; producers calling AACP; merging audit into catalogue ACP.
+
+---
+
+## 12. Scaling {#scaling}
+
+Emit is off the hot path. Scale with new runs and ops query load, not with loop steps per se (Phase B `stage.*` adds per-stage emits).
+
+| Axis | Grows with | Scale signal |
+| --- | --- | --- |
+| **AADP ingest** | Decide + start + stage emit RPS | POST p99, insert QPS, drop metric |
+| **AADP query** | AACP / SIEM chain reads | GET p99, correlation index hit rate |
+| **AACP** | Concurrent ops users | UI latency; cache not required for v1 |
+| **Postgres `audit`** | Event volume × retention window | Disk, partition/TTL policy |
+
+---
+
+## Read next
+
+**[Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)** · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Audit plan](../tasks/audit-plan.md) · [Audit event envelope](../05-reference/audit-event-envelope.json)

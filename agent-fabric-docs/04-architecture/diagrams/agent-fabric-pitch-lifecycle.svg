@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1280 240" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="agent-fabric-pitch-lifecycle-title agent-fabric-pitch-lifecycle-desc">
+      <title id="agent-fabric-pitch-lifecycle-title">V1 reference lifecycle</title>
+      <desc id="agent-fabric-pitch-lifecycle-desc">The working V1 path from inbound message through classify, entitlement, pin, hydrate, execute, and response.</desc>
+      <defs>
+      <marker id="pitch-life-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+      </marker>
+      <marker id="pitch-life-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+      </marker></defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+      <line x1="168" y1="100" x2="200" y2="100" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-life-arrow)"/>
+<line x1="328" y1="100" x2="360" y2="100" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-life-arrow)"/>
+<line x1="488" y1="100" x2="520" y2="100" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-life-arrow)"/>
+<line x1="648" y1="100" x2="680" y2="100" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-life-arrow)"/>
+<line x1="808" y1="100" x2="840" y2="100" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-life-arrow)"/>
+<line x1="968" y1="100" x2="1000" y2="100" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-life-arrow)"/>
+
+      
+      <rect x="40" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="72" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="48" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="62" y="89" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">IN</text>
+      <text x="104" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Message</text>
+      
+      <rect x="200" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="200" y="72" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="208" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="222" y="89" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">DEC</text>
+      <text x="264" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Classify</text>
+      
+      <rect x="360" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="360" y="72" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="368" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="382" y="89" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">DEC</text>
+      <text x="424" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Entitle</text>
+      
+      <rect x="520" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="520" y="72" width="128" height="56" rx="6" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="1"/>
+      <rect x="528" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(249,115,22,0.45)" stroke-width="0.8"/>
+      <text x="542" y="89" fill="#f97316" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">PIN</text>
+      <text x="584" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Pin</text>
+      
+      <rect x="680" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="680" y="72" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="688" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="702" y="89" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">HYD</text>
+      <text x="744" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Hydrate</text>
+      
+      <rect x="840" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="840" y="72" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="848" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="862" y="89" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">RUN</text>
+      <text x="904" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Execute</text>
+      
+      <rect x="1000" y="72" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="1000" y="72" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="1008" y="80" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="1022" y="89" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">OUT</text>
+      <text x="1064" y="104" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Response</text>
+      
+      <text x="640" y="168" fill="#1e293b" font-size="14" font-family="'Instrument Serif', serif" font-style="italic" text-anchor="middle">Same contract for chat and jobs ingress.</text>
+      <line x1="40" y1="192" x2="1240" y2="192" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="40" y="208" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LEGEND</text>
+      <rect x="40" y="212" width="20" height="14" rx="2" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="1"/>
+      <text x="68" y="222" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Durable pin</text>
+    </svg>

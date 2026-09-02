@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Many assistants. Many gateways. No single answer.</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Geist', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1280px; width: 100%; }
+    .eyebrow {
+      font-family: 'Geist Mono', ui-monospace, monospace;
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: 'Instrument Serif', serif;
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 960px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · The problem</p>
+    <h1>Many assistants. Many gateways. No single answer.</h1>
+    
+    <svg viewBox="0 0 960 400" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="agent-fabric-pitch-problem-title agent-fabric-pitch-problem-desc">
+      <title id="agent-fabric-pitch-problem-title">Fragmented enterprise AI today</title>
+      <desc id="agent-fabric-pitch-problem-desc">Employees and partners reach separate assistants and endpoints. Each domain rebuilds authentication, routing, and controls independently.</desc>
+      <defs>
+      <marker id="pitch-problem-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+      </marker>
+      <marker id="pitch-problem-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+      </marker></defs>
+      <rect width="100%" height="100%" fill="#f8fafc"/>
+
+      
+      <rect x="40" y="48" width="160" height="56" rx="20" fill="#f8fafc"/>
+      <rect x="40" y="48" width="160" height="56" rx="20" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
+      <rect x="48" y="56" width="28" height="12" rx="2" fill="transparent" stroke="rgba(148,163,184,0.45)" stroke-width="0.8"/>
+      <text x="62" y="65" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">USR</text>
+      <text x="120" y="80" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Employees</text>
+      
+      
+      <rect x="40" y="168" width="160" height="56" rx="20" fill="#f8fafc"/>
+      <rect x="40" y="168" width="160" height="56" rx="20" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
+      <rect x="48" y="176" width="28" height="12" rx="2" fill="transparent" stroke="rgba(148,163,184,0.45)" stroke-width="0.8"/>
+      <text x="62" y="185" fill="#94a3b8" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">PRT</text>
+      <text x="120" y="200" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Partners / systems</text>
+      
+
+      <line x1="200" y1="76" x2="280" y2="76" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
+      <line x1="200" y1="196" x2="280" y2="196" stroke="#64748b" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
+
+      <rect x="280" y="40" width="640" height="120" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="600" y="64" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">EMPLOYEE ASSISTANTS</text>
+      
+      <rect x="300" y="80" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="300" y="80" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="308" y="88" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="322" y="97" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="364" y="112" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Finance</text>
+      
+      
+      <rect x="448" y="80" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="448" y="80" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="456" y="88" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="470" y="97" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="512" y="112" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">HR</text>
+      
+      
+      <rect x="596" y="80" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="596" y="80" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="604" y="88" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="618" y="97" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="660" y="112" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Legal</text>
+      
+      
+      <rect x="744" y="80" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="744" y="80" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="752" y="88" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="766" y="97" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="808" y="112" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Technology</text>
+      
+
+      <rect x="280" y="160" width="640" height="120" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="600" y="184" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">PARTNER / DOMAIN ENDPOINTS</text>
+      
+      <rect x="300" y="200" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="300" y="200" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="308" y="208" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="322" y="217" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="364" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Customer svc</text>
+      
+      
+      <rect x="448" y="200" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="448" y="200" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="456" y="208" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="470" y="217" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="512" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Claims</text>
+      
+      
+      <rect x="596" y="200" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="596" y="200" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="604" y="208" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="618" y="217" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="660" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Payments</text>
+      
+      
+      <rect x="744" y="200" width="128" height="56" rx="6" fill="#f8fafc"/>
+      <rect x="744" y="200" width="128" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="752" y="208" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="766" y="217" fill="#1e293b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">AI</text>
+      <text x="808" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">KYC</text>
+      
+
+      <text x="480" y="320" fill="#1e293b" font-size="14" font-family="'Instrument Serif', serif" font-style="italic" text-anchor="middle">Who may use this? What may it do? Why was it selected?</text>
+      <line x1="40" y1="352" x2="920" y2="352" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="40" y="368" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LEGEND</text>
+      <rect x="40" y="372" width="20" height="14" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="68" y="382" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Isolated capability</text>
+    </svg>
+  </div>
+</body>
+</html>

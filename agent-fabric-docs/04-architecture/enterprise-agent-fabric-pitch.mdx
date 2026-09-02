@@ -98,6 +98,12 @@ The organisation loses a single answer to three fundamental questions:
 
 > **Why was this capability selected and what did it do?**
 
+<div className="gain-diagram-wrap">
+
+![Fragmented enterprise AI today: employees and partners reach separate assistants and endpoints, each rebuilding authentication, routing, and controls independently.](./diagrams/agent-fabric-pitch-problem.svg)
+
+</div>
+
 ---
 
 ## 5. The proposition
@@ -118,42 +124,11 @@ The model is:
 
 ## 6. Target state
 
-```text
-                         USERS / APPLICATIONS
-                                  │
-                                  ▼
-                     ┌────────────────────────┐
-                     │  ENTERPRISE AI         │
-                     │      FRONT DOOR        │
-                     └────────────┬───────────┘
-                                  │
-                         Identity + Intent
-                                  │
-                                  ▼
-                     ┌────────────────────────┐
-                     │   DECISION / CONTROL   │
-                     │                        │
-                     │ Entitlement            │
-                     │ Routing                │
-                     │ Policy                 │
-                     │ Capability selection   │
-                     └────────────┬───────────┘
-                                  │
-              ┌───────────────────┼───────────────────┐
-              ▼                   ▼                   ▼
-        CUSTOMER AI          PAYMENTS AI          LEGAL AI
-        CAPABILITY           CAPABILITY           CAPABILITY
-              │                   │                   │
-              └───────────────────┼───────────────────┘
-                                  ▼
-                     ┌────────────────────────┐
-                     │ ENTERPRISE CONTROLS    │
-                     │                        │
-                     │ Data • Tools • Policy  │
-                     │ Approval • Audit       │
-                     │ Monitoring • Risk      │
-                     └────────────────────────┘
-```
+<div className="gain-diagram-wrap">
+
+![Enterprise Agent Fabric target state: users and applications enter through the Enterprise AI Front Door; a decision layer selects the capability and verifies entitlement; specialised domain capabilities execute under shared enterprise controls.](./diagrams/agent-fabric-pitch-target-state.svg)
+
+</div>
 
 The key principle is that **the Fabric does not become one giant agent**. It provides the enterprise operating layer around specialised capabilities.
 
@@ -312,6 +287,12 @@ A working V1 reference implementation demonstrates the complete lifecycle:
 
 > **Message → classify → entitlement → pin → hydrate → execute → response**
 
+<div className="gain-diagram-wrap">
+
+![V1 reference lifecycle: message in, classify, entitlement, pin, hydrate, execute, and response out — the same contract for chat and jobs ingress.](./diagrams/agent-fabric-pitch-lifecycle.svg)
+
+</div>
+
 The reference implementation currently demonstrates Agent Fabric Front Door, Control Plane, Data Plane, Runtime, and Capability Registry; a route catalogue with multiple autonomy patterns; chat and jobs ingress; and LangGraph-based runtime execution.
 
 This is a proof point for the architecture and operating model, not the final production topology. Implementation status and behaviour truth: [status](../../02-understand/status.md) · [catalogue matrix](../../03-catalogue/README.md) · [technical design](./enterprise-agent-fabric-architecture.mdx).
@@ -393,7 +374,7 @@ Self-service capability onboarding, expanded policy controls, capability lifecyc
 
 <div className="gain-diagram-wrap">
 
-![Five beats from fragmented AI to one experience, through the Agent Fabric, to business outcomes, then the technical design.](./diagrams/agent-fabric-v1-story.svg)
+![Five beats from fragmented AI and enterprise risk, through one operating model and domain autonomy, to scale with control.](./diagrams/agent-fabric-v1-story.svg)
 
 </div>
 

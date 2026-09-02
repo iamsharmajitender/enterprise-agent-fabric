@@ -23,8 +23,9 @@ These packs may be ahead of code. Behaviour of the running binary is [02-underst
 | [Agent Fabric Plane](./agent-fabric-plane.mdx) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |
 | [Agent Fabric Runtime](./agent-fabric-runtime.mdx) | AR + Shared calls | Pin, hydrate, LangGraph loop, Patterns 0–3. |
 | [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) | Registry (with Agent Fabric Plane) | Publishers append `id@version`. AR hydrates at pin. |
+| [Agent Fabric Audit](./agent-fabric-audit.mdx) | AADP + AACP | Producers emit async. Append-only evidence chain. AACP examines by `correlation_id`. |
 
-Read order matches a request: **Fabric → AFD → Plane → Runtime → Registry**.
+Read order matches a request: **Fabric → AFD → Plane → Runtime → Registry → Audit**.
 
 ## Diagrams
 

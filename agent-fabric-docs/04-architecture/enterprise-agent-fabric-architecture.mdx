@@ -36,7 +36,7 @@ Local architecture paper. How-to stays in playbooks and box packs. This page is 
 
 ## Running locally (v1)
 
-Five processes prove the fabric chain. Channels talk only to Front Door.
+Seven processes prove the fabric chain. Channels talk only to Front Door.
 
 | Port | Box | Job |
 | --- | --- | --- |
@@ -45,6 +45,8 @@ Five processes prove the fabric chain. Channels talk only to Front Door.
 | 3007 | **Agent Data Plane** | Catalogue + classify (`POST /v1/intent/decide`) |
 | 3008 | **Agent Fabric Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
 | 3009 | **Agent Fabric Capability Registry** | Published capabilities; hydrate once at pin |
+| 3012 | **Agent Audit Data Plane (AADP)** | Append-only evidence ingest + query |
+| 3013 | **Agent Audit Control Plane (AACP)** | Ops UI; queries AADP only |
 
 **32 routes** in the seed catalogue. Four autonomy patterns (`autonomy_mode` 0–3). Pin → hydrate → graph is wired; gaps vs the full design are listed in [status](../../02-understand/status.md).
 
@@ -148,7 +150,7 @@ How those numbers become fleets: [Front Door scaling](./agent-fabric-front-door.
 
 </div>
 
-Child pages: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx).
+Child pages: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Agent Fabric Audit](./agent-fabric-audit.mdx).
 
 ### Roles and responsibilities
 
@@ -171,6 +173,7 @@ Child pages: [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent 
 | **RAG** (in Shared) | Corpus retrieve | Ingress classify | Platform | Grounding degrades; routing still works |
 | **Tools / PEP** (in Shared) | Actions scoped by pinned manifest. Dual check: user entitlements (or approval) and agent scopes | Route choice, mint | With AR | Side effects stop |
 | **Agent Fabric Capability Registry** (with Agent Fabric Plane) | Immutable `id@version`. Domain `invoke` and agent-start `invoke`. AR hydrates at pin | Pin, start, PEP permit | Platform | New runs cannot hydrate; in-flight pins still have schemas |
+| **Agent Fabric Audit** (AADP + AACP) | Append-only fabric evidence chain. Async emit from AFD, ADP, AR, ACR. Ops query by `correlation_id` | Decide, pin, start, loop | AADP ingest + query | New events may drop (fail-open); in-flight runs continue |
 | **Model router** | Which LLM. Called by AR | Which `route_id` | LLM gateway | Inference fails; decide unaffected |
 
 ### Three routers (do not collapse)
@@ -355,4 +358,4 @@ FRs above are the testable form.
 
 ## Read next
 
-**[Agent Fabric Front Door](./agent-fabric-front-door.mdx)** · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Catalogue matrix](../../03-catalogue/README.md) · [Runtime status](../../02-understand/status.md) · [Patterns](../../06-patterns/README.md) · [Executive brief](./enterprise-agent-fabric-pitch.mdx)
+**[Agent Fabric Front Door](./agent-fabric-front-door.mdx)** · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Agent Fabric Audit](./agent-fabric-audit.mdx) · [Catalogue matrix](../../03-catalogue/README.md) · [Runtime status](../../02-understand/status.md) · [Patterns](../../06-patterns/README.md) · [Executive brief](./enterprise-agent-fabric-pitch.mdx)
