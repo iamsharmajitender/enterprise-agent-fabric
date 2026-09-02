@@ -21,7 +21,7 @@ Own the versioned catalogue and classify/entitle (`POST /v1/intent/decide`). Ret
 | Auth | Workload only. `Authorization: Bearer fabric-internal` + `X-Workload` |
 | Decide caller | **`afd` only.** Anyone else → **403**. Channel bearer → **401**. |
 
-Docs map: [docs/README.md](../../agent-fabric-docs/README.md). Frozen decide bodies: [docs/05-reference/](../../agent-fabric-docs/05-reference/README.md). Box pack (may be ahead of this binary): [docs/04-architecture/agent-plane.md](../../agent-fabric-docs/04-architecture/agent-plane.md). Intent track: [agent-fabric-docs/tasks/intent-plan.md](../../agent-fabric-docs/tasks/intent-plan.md) (Layer ③ **on** is [I12 future enhancement](../../agent-fabric-docs/tasks/future-enhancement.md#i12-layer-3-llm-fallback)).
+Docs map: [docs/README.md](../../agent-fabric-docs/README.md). Frozen decide bodies: [docs/05-reference/](../../agent-fabric-docs/05-reference/README.md). Box pack (may be ahead of this binary): [docs/04-architecture/agent-plane.mdx](../../agent-fabric-docs/04-architecture/agent-plane.mdx). Intent track: [agent-fabric-docs/tasks/intent-plan.md](../../agent-fabric-docs/tasks/intent-plan.md) (Layer ③ **on** is [I12 future enhancement](../../agent-fabric-docs/tasks/future-enhancement.md#i12-layer-3-llm-fallback)).
 
 ---
 

@@ -386,7 +386,7 @@ How the later README topics land on each box is summarized at the end of this se
 
 **Database `afd`.** Schema `frontdoor`. Freeze is route stickiness (`session_id` → pin + `correlation_id`), not conversation memory. Local jobs freeze is in-memory until the chat-path table; prod is Redis/Valkey. Outbound workload: `Authorization: Bearer fabric-internal`, `X-Workload: afd`.
 
-Pack: [agent-fabric-front-door](agent-fabric-docs/04-architecture/agent-front-door.md). Service notes: [`agent-fabric-front-door/README.md`](agent-fabric-front-door/README.md).
+Pack: [agent-fabric-front-door](agent-fabric-docs/04-architecture/agent-front-door.mdx). Service notes: [`agent-fabric-front-door/README.md`](agent-fabric-front-door/README.md).
 
 ### ADP — Agent Data Plane (`adp`, :3007)
 
@@ -403,7 +403,7 @@ Pack: [agent-fabric-front-door](agent-fabric-docs/04-architecture/agent-front-do
 
 **Database `adp`.** Schema `dataplane`. Policy lives here; memories do not. A down catalogue fails closed (no new starts). A down Runtime does not stop classify.
 
-Pack: [agent-plane](agent-fabric-docs/04-architecture/agent-plane.md) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-fabric-plane/agent-data-plane/README.md`](agent-fabric-plane/agent-data-plane/README.md).
+Pack: [agent-plane](agent-fabric-docs/04-architecture/agent-plane.mdx) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-fabric-plane/agent-data-plane/README.md`](agent-fabric-plane/agent-data-plane/README.md).
 
 ### ACR — Agent Capability Registry (`acr`, :3009)
 
@@ -419,7 +419,7 @@ Pack: [agent-plane](agent-fabric-docs/04-architecture/agent-plane.md) (Data Plan
 
 **Database `acr`.** Append-only versions. If ACR dies, **new** runs cannot hydrate; in-flight pins already have schemas on the run pin.
 
-Pack: [agent-fabric-capability-registry](agent-fabric-docs/04-architecture/agent-capability-registry.md).
+Pack: [agent-fabric-capability-registry](agent-fabric-docs/04-architecture/agent-capability-registry.mdx).
 
 ### AR — Agent Runtime (`ar`, :3008)
 
@@ -438,7 +438,7 @@ Pack: [agent-fabric-capability-registry](agent-fabric-docs/04-architecture/agent
 
 **Database `ar`.** Schema `runtime`. Run pin is authoritative for the loop (longer than freeze TTL). Shared Memory is a fifth store, not this database.
 
-Pack: [agent-fabric-runtime](agent-fabric-docs/04-architecture/agent-runtime.md).
+Pack: [agent-fabric-runtime](agent-fabric-docs/04-architecture/agent-runtime.mdx).
 
 ### How README topics map onto the four boxes
 

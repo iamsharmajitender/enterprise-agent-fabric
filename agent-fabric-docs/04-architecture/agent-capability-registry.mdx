@@ -1,0 +1,350 @@
+---
+title: "Agent Capability Registry"
+sidebar_label: Agent Capability Registry
+sidebar_position: 4
+slug: /enterprise-agent-fabric/agent-capability-registry
+description: "Agent Capability Registry: publishers append id@version. Agent developers refer from the tool manifest. AR hydrates at pin. Domain APIs and agent-start invoke go through PEP."
+---
+
+import Details from '@theme/Details';
+
+# Agent Capability Registry
+
+**Box:** Agent Capability Registry (with Agent Plane; AR hydrates at pin)
+
+Parent: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) · Siblings: [Agent Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Agent Runtime](./agent-runtime.mdx)
+
+**Publishers publish versions. Agent developers refer. AR hydrates once, then calls `invoke`.** · **Status:** Draft · **Date:** 2026-09-02
+
+**Behaviour source:** [status](../02-understand/status.md). This pack may be ahead of code.
+
+The registry sits **with Agent Plane** (beside ACP and Data Plane). Memory, RAG, and Tools / PEP stay in Shared. It is a catalog, not a third AFD, not MCP `list_tools`, and not a client the loop calls on every turn.
+
+**Local v1:** Java service on port **3009**. Hydrate is real at pin. Capability kinds: [capabilities](../02-understand/capabilities.md).
+
+---
+
+## 1. Solution on a page
+
+### Business problem
+
+Teams inline OpenAPI into manifests, or they bind `latest`, or they treat MCP `list_tools` as the enterprise catalog. The loop fetches tools when the model first names them. Parent AR POSTs Legal's `activation_target`. A published capability is mistaken for permission. Every domain republishes the same OCR API.
+
+### Key requirements
+
+| ID | Requirement (this box) |
+| --- | --- |
+| Locked-8 | Capabilities are references. Publishers append immutable `id@version`. AR hydrates the **whole** pinned manifest before the LLM. |
+| Locked-8 | `kind=agent` `invoke` is API AFD jobs, not the callee AR. |
+| FR-8 / FR-10 | LLM never sees `{jobs_url}` or `activation_target`. Jobs `Authorization` is the calling agent token. Child mints **its** robot. |
+| — | Route row still has no `tools[]`. Only a `tool_manifest` pointer. |
+| — | Publish is append-only. Overwriting `1.2.0` is not a version. |
+
+Hydrate is pin-time, not turn-time. Scale with new starts and catalog reads, not with loop steps.
+
+### Architecture
+
+<div className="gain-diagram-wrap">
+
+![Publishers append an immutable id@version. Developers refer from the tool manifest. AR hydrates the whole pinned manifest before the LLM. Invoke goes through PEP: domain APIs or API AFD jobs.](./diagrams/registry-solution.svg)
+
+</div>
+
+[Editorial source](./diagrams/registry-solution.html)
+
+Three objects, two writers. Three moments — only the last is the AR loop.
+
+### Key technology decisions
+
+| Choice | Why |
+| --- | --- |
+| Package versions, not live `list_tools` | Exam and pin need a frozen schema. `1.2.0` never changes once published. |
+| Manifest stores a reference, not "latest" | Publishing `2.0.0` must not move `fraud_investigate_v1`. |
+| Hydrate whole manifest at pin | No mid-loop registry GET. Cache `(manifest_id, manifest_version)`. |
+| Two `kind`s, one catalog | `domain` = governed business API. `agent` = start another catalogue row via API AFD. |
+| PEP then invoke | A published capability is not permission. Dual check still runs. |
+| Registry with Agent Plane | Same band as catalogue. Shared stays Memory / RAG / Tools. |
+
+### Expected outcomes
+
+- Domain teams publish an API once; agent developers copy a ref.
+- A2A is a named tool on the parent manifest, same jobs contract as partners.
+- In-flight runs keep hydrated schemas if the registry later goes down.
+- Reviewers see which catalog versions moved in the manifest PR.
+
+### This box owns / does not own
+
+| Owns | Does not own |
+| --- | --- |
+| Immutable capability versions (schema, `invoke`, snippet, owner, status) | Pin, start, PEP permit, dual check |
+| Search / list for UI and CI | Route choice, classify, `activation_target` |
+| Hydrate reads at pin | Loop-time tool fetch, MCP server per internal API |
+
+If the registry dies: **new** runs cannot hydrate; in-flight pins still have schemas.
+
+---
+
+## 2. Job
+
+Three objects, two writers. The route row still has no `tools[]`.
+
+| Object | Who writes it | What it holds |
+| --- | --- | --- |
+| **Capability version** | Publisher | One immutable release: schema, `invoke`, snippet. `ocr_extract@1.2.0` or `start_contract_review@1.0.0` |
+| **Tool manifest** | Agent developer | References: `id` + `version` + `pdp_action` + `risk_tier` |
+| **Route row** | Platform / domain | `tool_manifest` pointer. Still no inlined tools |
+
+| Moment | Who | What happens |
+| --- | --- | --- |
+| **Publish** | Publisher | Pipeline puts one version in the registry. Append-only. |
+| **Refer** | Agent developer | Copies `{ "id", "version" }` into their `tool_manifest`. |
+| **Call** | AR | After freeze: download the **whole** pinned manifest, hydrate every ref onto the run pin, then schemas only to the LLM. `invoke` runs after PEP. |
+
+**Same freeze vs new route.** A summarizer helper is a **domain** capability on this manifest. Legal MSA review is an **agent-start** capability. The second one's `invoke` is the [API AFD](./agent-front-door.mdx) jobs URL, not Legal's `activation_target`.
+
+---
+
+## 3. What a capability version is
+
+| Field | Why it exists |
+| --- | --- |
+| `id` | Stable name: `ocr_extract` or `start_contract_review`. Product, not vendor. |
+| `version` | Immutable semver. `1.2.0` never changes once published. |
+| `kind` | `domain` (business API) or `agent` (start another catalogue row). |
+| `description` | What the agent developer (and later the model) reads. |
+| `input_schema` / `output_schema` | JSON Schema. Becomes the tool schema on the run pin. |
+| `invoke` | After PEP. Domain: governed business API. Agent-start: `POST` `{jobs_url}` with a **fixed** `route_id`. |
+| `snippet` | Copy-paste example for the developer. Documentation, not runtime. |
+| `owner` | The team that may publish the next version. |
+| `status` | `draft` / `published` / `deprecated`. Manifests may reference `published` only. |
+
+Breaking the contract is a **new major**. Overwriting `1.2.0` is not a version.
+
+<Details summary="Domain capability version (JSON)">
+
+```json
+{
+  "id": "ocr_extract",
+  "version": "1.2.0",
+  "kind": "domain",
+  "description": "Extract text from a document id.",
+  "input_schema": {
+    "type": "object",
+    "required": ["doc_id"],
+    "properties": { "doc_id": { "type": "string" } }
+  },
+  "output_schema": {
+    "type": "object",
+    "required": ["text"],
+    "properties": { "text": { "type": "string" } }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api.internal/ocr/extract",
+    "auth": "domain-oauth"
+  },
+  "owner": "document-intel",
+  "status": "published"
+}
+```
+
+</Details>
+
+<Details summary="Agent-start capability version (JSON)">
+
+```json
+{
+  "id": "start_contract_review",
+  "version": "1.0.0",
+  "kind": "agent",
+  "description": "Start governed Legal MSA review as a jobs run.",
+  "input_schema": {
+    "type": "object",
+    "required": ["document_id"],
+    "properties": {
+      "document_id": { "type": "string" },
+      "matter_id": { "type": "string" }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "required": ["correlation_id"],
+    "properties": { "correlation_id": { "type": "string" } }
+  },
+  "invoke": {
+    "method": "POST",
+    "url": "https://api-afd.internal/v1/jobs",
+    "auth": "calling-agent-oauth",
+    "body": { "route_id": "contract_review" }
+  },
+  "owner": "legal-agents",
+  "status": "published"
+}
+```
+
+</Details>
+
+---
+
+## 4. Call another route {#call-another-route}
+
+If this run needs a **separate catalogue row**, that callee is a named tool on the **parent** manifest. The model may only propose that name. The tool's `invoke` is API AFD, same jobs contract as partners and Kafka.
+
+Two gates, in order:
+
+1. **Manifest + PEP** (this freeze). No `invoke_any_agent`. A tool not on the pinned manifest never fires.
+2. **API AFD** (the child start). Entitle the **user** and record. Freeze Legal's `agent_client_id`. Async-start Legal AR. `202` + a **new** `correlation_id`.
+
+The LLM never sees `{jobs_url}` or `activation_target`. Parent AR never `POST`s Legal's AR. Chat AFD stays for humans. This caller is software, so it is the jobs fleet.
+
+Parent freeze stays `fraud_investigate`. Child freeze is `contract_review`. Two tickets.
+
+If Legal is only a stage on the **same** row (`workflow_id`), stay in parent AR — not this path.
+
+Identity: jobs `Authorization` is the **calling** agent token. After freeze, Legal mints **its** robot. [Three principals](./enterprise-agent-fabric-architecture.mdx#three-principals).
+
+---
+
+## 5. Context
+
+| Actor | Relationship |
+| --- | --- |
+| Publisher | Pipeline `PUT`s one version. Humans draft; CI sets `status=published`. |
+| Agent developer | Copies `{ id, version }` into `tool_manifest`. |
+| AR | `GET` each ref **once** after downloading the pinned manifest. Loop does not call this box. |
+| Registry UI | Search, detail, version history. Not a channel API. |
+| Shared PEP | Executes hydrated `invoke` after dual check. Not the registry. |
+| Chat/UI | **None.** Schemas never go to the browser as catalog JSON. |
+
+---
+
+## 6. How a reference lands in the manifest
+
+| Step | What they do |
+| --- | --- |
+| 1. Find | Search the registry. Copy references. |
+| 2. Write | Edit the manifest file. `tools[]` is name, `capability_id`, `capability_version`, `pdp_action`, `risk_tier`. |
+| 3. PR | Reviewers see which catalog versions moved. CI checks each ref exists and is `published`. |
+| 4. Pin | AFD freezes the route. First AR downloads that whole `tool_manifest`, hydrates every ref, then talks to the LLM. |
+| 5. Call | Proposal must match a hydrated name. PEP. Then `invoke` from the pin. |
+
+<Details summary="Parent manifest with domain tools and one agent-start (JSON)">
+
+```json
+{
+  "manifest_id": "fraud_investigate_v2",
+  "manifest_version": "2026.08.1",
+  "tools": [
+    {
+      "name": "search_transactions",
+      "capability_id": "search_transactions",
+      "capability_version": "1.4.0",
+      "pdp_action": "search_transactions",
+      "risk_tier": "low"
+    },
+    {
+      "name": "start_contract_review",
+      "capability_id": "start_contract_review",
+      "capability_version": "1.0.0",
+      "pdp_action": "start_contract_review",
+      "risk_tier": "high"
+    }
+  ]
+}
+```
+
+</Details>
+
+---
+
+## 7. APIs {#apis}
+
+The registry is not a channel API. UI, pipeline, and **one hydrate at pin** call it. The loop does not.
+
+| Method | Path | Who / when |
+| --- | --- | --- |
+| `PUT` | `/v1/capabilities/{id}/versions/{version}` | Pipeline (publish). UI (draft save). Existing `published` → conflict |
+| `GET` | `/v1/capabilities/{id}/versions/{version}` | UI detail. AR hydrate (every ref, once) |
+| `GET` | `/v1/capabilities/{id}/versions` | UI version history |
+| `GET` | `/v1/capabilities?q=` | UI search of `published` |
+
+AR start still goes to `{activation_target}` from [Runtime §5](./agent-runtime.mdx#apis). Agent-start `invoke` is a later `POST` to `{jobs_url}` on [API AFD](./agent-front-door.mdx#apis).
+
+---
+
+## 8. Deployment architecture
+
+| Concern | Stance |
+| --- | --- |
+| Ingress | Internal only. Not a channel API. |
+| Scale | Publish rate + pin hydrates (refs per new run). Does **not** grow with tokens in the loop. |
+| Cache | Hydrated `(manifest_id, manifest_version)` if many runs share a pin. Do not resolve `latest`. |
+| Failover | Reads from replicas. In-flight AR pins do not need this box. |
+| Isolation | Independent of Layer ② decide CPU. |
+
+---
+
+## 9. Data architecture
+
+**Indexes:** unique `(id, version)`. Search: `status=published` + text on `id` / `description`.
+
+**Consistency:** Published versions are immutable. No `latest` pointer in runtime.
+
+**Retention:** Append-only. Deprecated versions remain GET-able so old pins and exam still hydrate.
+
+---
+
+## 10. Sequence diagrams
+
+### Happy path — hydrate at pin
+
+<div className="gain-diagram-wrap">
+
+![After AFD start, AR downloads the pinned manifest, GETs every id@version, writes schemas onto the run pin, then sends schemas only to the LLM.](./diagrams/registry-seq-hydrate.svg)
+
+</div>
+
+[Editorial source](./diagrams/registry-seq-hydrate.html)
+
+### Agent-start invoke (two gates)
+
+<div className="gain-diagram-wrap">
+
+![Parent AR proposes a named agent-start tool. PEP checks the pinned manifest, then POSTs API AFD. API AFD entitles the user and starts the child AR. Parent never POSTs the callee activation_target.](./diagrams/registry-seq-a2a.svg)
+
+</div>
+
+[Editorial source](./diagrams/registry-seq-a2a.html)
+
+---
+
+## 11. Failure and resilience
+
+| Failure | Behaviour |
+| --- | --- |
+| Registry down at pin | New runs fail hydrate. In-flight pins continue. Classify/decide unaffected. |
+| Registry down mid-loop | No effect if hydrate already happened. Do not lazy-fetch. |
+| Missing / draft ref | Fail start. Do not skip the tool silently. |
+| PEP deny | No invoke. Published ≠ permitted. |
+| API AFD deny on agent-start | Child does not start. Parent run handles the error. |
+| Duplicate child start | Jobs `idempotency_key` on AR/AFD. |
+
+**Anti-patterns:** AR POSTs callee `activation_target`; `invoke_any_agent`; Chat AFD for A2A; lazy tool fetch; `latest` as a reference; user bearer as jobs `Authorization`.
+
+---
+
+## 12. Scaling {#scaling}
+
+Hydrate is pin-time, not turn-time. Scale with new starts and catalog reads, not with loop steps.
+
+| Axis | Grows with | Scale signal |
+| --- | --- | --- |
+| **Registry** | Publish rate + pin hydrates (refs per new run) | Hydrate p99, catalog QPS |
+| **Tools / PEP** | In-flight invokes (domain and agent-start) | Per-capability latency / deny rate |
+| **API AFD** (agent-start only) | Child job `POST` RPS from AR | Same jobs signals as partners |
+
+---
+
+## Read next
+
+**[Agent Runtime](./agent-runtime.mdx)** · [Agent Front Door](./agent-front-door.mdx) · [Agent Plane](./agent-plane.mdx) · [Capabilities](../02-understand/capabilities.md) · [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)

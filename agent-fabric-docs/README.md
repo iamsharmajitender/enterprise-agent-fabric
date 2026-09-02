@@ -9,7 +9,7 @@ Documentation for this repository. Behaviour is what Agent Runtime executes afte
 | [01-start](01-start/README.md) | Run the local fabric |
 | [02-understand](02-understand/overview.md) | How this binary works |
 | [03-catalogue](03-catalogue/) | Catalogue routes and use cases (generated from the seed) |
-| [04-architecture](04-architecture/) | Box packs (AFD, ADP, ACR, AR) plus [narrative/](04-architecture/narrative/) |
+| [04-architecture](04-architecture/) | Fabric architecture MDX (AFD, Plane, Runtime, Registry, pitch) |
 | [05-reference](05-reference/) | Frozen JSON contracts |
 | [06-patterns](06-patterns/) | Intended Pattern 0–3 compositions (what is possible) |
 | [07-usecases](07-usecases/) | Intended caller and process shapes (see [generic-shapes](07-usecases/generic-shapes.md); documents via DMS vs byte upload; LLM review signal vs process gate vs async handoff). Add files as we evolve |

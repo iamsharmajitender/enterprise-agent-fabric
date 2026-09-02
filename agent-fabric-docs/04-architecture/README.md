@@ -1,10 +1,10 @@
-# Enterprise Agent Fabric — solution architecture packs
+# Enterprise Agent Fabric — solution architecture
 
-These packs are the box design docs in this repo: one per Fabric box. They hold the **solution architecture** plus **detailed solution design**. Long-form MDX is in [narrative/](./narrative/).
+Box design docs for the Fabric. Each file is MDX with frontmatter, `gain-diagram-wrap` figures, and the full solution pack (deployment, APIs, data, sequences, failure).
 
-These packs may be ahead of code. Behaviour of this binary is [02-understand/status.md](../02-understand/status.md). These packs restate the box design so a CTO can scan a box in two minutes, and an engineer can implement it.
+These packs may be ahead of code. Behaviour of the running binary is [02-understand/status.md](../02-understand/status.md).
 
-Playbook and Docusaurus slugs (`/intent/...`, `/playbooks/...`) inside the MDX files are leftovers, not a second site.
+Playbook and Docusaurus slugs (`/intent/...`, `/playbooks/...`) inside MDX frontmatter are leftovers from the original site export. In this repo, use relative links between files in this folder.
 
 **Status:** Draft, aligned to the pin-split proposal (AFD pins and starts; Agent Plane classifies; AR runs).
 
@@ -12,31 +12,31 @@ Playbook and Docusaurus slugs (`/intent/...`, `/playbooks/...`) inside the MDX f
 
 | Pack | Box | Job in one line |
 | --- | --- | --- |
-| [Agent Front Door](./agent-front-door.md) | Chat AFD + API AFD | Only way in. Entitle, freeze, start. Two fleets, one contract. |
-| [Agent Plane](./agent-plane.md) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |
-| [Agent Runtime](./agent-runtime.md) | AR + Shared calls | Does the work. Run pin, loop, Patterns 0–3. |
-| [Agent Capability Registry](./agent-capability-registry.md) | Registry (with Agent Plane) | Publishers append `id@version`. AR hydrates at pin. |
+| [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx) | Whole fabric | One decide contract, two AFD fleets, three principals |
+| [Enterprise Agent Fabric V1](./enterprise-agent-fabric-pitch.mdx) | Executive brief | One front door, many governed capabilities |
+| [Agent Front Door](./agent-front-door.mdxx) | Chat AFD + API AFD | Only way in. Entitle, freeze, start. Two fleets, one contract. |
+| [Agent Plane](./agent-plane.mdxx) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |
+| [Agent Runtime](./agent-runtime.mdxx) | AR + Shared calls | Pin, hydrate, LangGraph loop, Patterns 0–3. |
+| [Agent Capability Registry](./agent-capability-registry.mdxx) | Registry (with Agent Plane) | Publishers append `id@version`. AR hydrates at pin. |
 
-Read order matches a request: **AFD → Plane → Runtime → Registry**.
+Read order matches a request: **Fabric → AFD → Plane → Runtime → Registry**.
 
-## What each pack contains
+## What each box pack contains
 
-Security, SLO maths, and runbooks are **not** duplicated here; failure design is, because it is load-bearing for this fabric.
+| Section | What it covers |
+| --- | --- |
+| Solution on a page | Problem → requirements → architecture diagram → tech choices → outcomes |
+| Context / job | Users, channels, siblings, providers |
+| Container / component | One level deeper than context |
+| APIs | Paths, bodies, auth, idempotency, errors |
+| Deployment | AZs, networking, trust boundaries, scale, failover |
+| Data architecture | Records, keys, TTL, indexes, consistency |
+| Event / messaging | Topics, partition key, consumers, retries |
+| Sequence diagrams | Happy path, failure, idempotent (with `gain-diagram-wrap` SVGs) |
+| Failure and resilience | Component, network, dependency, poison, shed, DR |
+| Scaling | Fleet signals and anti-patterns |
 
-| # | Section in each pack | What it covers |
-| --- | --- | --- |
-| — | Boundaries and non-goals | Added: this architecture is defined as much by what the box must not do |
-| 9 | Solution on a page | Problem → requirements → architecture → tech choices → outcomes + one diagram |
-| 10 | Context | Users, channels, this box, siblings, providers |
-| 11 | Container / component | One level deeper than context |
-| 12 | Deployment | AZs, networking, trust boundaries, scale, failover, ingress/egress |
-| 13 | API design | Paths, bodies, auth, idempotency, errors, rate limits |
-| 14 | Data architecture | Records, keys, TTL, indexes, consistency |
-| 15 | Event / messaging | Topics, partition key, consumers, retries, DLQ, delivery |
-| 16 | Sequences | Happy path, failure, duplicate / idempotent (minimum) |
-| 17 | Failure and resilience | Component, network, dependency, duplicates, poison, shed, DR |
-
-Diagrams are G.A.I.N editorial HTML/SVG in [`diagrams/`](./diagrams/) (not Mermaid). HTML is the source; SVG is inlined in the packs.
+Diagrams: G.A.I.N editorial HTML/SVG in [`diagrams/`](./diagrams/) and fabric-level SVGs in this folder (`agent-fabric-*.svg`). HTML is the editorial source; SVG is inlined in MDX via `gain-diagram-wrap`.
 
 ## Locked fabric rules these packs do not reopen
 
@@ -51,4 +51,4 @@ Diagrams are G.A.I.N editorial HTML/SVG in [`diagrams/`](./diagrams/) (not Merma
 
 ## Naming
 
-Narrative MDX mixes NAFD/NACP with AFD/ACP. These packs use the child-page names: **AFD**, **ACP**, **Agent Data Plane**, **AR** (Agent Runtime), **Registry**. Editorial HTML/SVG under `diagrams/` and [narrative/](./narrative/) may still say NAR until those figures are redrawn.
+Docs use **AFD**, **ACP**, **AR**. Editorial SVG under `diagrams/` may still say NAR until those figures are redrawn.

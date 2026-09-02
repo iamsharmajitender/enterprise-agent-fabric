@@ -18,7 +18,7 @@ Copy the freeze into a durable run pin, hydrate tools from ADP + ACR, run LangGr
 
 Request order: **AFD → ADP (decide / pin pointers) → AR (this service) → ACR (hydrate)**.
 
-Docs map: [docs/README.md](../agent-fabric-docs/README.md). Box pack: [docs/04-architecture/agent-runtime.md](../agent-fabric-docs/04-architecture/agent-runtime.md). Stub auth: [05-reference/stub-auth.md](../agent-fabric-docs/05-reference/stub-auth.md).
+Docs map: [docs/README.md](../agent-fabric-docs/README.md). Box pack: [docs/04-architecture/agent-runtime.mdx](../agent-fabric-docs/04-architecture/agent-runtime.mdx). Stub auth: [05-reference/stub-auth.md](../agent-fabric-docs/05-reference/stub-auth.md).
 
 ## Hexagonal layout
 

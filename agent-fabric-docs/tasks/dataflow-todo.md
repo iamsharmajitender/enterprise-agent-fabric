@@ -1,6 +1,6 @@
 # Task list: Route-contract stage data sharing (local Fabric)
 
-Plan: [dataflow-plan.md](./dataflow-plan.md) (includes **Present vs remaining** and proposed architecture). Docs map: [README.md](../README.md). Architecture: [agent-runtime](../04-architecture/agent-runtime.md). Route contract: [route-contract-reference](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference).
+Plan: [dataflow-plan.md](./dataflow-plan.md) (includes **Present vs remaining** and proposed architecture). Docs map: [README.md](../README.md). Architecture: [agent-runtime](../04-architecture/agent-runtime.mdx). Route contract: [route-contract-reference](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference).
 
 **Execution order:**
 

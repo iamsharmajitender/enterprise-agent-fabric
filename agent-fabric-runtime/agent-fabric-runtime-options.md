@@ -2,7 +2,7 @@
 
 How domain teams can run work **after** Agent Front Door (AFD) has decided and pinned a route. Covers shared vs dedicated vs custom runtime, where transformations belong, and what to emit so **business events**, **audit**, and **OpenTelemetry** stay aligned.
 
-**Related:** [technical-implementation.md](./technical-implementation.md) · [README.md](./README.md) · [agent-runtime architecture](../agent-fabric-docs/04-architecture/agent-runtime.md) · [audit plan](../agent-fabric-docs/tasks/audit-plan.md)
+**Related:** [technical-implementation.md](./technical-implementation.md) · [README.md](./README.md) · [agent-runtime architecture](../agent-fabric-docs/04-architecture/agent-runtime.mdx) · [audit plan](../agent-fabric-docs/tasks/audit-plan.md)
 
 ---
 

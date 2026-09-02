@@ -17,7 +17,7 @@ That is enough when every tool already has its ids in the job payload, and later
 
 **Not in this plan:** `conversation` / `long_term` Shared Memory ([future-enhancement](./future-enhancement.md#shared-memory-conversation-and-long_term)); LLM-as-judge evals ([eval-plan](./eval-plan.md) slice 3); Layer ②/③ classify ([intent-plan](./intent-plan.md)); executing `branch` / `human_gate` as a product UX (this plan only uses them as **consumers** of stage data).
 
-**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [agent-runtime](../04-architecture/agent-runtime.md), [route contract](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference), README [Memory](../../README.md#memory) / [Workflows](../../README.md#workflows) / [Retrieve](../../README.md#retrieve). Graph: `agent-runtime/app/graph/workflow.py`. Policy: `dataplane.memory_profiles.working`.
+**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [agent-runtime](../04-architecture/agent-runtime.mdx), [route contract](https://jitendersharma.dev/playbooks/agents/intent-router/route-contract-reference), README [Memory](../../README.md#memory) / [Workflows](../../README.md#workflows) / [Retrieve](../../README.md#retrieve). Graph: `agent-runtime/app/graph/workflow.py`. Policy: `dataplane.memory_profiles.working`.
 
 ## Present vs remaining
 
