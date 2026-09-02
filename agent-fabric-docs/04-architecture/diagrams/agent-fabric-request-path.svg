@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 960 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-req-title hir-req-desc">
       <title id="hir-req-title">Request path after decide</title>
-      <desc id="hir-req-desc">NAFD is one block. NACP and route catalog are a separate block. NAR is a third. NAFD asks the NACP to classify. On route the NAFD stores the frozen route and async-starts NAR. NAR copies the run pin and returns 202 to the NAFD.</desc>
+      <desc id="hir-req-desc">NAFD is one block. NACP and route catalog are a separate block. Agent runtime is a third. NAFD asks the NACP to classify. On route the NAFD stores the frozen route and async-starts Agent runtime. Agent runtime copies the run pin and returns 202 to the NAFD.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
 
@@ -25,7 +25,7 @@
 
       <rect x="520" y="72" width="400" height="300" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <rect x="666" y="76" width="108" height="12" rx="2" fill="#f8fafc"/>
-      <text x="720" y="85" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">NAR</text>
+      <text x="720" y="85" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">Agent runtime</text>
 
       <line x1="238" y1="148" x2="302" y2="148" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-req-arrow)"/>
       <line x1="302" y1="168" x2="238" y2="168" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-req-arrow)"/>
@@ -65,7 +65,7 @@
 
       <rect x="632" y="120" width="176" height="56" rx="6" fill="#f8fafc"/>
       <rect x="632" y="120" width="176" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="720" y="146" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">NAR</text>
+      <text x="720" y="146" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent runtime</text>
       <text x="720" y="162" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">run pin · loop</text>
 
       <line x1="720" y1="176" x2="720" y2="200" stroke="#64748b" stroke-width="1"/>
@@ -77,7 +77,7 @@
       <line x1="40" y1="424" x2="912" y2="424" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <text x="40" y="444" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.18em">LEGEND</text>
       <rect x="40" y="460" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="60" y="468" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD / NAR</text>
+      <text x="60" y="468" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD / Agent runtime</text>
       <rect x="192" y="460" width="14" height="10" rx="2" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1"/>
       <text x="212" y="468" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NACP</text>
       <rect x="324" y="460" width="14" height="10" rx="2" fill="rgba(30,41,59,0.05)" stroke="#64748b" stroke-width="1"/>

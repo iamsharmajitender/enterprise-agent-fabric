@@ -51,10 +51,10 @@
 <body>
   <div class="frame">
     <p class="eyebrow">Swimlane · UI turn</p>
-    <h1>NACP classifies. NAFD freezes and starts. NAR runs.</h1>
+    <h1>NACP classifies. NAFD freezes and starts. Agent runtime runs.</h1>
     <svg viewBox="0 0 1080 580" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-ui-sw-title hir-ui-sw-desc">
       <title id="hir-ui-sw-title">UI happy-path turn</title>
-      <desc id="hir-ui-sw-desc">IDP mints the user bearer the Chat UI sends on the turn. NAFD authenticates, asks the NACP to classify, freezes the route, and async-starts NAR. NAR asks the IDP to mint the agent token, then returns 202. The NAFD sends a slim accepted reply. The UI waits on SSE or poll.</desc>
+      <desc id="hir-ui-sw-desc">IDP mints the user bearer the Chat UI sends on the turn. NAFD authenticates, asks the NACP to classify, freezes the route, and async-starts Agent runtime. Agent runtime asks the IDP to mint the agent token, then returns 202. The NAFD sends a slim accepted reply. The UI waits on SSE or poll.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="hir-ui-sw-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -74,7 +74,7 @@
       <text x="52" y="116" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">CHAT UI</text>
       <text x="52" y="196" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">NAFD</text>
       <text x="52" y="276" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">NACP</text>
-      <text x="52" y="356" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">NAR</text>
+      <text x="52" y="356" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">Agent runtime</text>
       <text x="52" y="436" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">IDP</text>
 
       <path d="M 220,408 V 136" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-ui-sw-arrow-link)"/>

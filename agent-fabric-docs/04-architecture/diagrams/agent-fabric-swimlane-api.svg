@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1080 580" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-api-sw-title hir-api-sw-desc">
       <title id="hir-api-sw-title">Jobs API happy-path start</title>
-      <desc id="hir-api-sw-desc">IDP mints the caller bearer on the job POST. NAFD authenticates, asks the NACP to entitle and record, freezes the route, and async-starts NAR. NAR asks the IDP to mint the agent token, then returns 202. The NAFD returns 202 plus correlation_id to the caller.</desc>
+      <desc id="hir-api-sw-desc">IDP mints the caller bearer on the job POST. NAFD authenticates, asks the NACP to entitle and record, freezes the route, and async-starts Agent runtime. Agent runtime asks the IDP to mint the agent token, then returns 202. The NAFD returns 202 plus correlation_id to the caller.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="hir-api-sw-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -21,7 +21,7 @@
       <text x="52" y="116" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">CALLER</text>
       <text x="52" y="196" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">NAFD</text>
       <text x="52" y="276" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">NACP</text>
-      <text x="52" y="356" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">NAR</text>
+      <text x="52" y="356" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">Agent runtime</text>
       <text x="52" y="436" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">IDP</text>
 
       <path d="M 220,408 V 136" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-api-sw-arrow-link)"/>

@@ -151,7 +151,7 @@
       <rect x="560" y="204" width="184" height="124" rx="6" fill="#f8fafc"/>
       <rect x="560" y="204" width="184" height="124" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
       <rect x="564" y="210" width="36" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
-      <text x="582" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAR</text>
+      <text x="582" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">Agent runtime</text>
       <use href="#hir-db" x="720" y="208" width="16" height="16"/>
       <text x="652" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
       <text x="652" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fetch · hydrate · loop</text>
@@ -200,7 +200,7 @@
       <rect x="40" y="576" width="14" height="10" rx="2" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
       <text x="60" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Ingress</text>
       <rect x="132" y="576" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="152" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD / NAR</text>
+      <text x="152" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD / Agent runtime</text>
       <rect x="236" y="576" width="14" height="10" rx="2" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="1"/>
       <text x="256" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Control</text>
       <rect x="308" y="576" width="14" height="10" rx="2" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="1"/>
@@ -218,7 +218,7 @@
       <use href="#hir-db" x="836" y="573" width="14" height="14"/>
       <text x="854" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Store</text>
       <line x1="896" y1="581" x2="924" y2="581" stroke="#f97316" stroke-width="1.4" marker-end="url(#hir-arch-arrow-accent)"/>
-      <text x="932" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD starts NAR</text>
+      <text x="932" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD starts Agent runtime</text>
       <rect x="40" y="600" width="14" height="10" rx="2" fill="rgba(51,65,85,0.06)" stroke="#475569" stroke-width="1"/>
       <text x="60" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent security</text>
       <rect x="168" y="600" width="14" height="10" rx="2" fill="rgba(94,122,155,0.10)" stroke="#5e7a9b" stroke-width="1"/>

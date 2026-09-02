@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="registry-seq-a2a-title registry-seq-a2a-desc">
       <title id="registry-seq-a2a-title">Agent-start goes through API AFD</title>
-      <desc id="registry-seq-a2a-desc">Parent NAR proposes a named agent-start tool. PEP checks the pinned manifest, then POSTs the API AFD jobs URL. API AFD entitles the user and starts the child NAR. Parent never POSTs the callee activation_target.</desc>
+      <desc id="registry-seq-a2a-desc">Parent Agent runtime proposes a named agent-start tool. PEP checks the pinned manifest, then POSTs the API AFD jobs URL. API AFD entitles the user and starts the child Agent runtime. Parent never POSTs the callee activation_target.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="registry-seq-a2a-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -38,8 +38,8 @@
       <rect x="56" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
       <rect x="56" y="72" width="144" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
       <rect x="64" y="78" width="28" height="12" rx="2" fill="transparent" stroke="#1e293b" stroke-opacity="0.40" stroke-width="0.8"/>
-      <text x="78" y="87" fill="#1e293b" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAR</text>
-      <text x="128" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Parent NAR</text>
+      <text x="78" y="87" fill="#1e293b" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">Agent runtime</text>
+      <text x="128" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Parent Agent runtime</text>
       <text x="128" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fraud</text>
       <rect x="280" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
       <rect x="280" y="72" width="144" height="56" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
@@ -56,8 +56,8 @@
       <rect x="728" y="72" width="144" height="56" rx="6" fill="#f8fafc"/>
       <rect x="728" y="72" width="144" height="56" rx="6" fill="rgba(30,41,59,0.03)" stroke="rgba(30,41,59,0.30)" stroke-width="1"/>
       <rect x="736" y="78" width="28" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.30)" stroke-opacity="0.40" stroke-width="0.8"/>
-      <text x="750" y="87" fill="rgba(30,41,59,0.30)" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAR</text>
-      <text x="800" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Legal NAR</text>
+      <text x="750" y="87" fill="rgba(30,41,59,0.30)" fill-opacity="0.8" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">Agent runtime</text>
+      <text x="800" y="108" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Legal Agent runtime</text>
       <text x="800" y="124" fill="#64748b" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">child</text>
       <line x1="40" y1="448" x2="920" y2="448" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <text x="40" y="468" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.18em">LEGEND</text>

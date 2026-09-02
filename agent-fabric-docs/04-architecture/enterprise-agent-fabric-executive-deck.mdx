@@ -74,7 +74,7 @@ It also lacks controls that should exist **once** for the whole portfolio:
 
 <div className="gain-diagram-wrap">
 
-![Fragmented enterprise AI today.](./diagrams/agent-fabric-pitch-problem.svg)
+![Fragmented enterprise AI today — separate assistants per audience, duplicated controls, no shared model.](./diagrams/agent-fabric-executive-problem.svg)
 
 </div>
 
@@ -135,17 +135,17 @@ The employee does not need to know which AI sits behind the experience. The ente
 
 ### The same model for automated work
 
-When an application or batch job triggers AI — for example, a claims system routing a case — it follows the **same governed path**: verify → route → execute under policy → record evidence → return outcome.
+When an application or batch job triggers AI — for example, a **claims system routing a case** — it follows the **same governed path**: verify → route → execute under policy → record evidence → return outcome.
 
-Security, audit, and observability run **alongside** the request. They do not slow the user unless policy requires a pause or approval.
+Security, audit, and observability run **alongside** the request. They do not slow the caller unless policy requires a pause or approval.
 
 <div className="gain-diagram-wrap">
 
-![End-to-end request path: message in, classify, entitlement, pin, execute, response out.](./diagrams/agent-fabric-pitch-lifecycle.svg)
+![Automated AI request swimlane: application triggers job, Enterprise Fabric verifies and routes, domain AI executes, audit records evidence alongside, outcome returned.](./diagrams/agent-fabric-executive-swimlane-jobs.svg)
 
 </div>
 
-**In one line:** ask → verify and route → specialist AI runs → control if needed → answer or action → evidence retained.
+**In one line:** trigger → verify and route → specialist AI runs → control if needed → outcome returned → evidence retained.
 
 ---
 

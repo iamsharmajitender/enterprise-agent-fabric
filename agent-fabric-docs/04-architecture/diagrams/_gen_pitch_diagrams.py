@@ -107,6 +107,113 @@ def box(x: int, y: int, w: int, h: int, tag: str, name: str, sub: str = "",
 DOMAIN_TINT = "rgba(59,130,246,0.08)"
 DOMAIN_STROKE = "#3b82f6"
 DOMAIN_TAG = "rgba(59,130,246,0.45)"
+EMPLOYEE_TINT = "rgba(99,102,241,0.14)"
+EMPLOYEE_STROKE = "#6366f1"
+CUSTOMER_TINT = "rgba(16,185,129,0.14)"
+CUSTOMER_STROKE = "#10b981"
+PARTNER_TINT = "rgba(245,158,11,0.16)"
+PARTNER_STROKE = "#f59e0b"
+RISK_TINT = "rgba(239,68,68,0.10)"
+RISK_STROKE = "#ef4444"
+
+
+def ai_cap_colored(x: int, y: int, w: int, h: int, name: str, fill: str, stroke: str) -> str:
+    cx = x + w // 2
+    return f"""
+      <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{fill}" stroke="{stroke}" stroke-width="1.2"/>
+      <text x="{cx}" y="{y + 24}" fill="{INK}" font-size="11" font-weight="600" font-family="{SANS}" text-anchor="middle">{name}</text>
+      <text x="{cx}" y="{y + 40}" fill="{RISK_STROKE}" font-size="7" font-family="{MONO}" text-anchor="middle">own auth · audit · ops</text>"""
+
+
+def executive_fragmented_today() -> tuple[str, str]:
+    slug = "agent-fabric-executive-problem"
+    w, h = 1080, 540
+    body = f"""
+    <svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="{slug}-title {slug}-desc">
+      <title id="{slug}-title">Fragmented enterprise AI today</title>
+      <desc id="{slug}-desc">Employees, customers, and partners each reach separate AI assistants. Every capability rebuilds authentication, audit, and operations independently.</desc>
+      <defs>
+        {markers("exec-prob")}
+        <marker id="exec-prob-arrow-indigo" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="{EMPLOYEE_STROKE}"/>
+        </marker>
+        <marker id="exec-prob-arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="{CUSTOMER_STROKE}"/>
+        </marker>
+        <marker id="exec-prob-arrow-amber" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="{PARTNER_STROKE}"/>
+        </marker>
+      </defs>
+      <rect width="100%" height="100%" fill="{PAPER}"/>
+
+      <!-- employee band -->
+      <rect x="248" y="36" width="792" height="118" rx="12" fill="{EMPLOYEE_TINT}" stroke="{EMPLOYEE_STROKE}" stroke-width="1.2"/>
+      <text x="268" y="58" fill="{EMPLOYEE_STROKE}" font-size="9" font-weight="600" font-family="{MONO}" letter-spacing="0.14em">EMPLOYEE ASSISTANTS</text>
+
+      <!-- customer band -->
+      <rect x="248" y="174" width="792" height="118" rx="12" fill="{CUSTOMER_TINT}" stroke="{CUSTOMER_STROKE}" stroke-width="1.2"/>
+      <text x="268" y="196" fill="{CUSTOMER_STROKE}" font-size="9" font-weight="600" font-family="{MONO}" letter-spacing="0.14em">CUSTOMER AI</text>
+
+      <!-- partner band -->
+      <rect x="248" y="312" width="792" height="118" rx="12" fill="{PARTNER_TINT}" stroke="{PARTNER_STROKE}" stroke-width="1.2"/>
+      <text x="268" y="334" fill="{PARTNER_STROKE}" font-size="9" font-weight="600" font-family="{MONO}" letter-spacing="0.14em">PARTNER AI</text>
+
+      <!-- audience pills -->
+      <rect x="40" y="68" width="168" height="54" rx="27" fill="{EMPLOYEE_TINT}" stroke="{EMPLOYEE_STROKE}" stroke-width="1.4"/>
+      <text x="124" y="100" fill="{INK}" font-size="12" font-weight="600" font-family="{SANS}" text-anchor="middle">Employee</text>
+
+      <rect x="40" y="206" width="168" height="54" rx="27" fill="{CUSTOMER_TINT}" stroke="{CUSTOMER_STROKE}" stroke-width="1.4"/>
+      <text x="124" y="238" fill="{INK}" font-size="12" font-weight="600" font-family="{SANS}" text-anchor="middle">Customer</text>
+
+      <rect x="40" y="344" width="168" height="54" rx="27" fill="{PARTNER_TINT}" stroke="{PARTNER_STROKE}" stroke-width="1.4"/>
+      <text x="124" y="376" fill="{INK}" font-size="12" font-weight="600" font-family="{SANS}" text-anchor="middle">Partner</text>
+
+      <!-- arrows -->
+      <line x1="208" y1="95" x2="248" y2="95" stroke="{EMPLOYEE_STROKE}" stroke-width="1.6" marker-end="url(#exec-prob-arrow-indigo)"/>
+      <path d="M 208 233 L 248 210" fill="none" stroke="{CUSTOMER_STROKE}" stroke-width="1.6" marker-end="url(#exec-prob-arrow-green)"/>
+      <path d="M 208 371 L 248 390" fill="none" stroke="{PARTNER_STROKE}" stroke-width="1.6" marker-end="url(#exec-prob-arrow-amber)"/>
+
+      <!-- capabilities -->
+      {ai_cap_colored(280, 78, 132, 52, "Finance", EMPLOYEE_TINT, EMPLOYEE_STROKE)}
+      {ai_cap_colored(432, 78, 132, 52, "HR", EMPLOYEE_TINT, EMPLOYEE_STROKE)}
+      {ai_cap_colored(584, 78, 132, 52, "Legal", EMPLOYEE_TINT, EMPLOYEE_STROKE)}
+      {ai_cap_colored(736, 78, 132, 52, "Technology", EMPLOYEE_TINT, EMPLOYEE_STROKE)}
+
+      {ai_cap_colored(360, 216, 148, 52, "Customer service", CUSTOMER_TINT, CUSTOMER_STROKE)}
+      {ai_cap_colored(536, 216, 148, 52, "Claims", CUSTOMER_TINT, CUSTOMER_STROKE)}
+
+      {ai_cap_colored(360, 354, 148, 52, "Payments", PARTNER_TINT, PARTNER_STROKE)}
+      {ai_cap_colored(536, 354, 148, 52, "KYC", PARTNER_TINT, PARTNER_STROKE)}
+
+      <!-- fragmentation chaos lines between stacks -->
+      <path d="M 412 130 Q 500 150 588 130" fill="none" stroke="{RISK_STROKE}" stroke-width="1" stroke-dasharray="4 3" opacity="0.45"/>
+      <path d="M 564 130 Q 652 155 740 130" fill="none" stroke="{RISK_STROKE}" stroke-width="1" stroke-dasharray="4 3" opacity="0.45"/>
+      <text x="880" y="108" fill="{RISK_STROKE}" font-size="8" font-family="{MONO}" letter-spacing="0.08em">NO SHARED MODEL</text>
+
+      <!-- risk banner -->
+      <rect x="40" y="448" width="1000" height="56" rx="10" fill="{RISK_TINT}" stroke="{RISK_STROKE}" stroke-width="1.2"/>
+      <text x="540" y="472" fill="{RISK_STROKE}" font-size="9" font-weight="600" font-family="{MONO}" text-anchor="middle" letter-spacing="0.12em">THE ORGANISATION CANNOT CONSISTENTLY ANSWER</text>
+      <text x="540" y="492" fill="{INK}" font-size="12" font-weight="600" font-family="{SANS}" text-anchor="middle">Who may use this? · What may it do? · Why was it selected?</text>
+
+      <line x1="40" y1="516" x2="1040" y2="516" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="40" y="522" width="16" height="12" rx="6" fill="{EMPLOYEE_TINT}" stroke="{EMPLOYEE_STROKE}" stroke-width="1"/>
+      <text x="62" y="531" fill="{MUTED}" font-size="8" font-family="{SANS}">Employee</text>
+      <rect x="130" y="522" width="16" height="12" rx="6" fill="{CUSTOMER_TINT}" stroke="{CUSTOMER_STROKE}" stroke-width="1"/>
+      <text x="152" y="531" fill="{MUTED}" font-size="8" font-family="{SANS}">Customer</text>
+      <rect x="220" y="522" width="16" height="12" rx="6" fill="{PARTNER_TINT}" stroke="{PARTNER_STROKE}" stroke-width="1"/>
+      <text x="242" y="531" fill="{MUTED}" font-size="8" font-family="{SANS}">Partner</text>
+      <rect x="310" y="522" width="16" height="12" rx="2" fill="{RISK_TINT}" stroke="{RISK_STROKE}" stroke-width="1"/>
+      <text x="332" y="531" fill="{MUTED}" font-size="8" font-family="{SANS}">Duplicated controls per capability</text>
+    </svg>"""
+    html = chrome(
+        slug,
+        "Executive brief · The problem",
+        "Many audiences, many assistants, no shared control model.",
+        f"0 0 {w} {h}",
+        body,
+    )
+    return slug, html
 
 
 def control_chip(x: int, y: int, w: int, h: int, label: str, icon: str) -> str:
@@ -437,6 +544,105 @@ def lifecycle_proof() -> tuple[str, str]:
     return slug, html
 
 
+def swim_step(x: int, y: int, w: int, h: int, title: str, sub: str = "",
+              fill: str = WHITE, stroke: str = INK, accent: bool = False) -> str:
+    cx = x + w // 2
+    if accent:
+        fill = ACCENT_TINT
+        stroke = ACCENT
+    sub_y = y + h - 12 if sub else y + h // 2 + 4
+    title_y = y + 22 if sub else y + h // 2 + 4
+    return f"""
+      <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{fill}" stroke="{stroke}" stroke-width="1"/>
+      <text x="{cx}" y="{title_y}" fill="{INK}" font-size="10" font-weight="600" font-family="{SANS}" text-anchor="middle">{title}</text>
+      {f'<text x="{cx}" y="{sub_y}" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle">{sub}</text>' if sub else ''}"""
+
+
+def executive_swimlane_automated() -> tuple[str, str]:
+    slug = "agent-fabric-executive-swimlane-jobs"
+    w, h = 1080, 440
+    lane_x, lane_w = 148, 900
+    steps = [220, 400, 580, 760, 940]
+    body = f"""
+    <svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="{slug}-title {slug}-desc">
+      <title id="{slug}-title">Automated AI request swimlane</title>
+      <desc id="{slug}-desc">A claims system or batch job triggers AI through the Enterprise Fabric: verify and entitle, route and pin, execute under policy, record evidence alongside, return outcome.</desc>
+      <defs>{markers("exec-sw")}</defs>
+      <rect width="100%" height="100%" fill="{PAPER}"/>
+
+      <!-- lane bands -->
+      <rect x="{lane_x}" y="44" width="{lane_w}" height="76" fill="rgba(100,116,139,0.06)" rx="4"/>
+      <rect x="{lane_x}" y="132" width="{lane_w}" height="92" fill="{ACCENT_TINT}" rx="4"/>
+      <rect x="{lane_x}" y="236" width="{lane_w}" height="76" fill="{DOMAIN_TINT}" rx="4"/>
+      <rect x="{lane_x}" y="328" width="{lane_w}" height="76" fill="rgba(30,41,59,0.04)" rx="4"/>
+
+      <!-- lane dividers -->
+      <line x1="{lane_x}" y1="44" x2="{lane_x + lane_w}" y2="44" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
+      <line x1="{lane_x}" y1="128" x2="{lane_x + lane_w}" y2="128" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
+      <line x1="{lane_x}" y1="224" x2="{lane_x + lane_w}" y2="224" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
+      <line x1="{lane_x}" y1="328" x2="{lane_x + lane_w}" y2="328" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
+      <line x1="{lane_x}" y1="404" x2="{lane_x + lane_w}" y2="404" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
+      <line x1="{lane_x}" y1="44" x2="{lane_x}" y2="404" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
+
+      <!-- lane labels -->
+      <text x="24" y="88" fill="{MUTED}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">APPLICATION</text>
+      <text x="24" y="98" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Claims system</text>
+      <text x="24" y="110" fill="{MUTED}" font-size="8" font-family="{SANS}">or batch job</text>
+
+      <text x="24" y="176" fill="{ACCENT}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">ENTERPRISE</text>
+      <text x="24" y="188" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Agent Fabric</text>
+
+      <text x="24" y="272" fill="{DOMAIN_STROKE}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">DOMAIN</text>
+      <text x="24" y="284" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Claims AI</text>
+
+      <text x="24" y="360" fill="{MUTED}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">ALONGSIDE</text>
+      <text x="24" y="372" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Audit &amp; ops</text>
+
+      <!-- steps -->
+      {swim_step(steps[0] - 56, 60, 112, 44, "Trigger job", "route case")}
+      {swim_step(steps[1] - 64, 148, 128, 52, "Verify", "identity &amp; entitle", accent=True)}
+      {swim_step(steps[2] - 64, 148, 128, 52, "Route &amp; pin", "select capability", accent=True)}
+      {swim_step(steps[3] - 64, 248, 128, 52, "Execute", "under policy", fill=DOMAIN_TINT, stroke=DOMAIN_STROKE)}
+      {swim_step(steps[4] - 56, 60, 112, 44, "Outcome", "202 / result")}
+      {swim_step(steps[1] - 48, 344, 96, 40, "Record", fill="rgba(30,41,59,0.02)", stroke=MUTED)}
+      {swim_step(steps[2] - 48, 344, 96, 40, "Record", fill="rgba(30,41,59,0.02)", stroke=MUTED)}
+      {swim_step(steps[3] - 48, 344, 96, 40, "Record", fill="rgba(30,41,59,0.02)", stroke=MUTED)}
+      {swim_step(steps[4] - 48, 344, 96, 40, "Record", fill="rgba(30,41,59,0.02)", stroke=MUTED)}
+
+      <!-- optional control callout -->
+      <rect x="{steps[3] - 20}" y="196" width="88" height="22" rx="4" fill="{WHITE}" stroke="{MUTED}" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="{steps[3] + 24}" y="211" fill="{MUTED}" font-size="8" font-family="{SANS}" text-anchor="middle">approval if required</text>
+
+      <!-- flow arrows -->
+      <line x1="{steps[0] + 56}" y1="82" x2="{steps[1] - 64}" y2="148" stroke="{MUTED}" stroke-width="1.3" marker-end="url(#exec-sw-arrow)"/>
+      <line x1="{steps[1] + 64}" y1="174" x2="{steps[2] - 64}" y2="174" stroke="{ACCENT}" stroke-width="1.5" marker-end="url(#exec-sw-arrow-accent)"/>
+      <line x1="{steps[2] + 64}" y1="174" x2="{steps[3] - 64}" y2="248" stroke="{MUTED}" stroke-width="1.3" marker-end="url(#exec-sw-arrow)"/>
+      <line x1="{steps[3] + 64}" y1="274" x2="{steps[4] - 56}" y2="82" stroke="{MUTED}" stroke-width="1.3" marker-end="url(#exec-sw-arrow)"/>
+
+      <!-- alongside track -->
+      <line x1="{steps[1]}" y1="364" x2="{steps[4]}" y2="364" stroke="{MUTED}" stroke-width="1" stroke-dasharray="5 4" opacity="0.7"/>
+      <text x="{lane_x + lane_w - 8}" y="358" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="end">runs alongside — does not block unless approval required</text>
+
+      <!-- column headers -->
+      <text x="{steps[0]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">START</text>
+      <text x="{steps[1]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">VERIFY</text>
+      <text x="{steps[2]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">ROUTE</text>
+      <text x="{steps[3]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">EXECUTE</text>
+      <text x="{steps[4]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">COMPLETE</text>
+
+      <text x="540" y="428" fill="{INK}" font-size="13" font-family="{SERIF}" font-style="italic" text-anchor="middle">Same governed path for chat and automated jobs — verify → route → execute → evidence → outcome</text>
+    </svg>"""
+    html = chrome(
+        slug,
+        "Swimlane · Automated work",
+        "Claims system triggers AI: verify, route, execute, evidence alongside, outcome returned.",
+        f"0 0 {w} {h}",
+        body,
+    )
+    return slug, html
+
+
 def extract_svg(html: str) -> str:
     start = html.index("<svg ")
     end = html.index("</svg>") + len("</svg>")
@@ -446,7 +652,7 @@ def extract_svg(html: str) -> str:
 
 
 def main() -> None:
-    for fn in (executive_proposition, target_state, executive_story, fragmented_problem, lifecycle_proof):
+    for fn in (executive_proposition, executive_swimlane_automated, executive_fragmented_today, target_state, executive_story, fragmented_problem, lifecycle_proof):
         slug, html = fn()
         (OUT / f"{slug}.html").write_text(html)
         (OUT / f"{slug}.svg").write_text(extract_svg(html))

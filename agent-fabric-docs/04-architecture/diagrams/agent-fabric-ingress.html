@@ -51,10 +51,10 @@
 <body>
   <div class="frame">
     <p class="eyebrow">Architecture · Two ingress shapes</p>
-    <h1>Each channel has an NAFD. NAFDs start NAR.</h1>
+    <h1>Each channel has an NAFD. NAFDs start Agent runtime.</h1>
     <svg viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-ing-title hir-ing-desc">
       <title id="hir-ing-title">Two ingress shapes</title>
-      <desc id="hir-ing-desc">Chat hits the Chat NAFD. The jobs API and Kafka job start hit the API NAFD. NAFDs ask the NACP to classify. On route the NAFD stores the frozen route and async-starts NAR. NACP and NAR are separate boxes. Kafka runs_topic is return, not a third NAFD. The NACP does not start NAR.</desc>
+      <desc id="hir-ing-desc">Chat hits the Chat NAFD. The jobs API and Kafka job start hit the API NAFD. NAFDs ask the NACP to classify. On route the NAFD stores the frozen route and async-starts Agent runtime. NACP and Agent runtime are separate boxes. Kafka runs_topic is return, not a third NAFD. The NACP does not start Agent runtime.</desc>
       <defs>
         <marker id="hir-ing-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
         <marker id="hir-ing-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f97316"/></marker>
@@ -81,7 +81,7 @@
 
       <rect x="724" y="176" width="196" height="180" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <rect x="802" y="180" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="822" y="189" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">NAR</text>
+      <text x="822" y="189" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">Agent runtime</text>
 
       <line x1="208" y1="116" x2="264" y2="116" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-ing-arrow-link)"/>
       <line x1="208" y1="244" x2="264" y2="244" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-ing-arrow-link)"/>
@@ -130,7 +130,7 @@
 
       <rect x="732" y="216" width="168" height="64" rx="6" fill="#f8fafc"/>
       <rect x="732" y="216" width="168" height="64" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="816" y="244" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">NAR</text>
+      <text x="816" y="244" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent runtime</text>
       <text x="816" y="260" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">started by NAFD</text>
 
       <line x1="602" y1="280" x2="602" y2="296" stroke="#64748b" stroke-width="1"/>
@@ -150,7 +150,7 @@
       <rect x="40" y="476" width="14" height="10" rx="2" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
       <text x="60" y="484" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Channel</text>
       <rect x="136" y="476" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="156" y="484" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD / NAR</text>
+      <text x="156" y="484" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD / Agent runtime</text>
       <rect x="300" y="476" width="14" height="10" rx="2" fill="rgba(249,115,22,0.08)" stroke="#f97316" stroke-width="1"/>
       <text x="320" y="484" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NACP</text>
       <rect x="436" y="476" width="14" height="10" rx="2" fill="rgba(30,41,59,0.05)" stroke="#64748b" stroke-width="1"/>
