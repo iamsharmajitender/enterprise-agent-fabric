@@ -3,14 +3,14 @@ title: "Enterprise Agent Fabric — Executive Brief"
 sidebar_label: Executive quick deck
 sidebar_position: 1
 slug: /enterprise-agent-fabric/v1/executive-deck
-description: "Short executive brief — the opportunity, our answer, value, and decision for Enterprise Agent Fabric V1."
+description: "Executive brief for Enterprise Agent Fabric V1 — why we need a common operating model for AI, what it delivers, and what we are asking leadership to endorse."
 ---
 
 # Enterprise Agent Fabric
 
 ## Executive Brief
 
-### One governed front door for enterprise AI
+### One governed way to run enterprise AI
 
 **2 September 2026**
 
@@ -18,15 +18,33 @@ description: "Short executive brief — the opportunity, our answer, value, and 
 
 ---
 
-## The opportunity
+## Why leadership should care
 
-AI is growing quickly across the organisation. Teams are building capabilities for **employees, customers, partners, and operations** — good for innovation, but it creates a structural problem.
+AI is no longer a set of pilots in individual teams. It is becoming **production capability** across the organisation — for employees, customers, partners, and operations.
 
-**Today:** many AI apps → many approaches → many controls.
+That is the right direction. The risk is **how** we scale it.
 
-Each team may independently build experiences, access controls, routing, audit, monitoring, and governance. We risk **solving the same problem many times** and operating AI differently everywhere.
+If every division builds its own AI entry point, security model, approval path, and audit trail, we do not get more innovation. We get **the same enterprise plumbing rebuilt many times** — with different standards, different gaps, and no single place to answer hard questions when something goes wrong.
 
-The organisation loses one answer to: **who** may use a capability, **what** it may do, and **why** it was selected and what it did.
+We need to move from *“another AI application”* to *“another governed capability in the enterprise portfolio.”*
+
+---
+
+## What is happening today
+
+Capabilities are emerging independently:
+
+- **Employees** — finance, HR, legal, technology assistants
+- **Customers** — service and claims AI
+- **Partners** — payments and KYC AI
+
+Each team solves the visible problem — the assistant or automation — and often rebuilds the invisible work underneath: who can access it, how requests are directed, what the AI is allowed to do, how actions are approved, and how we prove what happened afterwards.
+
+The organisation cannot consistently answer:
+
+- **Who** was allowed to use this AI?
+- **What** was it permitted to do?
+- **Why** was this capability chosen, and what did it actually do?
 
 <div className="gain-diagram-wrap">
 
@@ -34,15 +52,21 @@ The organisation loses one answer to: **who** may use a capability, **what** it 
 
 </div>
 
+That is not a technology inconvenience. It is a **governance, security, and operational risk** as AI starts to touch money, customers, and regulated processes.
+
 ---
 
-## Our answer
+## What we are proposing
 
-**Enterprise Agent Fabric** — a shared enterprise layer between users and AI capabilities.
+**Enterprise Agent Fabric** is the common operating layer for AI across the enterprise.
 
-**One front door** → **one set of enterprise controls** → **many specialised AI capabilities**
+It is **not** one giant AI that does everything. It is the **enterprise infrastructure** that sits between users and the specialised AI each domain builds.
 
-Users do not need to know which capability sits behind the experience. Domains still own their AI; the Fabric provides the **common enterprise path**.
+**For users and applications:** one place to ask for help.
+
+**For the enterprise:** one consistent way to control access, direct work, govern actions, monitor health, and retain evidence.
+
+**For domain teams:** freedom to build specialised AI for their business — without rebuilding the enterprise control stack every time.
 
 <div className="gain-diagram-wrap">
 
@@ -50,66 +74,86 @@ Users do not need to know which capability sits behind the experience. Domains s
 
 </div>
 
----
+In plain terms:
 
-## What becomes common
-
-- **Who can use it** — identity, entitlement, least-privilege access
-- **Where the request goes** — routing and policy select the right capability
-- **What it can do** — controls, approvals, and policy govern actions
-- **What happened** — common audit, monitoring, and operational visibility
-- **Is it safe to release** — evaluation and governance before production
+**One front door → one set of enterprise controls → many specialised AI capabilities**
 
 ---
 
-## What stays with the domains
+## What the enterprise standardises once
 
-The Fabric does **not** centralise everything. Domains keep:
+These are not technical details for their own sake. They are the controls every production AI capability will need anyway.
 
-- Business logic, workflows, and knowledge
-- Models, tools, and business outcomes
+- **Access** — who may use which AI, under which role and entitlement
+- **Direction** — which specialist capability handles each request, under defined rules
+- **Action** — what the AI may do, including approvals for higher-risk steps
+- **Evidence** — a consistent record of what was requested, decided, executed, and approved
+- **Oversight** — operational visibility and pre-production checks before change reaches users
 
-> **Centralise the controls. Decentralise the intelligence.**
-
----
-
-## The value
-
-- **Faster** — onboard a capability without rebuilding platform foundations
-- **Safer** — consistent enterprise controls across the portfolio
-- **More accountable** — who asked, what was selected, what happened, what was approved
-- **Easier to scale** — add AI without adding the same platform complexity each time
+We build this once at enterprise level. Domains plug into it instead of reinventing it.
 
 ---
 
-## The shift
+## What domains keep
 
-| From | To |
+This proposal does **not** centralise business AI or slow domain teams down.
+
+Domains continue to own:
+
+- The business problem and workflow
+- Domain knowledge and data
+- Models, tools, and specialist logic
+- Business outcomes and quality for their use cases
+
+> **Centralise the controls. Keep the intelligence in the domains.**
+
+That is the balance: **enterprise consistency without enterprise bottleneck.**
+
+---
+
+## What the organisation gains
+
+- **Move faster over time** — new AI ships by onboarding to a shared model, not by standing up another full stack
+- **Reduce risk** — the same security, approval, and policy standards apply everywhere AI acts on behalf of the business
+- **Improve accountability** — leadership and regulators get a clear trail: who asked, what ran, what was approved, what happened
+- **Scale without chaos** — the AI portfolio can grow without an equal growth in duplicated platform work, inconsistent controls, and operational blind spots
+
+---
+
+## The shift we are asking for
+
+| Today | With Enterprise Agent Fabric |
 | --- | --- |
-| Every team builds, controls, and operates independently | **Enterprise Fabric** — common controls and experience |
-| Repeated platform work per capability | **Specialised domain AI** — independent and domain-owned |
+| Each team builds, secures, and operates AI on its own | The enterprise provides one governed path; domains focus on specialist capability |
+| Adding AI means adding another application and another control stack | Adding AI means onboarding another capability to a known operating model |
+| Hard to explain the AI landscape or prove control after an incident | One catalogue, one evidence model, one operational view |
 
 ---
 
-## What V1 enables
+## What V1 delivers
 
-1. Harden the platform for production
-2. Onboard priority AI capabilities
-3. Establish common enterprise standards
-4. Prove the model through real business use cases
-5. Create a repeatable pattern for future AI
+V1 is deliberately bounded. It establishes the **pattern**, not a monolithic AI platform.
+
+Leadership endorsement would allow us to:
+
+1. **Harden for production** — security, resilience, and operational readiness
+2. **Onboard priority capabilities** — prove the model on real business use cases
+3. **Set enterprise standards** — access, audit, monitoring, and release discipline
+4. **Create a repeatable path** — so the next AI capability is faster and safer than the last
+
+V1 does **not** require one model, one runtime, or one team owning every use case.
 
 ---
 
 ## The decision
 
-**Do we continue scaling AI applications independently?**
+**Option A:** Continue letting AI scale as independent applications — accepting duplication, inconsistency, and growing governance exposure.
 
-**Or do we establish one enterprise operating model for AI?**
+**Option B:** Endorse **Enterprise Agent Fabric** as the enterprise operating model for AI — one governed front door, many specialised capabilities, one consistent control model.
 
 **Recommendation:** proceed with **Enterprise Agent Fabric V1**.
 
-Not one giant enterprise agent — **one governed way of operating many AI capabilities.**
+The goal is not to build one AI to rule them all. The goal is to give the organisation **one disciplined way to run many AIs** — with the speed domains need and the control the enterprise requires.
 
 ---
 
