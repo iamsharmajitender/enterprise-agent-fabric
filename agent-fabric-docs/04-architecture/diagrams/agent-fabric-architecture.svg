@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 1356 790" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-arch-title hir-arch-desc">
+<svg viewBox="0 0 1260 790" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-arch-title hir-arch-desc">
       <title id="hir-arch-title">Enterprise Agent Fabric</title>
-      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Agent audit sits on the right. Events sits at the top. Agent Fabric Plane sits above the middle: Agent Control Plane stacked on Agent Data Plane, with the Agent Fabric Capability Registry beside them. A small database mark sits inside Agent Fabric Front Door, Agent Fabric Plane, and Agent Fabric Runtime. Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Agent Data Plane does not start Agent Fabric Runtime. Shared holds Memory, RAG, and Tools. Observability feeds Dashboard then Responsible / Governed AI.</desc>
+      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Events sits at the top. Agent Fabric Plane sits above the middle: Agent Control Plane stacked on Agent Data Plane, with the Agent Fabric Capability Registry beside them. A small database mark sits inside Agent Fabric Front Door, Agent Fabric Plane, and Agent Fabric Runtime. Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Agent Data Plane does not start Agent Fabric Runtime. Shared holds Memory, RAG, and Tools. Observability and Agent audit sit side by side at the bottom; both feed Dashboard. Dashboard feeds Responsible / Governed AI.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="hir-arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -27,12 +26,6 @@
       <rect x="120" y="28" width="48" height="12" rx="2" fill="transparent" stroke="rgba(94,122,155,0.45)" stroke-width="0.8"/>
       <text x="144" y="37" fill="#5e7a9b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">EVAL</text>
       <text x="144" y="290" transform="rotate(-90 144 290)" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent evals</text>
-
-      <rect x="1260" y="20" width="80" height="586" rx="10" fill="#f8fafc"/>
-      <rect x="1260" y="20" width="80" height="586" rx="10" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1.2"/>
-      <rect x="1276" y="28" width="48" height="12" rx="2" fill="transparent" stroke="rgba(59,130,246,0.45)" stroke-width="0.8"/>
-      <text x="1300" y="37" fill="#3b82f6" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AUDIT</text>
-      <text x="1300" y="290" transform="rotate(-90 1300 290)" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent audit</text>
 
       <g transform="translate(192,0)">
       <rect x="24" y="20" width="1036" height="586" rx="10" fill="none" stroke="rgba(30,41,59,0.22)" stroke-width="1.2"/>
@@ -181,11 +174,16 @@
       <line x1="652" y1="328" x2="652" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
       <line x1="910" y1="344" x2="910" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
 
-      <rect x="40" y="360" width="1004" height="44" rx="6" fill="#f8fafc"/>
-      <rect x="40" y="360" width="1004" height="44" rx="6" fill="rgba(14,165,233,0.08)" stroke="#38bdf8" stroke-width="1"/>
-      <text x="542" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Observability</text>
+      <rect x="40" y="360" width="496" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="360" width="496" height="44" rx="6" fill="rgba(14,165,233,0.08)" stroke="#38bdf8" stroke-width="1"/>
+      <text x="288" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Observability</text>
 
-      <line x1="542" y1="404" x2="542" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
+      <rect x="548" y="360" width="496" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="548" y="360" width="496" height="44" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="796" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent audit</text>
+
+      <line x1="288" y1="404" x2="288" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="796" y1="404" x2="796" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
 
       <rect x="40" y="416" width="1004" height="44" rx="6" fill="#f8fafc"/>
       <rect x="40" y="416" width="1004" height="44" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
@@ -211,24 +209,24 @@
       <text x="388" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Events</text>
       <rect x="440" y="576" width="14" height="10" rx="2" fill="rgba(14,165,233,0.08)" stroke="#38bdf8" stroke-width="1"/>
       <text x="460" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Observability</text>
-      <rect x="548" y="576" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="568" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Dashboard</text>
-      <rect x="640" y="576" width="14" height="10" rx="2" fill="rgba(124,143,111,0.10)" stroke="#7c8f6f" stroke-width="1"/>
-      <text x="660" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Governed AI</text>
-      <use href="#hir-db" x="736" y="573" width="14" height="14"/>
-      <text x="754" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Store</text>
-      <line x1="796" y1="581" x2="824" y2="581" stroke="#f97316" stroke-width="1.4" marker-end="url(#hir-arch-arrow-accent)"/>
-      <text x="832" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD starts NAR</text>
+      <rect x="548" y="576" width="14" height="10" rx="2" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="568" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent audit</text>
+      <rect x="648" y="576" width="14" height="10" rx="2" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="668" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Dashboard</text>
+      <rect x="740" y="576" width="14" height="10" rx="2" fill="rgba(124,143,111,0.10)" stroke="#7c8f6f" stroke-width="1"/>
+      <text x="760" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Governed AI</text>
+      <use href="#hir-db" x="836" y="573" width="14" height="14"/>
+      <text x="854" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Store</text>
+      <line x1="896" y1="581" x2="924" y2="581" stroke="#f97316" stroke-width="1.4" marker-end="url(#hir-arch-arrow-accent)"/>
+      <text x="932" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">NAFD starts NAR</text>
       <rect x="40" y="600" width="14" height="10" rx="2" fill="rgba(51,65,85,0.06)" stroke="#475569" stroke-width="1"/>
       <text x="60" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent security</text>
       <rect x="168" y="600" width="14" height="10" rx="2" fill="rgba(94,122,155,0.10)" stroke="#5e7a9b" stroke-width="1"/>
       <text x="188" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent evals</text>
-      <rect x="276" y="600" width="14" height="10" rx="2" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
-      <text x="296" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent audit</text>
-      <line x1="384" y1="605" x2="408" y2="605" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
-      <line x1="412" y1="599" x2="424" y2="611" stroke="#64748b" stroke-width="1.2"/>
-      <line x1="424" y1="599" x2="412" y2="611" stroke="#64748b" stroke-width="1.2"/>
-      <text x="432" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Skip blocked</text>
+      <line x1="276" y1="605" x2="300" y2="605" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
+      <line x1="304" y1="599" x2="316" y2="611" stroke="#64748b" stroke-width="1.2"/>
+      <line x1="316" y1="599" x2="304" y2="611" stroke="#64748b" stroke-width="1.2"/>
+      <text x="324" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Skip blocked</text>
       </g>
       <line x1="360" y1="268" x2="360" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       <line x1="418" y1="132" x2="418" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
