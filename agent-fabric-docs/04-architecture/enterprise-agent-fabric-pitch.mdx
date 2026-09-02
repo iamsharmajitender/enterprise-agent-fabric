@@ -79,6 +79,16 @@ The organisation loses a single answer to three fundamental questions:
 - What is the capability allowed to do?
 - Why was this capability selected and what did it do?
 
+It also lacks shared platform controls that should apply once across every capability:
+
+- **Centralised audit** — one evidence chain for what was decided, allowed, executed, and approved
+- **Centralised observability** — one ops view of health, latency, errors, and saturation across Front Door, Plane, and Runtime
+- **Common security** — consistent identity, entitlement, and least-privilege agent credentials instead of per-assistant side doors
+- **Kill switch** — a single place to pause, revoke, or stop a capability or fleet without hunting through domain deployments
+- **Policy and approval** — shared high-risk gates rather than bespoke approval paths per team
+- **Evaluation gates** — routing and capability quality checked before production, not only after incidents
+- **Resilience and recovery** — common patterns for timeout, retry, failover, and controlled error instead of reinvented per assistant
+
 <div className="gain-diagram-wrap">
 
 ![Fragmented enterprise AI today: employees, customers, and partners each reach separate assistants and endpoints, with authentication, routing, and controls rebuilt independently.](./diagrams/agent-fabric-pitch-problem.svg)
