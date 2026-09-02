@@ -3,7 +3,7 @@ title: "Enterprise Agent Fabric V1"
 sidebar_label: Enterprise Agent Fabric V1
 sidebar_position: 0
 slug: /enterprise-agent-fabric/v1
-description: "Executive decision paper. One governed front door for enterprise AI — one experience, many specialised capabilities, one control model."
+description: "Executive decision paper. Scale enterprise AI as a governed portfolio — one experience, many specialised capabilities, one control model."
 ---
 
 # Enterprise Agent Fabric V1
@@ -36,9 +36,11 @@ The strategic choice is whether we scale AI as a portfolio of governed enterpris
 
 ## 2. Executive summary
 
+**The Enterprise Agent Fabric lets the organisation scale AI as a governed portfolio** — one experience for users, specialised capabilities for each domain, and one consistent control model — **instead of rebuilding identity, policy, audit, and operations for every new AI application.**
+
 Enterprise AI is moving from a small number of assistants and experiments to a portfolio of specialised capabilities across Finance, HR, Legal, Customer Service, Payments, Claims, KYC, Operations, and Technology. The challenge is no longer simply building an agent. It is operating many AI capabilities as one enterprise capability while maintaining security, entitlement, governance, auditability, resilience, and accountability.
 
-The Enterprise Agent Fabric addresses this by providing:
+The Fabric provides:
 
 - **One front door** — users and applications interact with the enterprise AI capability rather than individual agents.
 - **Many specialised capabilities** — business domains retain specialised AI for their own processes, data, and expertise.
@@ -46,9 +48,28 @@ The Enterprise Agent Fabric addresses this by providing:
 
 Users and applications do not need to understand the underlying AI landscape. They enter through a common interface; the Fabric determines the appropriate capability, verifies entitlement and policy, and connects the request to the relevant specialised capability. The capability remains domain-owned and independently evolvable. The enterprise controls remain consistent.
 
+**What that delivers in practice** — speed, control, and visibility without sacrificing domain ownership — is summarised in [section 3](#3-what-the-fabric-delivers).
+
 ---
 
-## 3. Why now
+## 3. What the Fabric delivers
+
+If you read only one section beyond the decision ask, read this. The Fabric is not a platform tour; it is how the enterprise gets these outcomes:
+
+- **One AI experience** — simpler interaction for employees, customers, and applications; no need to know which assistant or endpoint to use
+- **Faster capability onboarding** — new AI ships by registering a governed capability, not by rebuilding auth, routing, audit, and ops each time
+- **Consistent controls** — entitlement, policy, kill switch, and least-privilege apply once across every capability
+- **Clear accountability** — one evidence model for who asked, what was selected, what ran, and what was approved
+- **Operational visibility** — shared health, latency, and failure view across Front Door, Plane, and Runtime
+- **Evaluated change** — routing and capability behaviour gated before production, not only inspected after incidents
+- **Failure isolation** — one capability or ingress path failing does not become an enterprise-wide AI outage
+- **Domain autonomy** — business teams keep specialised workflows, knowledge, and outcomes; the platform owns the common path
+
+Taken together, the Fabric allows the organisation to **scale AI adoption without scaling fragmentation, risk, and duplicated platform work at the same rate.**
+
+---
+
+## 4. Why now
 
 Enterprise AI is moving from answering questions toward performing work and taking actions. That changes the architectural and governance problem. A standalone chatbot can operate with relatively limited integration. A portfolio of AI capabilities may interact with enterprise data, customer information, financial systems, operational platforms, APIs, workflow systems, human approval processes, and external services.
 
@@ -63,7 +84,7 @@ The organisation therefore needs to move from “how do we build another AI appl
 
 ---
 
-## 4. The problem
+## 5. The problem
 
 Today, AI capabilities naturally emerge independently across business domains.
 
@@ -97,45 +118,15 @@ It also lacks shared platform controls that should apply once across every capab
 
 ---
 
-## 5. The proposition
+## 6. The proposition
 
-The Enterprise Agent Fabric provides a common operating layer for enterprise AI.
-
-- **One front door** — users and applications interact with the enterprise AI capability rather than individual agents.
-- **Many specialised capabilities** — business domains retain specialised AI for their own processes, data, and expertise.
-- **One control model** — identity, entitlement, policy, monitoring, audit, evaluation, and governance apply consistently across capabilities.
+The Enterprise Agent Fabric is the common operating layer that delivers the outcomes in [section 3](#3-what-the-fabric-delivers).
 
 The model is one experience → governed decision → specialised capability → controlled action → auditable outcome.
 
 ---
 
-## 6. Target state
-
-<div className="gain-diagram-wrap">
-
-![Enterprise Agent Fabric target state: users and applications enter through the Enterprise AI Front Door; a decision layer selects the capability and verifies entitlement; specialised domain capabilities execute under shared enterprise controls.](./diagrams/agent-fabric-pitch-target-state.svg)
-
-</div>
-
-The key principle is that the Fabric does not become one giant agent. It provides the enterprise operating layer around specialised capabilities.
-
----
-
-## 7. How the Fabric works
-
-A request moves through a consistent set of stages:
-
-- **Front Door** — establish identity and receive the request
-- **Decision layer** — understand intent, determine the appropriate capability, and verify entitlement
-- **Capability** — execute the specialised AI workflow using approved knowledge, data, and tools
-- **Controls** — apply security, policy, monitoring, governance, audit, and evaluation throughout the lifecycle
-- **Outcome** — return the result or initiate an approved business action
-
-Chat interactions and automated jobs use the same underlying contract: entitle → decide → pin → start → execute → audit. Different ingress channels can operate independently while maintaining a consistent enterprise control model. Production splits chat and API ingress into separate fleets; the contract stays the same.
-
----
-
-## 8. What changes for the business
+## 7. What changes for the business
 
 The Fabric shifts how the enterprise builds and consumes AI:
 
@@ -154,9 +145,57 @@ The desired shift is from many AI applications to one enterprise AI capability e
 
 ---
 
-## 9. Least-privilege AI
+## 8. The executive story
 
-A fundamental principle of the Fabric is that user access does not automatically translate into unlimited AI access. Three identities and permissions must be considered independently:
+<div className="gain-diagram-wrap">
+
+![Five beats from fragmented AI and enterprise risk, through one operating model and domain autonomy, to scale with control.](./diagrams/agent-fabric-v1-story.svg)
+
+</div>
+
+Five beats:
+
+1. **AI is fragmenting** — more teams are building more AI capabilities.
+2. **Fragmentation creates enterprise risk** — every capability can independently introduce security, governance, integration, and operational complexity.
+3. **The Fabric creates one operating model** — one front door, common controls, and specialised capabilities.
+4. **Domains keep their autonomy** — business teams own their AI capabilities and outcomes.
+5. **The enterprise gets scale with control** — AI can grow as a portfolio without an equivalent increase in fragmentation, risk, and complexity.
+
+---
+
+## 9. Target state
+
+<div className="gain-diagram-wrap">
+
+![Enterprise Agent Fabric target state: users and applications enter through the Enterprise AI Front Door; a decision layer selects the capability and verifies entitlement; specialised domain capabilities execute under shared enterprise controls.](./diagrams/agent-fabric-pitch-target-state.svg)
+
+</div>
+
+The key principle is that the Fabric does not become one giant agent. It provides the enterprise operating layer around specialised capabilities.
+
+---
+
+## 10. How the Fabric works
+
+*This is the request path that delivers one front door and one control model.*
+
+A request moves through a consistent set of stages:
+
+- **Front Door** — establish identity and receive the request
+- **Decision layer** — understand intent, determine the appropriate capability, and verify entitlement
+- **Capability** — execute the specialised AI workflow using approved knowledge, data, and tools
+- **Controls** — apply security, policy, monitoring, governance, audit, and evaluation throughout the lifecycle
+- **Outcome** — return the result or initiate an approved business action
+
+Chat interactions and automated jobs use the same underlying contract: entitle → decide → pin → start → execute → audit. Different ingress channels can operate independently while maintaining a consistent enterprise control model. Production splits chat and API ingress into separate fleets; the contract stays the same.
+
+---
+
+## 11. Least-privilege AI
+
+*This is how the Fabric delivers consistent control — user access does not automatically mean unlimited AI access.*
+
+Three identities and permissions must be considered independently:
 
 - **The user** — who initiated the request?
 - **The capability** — what is this AI capability authorised to do?
@@ -166,7 +205,9 @@ This separation enables least-privilege AI. For example, a user may be entitled 
 
 ---
 
-## 10. Human control by design
+## 12. Human control by design
+
+*This is how the Fabric delivers accountability when AI moves from answering to acting.*
 
 Enterprise AI must maintain a clear distinction between answering and acting. Human control is built in as first-class workflow patterns:
 
@@ -178,7 +219,9 @@ These are not exceptions. The platform can record what control was triggered, wh
 
 ---
 
-## 11. Governance and accountability
+## 13. Governance and accountability
+
+*This is how the Fabric delivers a single answer to “why did this happen?” across every capability.*
 
 As AI moves toward autonomous action, organisations need to demonstrate not only what happened, but why it happened. The Fabric is designed to provide evidence for:
 
@@ -195,7 +238,9 @@ This creates a consistent enterprise evidence model across AI capabilities. Eval
 
 ---
 
-## 12. Audit and observability
+## 14. Audit and observability
+
+*This is how the Fabric delivers enterprise visibility — evidence for accountability and signals for operations.*
 
 Audit and observability are both required, but they serve different audiences and must not be collapsed into one path.
 
@@ -213,7 +258,9 @@ Evals sit beside both: routing golden sets and adversarial cases gate misroutes 
 
 ---
 
-## 13. Operating model
+## 15. Operating model
+
+*This is how the Fabric delivers domain speed without every team rebuilding the platform.*
 
 Ownership is split so domains can move quickly without rebuilding the platform:
 
@@ -225,7 +272,7 @@ Domain teams innovate independently without rebuilding the enterprise AI platfor
 
 ---
 
-## 14. What this is not
+## 16. What this is not
 
 The Enterprise Agent Fabric is not:
 
@@ -240,7 +287,9 @@ Instead, the Fabric provides the common enterprise operating model while allowin
 
 ---
 
-## 15. Resilience and scale
+## 17. Resilience and scale
+
+*This is how the Fabric delivers failure isolation as the portfolio grows.*
 
 Enterprise AI capabilities will have different traffic profiles and failure characteristics. Conversational workloads and automated job workloads should not necessarily operate within the same failure domain.
 
@@ -256,7 +305,7 @@ The principle is that a failure in one AI capability should not become an enterp
 
 ---
 
-## 16. V1 scope
+## 18. V1 scope
 
 V1 establishes the foundational operating pattern rather than attempting to solve every enterprise AI problem.
 
@@ -285,7 +334,7 @@ The objective is to establish the enterprise pattern, not create a monolithic AI
 
 ---
 
-## 17. Proof point
+## 19. Proof point
 
 A working V1 reference implementation demonstrates the complete lifecycle:
 
@@ -309,9 +358,9 @@ This is a proof point for the architecture and operating model, not the final pr
 
 ---
 
-## 18. Success measures
+## 20. Success measures
 
-Success should be measured by business and control outcomes, not by the number of platform components built.
+Success should be measured by the outcomes in [section 3](#3-what-the-fabric-delivers), not by the number of platform components built.
 
 - **Adoption** — priority capabilities onboarded through the Fabric; percentage of new enterprise AI using the common pattern
 - **Speed** — time to onboard a new governed capability; reduction in duplicated platform engineering
@@ -323,24 +372,7 @@ Success should be measured by business and control outcomes, not by the number o
 
 ---
 
-## 19. Strategic value
-
-The Fabric delivers strategic value across experience, delivery, and control:
-
-- **One AI experience** — simpler interaction for employees, customers, and applications
-- **Reusable platform** — faster deployment of new AI capabilities
-- **Consistent controls** — reduced security, governance, and operational risk
-- **Specialised capabilities** — better domain outcomes than a generic enterprise agent
-- **Enterprise visibility** — clear accountability through audit, and operational clarity through observability
-- **Evaluated change** — routing and capability behaviour gated before production, not only inspected after incidents
-- **Failure isolation** — reduced blast radius of AI incidents
-- **Domain autonomy** — business teams retain ownership and speed
-
-Taken together, the Fabric allows the organisation to scale AI adoption without scaling fragmentation at the same rate.
-
----
-
-## 20. Key risks and proposed responses
+## 21. Key risks and proposed responses
 
 - **Fabric becomes a central bottleneck** — standard contracts and decentralised capability ownership
 - **Platform becomes a monolithic agent runtime** — separate Fabric control plane from domain execution
@@ -355,7 +387,7 @@ Taken together, the Fabric allows the organisation to scale AI adoption without 
 
 ---
 
-## 21. Roadmap
+## 22. Roadmap
 
 **V1 — Establish the pattern.** Prove the enterprise operating model with Front Door, capability registry, routing and entitlement, durable execution, a common audit and observability model, routing evaluation gates, human-control patterns, and initial priority capabilities.
 
@@ -369,24 +401,6 @@ Taken together, the Fabric allows the organisation to scale AI adoption without 
 - Governance integration and production onboarding model
 
 **V2 — Scale the ecosystem.** Make onboarding AI capabilities repeatable across the enterprise through self-service capability onboarding, expanded policy controls, capability lifecycle management, standardised evaluation across domains, cost and usage optimisation, and broader domain adoption.
-
----
-
-## 22. The executive story
-
-<div className="gain-diagram-wrap">
-
-![Five beats from fragmented AI and enterprise risk, through one operating model and domain autonomy, to scale with control.](./diagrams/agent-fabric-v1-story.svg)
-
-</div>
-
-Five beats:
-
-1. **AI is fragmenting** — more teams are building more AI capabilities.
-2. **Fragmentation creates enterprise risk** — every capability can independently introduce security, governance, integration, and operational complexity.
-3. **The Fabric creates one operating model** — one front door, common controls, and specialised capabilities.
-4. **Domains keep their autonomy** — business teams own their AI capabilities and outcomes.
-5. **The enterprise gets scale with control** — AI can grow as a portfolio without an equivalent increase in fragmentation, risk, and complexity.
 
 ---
 
