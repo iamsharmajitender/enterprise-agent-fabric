@@ -1,0 +1,182 @@
+---
+title: "Enterprise Agent Fabric — Executive Deck"
+sidebar_label: Executive quick deck
+sidebar_position: 1
+slug: /enterprise-agent-fabric/v1/executive-deck
+description: "Short executive deck — what the Fabric is, the problem, benefits, and how they are delivered."
+---
+
+# Enterprise Agent Fabric
+
+## Executive quick deck
+
+**One governed front door for enterprise AI**
+
+**Status:** Draft · **Date:** 2 September 2026
+
+Full decision paper: [Enterprise Agent Fabric V1](./enterprise-agent-fabric-pitch.mdx) · Technical design: [Enterprise Agent Fabric](./enterprise-agent-fabric-architecture.mdx)
+
+---
+
+## Slide 1 — What it is
+
+The **Enterprise Agent Fabric** is a shared operating layer for enterprise AI.
+
+It is **not** one giant agent. It is the infrastructure that sits between users and domain-owned AI capabilities.
+
+- **One front door** — one entry point for employees, customers, applications, and jobs
+- **Many specialised capabilities** — Finance, HR, Legal, Claims, Payments, and others stay domain-owned
+- **One control model** — identity, entitlement, policy, audit, monitoring, and evaluation applied consistently
+
+**In one line:** scale AI as a governed portfolio, not as a collection of disconnected applications.
+
+---
+
+## Slide 2 — The problem we are solving
+
+AI capabilities are emerging independently in every domain.
+
+- **Employee** — Finance Assistant, HR Assistant, Legal Assistant, Technology Assistant
+- **Customer** — Customer Service AI, Claims AI
+- **Partner** — Payments AI, KYC AI
+
+Each team rebuilds its own front door, auth, routing, audit, and ops.
+
+The organisation loses one answer to:
+
+- **Who** may use this capability?
+- **What** is it allowed to do?
+- **Why** was it selected, and what did it do?
+
+<div className="gain-diagram-wrap">
+
+![Fragmented enterprise AI today: employees, customers, and partners each reach separate assistants and endpoints.](./diagrams/agent-fabric-pitch-problem.svg)
+
+</div>
+
+---
+
+## Slide 3 — Why now
+
+AI is moving from answering questions to **performing work and taking actions**.
+
+That raises the stakes:
+
+- More integration with enterprise data, customers, money, and operations
+- More need for approval, audit, and accountability
+- More risk if every team invents its own controls
+
+Without a common operating model, each new capability adds duplication, inconsistency, and governance overhead.
+
+**The shift:** from “build another AI app” to “onboard another governed capability.”
+
+---
+
+## Slide 4 — What we propose
+
+A **shared operating layer** between users and specialised AI.
+
+The Fabric handles:
+
+- **Who** may act — identity and entitlement
+- **Which** capability should respond — routing and policy
+- **How** work runs safely — audit, approval, monitoring, and ops
+
+Domains keep ownership of workflows, knowledge, models, and business outcomes.
+
+<div className="gain-diagram-wrap">
+
+![Target state: one front door, governed decision, specialised capabilities under shared controls.](./diagrams/agent-fabric-pitch-target-state.svg)
+
+</div>
+
+---
+
+## Slide 5 — What you get
+
+- **One AI experience** — users do not need to know which assistant or endpoint to use
+- **Faster onboarding** — register a governed capability instead of rebuilding platform plumbing
+- **Consistent controls** — entitlement, policy, kill switch, and least-privilege once for all capabilities
+- **Clear accountability** — one evidence model across the portfolio
+- **Operational visibility** — shared health and failure view across the platform
+- **Safer change** — routing and behaviour checked before production, not only after incidents
+- **Failure isolation** — one capability failing does not take down enterprise AI
+- **Domain autonomy** — business teams keep speed and specialisation; the platform owns the common path
+
+**Outcome:** scale AI adoption without scaling fragmentation and risk at the same rate.
+
+---
+
+## Slide 6 — How it works
+
+Every request follows the same governed path:
+
+1. **One experience** — enter through the enterprise front door
+2. **Governed decision** — understand intent, select capability, verify entitlement and policy
+3. **Specialised capability** — domain AI runs with approved data and tools
+4. **Controlled action** — high-risk steps gated by policy, approval, or human handoff
+5. **Auditable outcome** — record what was decided, executed, and approved
+
+Chat and automated jobs use the same contract. Different ingress paths can scale independently.
+
+---
+
+## Slide 7 — Benefits and how
+
+| Benefit | How the Fabric delivers it |
+| --- | --- |
+| One AI experience | Common front door and capability catalogue — users ask the enterprise, not a specific agent |
+| Faster onboarding | Register capabilities to a shared contract instead of rebuilding auth, routing, audit, and ops |
+| Consistent controls | One entitlement, policy, and least-privilege model — separate user, capability, and runtime permissions |
+| Clear accountability | Append-only audit evidence — who asked, what was selected, what ran, what was approved |
+| Operational visibility | Shared observability across Front Door, Plane, and Runtime |
+| Safer change | Evaluation gates on routing and capability behaviour before release |
+| Failure isolation | Independent scaling for chat, API, and capabilities — one outage stays local |
+| Domain autonomy | Platform owns the common path; domains own specialised workflows and outcomes |
+
+---
+
+## Slide 8 — The five-beat story
+
+<div className="gain-diagram-wrap">
+
+![Five beats from fragmentation to scale with control.](./diagrams/agent-fabric-v1-story.svg)
+
+</div>
+
+1. **AI is fragmenting** — more teams, more capabilities
+2. **Fragmentation creates risk** — duplicated controls, inconsistent governance
+3. **The Fabric creates one operating model** — one front door, common controls, specialised capabilities
+4. **Domains keep autonomy** — they own their AI and outcomes
+5. **The enterprise gets scale with control** — grow the portfolio without growing chaos
+
+---
+
+## Slide 9 — What it is not
+
+- Not one giant enterprise agent
+- Not a replacement for domain AI teams or platforms
+- Not one model or one runtime for everything
+- Not central ownership of every use case
+
+**Centralise** what must be consistent: identity, routing, policy, audit, observability, evaluation, reliability.
+
+**Decentralise** what domains do best: business logic, workflows, knowledge, and specialised quality.
+
+---
+
+## Slide 10 — The ask
+
+Endorse the **Enterprise Agent Fabric** as the enterprise pattern for governed AI.
+
+Support **V1** as the foundation to:
+
+- Harden the platform for production
+- Onboard priority capabilities across domains
+- Establish enterprise standards for controls, audit, and evaluation
+
+**Decision:** scale AI as a governed capability portfolio — or keep scaling disconnected AI applications independently.
+
+---
+
+**[Full decision paper](./enterprise-agent-fabric-pitch.mdx)** · [Technical design](./enterprise-agent-fabric-architecture.mdx)
