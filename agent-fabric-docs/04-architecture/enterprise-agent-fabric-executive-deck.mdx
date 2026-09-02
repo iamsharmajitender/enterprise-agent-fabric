@@ -114,19 +114,38 @@ In plain terms:
 
 ---
 
-## How every request is handled
+## How every request flows — from ask to completion
 
-Built on those central controls, every AI request follows the same path:
+Executives often ask: *“What actually happens when someone uses this?”* Here is the same path every time — whether a person is chatting or a system is triggering a job.
 
-| Step | What happens |
+### Example: an employee asks for help
+
+*“I need to check my leave balance and request time off.”*
+
+| Stage | What happens |
 | --- | --- |
-| **One experience** | User or application enters through the enterprise front door |
-| **Governed decision** | Intent understood, right capability selected, entitlement and policy verified |
-| **Specialised capability** | Domain AI runs with approved data and tools |
-| **Controlled action** | High-risk steps gated by policy, approval, or human handoff |
-| **Auditable outcome** | Evidence recorded — what was decided, executed, and approved |
+| **1. Ask** | The employee enters through the **enterprise front door** — one place to ask, not a hunt for the right HR bot |
+| **2. Verify** | The Fabric confirms **who they are** and **what they are allowed to use** |
+| **3. Route** | Intent is understood; the request is directed to the **right specialist capability** — here, HR AI — under enterprise policy |
+| **4. Execute** | Domain-owned HR AI runs with **approved knowledge and tools**; it may answer, gather information, or start a workflow |
+| **5. Control** | If the request leads to a **high-risk action** (for example, submitting leave that needs manager approval), the Fabric pauses, routes for approval, or hands off to a human process |
+| **6. Complete** | The employee receives an answer or clear next step; the enterprise retains a **full evidence trail** — who asked, what was selected, what ran, what was approved |
 
-Chat and automated jobs use the same contract. Capabilities can scale and fail independently without taking down enterprise AI.
+The employee does not need to know which AI sits behind the experience. The enterprise always knows how the request was handled.
+
+### The same model for automated work
+
+When an application or batch job triggers AI — for example, a claims system routing a case — it follows the **same governed path**: verify → route → execute under policy → record evidence → return outcome.
+
+Security, audit, and observability run **alongside** the request. They do not slow the user unless policy requires a pause or approval.
+
+<div className="gain-diagram-wrap">
+
+![End-to-end request path: message in, classify, entitlement, pin, execute, response out.](./diagrams/agent-fabric-pitch-lifecycle.svg)
+
+</div>
+
+**In one line:** ask → verify and route → specialist AI runs → control if needed → answer or action → evidence retained.
 
 ---
 
