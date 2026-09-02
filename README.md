@@ -777,7 +777,7 @@ Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of 
 - [The four boxes](#the-four-boxes-afd-adp-acr-ar) (this README — AFD, ADP, ACR, AR)
 - [Workflows](#workflows), [Prompts](#prompts), [Retrieve](#retrieve), [Tools](#tools)
 - [Intent](agent-fabric-docs/intent/enterprise-agent-fabric-v1.md)
-- [Architecture packs](agent-fabric-docs/04-architecture/README.md)
+- [Architecture packs](agent-fabric-docs/04-architecture/index.mdx)
 - [Plan](agent-fabric-docs/tasks/plan.md)
 - [Evals](#evals) — [eval-plan.md](agent-fabric-docs/tasks/eval-plan.md) / [eval-todo.md](agent-fabric-docs/tasks/eval-todo.md) (routing golden set — not on the hot path)
 - [Intent router](agent-fabric-docs/tasks/intent-plan.md) / [intent-todo.md](agent-fabric-docs/tasks/intent-todo.md) (① rules, ② retrieve, ③ **off**; chat JSON still FR-5 slim)

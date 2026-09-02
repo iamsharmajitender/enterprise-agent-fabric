@@ -1,6 +1,6 @@
 /** Open scratchpad links in a new tab without navigating the current page. */
 export function wireOpenInNewTabLinks(root = document) {
-    for (const link of root.querySelectorAll("a[data-open-tab]")) {
+    for (const link of Array.from(root.querySelectorAll("a[data-open-tab]"))) {
         link.addEventListener("click", (event) => {
             if (event.defaultPrevented)
                 return;

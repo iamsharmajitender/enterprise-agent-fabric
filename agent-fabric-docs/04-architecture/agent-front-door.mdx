@@ -103,7 +103,7 @@ Entitle → classify (chat) or entitle-only (jobs) → freeze → start. Callers
 
 <div className="gain-diagram-wrap">
 
-![Two AFD fleets: Chat/UI hits Chat AFD. Jobs API and Kafka job start hit API AFD. AFD calls Agent Data Plane to classify. On route the AFD stores the frozen route/session and starts AR. Kafka runs_topic is return, not a third AFD.](./agent-fabric-ingress.svg)
+![Two AFD fleets: Chat/UI hits Chat AFD. Jobs API and Kafka job start hit API AFD. AFD calls Agent Data Plane to classify. On route the AFD stores the frozen route/session and starts AR. Kafka runs_topic is return, not a third AFD.](./diagrams/agent-fabric-ingress.svg)
 
 </div>
 
@@ -255,7 +255,7 @@ Decide JSON: [Agent Plane](./agent-plane.mdx#apis). Start / `202`: [Agent Runtim
 
 <div className="gain-diagram-wrap">
 
-![UI happy path: IDP mints the user bearer. Chat/UI posts a turn. AFD authenticates, asks Agent Data Plane to classify, freezes the route/session, and async-starts AR. AR asks IDP to mint the agent token. The UI waits on SSE or poll.](./agent-fabric-swimlane-ui.svg)
+![UI happy path: IDP mints the user bearer. Chat/UI posts a turn. AFD authenticates, asks Agent Data Plane to classify, freezes the route/session, and async-starts AR. AR asks IDP to mint the agent token. The UI waits on SSE or poll.](./diagrams/agent-fabric-swimlane-ui.svg)
 
 </div>
 
@@ -263,7 +263,7 @@ Decide JSON: [Agent Plane](./agent-plane.mdx#apis). Start / `202`: [Agent Runtim
 
 <div className="gain-diagram-wrap">
 
-![Jobs API happy path: Caller posts route_id. AFD authenticates, asks Agent Data Plane to entitle and record, freezes the route/session, and async-starts AR. Caller receives 202 and polls the job.](./agent-fabric-swimlane-api.svg)
+![Jobs API happy path: Caller posts route_id. AFD authenticates, asks Agent Data Plane to entitle and record, freezes the route/session, and async-starts AR. Caller receives 202 and polls the job.](./diagrams/agent-fabric-swimlane-api.svg)
 
 </div>
 

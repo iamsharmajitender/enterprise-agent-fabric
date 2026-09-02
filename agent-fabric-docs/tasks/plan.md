@@ -16,7 +16,7 @@ Stand up five independently deployable Fabric services in the existing folders, 
 - **Constraint:** Java hexagonal (Front Door, Registry, Data Plane); TypeScript Control Plane is a UI (no Fabric APIs, no DB) that calls Data Plane; Python AR with uv + LangGraph; HTTP on **3005, 3006 (CP UI), 3007, 3008, 3009**; stub Kafka / IdP / LLM; **no decision audit**; each service folder has a detailed `README.md`
 - Out of scope: remaining case-study packs; real Kafka / IdP / LLM; two production AFD fleets; Patterns 0–3; dual-check; **decision audit**; real chat UI; production deploy / SLO maths
 
-**Docs map:** [README.md](../README.md). **Behaviour source:** [04-architecture](../04-architecture/README.md). Do not reopen locked fabric rules. V1 implements them cheaply (HTTP instead of Kafka, stub identity, keyword Layer ②, LangGraph stub node).
+**Docs map:** [README.md](../README.md). **Behaviour source:** [04-architecture](../04-architecture/index.mdx). Do not reopen locked fabric rules. V1 implements them cheaply (HTTP instead of Kafka, stub identity, keyword Layer ②, LangGraph stub node).
 
 ## Architecture Decisions
 

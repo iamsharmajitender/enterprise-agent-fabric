@@ -6,7 +6,7 @@ Instrument the running Agent Fabric so a single chat (or jobs) turn is visible e
 
 **Not in this plan:** L4/L5 predictive/autonomous ops, production retention tiers, real Kafka event bus, decision-audit store, second AFD fleet.
 
-**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [README Observability section](../../README.md), [enterprise-agent-fabric architecture](../04-architecture/README.md). Do not reopen locked fabric rules.
+**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [README Observability section](../../README.md), [enterprise-agent-fabric architecture](../04-architecture/index.mdx). Do not reopen locked fabric rules.
 
 ## Architecture Decisions
 

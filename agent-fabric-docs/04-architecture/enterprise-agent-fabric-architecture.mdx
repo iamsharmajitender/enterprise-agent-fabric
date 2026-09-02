@@ -144,7 +144,7 @@ How those numbers become fleets: [Front Door scaling](./agent-front-door.mdx#sca
 
 <div className="gain-diagram-wrap">
 
-![Enterprise Agent Fabric: Agent security and Agent evals on the left. Events at the top. Agent Plane sits above the middle with Agent Control Plane stacked on Agent Data Plane and the Agent Capability Registry beside them. Chat/UI and API enter through Agent Front Door. Front Door asks Agent Data Plane to classify, pins the route, then starts Agent Runtime. Agent Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Capability Registry. Small database marks sit inside Front Door, Agent Plane, and Runtime. Agent Data Plane does not start Agent Runtime. Shared sits to the right (Memory, RAG, Tools). Observability feeds Dashboard then Responsible / Governed AI. Direct skips to Agent Plane are blocked.](./agent-fabric-architecture.svg)
+![Enterprise Agent Fabric: Agent security and Agent evals on the left. Events at the top. Agent Plane sits above the middle with Agent Control Plane stacked on Agent Data Plane and the Agent Capability Registry beside them. Chat/UI and API enter through Agent Front Door. Front Door asks Agent Data Plane to classify, pins the route, then starts Agent Runtime. Agent Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Capability Registry. Small database marks sit inside Front Door, Agent Plane, and Runtime. Agent Data Plane does not start Agent Runtime. Shared sits to the right (Memory, RAG, Tools). Observability feeds Dashboard then Responsible / Governed AI. Direct skips to Agent Plane are blocked.](./diagrams/agent-fabric-architecture.svg)
 
 </div>
 
@@ -255,7 +255,7 @@ The Agent Data Plane **classifies**. Agent Front Door **calls it**, then **freez
 
 <div className="gain-diagram-wrap">
 
-![Request path: AFD, Agent Data Plane plus route/workflow catalogue, and AR as three blocks. Agent Front Door calls the data plane to classify. On route the AFD stores the frozen route/session and async-starts AR.](./agent-fabric-request-path.svg)
+![Request path: AFD, Agent Data Plane plus route/workflow catalogue, and AR as three blocks. Agent Front Door calls the data plane to classify. On route the AFD stores the frozen route/session and async-starts AR.](./diagrams/agent-fabric-request-path.svg)
 
 </div>
 
