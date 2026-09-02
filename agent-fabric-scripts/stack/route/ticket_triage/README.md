@@ -17,8 +17,8 @@ Control Plane: [http://localhost:3006/routes/ticket_triage](http://localhost:300
 Child payload is projected from goal ∪ slots (`utterance`, `category`, `order_ref`, `intent`, `priority`).
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/route/ticket_draft_reply/add.sh
-./agent-fabric-scripts/catalogue-seed/route/ticket_triage/add.sh
+./agent-fabric-scripts/stack/route/ticket_draft_reply/add.sh
+./agent-fabric-scripts/stack/route/ticket_triage/add.sh
 ```
 
 Scratchpad: [http://localhost:3014/chat](http://localhost:3014/chat) → **Guided → ticket_triage**

@@ -106,9 +106,15 @@ class HttpRuntimeClientTest {
     server
         .expect(requestTo("http://agent-runtime-custom:3008/v1/runs/corr-9f3c/turns"))
         .andExpect(method(HttpMethod.POST))
-        .andRespond(MockRestResponseCreators.withSuccess());
+        .andRespond(
+            withSuccess("{\"correlation_id\":\"corr-9f3c\",\"status\":\"completed\"}", MediaType.APPLICATION_JSON));
 
-    client.resume("corr-9f3c", "yes", "http://agent-runtime-custom:3008/v1/runs");
+    Map<String, Object> body =
+        client.resumeTurn(
+            "corr-9f3c",
+            Map.of("message", "yes"),
+            "http://agent-runtime-custom:3008/v1/runs");
+    assertThat(body.get("status")).isEqualTo("completed");
     server.verify();
   }
 

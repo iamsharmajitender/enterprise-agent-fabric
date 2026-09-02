@@ -23,7 +23,7 @@ These directories are not shelves. They do not move.
 | [tasks/](tasks/) | Engineering plans and todos |
 | [intent/](intent/) | v1 lock: what to build. Not how a box works today |
 
-Local run tooling lives at repo root: [`agent-fabric-scripts/`](../agent-fabric-scripts/) (`stack/`, `catalogue-seed/`, `docker-compose/`).
+Local run tooling lives at repo root: [`agent-fabric-scripts/`](../agent-fabric-scripts/) (`stack/`, `docker-compose/`).
 
 Domain HTTP doubles live at repo root: [`agent-fabric-mocks/tools/`](../agent-fabric-mocks/tools/).
 

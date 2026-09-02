@@ -1,5 +1,5 @@
 {
-  "_source": "Job demos for routes under catalogue-seed/route/.",
+  "_source": "Job demos for routes under stack/route/.",
   "jobs": [
     {
       "route_id": "duplicate_charge_review",
@@ -17,6 +17,26 @@
       "claims": ["support:case"],
       "payload": {
         "utterance": "Customer says they were charged twice on order ORD-77819"
+      }
+    },
+    {
+      "id": "kyc_onboarding_low_risk",
+      "route_id": "kyc_onboarding",
+      "autonomy_mode": 2,
+      "label": "Deterministic (branch)",
+      "claims": ["kyc:operate"],
+      "payload": {
+        "applicant_id": "app-low-4412"
+      }
+    },
+    {
+      "id": "kyc_onboarding_high_risk",
+      "route_id": "kyc_onboarding",
+      "autonomy_mode": 2,
+      "label": "Deterministic (branch → gate)",
+      "claims": ["kyc:operate"],
+      "payload": {
+        "applicant_id": "app-high-9910"
       }
     }
   ]

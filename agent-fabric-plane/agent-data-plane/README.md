@@ -298,7 +298,7 @@ Unknown jobs `route_id` is **200 `abstain`**, not 404. Catalogue miss is 404.
 
 Flyway on `adp` creates schema `dataplane`. Catalogue tables only — routes, memory profiles, retrieval, corpora, prompt packs, workflows, intent rules, and related pointers. **No** `decisions` / audit table and **no** `GET`/`POST /v1/decisions`.
 
-Operational seed: `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh`. Pin lint / routing evals use in-memory twins of that seed.
+Operational seed: `./agent-fabric-scripts/stack/add-seed-data.sh`. Pin lint / routing evals use in-memory twins of that seed.
 
 ## Sibling calls
 
@@ -345,7 +345,7 @@ Control Plane browse: same URLs, `X-Workload: acp`. Swap `afd` → `ar` on decid
 | `adapters.in.http` | Controllers, workload filter, stub claims |
 | `adapters.out.jdbc` | Flyway-backed stores |
 
-Tests seed **in-memory** twins of the catalogue-seed route packs. Keep them aligned; `SeedCatalogueSqlTest` guards against Flyway accidentally re-seeding routes.
+Tests seed **in-memory** twins of the stack route packs. Keep them aligned; `SeedCatalogueSqlTest` guards against Flyway accidentally re-seeding routes.
 
 ---
 

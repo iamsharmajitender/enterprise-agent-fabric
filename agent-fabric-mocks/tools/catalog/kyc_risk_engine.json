@@ -1,0 +1,26 @@
+{
+  "id": "kyc_risk_engine",
+  "method": "POST",
+  "path": "/kyc/risk",
+  "status": 200,
+  "response": {
+    "risk": "low",
+    "text": "KYC risk: low."
+  },
+  "match": [
+    {
+      "body_contains": "app-high",
+      "response": {
+        "risk": "high",
+        "text": "KYC risk: high."
+      }
+    },
+    {
+      "body_contains": "high-risk",
+      "response": {
+        "risk": "high",
+        "text": "KYC risk: high."
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "id": "kyc_id_verify",
+  "method": "POST",
+  "path": "/kyc/verify",
+  "status": 200,
+  "response": {
+    "text": "Government id verified.",
+    "verified": true
+  }
+}

@@ -7,6 +7,7 @@ import com.fabric.afd.domain.DecideCall;
 import com.fabric.afd.domain.DecideOutcome;
 import com.fabric.afd.domain.ForbiddenException;
 import com.fabric.afd.domain.FrozenRoute;
+import com.fabric.afd.domain.NotFoundException;
 import com.fabric.afd.domain.RunStart;
 import com.fabric.afd.domain.SessionIds;
 import java.util.Map;
@@ -131,6 +132,18 @@ public class JobsService {
             "started"));
     events.countOutcome(journeyId, "started", "web");
     return correlationId;
+  }
+
+  public Map<String, Object> resume(String correlationId, Map<String, Object> body) {
+    FrozenRoute live = freeze.findByCorrelationId(correlationId);
+    if (live == null) {
+      throw new NotFoundException(correlationId);
+    }
+    TraceIds.put("correlation_id", correlationId);
+    TraceIds.put("session_id", live.sessionId());
+    TraceIds.put("route_id", live.routeId());
+    return runtime.resumeTurn(
+        correlationId, body == null ? Map.of() : body, live.activationTarget());
   }
 
   public Map<String, Object> status(String correlationId) {

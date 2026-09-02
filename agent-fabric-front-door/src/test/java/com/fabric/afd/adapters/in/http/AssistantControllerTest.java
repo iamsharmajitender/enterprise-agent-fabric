@@ -166,6 +166,12 @@ class AssistantControllerTest {
     public void resume(String correlationId, String message, String activationTarget) {}
 
     @Override
+    public Map<String, Object> resumeTurn(
+        String correlationId, Map<String, Object> body, String activationTarget) {
+      return Map.of();
+    }
+
+    @Override
     public Optional<FrozenRoute> openRun(String sessionId) {
       return Optional.empty();
     }

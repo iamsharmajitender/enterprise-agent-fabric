@@ -1,7 +1,7 @@
 # Agent Capability Registry — solution architecture and design
 
 **Box:** Agent Capability Registry (with Agent Plane; AR hydrates at pin)  
-**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-capability-registry.mdx](./narrative/agent-capability-registry.mdx)  
+**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric-architecture.mdx) · **Behaviour source:** [agent-capability-registry.mdx](./narrative/agent-capability-registry.mdx)  
 **Status:** Draft · **Date:** 2026-08-20  
 **This binary:** [02-understand/status.md](../02-understand/status.md). This pack may be ahead of code.  
 **Audience:** CTO / chief architect (solution on a page); platform engineer (design)

@@ -142,6 +142,45 @@ class JobsControllerTest {
                 .value("no manifest, workflow, or prompt on pinned catalogue row"));
   }
 
+  @Test
+  void resumeTurnPostsGatePacket() throws Exception {
+    mvc.perform(
+            post("/v1/jobs")
+                .header("Authorization", "Bearer stub")
+                .header("X-Stub-Claims", JANE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"route_id":"fee_explain","idempotency_key":"job-fee-explain:v1","payload":{}}
+                    """))
+        .andExpect(status().isAccepted())
+        .andExpect(jsonPath("$.correlation_id").value("corr-9f3c"));
+
+    mvc.perform(
+            post("/v1/jobs/corr-9f3c/turns")
+                .header("Authorization", "Bearer stub")
+                .header("X-Stub-Claims", JANE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {"decision":"approve","reviewer_id":"ops-1","comment":"ok"}
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("completed"))
+        .andExpect(jsonPath("$.result.message").value("human_gate resumed"));
+  }
+
+  @Test
+  void resumeUnknownJobIs404() throws Exception {
+    mvc.perform(
+            post("/v1/jobs/missing/turns")
+                .header("Authorization", "Bearer stub")
+                .header("X-Stub-Claims", JANE)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"decision\":\"approve\"}"))
+        .andExpect(status().isNotFound());
+  }
+
   @TestConfiguration
   static class MemConfig {
     @Bean
@@ -214,7 +253,17 @@ class JobsControllerTest {
 
     @Override
     public void resume(String correlationId, String message, String activationTarget) {
-      throw new UnsupportedOperationException("jobs do not resume");
+      resumeTurn(correlationId, Map.of("message", message == null ? "" : message), activationTarget);
+    }
+
+    @Override
+    public Map<String, Object> resumeTurn(
+        String correlationId, Map<String, Object> body, String activationTarget) {
+      Map<String, Object> response = new LinkedHashMap<>();
+      response.put("correlation_id", correlationId);
+      response.put("status", "completed");
+      response.put("result", Map.of("message", "human_gate resumed"));
+      return response;
     }
 
     @Override

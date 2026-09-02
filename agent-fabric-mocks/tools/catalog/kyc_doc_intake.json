@@ -1,0 +1,10 @@
+{
+  "id": "kyc_doc_intake",
+  "method": "POST",
+  "path": "/kyc/doc_intake",
+  "status": 200,
+  "response": {
+    "text": "Identity documents received and indexed.",
+    "status": "complete"
+  }
+}

@@ -47,6 +47,7 @@ Outbound to Data Plane and Runtime: `Authorization: Bearer fabric-internal` and 
 | `GET` | `/health` | Anyone | `{"status":"UP"}` |
 | `POST` | `/v1/jobs` | Channel bearer | `202 {"correlation_id"}`. Layer ① only (`ingress: "jobs"` + explicit `route_id`). Never chat `clarify`. Missing claims / unknown route → **403**, do not start Runtime. Duplicate `idempotency_key` returns the original id. |
 | `GET` | `/v1/jobs/{correlation_id}` | Channel bearer | Slim Runtime status / result. **No** Data Plane call. |
+| `POST` | `/v1/jobs/{correlation_id}/turns` | Channel bearer | Resume a waiting job — forwards gate packet JSON to Runtime `/v1/runs/{id}/turns`. |
 | `GET` | `/v1/assistant/hints` | Channel bearer | Eligible chip hints for the stub claims |
 | `POST` | `/v1/assistant/turns` | Channel bearer | First turn: decide → freeze → start AR. Live freeze: **skip decide**, resume / continue. FR-5 slim JSON. |
 | `GET` | `/v1/assistant/sessions/{sessionId}/events` | Channel bearer | Poll assistant events / run progress |

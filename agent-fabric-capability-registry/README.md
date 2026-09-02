@@ -80,7 +80,7 @@ Flyway `V1__registry.sql` on database `acr`:
 | `registry.capabilities` | `(id, version)` | kind, schemas, invoke JSON, status |
 | `registry.manifests` | `(manifest_id, manifest_version)` | tools JSON, status |
 
-Flyway creates the tables only. Route capabilities and manifests load from [`agent-fabric-scripts/catalogue-seed/route/`](../agent-fabric-scripts/catalogue-seed/route/) via `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` or per-route `./add.sh`.
+Flyway creates the tables only. Route capabilities and manifests load from [`agent-fabric-scripts/stack/route/`](../agent-fabric-scripts/stack/route/) via `./agent-fabric-scripts/stack/add-seed-data.sh` or per-route `./add.sh`.
 
 ## Sibling calls
 

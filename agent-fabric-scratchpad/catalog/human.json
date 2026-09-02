@@ -1,0 +1,9 @@
+{
+  "_source": "Human gate resume demos for jobs waiting at human_gate.",
+  "claims": ["kyc:operate", "support:case", "accounts:read"],
+  "default_packet": {
+    "decision": "approve",
+    "reviewer_id": "ops-jane",
+    "comment": "Approved after doc check"
+  }
+}

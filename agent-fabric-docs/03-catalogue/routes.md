@@ -1,6 +1,6 @@
 # Catalogue routes
 
-Active route rows match [`route/shopassist_case/`](../../agent-fabric-scripts/catalogue-seed/route/shopassist_case/) and [`chats.json`](../../agent-fabric-scratchpad/catalog/chats.json).
+Active route rows match [`route/shopassist_case/`](../../agent-fabric-scripts/stack/route/shopassist_case/) and [`chats.json`](../../agent-fabric-scratchpad/catalog/chats.json).
 
 Status vocabulary ([`../02-understand/status.md`](../02-understand/status.md)):
 

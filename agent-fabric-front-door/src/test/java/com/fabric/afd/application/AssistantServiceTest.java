@@ -264,6 +264,13 @@ class AssistantServiceTest {
     }
 
     @Override
+    public Map<String, Object> resumeTurn(
+        String correlationId, Map<String, Object> body, String activationTarget) {
+      resume(correlationId, String.valueOf(body.get("message")), activationTarget);
+      return Map.of("status", "completed");
+    }
+
+    @Override
     public Optional<FrozenRoute> openRun(String sessionId) {
       openLookups.add(sessionId);
       return open;

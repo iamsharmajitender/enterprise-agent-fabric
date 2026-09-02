@@ -78,7 +78,7 @@ That is `docker compose up --build -d`. Stop (volumes kept):
 Reload catalogue seed (deletes, then inserts):
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
+./agent-fabric-scripts/stack/add-seed-data.sh
 ```
 
 **Demo path (Task 24):** open [http://localhost:3014/chat](http://localhost:3014/chat) and run `shopassist_case_ask`.
@@ -89,16 +89,16 @@ Both hit Front Door **:3005** (`/v1/jobs*` and `/v1/assistant/*`). Stub IdP: `Be
 | --- | --- |
 | `./agent-fabric-scripts/stack/start-app.sh` | Build and start in the background |
 | `./agent-fabric-scripts/stack/stop-app.sh` | Stop containers (volumes kept) |
-| `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh` | Delete and add all routes and catalogue seed data |
-| `./agent-fabric-scripts/catalogue-seed/delete-seed-data.sh` | Delete all application data from every fabric database |
-| `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh shopassist_case` | Load one route pack from `catalogue-seed/route/<route_id>/` |
+| `./agent-fabric-scripts/stack/add-seed-data.sh` | Delete and add all routes and catalogue seed data |
+| `./agent-fabric-scripts/stack/delete-seed-data.sh` | Delete all application data from every fabric database |
+| `./agent-fabric-scripts/stack/add-seed-data.sh shopassist_case` | Load one route pack from `stack/route/<route_id>/` |
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml ps` | Process status |
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f` | Follow all logs |
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f agent-fabric-plane/agent-data-plane` | One service |
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml logs -f otel-lgtm` | Grafana LGTM startup and collector |
 | `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml down -v` | Stop and **wipe** Postgres and LGTM data |
 
-`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Flyway applies **schema only**; load routes with `./agent-fabric-scripts/catalogue-seed/add-seed-data.sh`. Editing an already-applied migration is fine locally: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable schema history.
+`start-app.sh` rebuilds images after code or **new** Flyway versions and waits for Data Plane and Registry health. Flyway applies **schema only**; load routes with `./agent-fabric-scripts/stack/add-seed-data.sh`. Editing an already-applied migration is fine locally: the script hashes those SQL files, and when they change it wipes **only** the Postgres volume before starting so Flyway can re-apply. If a checksum mismatch still appears in logs, it auto-recovers once the same way (LGTM volume is kept). Set `FABRIC_AUTO_WIPE_ON_FLYWAY_MISMATCH=0` to disable. Prefer a new versioned migration for durable schema history.
 
 ### Check it is up
 
@@ -116,7 +116,7 @@ Grafana LGTM can take a minute. Wait until logs print `The OpenTelemetry collect
 
 ### Dummy requests
 
-Chat demo routes live under [`agent-fabric-scripts/catalogue-seed/`](agent-fabric-scripts/catalogue-seed/). Demo catalog: [`agent-fabric-scratchpad/catalog/chats.json`](agent-fabric-scratchpad/catalog/chats.json).
+Chat demo routes live under [`agent-fabric-scripts/stack/`](agent-fabric-scripts/stack/). Demo catalog: [`agent-fabric-scratchpad/catalog/chats.json`](agent-fabric-scratchpad/catalog/chats.json).
 
 Open [http://localhost:3014/chat](http://localhost:3014/chat) (included in Compose). Pick a demo from the catalog dropdown and send.
 
@@ -464,7 +464,7 @@ Each route is versioned on its own (`route_id` + `route_version`). One version p
 The catalogue seed is the Pattern 0–3 set (32 routes, matching manifests, prompts, workflows, and Registry capabilities). IDs have no `v1`/`v3` suffix — version lives on `*_version` columns. The same file also has extra published, draft, and retired cuts plus version history. Reload everything in one shot:
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
+./agent-fabric-scripts/stack/add-seed-data.sh
 ```
 
 `add-seed-data.sh` deletes first, then inserts, so it is safe to run again. Each row has an `autonomy_mode` (0–3) from [Autonomy vs Control](https://jitendersharma.dev/insights/enterprise-ai-workflow-patterns-autonomy-vs-control). `fee_explain` needs claim `accounts:read` (stub user `jane`).

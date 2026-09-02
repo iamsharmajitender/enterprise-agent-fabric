@@ -12,5 +12,8 @@ public interface RuntimePort {
 
   void resume(String correlationId, String message, String activationTarget);
 
+  Map<String, Object> resumeTurn(
+      String correlationId, Map<String, Object> body, String activationTarget);
+
   Optional<FrozenRoute> openRun(String sessionId);
 }

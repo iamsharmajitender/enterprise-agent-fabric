@@ -53,16 +53,16 @@ class SeedCapabilitiesSqlTest {
   }
 
   private static String readRoutePack(String routeId, String file) throws Exception {
-    Path path = catalogueSeedRoute(routeId, file);
-    assertThat(path).as("catalogue-seed route pack").exists();
+    Path path = stackRoutePack(routeId, file);
+    assertThat(path).as("stack route pack").exists();
     return Files.readString(path, StandardCharsets.UTF_8);
   }
 
-  private static Path catalogueSeedRoute(String routeId, String file) {
+  private static Path stackRoutePack(String routeId, String file) {
     Path dir = Path.of(System.getProperty("user.dir"));
     for (int i = 0; i < 6; i += 1) {
       Path candidate =
-          dir.resolve("agent-fabric-scripts/catalogue-seed/route/" + routeId + "/" + file);
+          dir.resolve("agent-fabric-scripts/stack/route/" + routeId + "/" + file);
       if (Files.isRegularFile(candidate)) {
         return candidate;
       }
@@ -71,6 +71,6 @@ class SeedCapabilitiesSqlTest {
       }
       dir = dir.getParent();
     }
-    throw new IllegalStateException("missing catalogue-seed route pack: " + routeId + "/" + file);
+    throw new IllegalStateException("missing stack route pack: " + routeId + "/" + file);
   }
 }

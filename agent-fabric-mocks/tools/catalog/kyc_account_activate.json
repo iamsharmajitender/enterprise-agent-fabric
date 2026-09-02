@@ -1,0 +1,10 @@
+{
+  "id": "kyc_account_activate",
+  "method": "POST",
+  "path": "/kyc/activate",
+  "status": 200,
+  "response": {
+    "text": "Account activated for applicant.",
+    "activated": true
+  }
+}

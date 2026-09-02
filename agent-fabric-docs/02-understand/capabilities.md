@@ -29,4 +29,4 @@ These already have a home. A new `kind` would split the catalog and confuse hydr
 
 Only if **invoke is a different gate**: not domain HTTP and not AFD jobs. Example: a human work-item API, or a non-HTTP bus. Until then, two kinds.
 
-Register with `PUT` on ACR (port 3009), not Control Plane. After `add-seed-data.sh`, seed rows reload from `agent-fabric-scripts/catalogue-seed/route/`.
+Register with `PUT` on ACR (port 3009), not Control Plane. After `add-seed-data.sh`, seed rows reload from `agent-fabric-scripts/stack/route/`.

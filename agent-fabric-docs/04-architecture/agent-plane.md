@@ -1,7 +1,7 @@
 # Agent Plane — solution architecture and design
 
 **Box:** Agent Control Plane (ACP) + Agent Data Plane  
-**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric.mdx) · **Behaviour source:** [agent-plane.mdx](./narrative/agent-plane.mdx)  
+**Parent:** [Enterprise Agent Fabric](./narrative/enterprise-agent-fabric-architecture.mdx) · **Behaviour source:** [agent-plane.mdx](./narrative/agent-plane.mdx)  
 **Status:** Draft · **Date:** 2026-08-20  
 **This binary:** [02-understand/status.md](../02-understand/status.md). This pack may be ahead of code.  
 **Audience:** CTO / chief architect (solution on a page); platform engineer (design)

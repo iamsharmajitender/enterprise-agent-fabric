@@ -18,7 +18,7 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 
 ## Task 1: Compose Postgres and stub-auth contract
 
-**Description:** Compose in `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/catalogue-seed/` starts Postgres 16 with databases `afd`, `adp`, `ar`, `acr` (no `acp`), plus Adminer for browsing those databases. Document the stub IdP headers every service will enforce.
+**Description:** Compose in `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/stack/` starts Postgres 16 with databases `afd`, `adp`, `ar`, `acr` (no `acp`), plus Adminer for browsing those databases. Document the stub IdP headers every service will enforce.
 
 **Acceptance criteria:**
 - [x] `docker compose -f agent-fabric-scripts/docker-compose/docker-compose.yml up postgres` creates those four databases and no `acp`
@@ -643,20 +643,20 @@ Ports: **3005** Front Door · **3006** Control Plane UI · **3007** Data Plane �
 **Description:** One script is the plan’s success check: compose is up, seed is loaded, one chat turn, four Postgres databases written, Control Plane fetched catalogue/eligible from Data Plane.
 
 **Acceptance criteria:**
-- [x] `agent-fabric-scripts/catalogue-seed/demo-chat-turn.sh` exits 0 only if slim completed message matches canned text
+- [x] `agent-fabric-scripts/stack/demo-chat-turn.sh` exits 0 only if slim completed message matches canned text
 - [x] Script fails if any of `afd` / `adp` / `ar` / `acr` lacks the expected row
 - [x] Script fails if Control Plane did not successfully GET eligible and the `fee_explain` catalogue row
 - [x] Seed is idempotent (`compose` or script can reload `fee_explain` + capability + manifest)
 
 **Verification:**
-- [x] `docker compose up -d && ./agent-fabric-scripts/catalogue-seed/demo-chat-turn.sh`
+- [x] `docker compose up -d && ./agent-fabric-scripts/stack/demo-chat-turn.sh`
 - [x] Run twice: still exit 0 (idempotent start keys / seeds)
 
 **Dependencies:** Task 10, Task 22
 
 **Files likely touched:**
-- `agent-fabric-scripts/catalogue-seed/demo-chat-turn.sh`
-- `agent-fabric-scripts/catalogue-seed/add-seed-data.sh`
+- `agent-fabric-scripts/stack/demo-chat-turn.sh`
+- `agent-fabric-scripts/stack/add-seed-data.sh`
 
 **Estimated scope:** Medium
 

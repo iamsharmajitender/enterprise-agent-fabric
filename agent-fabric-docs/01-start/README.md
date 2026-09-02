@@ -6,7 +6,7 @@ From the repository root:
 ./agent-fabric-scripts/stack/start-app.sh
 ```
 
-That builds and starts Compose in the background. Chat demos: [catalogue-seed/README.md](../../agent-fabric-scripts/catalogue-seed/README.md).
+That builds and starts Compose in the background. Chat demos: [stack/README.md](../../agent-fabric-scripts/stack/README.md).
 
 | Port | Process |
 | --- | --- |

@@ -383,7 +383,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); observability remains in [observ
 **Description:** A short operator checklist: command ①, fee retrieve ②, ③ off, jobs entitle/fail-closed, FR-5, golden set if present.
 
 **Acceptance criteria:**
-- [x] Checklist lives in [intent-plan.md](./intent-plan.md) demo path or `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/catalogue-seed/` — one place
+- [x] Checklist lives in [intent-plan.md](./intent-plan.md) demo path or `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/stack/` — one place
 - [x] Includes: `/hr` (or seeded command) → rules; `$42` → `fee_explain` retrieve; jobs missing claims fail closed; assistant JSON has no `router_layer`
 
 **Verification:**

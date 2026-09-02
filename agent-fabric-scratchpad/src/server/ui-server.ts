@@ -45,6 +45,9 @@ async function handle(
   if (req.method === "GET" && path === "/jobs.json") {
     return file(res, join(catalogDir(), "jobs.json"), "application/json; charset=utf-8");
   }
+  if (req.method === "GET" && path === "/human.json") {
+    return file(res, join(catalogDir(), "human.json"), "application/json; charset=utf-8");
+  }
 
   if (path.startsWith("/v1/")) {
     return proxy(req, res, fetchImpl, path + url.search);
@@ -55,6 +58,9 @@ async function handle(
   }
   if (req.method === "GET" && (path === "/jobs" || path === "/jobs.html")) {
     return file(res, join(publicDir(), "jobs.html"), "text/html; charset=utf-8");
+  }
+  if (req.method === "GET" && (path === "/human" || path === "/human.html")) {
+    return file(res, join(publicDir(), "human.html"), "text/html; charset=utf-8");
   }
   if (req.method === "GET" && path === "/styles.css") {
     return file(res, join(publicDir(), "styles.css"), "text/css; charset=utf-8");

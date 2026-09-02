@@ -210,7 +210,7 @@ Dummy jobs returning `completed` without envelope-aware failure proofs is **not*
 **Dependencies:** TF4, TF6 (TF5 if linear demo chosen)
 
 **Files likely touched:**
-- `agent-runtime/tests/**` or `agent-fabric-scripts/catalogue-seed/**`
+- `agent-runtime/tests/**` or `agent-fabric-scripts/stack/**`
 - `agent-fabric-docs/tasks/tool-failure-plan.md` (demo path checkboxes)
 
 **Estimated scope:** Medium

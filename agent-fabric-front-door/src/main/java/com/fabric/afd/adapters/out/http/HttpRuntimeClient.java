@@ -104,13 +104,24 @@ public class HttpRuntimeClient implements RuntimePort {
 
   @Override
   public void resume(String correlationId, String message, String activationTarget) {
+    resumeTurn(correlationId, Map.of("message", message == null ? "" : message), activationTarget);
+  }
+
+  @Override
+  public Map<String, Object> resumeTurn(
+      String correlationId, Map<String, Object> body, String activationTarget) {
     try {
-      client(activationTarget)
-          .post()
-          .uri("/v1/runs/{id}/turns", correlationId)
-          .body(Map.of("message", message == null ? "" : message))
-          .retrieve()
-          .toBodilessEntity();
+      Map<String, Object> response =
+          client(activationTarget)
+              .post()
+              .uri("/v1/runs/{id}/turns", correlationId)
+              .body(body == null ? Map.of() : body)
+              .retrieve()
+              .body(MAP);
+      if (response == null) {
+        throw new UnavailableException("runtime resume unavailable");
+      }
+      return response;
     } catch (RestClientResponseException e) {
       if (e.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404))) {
         throw new NotFoundException(correlationId);

@@ -1,6 +1,6 @@
 # Catalogue matrix
 
-How to read [routes.md](routes.md) and [use-cases.md](use-cases.md). This is the **active seed** from [`route/shopassist_case/`](../../agent-fabric-scripts/catalogue-seed/route/shopassist_case/) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
+How to read [routes.md](routes.md) and [use-cases.md](use-cases.md). This is the **active seed** from [`route/shopassist_case/`](../../agent-fabric-scripts/stack/route/shopassist_case/) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
 
 **32** `route_id`s. Payload files are [`chats.json`](../../agent-fabric-scratchpad/catalog/chats.json). Run demos at [http://localhost:3014/chat](http://localhost:3014/chat).
 
@@ -30,11 +30,11 @@ Each row is one `route_id`. Columns are facts from seed + dummy payloads, plus a
 
 ## How to run a row
 
-Fabric up, then open [http://localhost:3014/chat](http://localhost:3014/chat). See [catalogue-seed/README.md](../../agent-fabric-scripts/catalogue-seed/README.md).
+Fabric up, then open [http://localhost:3014/chat](http://localhost:3014/chat). See [stack/README.md](../../agent-fabric-scripts/stack/README.md).
 
 ```bash
 ./agent-fabric-scripts/stack/start-app.sh
-./agent-fabric-scripts/catalogue-seed/add-seed-data.sh
+./agent-fabric-scripts/stack/add-seed-data.sh
 ```
 
 Tool-only HTTP paths can finish against agent-fabric-mocks. LLM stages still need Ollama.
@@ -43,7 +43,7 @@ Tool-only HTTP paths can finish against agent-fabric-mocks. LLM stages still nee
 
 Rewrite these three files when **seed** or **dummy payloads/scripts** change. No generator in this pass. Walk:
 
-1. Active seed `INSERT`s in [`route/shopassist_case/`](../../agent-fabric-scripts/catalogue-seed/route/shopassist_case/) (`dataplane.routes`, `dataplane.prompt_packs`, `dataplane.memory_profiles`, ACR capabilities/manifests).
+1. Active seed `INSERT`s in [`route/shopassist_case/`](../../agent-fabric-scripts/stack/route/shopassist_case/) (`dataplane.routes`, `dataplane.prompt_packs`, `dataplane.memory_profiles`, ACR capabilities/manifests).
 2. Payload keys, channels, and **route_id spelling** from `jobs.json` / `chats.json` (source of demo wrappers).
 3. Demo ids from `chats.json` and the [chat scratchpad](http://localhost:3014/chat).
 4. Status against Runtime ([status](../02-understand/status.md), [D13 verification](../tasks/dataflow-plan.md#verification-checklist-d13)) — not against dummy `completed` alone.

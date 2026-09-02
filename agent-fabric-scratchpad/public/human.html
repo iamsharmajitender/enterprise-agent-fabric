@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Human scratchpad</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="app app--human">
+<div class="shell">
+  <header class="top">
+    <nav class="crumbs" aria-label="Scratchpad">
+      <a class="crumbs__link" href="/chat">Chat</a>
+      <span class="crumbs__sep" aria-hidden="true">·</span>
+      <a class="crumbs__link" href="/jobs">Jobs</a>
+      <span class="crumbs__sep" aria-hidden="true">·</span>
+      <span class="crumbs__here">Human</span>
+    </nav>
+    <div class="top-row">
+      <div class="top-title">
+        <h1>Human gate scratchpad</h1>
+        <p id="meta" class="top-meta">Resume a waiting job via Front Door</p>
+      </div>
+    </div>
+  </header>
+  <main class="main">
+    <div id="thread" class="thread" role="log" aria-live="polite" aria-label="Resume log" tabindex="0">
+      <p class="empty" id="empty">Paste the correlation id from a waiting job, edit the gate packet JSON, then resume.</p>
+    </div>
+  </main>
+  <footer class="composer composer--human">
+    <form id="f">
+      <label for="correlation-id">Correlation id</label>
+      <input id="correlation-id" name="correlation_id" type="text" class="text-input" autocomplete="off" spellcheck="false" placeholder="corr-…">
+      <label for="packet">Gate packet (JSON)</label>
+      <div class="composer-row">
+        <textarea id="packet" name="packet" rows="3" autocomplete="off" spellcheck="false" placeholder="{}"></textarea>
+        <button type="submit" id="resume" class="btn-primary">Resume</button>
+      </div>
+      <p class="composer-hint">POST /v1/jobs/{correlation_id}/turns via Front Door · decision: approve | reject</p>
+    </form>
+  </footer>
+</div>
+<script type="module" src="/client/human-main.js"></script>
+</body>
+</html>

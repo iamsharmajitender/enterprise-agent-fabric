@@ -143,7 +143,7 @@ Chat JSON never contains `route_id`, `run_id`, `agent_client_id`, `confidence`, 
 
 ### Phase 8: Scripted chat demo
 
-- [x] Task 23: `agent-fabric-scripts/catalogue-seed/demo-chat-turn.sh` + seed + four-DB assertions + Control Plane catalogue fetch
+- [x] Task 23: `agent-fabric-scripts/stack/demo-chat-turn.sh` + seed + four-DB assertions + Control Plane catalogue fetch
 
 ### Phase 9: Service handbooks
 

@@ -214,6 +214,12 @@ class JobsServiceTest {
 
     @Override
     public void resume(String correlationId, String message, String activationTarget) {
+      resumeTurn(correlationId, Map.of("message", message == null ? "" : message), activationTarget);
+    }
+
+    @Override
+    public Map<String, Object> resumeTurn(
+        String correlationId, Map<String, Object> body, String activationTarget) {
       throw new UnsupportedOperationException("jobs do not resume");
     }
 

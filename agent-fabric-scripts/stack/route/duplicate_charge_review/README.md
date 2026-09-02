@@ -12,7 +12,7 @@ Fixed pipeline: **2 LLM calls + 2 HTTP tool calls**. Slot merge passes `customer
 | `respond` | `duplicate_charge_respond` | `synthesis` | LLM reply from `notes` |
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/route/duplicate_charge_review/add.sh
+./agent-fabric-scripts/stack/route/duplicate_charge_review/add.sh
 ```
 
 Then open [http://localhost:3014/chat](http://localhost:3014/chat) and pick **Deterministic → duplicate_charge_review**, or [http://localhost:3014/jobs](http://localhost:3014/jobs) for the job demo.

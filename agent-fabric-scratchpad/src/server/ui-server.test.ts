@@ -48,6 +48,26 @@ test("GET /chats.json serves the seed catalog", async () => {
   });
 });
 
+test("GET /human serves the human gate scratchpad shell", async () => {
+  await withServer(async (origin) => {
+    const res = await fetch(`${origin}/human`);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /id="correlation-id"/);
+    assert.match(html, /id="packet"/);
+    assert.match(html, /client\/human-main\.js/);
+  });
+});
+
+test("GET /human.json serves the seed catalog", async () => {
+  await withServer(async (origin) => {
+    const res = await fetch(`${origin}/human.json`);
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { default_packet?: { decision?: string } };
+    assert.equal(body.default_packet?.decision, "approve");
+  });
+});
+
 test("GET /health returns UP", async () => {
   await withServer(async (origin) => {
     const res = await fetch(`${origin}/health`);

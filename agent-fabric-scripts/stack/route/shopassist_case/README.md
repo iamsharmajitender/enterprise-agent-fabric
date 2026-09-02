@@ -14,7 +14,7 @@ Route id: `shopassist_case` · version `2026.08.1` · Pattern 1 (autonomous chat
 No `workflow.sql` — this route uses manifest tools + prompt, not a fixed workflow.
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/route/shopassist_case/add.sh
+./agent-fabric-scripts/stack/route/shopassist_case/add.sh
 ```
 
 Then open [http://localhost:3014/chat](http://localhost:3014/chat) and run `shopassist_case_ask`.

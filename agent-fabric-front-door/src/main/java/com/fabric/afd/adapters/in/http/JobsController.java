@@ -41,6 +41,12 @@ public class JobsController {
     return jobs.status(correlationId);
   }
 
+  @PostMapping("/v1/jobs/{correlationId}/turns")
+  public Map<String, Object> resume(
+      @PathVariable String correlationId, @RequestBody Map<String, Object> body) {
+    return jobs.resume(correlationId, body);
+  }
+
   private static String string(Object value) {
     return value == null ? null : String.valueOf(value);
   }

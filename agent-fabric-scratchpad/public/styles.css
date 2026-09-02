@@ -371,9 +371,9 @@ h1 {
   gap: 0.5rem;
   align-items: flex-end;
 }
-.composer-grid {
-  flex-direction: column;
-  align-items: stretch;
+.composer-row .btn-primary {
+  flex-shrink: 0;
+  align-self: flex-end;
 }
 .field--grow { flex: 1; }
 .form-grid {
@@ -390,7 +390,9 @@ h1 {
 }
 .field-input,
 #m,
-#payload {
+#payload,
+#correlation-id,
+#packet {
   width: 100%;
   font: inherit;
   padding: 0.625rem 0.75rem;
@@ -400,14 +402,17 @@ h1 {
   background: var(--surface);
 }
 #m,
-#payload {
+#payload,
+#packet {
   resize: none;
   min-height: 3rem;
   max-height: 8rem;
   overflow-y: auto;
 }
 #m:focus,
-#payload:focus {
+#payload:focus,
+#correlation-id:focus,
+#packet:focus {
   border-color: #888;
   outline: none;
   box-shadow: 0 0 0 3px rgb(0 0 0 / 6%);

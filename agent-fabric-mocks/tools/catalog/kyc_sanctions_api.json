@@ -1,0 +1,10 @@
+{
+  "id": "kyc_sanctions_api",
+  "method": "POST",
+  "path": "/kyc/sanctions",
+  "status": 200,
+  "response": {
+    "text": "No sanctions hits.",
+    "cleared": true
+  }
+}

@@ -19,6 +19,6 @@ Parent projects this payload from goal + prior slots:
 Load with parent:
 
 ```bash
-./agent-fabric-scripts/catalogue-seed/route/ticket_draft_reply/add.sh
-./agent-fabric-scripts/catalogue-seed/route/ticket_triage/add.sh
+./agent-fabric-scripts/stack/route/ticket_draft_reply/add.sh
+./agent-fabric-scripts/stack/route/ticket_triage/add.sh
 ```

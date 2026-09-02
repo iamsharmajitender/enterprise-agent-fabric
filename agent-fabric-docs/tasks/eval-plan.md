@@ -8,11 +8,11 @@ Stand up a **CI-gated eval surface** for the catalogue seed so a misroute or a b
 2. **Pin and hydrate** (cheap, high signal). For each active route: pointers resolve, manifest refs are published, retrieval scope ids exist, Pattern 0 has no tools/workflow, high-risk routes still have a workflow. Catalogue lint plus dummy-request `--all` as fail-closed smoke, pinned to route version.
 3. **Route quality** (later, only where it pays). This is what `eval_suite_id` is for. Deterministic / jobs: same payload → expected tool sequence, not prose (`card_freeze` must be identity → limit → freeze). Grounded Q&A: citation from scoped corpus, or abstain. No LLM-as-judge. Free-form (`agent-chat`): skip — empty `eval_suite_id` is correct. Do not wait on `output_schema_id`; the reply can stay `{ "message": "…" }`.
 
-Target: examiners can show adversarial routing cases pass at 100% before release, and that a routing incident was added to the golden set and blocked in CI ([enterprise-agent-fabric](../04-architecture/narrative/enterprise-agent-fabric.mdx)).
+Target: examiners can show adversarial routing cases pass at 100% before release, and that a routing incident was added to the golden set and blocked in CI ([enterprise-agent-fabric](../04-architecture/narrative/enterprise-agent-fabric-architecture.mdx)).
 
 **Not in this plan:** LLM-as-judge, output-schema validation, eval on the decide/start/loop hot path, a decision-audit store, `route_tables` snapshots ([future-enhancement](./future-enhancement.md#versioned-route-table)), production eval SaaS, scoring free-form chat prose, implementing `policy_profile` / PDP. Replacing keyword Layer ② / adding ① rules and ③ fallback is [intent-plan.md](./intent-plan.md) — this eval plan only freezes the labels those layers must still hit.
 
-**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [agent-plane](../04-architecture/agent-plane.md), [enterprise-agent-fabric](../04-architecture/narrative/enterprise-agent-fabric.mdx) (Agent evals box). Do not reopen locked fabric rules.
+**Docs map:** [README.md](../README.md). **Behaviour / architecture source:** [agent-plane](../04-architecture/agent-plane.md), [enterprise-agent-fabric](../04-architecture/narrative/enterprise-agent-fabric-architecture.mdx) (Agent evals box). Do not reopen locked fabric rules.
 
 ## Architecture Decisions
 

@@ -270,7 +270,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 
 ## Task O11: Grafana journey row for fee_explain
 
-**Description:** Add a minimal Grafana dashboard (provisioned JSON under `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/catalogue-seed/` or documented Explore queries) answering: outcome mix, completion rate, decide/run latency.
+**Description:** Add a minimal Grafana dashboard (provisioned JSON under `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/stack/` or documented Explore queries) answering: outcome mix, completion rate, decide/run latency.
 
 **Acceptance criteria:**
 - [x] Dashboard or README “Explore” recipes cover the four on-call questions for `fee_explain`
@@ -283,7 +283,7 @@ v1 fabric tasks remain in [todo.md](./todo.md); evals remain in [eval-todo.md](.
 **Dependencies:** Task O10
 
 **Files likely touched:**
-- `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/catalogue-seed/grafana/` (if provisioning) or `README.md`
+- `agent-fabric-scripts/docker-compose/ or agent-fabric-scripts/stack/grafana/` (if provisioning) or `README.md`
 - Possibly `agent-fabric-scripts/docker-compose/docker-compose.yml` volume mounts for provisioning
 
 **Estimated scope:** Small

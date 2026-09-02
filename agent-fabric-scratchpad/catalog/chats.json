@@ -1,5 +1,5 @@
 {
-  "_source": "Chat demos for routes under catalogue-seed/route/.",
+  "_source": "Chat demos for routes under stack/route/.",
   "chats": [
     {
       "id": "overdraft_fee_qa",
@@ -44,6 +44,24 @@
       "label": "Guided",
       "claims": ["support:case"],
       "message": "Customer ticket: charged twice on order ORD-77819. Please triage and draft a reply.",
+      "expected_status": "completed"
+    },
+    {
+      "id": "billing_assistant_fee",
+      "route_id": "billing_assistant",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["accounts:read", "support:case"],
+      "message": "Why was I charged $42 on account acct-4412?",
+      "expected_status": "completed"
+    },
+    {
+      "id": "billing_assistant_order",
+      "route_id": "billing_assistant",
+      "autonomy_mode": 1,
+      "label": "Autonomous",
+      "claims": ["accounts:read", "support:case"],
+      "message": "Can you tell me the status of order ORD-77819?",
       "expected_status": "completed"
     }
   ]
