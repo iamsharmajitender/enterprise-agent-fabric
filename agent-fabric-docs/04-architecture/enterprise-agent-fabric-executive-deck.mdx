@@ -30,6 +30,23 @@ We need to move from *“another AI application”* to *“another governed capa
 
 ---
 
+## Why now
+
+AI is moving from **answering questions** to **taking action** — touching customer data, money, operations, and regulated processes.
+
+A standalone chatbot can live with light controls. A portfolio of AI that acts on behalf of the business cannot.
+
+Each new capability without a common model adds:
+
+- Duplicated platform engineering
+- Inconsistent security and approval paths
+- Governance overhead and user confusion
+- Weaker ability to demonstrate accountability after an incident
+
+The window to set the operating model is **before** the portfolio outgrows our ability to govern it.
+
+---
+
 ## What is happening today
 
 Capabilities are emerging independently:
@@ -45,6 +62,15 @@ The organisation cannot consistently answer:
 - **Who** was allowed to use this AI?
 - **What** was it permitted to do?
 - **Why** was this capability chosen, and what did it actually do?
+
+It also lacks controls that should exist **once** for the whole portfolio:
+
+- **One audit trail** — evidence of what was decided, allowed, executed, and approved
+- **One operational view** — health, errors, and performance across AI capabilities
+- **One security model** — identity and entitlement, not a side door per assistant
+- **One kill switch** — pause or revoke a capability without hunting through domain deployments
+- **One approval path** — shared gates for high-risk actions, not bespoke paths per team
+- **One release bar** — behaviour checked before production, not only after incidents
 
 <div className="gain-diagram-wrap">
 
@@ -92,13 +118,43 @@ In plain terms:
 
 Built on those central controls, every AI request follows the same path:
 
-- **Access** — verify who is asking and what they are entitled to use
-- **Direction** — route the request to the right specialist capability under defined rules
-- **Action** — run the work within policy, including approvals where required
-- **Evidence** — record what happened for audit and accountability
-- **Oversight** — monitor health in production and gate change before release
+| Step | What happens |
+| --- | --- |
+| **One experience** | User or application enters through the enterprise front door |
+| **Governed decision** | Intent understood, right capability selected, entitlement and policy verified |
+| **Specialised capability** | Domain AI runs with approved data and tools |
+| **Controlled action** | High-risk steps gated by policy, approval, or human handoff |
+| **Auditable outcome** | Evidence recorded — what was decided, executed, and approved |
 
-We build this once at enterprise level. Domains plug into it instead of reinventing it.
+Chat and automated jobs use the same contract. Capabilities can scale and fail independently without taking down enterprise AI.
+
+---
+
+## Built for action — human control by design
+
+As AI moves from answering to acting, **human control cannot be an afterthought**.
+
+The Fabric treats approval and escalation as normal workflow — not exceptions bolted on later:
+
+- **Pause before risk** — stop a run before a high-impact action (for example, a refund pending approval)
+- **Hand off to people** — escalate to a human process when automation should not finish the job
+- **Evidence for decisions** — structured output for downstream review, not just a chat reply
+
+Every control is recorded: what was triggered, why, who approved, which policy applied.
+
+---
+
+## Least privilege — three permissions, not one
+
+User access to AI does **not** mean unlimited AI access to systems.
+
+The Fabric separates three permissions:
+
+- **The user** — who initiated the request
+- **The capability** — what this AI is authorised to do
+- **The runtime** — what systems the executing platform may touch
+
+A user may be entitled to use a payments AI without that AI being authorised to perform every payment operation directly. That is how we keep AI useful **and** contained.
 
 ---
 
@@ -116,6 +172,29 @@ Domains continue to own:
 > **Centralise the controls. Keep the intelligence in the domains.**
 
 That is the balance: **enterprise consistency without enterprise bottleneck.**
+
+---
+
+## Who owns what
+
+| Owner | Responsibility |
+| --- | --- |
+| **Enterprise platform** | Front door, security, common controls, monitoring, audit, reliability, and standards |
+| **Domain teams** | Specialised AI capabilities, workflows, knowledge, and business outcomes |
+| **Risk and governance** | AI risk, oversight, compliance requirements, and evidence |
+
+The platform makes the **safe path the easy path**. Domains innovate inside that framework instead of rebuilding it.
+
+---
+
+## What this is not
+
+- Not one giant enterprise agent
+- Not a replacement for domain AI teams or existing platforms
+- Not one model or one runtime for every workload
+- Not central ownership of every use case
+
+The Fabric is the **operating model** around specialised capabilities — not a monolith that absorbs them.
 
 ---
 
@@ -156,10 +235,44 @@ More capabilities. One operating model. Domains stay fast; the enterprise stays 
 | **How AI is built** | Each team builds, secures, and operates on its own | One governed enterprise path; domains build specialist capability on top |
 | **What “adding AI” means** | Another application, another control stack, another ops model | Onboard another capability to a known, trusted operating model |
 | **After something goes wrong** | Hard to explain the landscape or prove what happened | One catalogue, one evidence model, one operational view |
+| **User experience** | Users must know which assistant or endpoint to use | Users ask the enterprise; the Fabric routes to the right capability |
+| **Operational resilience** | One capability’s failure can blur into enterprise confusion | Capabilities scale and fail independently under a common contract |
 
 **Today:** innovation spreads faster than control.
 
 **Tomorrow:** innovation and control scale together — domains move quickly inside a model the enterprise can stand behind.
+
+---
+
+## The story in five beats
+
+<div className="gain-diagram-wrap">
+
+![Five beats from fragmentation to scale with control.](./diagrams/agent-fabric-v1-story.svg)
+
+</div>
+
+1. **AI is fragmenting** — more teams, more capabilities
+2. **Fragmentation creates risk** — duplicated controls, inconsistent governance
+3. **The Fabric creates one operating model** — one front door, common controls, specialised capabilities
+4. **Domains keep autonomy** — they own their AI and outcomes
+5. **The enterprise gets scale with control** — grow the portfolio without growing chaos
+
+---
+
+## Proof the model works
+
+A working reference implementation already demonstrates the end-to-end path:
+
+**Message → classify → entitlement → pin → execute → response**
+
+- Governed ingress for chat and automated jobs
+- Capability registry and routing across multiple domain patterns
+- Foundations for audit evidence and operational observability
+
+This is a **proof point for the operating model**, not the final production topology. Detail: [status](../../02-understand/status.md) · [technical design](./enterprise-agent-fabric-architecture.mdx).
+
+For V1 scope, success measures, risks, and the leadership decision — see the [full decision paper](./enterprise-agent-fabric-pitch.mdx).
 
 ---
 
