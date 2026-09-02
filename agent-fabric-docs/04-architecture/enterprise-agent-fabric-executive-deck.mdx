@@ -64,9 +64,17 @@ It is **not** one giant AI that does everything. It is the **enterprise infrastr
 
 **For users and applications:** one place to ask for help.
 
-**For the enterprise:** one consistent way to control access, direct work, govern actions, monitor health, and retain evidence.
+**For the enterprise:** one place where **security, governance, audit, and observability** are applied consistently — so every AI capability runs under the same enterprise standards, not a different version in each division.
 
 **For domain teams:** freedom to build specialised AI for their business — without rebuilding the enterprise control stack every time.
+
+At the centre, the Fabric standardises:
+
+- **Security** — identity, entitlement, and least-privilege access for users and AI
+- **Governance** — policy, approvals, and rules for what AI may do
+- **Audit** — a consistent evidence trail of what was requested, decided, executed, and approved
+- **Observability** — operational visibility into health, performance, and failure across the AI portfolio
+- **Evaluation** — checks that AI behaviour is safe to release before it reaches production
 
 <div className="gain-diagram-wrap">
 
@@ -76,19 +84,19 @@ It is **not** one giant AI that does everything. It is the **enterprise infrastr
 
 In plain terms:
 
-**One front door → one set of enterprise controls → many specialised AI capabilities**
+**One front door → central security, governance, audit, and observability → many specialised AI capabilities**
 
 ---
 
-## What the enterprise standardises once
+## How every request is handled
 
-These are not technical details for their own sake. They are the controls every production AI capability will need anyway.
+Built on those central controls, every AI request follows the same path:
 
-- **Access** — who may use which AI, under which role and entitlement
-- **Direction** — which specialist capability handles each request, under defined rules
-- **Action** — what the AI may do, including approvals for higher-risk steps
-- **Evidence** — a consistent record of what was requested, decided, executed, and approved
-- **Oversight** — operational visibility and pre-production checks before change reaches users
+- **Access** — verify who is asking and what they are entitled to use
+- **Direction** — route the request to the right specialist capability under defined rules
+- **Action** — run the work within policy, including approvals where required
+- **Evidence** — record what happened for audit and accountability
+- **Oversight** — monitor health in production and gate change before release
 
 We build this once at enterprise level. Domains plug into it instead of reinventing it.
 
