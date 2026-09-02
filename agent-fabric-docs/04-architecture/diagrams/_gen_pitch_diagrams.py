@@ -104,6 +104,119 @@ def box(x: int, y: int, w: int, h: int, tag: str, name: str, sub: str = "",
       {f'<text x="{cx}" y="{sub_y}" fill="{MUTED}" font-size="9" font-family="{MONO}" text-anchor="middle">{sub}</text>' if sub else ''}"""
 
 
+DOMAIN_TINT = "rgba(59,130,246,0.08)"
+DOMAIN_STROKE = "#3b82f6"
+DOMAIN_TAG = "rgba(59,130,246,0.45)"
+
+
+def control_chip(x: int, y: int, w: int, h: int, label: str, icon: str) -> str:
+    cx = x + w // 2
+    return f"""
+      <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="{WHITE}" stroke="{ACCENT}" stroke-width="1.2"/>
+      <text x="{cx}" y="{y + 28}" fill="{ACCENT}" font-size="16" font-family="{SANS}" text-anchor="middle">{icon}</text>
+      <text x="{cx}" y="{y + 48}" fill="{INK}" font-size="10" font-weight="600" font-family="{SANS}" text-anchor="middle">{label}</text>"""
+
+
+def domain_cap(x: int, y: int, w: int, h: int, name: str) -> str:
+    cx = x + w // 2
+    return f"""
+      <rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{DOMAIN_TINT}" stroke="{DOMAIN_STROKE}" stroke-width="1"/>
+      <text x="{cx}" y="{y + 30}" fill="{INK}" font-size="11" font-weight="600" font-family="{SANS}" text-anchor="middle">{name}</text>
+      <text x="{cx}" y="{y + 46}" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle">domain-owned</text>"""
+
+
+def executive_proposition() -> tuple[str, str]:
+    slug = "agent-fabric-executive-proposition"
+    w, h = 1080, 520
+    cx = w // 2
+    actor_fill = "rgba(100,116,139,0.10)"
+    chips = []
+    chip_w, chip_h, gap = 148, 58, 16
+    labels = [
+        ("Security", "◆"),
+        ("Governance", "◇"),
+        ("Audit", "▣"),
+        ("Observability", "◎"),
+        ("Evaluation", "✓"),
+    ]
+    total_w = len(labels) * chip_w + (len(labels) - 1) * gap
+    start_x = cx - total_w // 2
+    for i, (label, icon) in enumerate(labels):
+        chips.append(control_chip(start_x + i * (chip_w + gap), 196, chip_w, chip_h, label, icon))
+
+    domains = []
+    dom_arrows = []
+    dom_w, dom_h, dom_gap = 148, 58, 18
+    dom_names = ["Finance AI", "HR AI", "Legal AI", "Claims AI", "Payments AI"]
+    dom_total = len(dom_names) * dom_w + (len(dom_names) - 1) * dom_gap
+    dom_start = cx - dom_total // 2
+    for i, name in enumerate(dom_names):
+        x = dom_start + i * (dom_w + dom_gap)
+        domains.append(domain_cap(x, 372, dom_w, dom_h, name))
+        dom_arrows.append(
+            f'<line x1="{x + dom_w // 2}" y1="300" x2="{x + dom_w // 2}" y2="368" '
+            f'stroke="{MUTED}" stroke-width="1.2" marker-end="url(#exec-prop-arrow)"/>'
+        )
+
+    body = f"""
+    <svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="{slug}-title {slug}-desc">
+      <title id="{slug}-title">Enterprise Agent Fabric proposition</title>
+      <desc id="{slug}-desc">Users enter through one front door. The Fabric centralises security, governance, audit, observability, and evaluation. Specialised domain AI capabilities remain independently owned below.</desc>
+      <defs>
+        {markers("exec-prop")}
+        <linearGradient id="fabric-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(249,115,22,0.16)"/>
+          <stop offset="50%" stop-color="rgba(249,115,22,0.28)"/>
+          <stop offset="100%" stop-color="rgba(249,115,22,0.16)"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="{PAPER}"/>
+
+      {box(200, 28, 148, 44, "USR", "Employees", fill=actor_fill, stroke=SOFT, tag_stroke="rgba(148,163,184,0.45)", rx=22, name_size=11)}
+      {box(cx - 74, 28, 148, 44, "USR", "Customers", fill=actor_fill, stroke=SOFT, tag_stroke="rgba(148,163,184,0.45)", rx=22, name_size=11)}
+      {box(732, 28, 148, 44, "USR", "Applications", fill=actor_fill, stroke=SOFT, tag_stroke="rgba(148,163,184,0.45)", rx=22, name_size=11)}
+
+      <path d="M 274 72 L {cx} 92" fill="none" stroke="{MUTED}" stroke-width="1.4" marker-end="url(#exec-prop-arrow)"/>
+      <path d="M {cx} 72 L {cx} 92" fill="none" stroke="{ACCENT}" stroke-width="1.8" marker-end="url(#exec-prop-arrow-accent)"/>
+      <path d="M 806 72 L {cx} 92" fill="none" stroke="{MUTED}" stroke-width="1.4" marker-end="url(#exec-prop-arrow)"/>
+
+      <rect x="{cx - 132}" y="92" width="264" height="40" rx="20" fill="{ACCENT}" stroke="{ACCENT}" stroke-width="1"/>
+      <text x="{cx}" y="117" fill="{WHITE}" font-size="12" font-weight="600" font-family="{SANS}" text-anchor="middle">One governed front door</text>
+
+      <line x1="{cx}" y1="132" x2="{cx}" y2="152" stroke="{ACCENT}" stroke-width="2" marker-end="url(#exec-prop-arrow-accent)"/>
+
+      <rect x="48" y="152" width="984" height="148" rx="14" fill="url(#fabric-grad)" stroke="{ACCENT}" stroke-width="1.6"/>
+      <text x="{cx}" y="178" fill="{INK}" font-size="15" font-weight="600" font-family="{SANS}" text-anchor="middle">Enterprise Agent Fabric</text>
+      <text x="{cx}" y="194" fill="{MUTED}" font-size="9" font-family="{MONO}" text-anchor="middle" letter-spacing="0.14em">CENTRAL ENTERPRISE CONTROLS — BUILT ONCE, APPLIED EVERYWHERE</text>
+      {"".join(chips)}
+
+      <path d="M 64 318 Q 64 340 88 340 L 992 340 Q 1016 340 1016 318" fill="none" stroke="{ACCENT}" stroke-width="1.2" stroke-dasharray="6 4" opacity="0.55"/>
+      <text x="72" y="334" fill="{ACCENT}" font-size="8" font-family="{MONO}" letter-spacing="0.1em">ENTERPRISE STANDARD</text>
+      <text x="900" y="334" fill="{DOMAIN_STROKE}" font-size="8" font-family="{MONO}" letter-spacing="0.1em">DOMAIN-OWNED</text>
+
+      {"".join(dom_arrows)}
+
+      {"".join(domains)}
+
+      <text x="{cx}" y="468" fill="{INK}" font-size="15" font-family="{SERIF}" font-style="italic" text-anchor="middle">Centralise the controls. Keep the intelligence in the domains.</text>
+
+      <line x1="40" y1="488" x2="1040" y2="488" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="40" y="496" width="24" height="14" rx="7" fill="{ACCENT}"/>
+      <text x="72" y="506" fill="{MUTED}" font-size="8" font-family="{SANS}">Enterprise Fabric</text>
+      <rect x="180" y="496" width="20" height="14" rx="2" fill="{DOMAIN_TINT}" stroke="{DOMAIN_STROKE}" stroke-width="1"/>
+      <text x="208" y="506" fill="{MUTED}" font-size="8" font-family="{SANS}">Specialised capability</text>
+    </svg>"""
+    html = chrome(
+        slug,
+        "Executive brief · Proposition",
+        "One front door. Central controls. Many domain-owned capabilities.",
+        f"0 0 {w} {h}",
+        body,
+    )
+    return slug, html
+
+
 def target_state() -> tuple[str, str]:
     slug = "agent-fabric-pitch-target-state"
     w, h = 960, 560
@@ -333,7 +446,7 @@ def extract_svg(html: str) -> str:
 
 
 def main() -> None:
-    for fn in (target_state, executive_story, fragmented_problem, lifecycle_proof):
+    for fn in (executive_proposition, target_state, executive_story, fragmented_problem, lifecycle_proof):
         slug, html = fn()
         (OUT / f"{slug}.html").write_text(html)
         (OUT / f"{slug}.svg").write_text(extract_svg(html))
