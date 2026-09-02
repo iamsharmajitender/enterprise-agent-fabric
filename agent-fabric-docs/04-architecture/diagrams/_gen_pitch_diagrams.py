@@ -216,45 +216,56 @@ def executive_story() -> tuple[str, str]:
 
 def fragmented_problem() -> tuple[str, str]:
     slug = "agent-fabric-pitch-problem"
-    w, h = 960, 400
+    w, h = 960, 520
+    actor_fill = "rgba(100,116,139,0.10)"
+    actor_stroke = SOFT
+    actor_tag = "rgba(148,163,184,0.45)"
     body = f"""
     <svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="{slug}-title {slug}-desc">
       <title id="{slug}-title">Fragmented enterprise AI today</title>
-      <desc id="{slug}-desc">Employees and partners reach separate assistants and endpoints. Each domain rebuilds authentication, routing, and controls independently.</desc>
+      <desc id="{slug}-desc">Employees, customers, and partners each reach separate assistants and endpoints. Each domain rebuilds authentication, routing, and controls independently.</desc>
       <defs>{markers("pitch-problem")}</defs>
       <rect width="100%" height="100%" fill="{PAPER}"/>
 
-      {box(40, 48, 160, 56, "USR", "Employees", fill="rgba(100,116,139,0.10)", stroke=SOFT, tag_stroke="rgba(148,163,184,0.45)", rx=20)}
-      {box(40, 168, 160, 56, "PRT", "Partners / systems", fill="rgba(100,116,139,0.10)", stroke=SOFT, tag_stroke="rgba(148,163,184,0.45)", rx=20)}
+      <rect x="280" y="32" width="640" height="112" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="600" y="52" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.12em">EMPLOYEE ASSISTANTS</text>
+      <rect x="280" y="160" width="640" height="112" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="600" y="180" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.12em">CUSTOMER AI</text>
+      <rect x="280" y="288" width="640" height="112" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="600" y="308" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.12em">PARTNER AI</text>
 
-      <line x1="200" y1="76" x2="280" y2="76" stroke="{MUTED}" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
-      <line x1="200" y1="196" x2="280" y2="196" stroke="{MUTED}" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
+      <line x1="200" y1="88" x2="280" y2="88" stroke="{MUTED}" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
+      <line x1="200" y1="216" x2="280" y2="216" stroke="{MUTED}" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
+      <line x1="200" y1="344" x2="280" y2="344" stroke="{MUTED}" stroke-width="1.2" marker-end="url(#pitch-problem-arrow)"/>
 
-      <rect x="280" y="40" width="640" height="120" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <text x="600" y="64" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.12em">EMPLOYEE ASSISTANTS</text>
-      {box(300, 80, 128, 56, "AI", "Finance", name_size=11)}
-      {box(448, 80, 128, 56, "AI", "HR", name_size=11)}
-      {box(596, 80, 128, 56, "AI", "Legal", name_size=11)}
-      {box(744, 80, 128, 56, "AI", "Technology", name_size=11)}
+      {box(40, 60, 160, 56, "EMP", "Employee", fill=actor_fill, stroke=actor_stroke, tag_stroke=actor_tag, rx=20)}
+      {box(40, 188, 160, 56, "CUS", "Customer", fill=actor_fill, stroke=actor_stroke, tag_stroke=actor_tag, rx=20)}
+      {box(40, 316, 160, 56, "PRT", "Partner", fill=actor_fill, stroke=actor_stroke, tag_stroke=actor_tag, rx=20)}
 
-      <rect x="280" y="160" width="640" height="120" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <text x="600" y="184" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.12em">PARTNER / DOMAIN ENDPOINTS</text>
-      {box(300, 200, 128, 56, "AI", "Customer svc", name_size=11)}
-      {box(448, 200, 128, 56, "AI", "Claims", name_size=11)}
-      {box(596, 200, 128, 56, "AI", "Payments", name_size=11)}
-      {box(744, 200, 128, 56, "AI", "KYC", name_size=11)}
+      {box(300, 68, 128, 56, "AI", "Finance", name_size=11)}
+      {box(448, 68, 128, 56, "AI", "HR", name_size=11)}
+      {box(596, 68, 128, 56, "AI", "Legal", name_size=11)}
+      {box(744, 68, 128, 56, "AI", "Technology", name_size=11)}
 
-      <text x="480" y="320" fill="{INK}" font-size="14" font-family="{SERIF}" font-style="italic" text-anchor="middle">Who may use this? What may it do? Why was it selected?</text>
-      <line x1="40" y1="352" x2="920" y2="352" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <text x="40" y="368" fill="{MUTED}" font-size="8" font-family="{MONO}" letter-spacing="0.14em">LEGEND</text>
-      <rect x="40" y="372" width="20" height="14" rx="2" fill="{WHITE}" stroke="{INK}" stroke-width="1"/>
-      <text x="68" y="382" fill="{MUTED}" font-size="8" font-family="{SANS}">Isolated capability</text>
+      {box(372, 196, 160, 56, "AI", "Customer svc", name_size=11)}
+      {box(588, 196, 160, 56, "AI", "Claims", name_size=11)}
+
+      {box(372, 324, 160, 56, "AI", "Payments", name_size=11)}
+      {box(588, 324, 160, 56, "AI", "KYC", name_size=11)}
+
+      <text x="480" y="440" fill="{INK}" font-size="14" font-family="{SERIF}" font-style="italic" text-anchor="middle">Who may use this? What may it do? Why was it selected?</text>
+      <line x1="40" y1="464" x2="920" y2="464" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="40" y="484" fill="{MUTED}" font-size="8" font-family="{MONO}" letter-spacing="0.14em">LEGEND</text>
+      <rect x="40" y="492" width="24" height="14" rx="7" fill="{actor_fill}" stroke="{actor_stroke}" stroke-width="1"/>
+      <text x="72" y="502" fill="{MUTED}" font-size="8" font-family="{SANS}">Audience</text>
+      <rect x="160" y="492" width="20" height="14" rx="2" fill="{WHITE}" stroke="{INK}" stroke-width="1"/>
+      <text x="188" y="502" fill="{MUTED}" font-size="8" font-family="{SANS}">Isolated capability</text>
     </svg>"""
     html = chrome(
         slug,
         "Architecture · The problem",
-        "Many assistants. Many gateways. No single answer.",
+        "Many audiences. Many assistants. No single answer.",
         f"0 0 {w} {h}",
         body,
     )

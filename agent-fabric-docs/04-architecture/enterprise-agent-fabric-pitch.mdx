@@ -42,7 +42,7 @@ The Enterprise Agent Fabric addresses this by providing:
 
 - **One front door** — users and applications interact with the enterprise AI capability rather than individual agents.
 - **Many specialised capabilities** — business domains retain specialised AI for their own processes, data, and expertise.
-- **One control model** — identity, entitlement, policy, monitoring, audit, and governance apply consistently across capabilities.
+- **One control model** — identity, entitlement, policy, monitoring, audit, evaluation, and governance apply consistently across capabilities.
 
 Users and applications do not need to understand the underlying AI landscape. They enter through a common interface; the Fabric determines the appropriate capability, verifies entitlement and policy, and connects the request to the relevant specialised capability. The capability remains domain-owned and independently evolvable. The enterprise controls remain consistent.
 
@@ -67,10 +67,11 @@ The organisation therefore needs to move from “how do we build another AI appl
 
 Today, AI capabilities naturally emerge independently across business domains.
 
-- **Employee:** Finance Assistant → HR Assistant → Legal Assistant → Technology Assistant
-- **Customer / Partner:** Customer Service AI → Claims AI → Payments AI → KYC AI
+- **Employee** — Finance Assistant → HR Assistant → Legal Assistant → Technology Assistant
+- **Customer** — Customer Service AI → Claims AI
+- **Partner** — Payments AI → KYC AI
 
-This creates a fragmented AI landscape. Users need to know which capability to use. Applications need to know which endpoint to call. Teams independently implement authentication, entitlement, routing, tool access, data access, monitoring, audit, approval, governance, and resilience.
+This creates a fragmented AI landscape. Employees, customers, and partners each face a different set of assistants and endpoints. Users need to know which capability to use. Applications need to know which endpoint to call. Teams independently implement authentication, entitlement, routing, tool access, data access, monitoring, audit, approval, governance, and resilience.
 
 The organisation loses a single answer to three fundamental questions:
 
@@ -80,7 +81,7 @@ The organisation loses a single answer to three fundamental questions:
 
 <div className="gain-diagram-wrap">
 
-![Fragmented enterprise AI today: employees and partners reach separate assistants and endpoints, each rebuilding authentication, routing, and controls independently.](./diagrams/agent-fabric-pitch-problem.svg)
+![Fragmented enterprise AI today: employees, customers, and partners each reach separate assistants and endpoints, with authentication, routing, and controls rebuilt independently.](./diagrams/agent-fabric-pitch-problem.svg)
 
 </div>
 
@@ -92,7 +93,7 @@ The Enterprise Agent Fabric provides a common operating layer for enterprise AI.
 
 - **One front door** — users and applications interact with the enterprise AI capability rather than individual agents.
 - **Many specialised capabilities** — business domains retain specialised AI for their own processes, data, and expertise.
-- **One control model** — identity, entitlement, policy, monitoring, audit, and governance apply consistently across capabilities.
+- **One control model** — identity, entitlement, policy, monitoring, audit, evaluation, and governance apply consistently across capabilities.
 
 The model is one experience → governed decision → specialised capability → controlled action → auditable outcome.
 
@@ -117,7 +118,7 @@ A request moves through a consistent set of stages:
 - **Front Door** — establish identity and receive the request
 - **Decision layer** — understand intent, determine the appropriate capability, and verify entitlement
 - **Capability** — execute the specialised AI workflow using approved knowledge, data, and tools
-- **Controls** — apply security, policy, monitoring, governance, and audit throughout the interaction
+- **Controls** — apply security, policy, monitoring, governance, audit, and evaluation throughout the lifecycle
 - **Outcome** — return the result or initiate an approved business action
 
 Chat interactions and automated jobs use the same underlying contract: entitle → decide → pin → start → execute → audit. Different ingress channels can operate independently while maintaining a consistent enterprise control model. Production splits chat and API ingress into separate fleets; the contract stays the same.
@@ -133,6 +134,8 @@ The Fabric shifts how the enterprise builds and consumes AI:
 - Domain-specific authentication and controls → reusable enterprise control model
 - Agents deployed independently → capabilities registered and governed
 - Inconsistent auditability → consistent audit and evidence model
+- Limited operational visibility → shared observability across Front Door, Plane, and Runtime
+- Quality checked after incidents → routing and capability evaluation before production
 - Difficult to understand the AI landscape → central capability catalogue
 - Adding AI creates another application → adding AI becomes onboarding another capability
 - Shared infrastructure can create large failure domains → capabilities and ingress can be independently scaled and isolated
@@ -178,23 +181,41 @@ As AI moves toward autonomous action, organisations need to demonstrate not only
 - Which controls and policies applied
 - Which AI identity performed downstream actions — distinct from the user and from the runtime workload
 
-This creates a consistent enterprise evidence model across AI capabilities.
+This creates a consistent enterprise evidence model across AI capabilities. Evaluation complements that model by testing whether routing and capability behaviour remain correct before change reaches production.
 
 ---
 
-## 12. Operating model
+## 12. Audit and observability
+
+Audit and observability are both required, but they serve different audiences and must not be collapsed into one path.
+
+**Audit** is the evidence path. Fabric components emit append-only events asynchronously so decide, freeze, pin, and start never wait on evidence commit. Reviewers reconstruct a run by correlation — route selected, entitlement snapshot, frozen contract, stage outcomes, approvals, and terminal state — without putting raw transcripts, tokens, or PII on the chat wire. Technical design: [Agent Fabric Audit](./agent-fabric-audit.mdx).
+
+**Observability** is the operations path. Traces, metrics, and logs show latency, errors, saturation, and recovery for Front Door, Plane, Runtime, and shared services. Operators use this to keep the platform healthy; risk and compliance use audit to prove what a capability did under which controls.
+
+Together they answer different questions:
+
+- **Observability** — is the Fabric healthy, and where is it failing?
+- **Audit** — for this request, what was decided, allowed, executed, and approved?
+- **Evals** — before and after change, does routing and capability behaviour still meet the golden and adversarial bar?
+
+Evals sit beside both: routing golden sets and adversarial cases gate misroutes in CI, while production audit and observability show whether live behaviour matches that contract.
+
+---
+
+## 13. Operating model
 
 Ownership is split so domains can move quickly without rebuilding the platform:
 
-- **Enterprise platform** — Front Door, security, common controls, governance, monitoring, reliability, and standards
-- **Domain teams** — specialised AI capabilities, domain workflows, knowledge, and business outcomes
+- **Enterprise platform** — Front Door, security, common controls, governance, monitoring, audit, reliability, standards, and evaluation gates for the common pattern
+- **Domain teams** — specialised AI capabilities, domain workflows, knowledge, domain-level evaluation, and business outcomes
 - **Risk and governance** — AI risk, independent oversight, control requirements, compliance, and evidence
 
 Domain teams innovate independently without rebuilding the enterprise AI platform. Their responsibility is to publish and operate capabilities within the agreed framework. The platform responsibility is to make the safe path the easy path.
 
 ---
 
-## 13. What this is not
+## 14. What this is not
 
 The Enterprise Agent Fabric is not:
 
@@ -209,7 +230,7 @@ Instead, the Fabric provides the common enterprise operating model while allowin
 
 ---
 
-## 14. Resilience and scale
+## 15. Resilience and scale
 
 Enterprise AI capabilities will have different traffic profiles and failure characteristics. Conversational workloads and automated job workloads should not necessarily operate within the same failure domain.
 
@@ -225,7 +246,7 @@ The principle is that a failure in one AI capability should not become an enterp
 
 ---
 
-## 15. V1 scope
+## 16. V1 scope
 
 V1 establishes the foundational operating pattern rather than attempting to solve every enterprise AI problem.
 
@@ -236,7 +257,8 @@ V1 establishes the foundational operating pattern rather than attempting to solv
 - Entitlement and policy enforcement
 - Durable run initiation
 - Capability registry and standard capability contract
-- Audit and observability
+- Audit and observability as separate evidence and ops paths
+- Routing evaluation gates for the common pattern
 - Human approval and handoff patterns
 - Separation of user, capability, and runtime identities
 
@@ -247,12 +269,13 @@ V1 establishes the foundational operating pattern rather than attempting to solv
 - Force a single LLM or model provider
 - Create one runtime for every capability
 - Eliminate existing domain platforms
+- Replace domain-owned evaluation of specialised capability quality
 
 The objective is to establish the enterprise pattern, not create a monolithic AI platform.
 
 ---
 
-## 16. Proof point
+## 17. Proof point
 
 A working V1 reference implementation demonstrates the complete lifecycle:
 
@@ -270,12 +293,13 @@ The reference implementation currently demonstrates:
 - A route catalogue with multiple autonomy patterns
 - Chat and jobs ingress
 - LangGraph-based runtime execution
+- Foundations for audit evidence and operational observability alongside the request path
 
 This is a proof point for the architecture and operating model, not the final production topology. Implementation status and behaviour truth: [status](../../02-understand/status.md) · [catalogue matrix](../../03-catalogue/README.md) · [technical design](./enterprise-agent-fabric-architecture.mdx).
 
 ---
 
-## 17. Success measures
+## 18. Success measures
 
 Success should be measured by business and control outcomes, not by the number of platform components built.
 
@@ -283,12 +307,13 @@ Success should be measured by business and control outcomes, not by the number o
 - **Speed** — time to onboard a new governed capability; reduction in duplicated platform engineering
 - **Reuse** — percentage of capabilities using common enterprise controls; shared services reused across domains
 - **Control** — AI actions covered by entitlement and policy; capabilities with complete audit evidence; high-risk actions with appropriate approval
+- **Quality** — routing and capability changes covered by evaluation gates; reduction in misroutes caught only in production
 - **Reliability** — independent scaling of major workloads; capability-level failure isolation; platform availability and recovery
 - **Transparency** — ability to reconstruct who asked, what was requested, why the capability was selected, what the AI did, what controls applied, and what the outcome was
 
 ---
 
-## 18. Strategic value
+## 19. Strategic value
 
 The Fabric delivers strategic value across experience, delivery, and control:
 
@@ -296,7 +321,8 @@ The Fabric delivers strategic value across experience, delivery, and control:
 - **Reusable platform** — faster deployment of new AI capabilities
 - **Consistent controls** — reduced security, governance, and operational risk
 - **Specialised capabilities** — better domain outcomes than a generic enterprise agent
-- **Enterprise visibility** — clear accountability and auditability
+- **Enterprise visibility** — clear accountability through audit, and operational clarity through observability
+- **Evaluated change** — routing and capability behaviour gated before production, not only inspected after incidents
 - **Failure isolation** — reduced blast radius of AI incidents
 - **Domain autonomy** — business teams retain ownership and speed
 
@@ -304,7 +330,7 @@ Taken together, the Fabric allows the organisation to scale AI adoption without 
 
 ---
 
-## 19. Key risks and proposed responses
+## 20. Key risks and proposed responses
 
 - **Fabric becomes a central bottleneck** — standard contracts and decentralised capability ownership
 - **Platform becomes a monolithic agent runtime** — separate Fabric control plane from domain execution
@@ -312,28 +338,31 @@ Taken together, the Fabric allows the organisation to scale AI adoption without 
 - **Excessive centralisation** — platform owns common controls; domains own business capabilities
 - **AI actions become over-privileged** — separate user, capability, and runtime permissions
 - **One capability impacts others** — independent scaling and failure isolation
-- **Governance slows innovation** — embed controls into the platform rather than manual gates everywhere
+- **Misroutes reach production unnoticed** — routing golden sets, adversarial cases, and CI evaluation gates
+- **Evidence gaps after an incident** — append-only audit beside the request path; observability for ops, audit for accountability
+- **Governance slows innovation** — embed controls, audit, and evals into the platform rather than manual gates everywhere
 - **Fabric becomes another abstraction layer** — keep the enterprise contract simple and implementation-neutral
 
 ---
 
-## 20. Roadmap
+## 21. Roadmap
 
-**V1 — Establish the pattern.** Prove the enterprise operating model with Front Door, capability registry, routing and entitlement, durable execution, a common audit model, human-control patterns, and initial priority capabilities.
+**V1 — Establish the pattern.** Prove the enterprise operating model with Front Door, capability registry, routing and entitlement, durable execution, a common audit and observability model, routing evaluation gates, human-control patterns, and initial priority capabilities.
 
 **V1 → Production.** Harden the platform for enterprise operation:
 
 - Production security integration
 - Resilience and failure isolation
-- Operational monitoring and capacity management
-- Platform SLOs and governance integration
-- Production onboarding model
+- Operational monitoring, observability SLOs, and capacity management
+- Production-grade audit retention and examination workflows
+- Expanded evaluation coverage for priority routes and capabilities
+- Governance integration and production onboarding model
 
-**V2 — Scale the ecosystem.** Make onboarding AI capabilities repeatable across the enterprise through self-service capability onboarding, expanded policy controls, capability lifecycle management, standardised evaluation, cost and usage optimisation, and broader domain adoption.
+**V2 — Scale the ecosystem.** Make onboarding AI capabilities repeatable across the enterprise through self-service capability onboarding, expanded policy controls, capability lifecycle management, standardised evaluation across domains, cost and usage optimisation, and broader domain adoption.
 
 ---
 
-## 21. The executive story
+## 22. The executive story
 
 <div className="gain-diagram-wrap">
 
@@ -351,24 +380,24 @@ Five beats:
 
 ---
 
-## 22. Final recommendation
+## 23. Final recommendation
 
 The Enterprise Agent Fabric should be adopted as the strategic enterprise pattern for governed AI capability access and operation.
 
 The organisation should not attempt to centralise every AI capability. Instead, it should centralise what needs to be consistent:
 
 - Identity, entitlement, routing, policy
-- Governance, audit, observability
+- Governance, audit, observability, and evaluation standards
 - Reliability standards
 
 And decentralise what benefits from domain ownership:
 
 - Business capability and domain knowledge
 - Workflows, models, and tools
-- Implementation
+- Implementation and domain-level evaluation of specialised quality
 
 This creates a scalable operating model for enterprise AI: one experience, one front door, many specialised capabilities, one control model. The Enterprise Agent Fabric becomes the operating foundation that allows the organisation to scale AI as an enterprise capability portfolio rather than a collection of disconnected applications.
 
 ---
 
-**[Technical design](./enterprise-agent-fabric-architecture.mdx)** · [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx)
+**[Technical design](./enterprise-agent-fabric-architecture.mdx)** · [Agent Fabric Front Door](./agent-fabric-front-door.mdx) · [Agent Fabric Plane](./agent-fabric-plane.mdx) · [Agent Fabric Runtime](./agent-fabric-runtime.mdx) · [Agent Fabric Capability Registry](./agent-fabric-capability-registry.mdx) · [Agent Fabric Audit](./agent-fabric-audit.mdx)

@@ -140,13 +140,13 @@ How those numbers become fleets: [Front Door scaling](./agent-fabric-front-door.
 
 ## 4. High-level architecture
 
-**Enterprise Agent Fabric** is the outer box. **Agent security** and **Agent evals** sit on the left. **Events** sits at the top. Agent Front Door, Agent Control Plane, and Agent Runtime emit into Events. Left to right: **Agent Front Door**, **Agent Plane** (ACP stacked on Agent Data Plane, Agent Capability Registry beside them), **Agent Runtime**, **Shared** (Memory, RAG, Tools). Do not collapse them. A small database mark on Front Door, Agent Plane, and Runtime means each owns a store (frozen route/session, catalogue, runs). AFD is two fleets with one contract (Chat BFF and API, including Kafka ingest). AFD, Agent Plane, AR, and Shared emit into Observability. Observability feeds Dashboard. Dashboard feeds Responsible / Governed AI.
+**Enterprise Agent Fabric** is the outer box. **Agent security** and **Agent evals** sit on the left. **Agent audit** sits on the right. **Events** sits at the top. Agent Front Door, Agent Control Plane, and Agent Runtime emit into Events. Left to right: **Agent Front Door**, **Agent Plane** (ACP stacked on Agent Data Plane, Agent Capability Registry beside them), **Agent Runtime**, **Shared** (Memory, RAG, Tools). Do not collapse them. A small database mark on Front Door, Agent Plane, and Runtime means each owns a store (frozen route/session, catalogue, runs). AFD is two fleets with one contract (Chat BFF and API, including Kafka ingest). AFD, Agent Plane, AR, and Shared emit into Observability. Observability feeds Dashboard. Dashboard feeds Responsible / Governed AI.
 
 **Agent Front Door calls the Agent Data Plane to classify.** The data plane does **not** call or start AR. After `outcome=route`, the **Front Door** pins the frozen route/session (`route_id` + versions), then async-starts **Agent Runtime** on a straight start. **AR fetches** the catalogue row and manifest pointers from the Agent Data Plane at that pinned version, **hydrates** each capability from the **Agent Capability Registry** (same Agent Plane band, not Shared), copies the run pin, and returns `202` plus `correlation_id` to the Front Door. **Memory**, **RAG**, and **Tools** sit in **Shared**.
 
 <div className="gain-diagram-wrap">
 
-![Enterprise Agent Fabric: Agent security and Agent evals on the left. Events at the top. Agent Fabric Plane sits above the middle with Agent Control Plane stacked on Agent Data Plane and the Agent Fabric Capability Registry beside them. Chat/UI and API enter through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the route, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Shared sits to the right (Memory, RAG, Tools). Observability feeds Dashboard then Responsible / Governed AI.](./diagrams/agent-fabric-architecture.svg)
+![Enterprise Agent Fabric: Agent security and Agent evals on the left. Agent audit on the right. Events at the top. Agent Fabric Plane sits above the middle with Agent Control Plane stacked on Agent Data Plane and the Agent Fabric Capability Registry beside them. Chat/UI and API enter through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the route, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Shared sits to the right (Memory, RAG, Tools). Observability feeds Dashboard then Responsible / Governed AI.](./diagrams/agent-fabric-architecture.svg)
 
 </div>
 
@@ -313,7 +313,7 @@ Channel APIs and swim lanes: [Front Door](./agent-fabric-front-door.mdx). Decide
 
 ## 8. Design review checklist
 
-- [ ] Boxes distinct: AFD, Agent Plane (ACP on Data Plane, Registry beside them), AR, Shared (Memory, RAG, Tools). Small database mark inside Front Door, Agent Plane, and Runtime. Agent security and Agent evals on the left. Events at the top. Observability → Dashboard → Responsible / Governed AI
+- [ ] Boxes distinct: AFD, Agent Plane (ACP on Data Plane, Registry beside them), AR, Shared (Memory, RAG, Tools). Small database mark inside Front Door, Agent Plane, and Runtime. Agent security and Agent evals on the left. Agent audit on the right. Events at the top. Observability → Dashboard → Responsible / Governed AI
 - [ ] Two AFD fleets, one contract, one Agent Plane, separate process (FR-9) — local v1 may colocate until scale demands split
 - [ ] `{runs_topic}` is AR return; Kafka job start is the API AFD
 - [ ] Jobs name `route_id` and still entitle; generic chat still classifies
