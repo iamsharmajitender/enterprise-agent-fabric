@@ -26,7 +26,7 @@
       justify-content: center;
       padding: 3rem 2rem;
     }
-    .frame { max-width: 1260px; width: 100%; }
+    .frame { max-width: 1500px; width: 100%; }
     .eyebrow {
       font-family: var(--font-mono);
       font-size: 0.66rem;
@@ -45,16 +45,16 @@
       color: var(--color-ink);
       margin-bottom: 1.5rem;
     }
-    svg { width: 100%; min-width: 1260px; display: block; }
+    svg { width: 100%; min-width: 1500px; display: block; }
   </style>
 </head>
 <body>
   <div class="frame">
     <p class="eyebrow">Enterprise Agent Fabric · NAFD · NACP · Agent runtime</p>
     <h1>One fabric. One ingress. One control plane. Specialized agents underneath.</h1>
-    <svg viewBox="0 0 1260 790" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-arch-title hir-arch-desc">
+    <svg viewBox="0 0 1500 790" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-arch-title hir-arch-desc">
       <title id="hir-arch-title">Enterprise Agent Fabric</title>
-      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Events sits at the top. Agent Fabric Plane sits above the middle: Agent Control Plane stacked on Agent Data Plane, with the Agent Fabric Capability Registry beside them. A small database mark sits inside Agent Fabric Front Door, Agent Fabric Plane, and Agent Fabric Runtime. Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Agent Data Plane does not start Agent Fabric Runtime. Shared holds Memory, RAG, and Tools. Observability and Agent audit sit side by side at the bottom; both feed Dashboard. Dashboard feeds Responsible / Governed AI.</desc>
+      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Events sits at the top. Agent Fabric Plane sits above Agent Fabric Front Door; Front Door spans the same width as Agent Plane. Agent Fabric Runtime sits to the right of Front Door, then Shared (Memory, RAG, Tools). Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Observability and Agent audit sit side by side at the bottom; both feed Dashboard. Dashboard feeds Responsible / Governed AI.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="hir-arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -82,13 +82,13 @@
       <text x="144" y="290" transform="rotate(-90 144 290)" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent evals</text>
 
       <g transform="translate(192,0)">
-      <rect x="24" y="20" width="1036" height="586" rx="10" fill="none" stroke="rgba(30,41,59,0.22)" stroke-width="1.2"/>
-      <rect x="424" y="14" width="236" height="14" rx="2" fill="#f8fafc"/>
-      <text x="542" y="25" fill="rgba(30,41,59,0.55)" font-size="9" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">Enterprise Agent Fabric</text>
+      <rect x="24" y="20" width="1268" height="586" rx="10" fill="none" stroke="rgba(30,41,59,0.22)" stroke-width="1.2"/>
+      <rect x="540" y="14" width="236" height="14" rx="2" fill="#f8fafc"/>
+      <text x="658" y="25" fill="rgba(30,41,59,0.55)" font-size="9" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">Enterprise Agent Fabric</text>
 
-      <rect x="40" y="40" width="1004" height="44" rx="6" fill="#f8fafc"/>
-      <rect x="40" y="40" width="1004" height="44" rx="6" fill="rgba(124,58,237,0.08)" stroke="#8b5cf6" stroke-width="1"/>
-      <text x="542" y="66" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Events</text>
+      <rect x="40" y="40" width="1236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="40" width="1236" height="44" rx="6" fill="rgba(124,58,237,0.08)" stroke="#8b5cf6" stroke-width="1"/>
+      <text x="658" y="66" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Events</text>
 
       <g transform="translate(0, 64)">
 
@@ -97,29 +97,36 @@
       <text x="140" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">CHANNELS</text>
 
       <rect x="252" y="48" width="508" height="122" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="430" y="52" width="148" height="12" rx="2" fill="#f8fafc"/>
-      <text x="504" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AGENT PLANE</text>
+      <rect x="432" y="52" width="148" height="12" rx="2" fill="#f8fafc"/>
+      <text x="506" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AGENT PLANE</text>
 
-      <rect x="252" y="182" width="216" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="256" y="186" width="168" height="12" rx="2" fill="#f8fafc"/>
-      <text x="340" y="195" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT FRONT DOOR</text>
+      <rect x="252" y="182" width="508" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="422" y="186" width="168" height="12" rx="2" fill="#f8fafc"/>
+      <text x="506" y="195" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT FRONT DOOR</text>
 
-      <rect x="544" y="182" width="216" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="552" y="186" width="156" height="12" rx="2" fill="#f8fafc"/>
-      <text x="630" y="195" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT RUNTIME</text>
+      <rect x="776" y="182" width="216" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="806" y="186" width="156" height="12" rx="2" fill="#f8fafc"/>
+      <text x="884" y="195" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT RUNTIME</text>
 
-      <rect x="776" y="182" width="268" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="880" y="186" width="60" height="12" rx="2" fill="#f8fafc"/>
-      <text x="910" y="195" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">SHARED</text>
+      <rect x="1008" y="182" width="268" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="1112" y="186" width="60" height="12" rx="2" fill="#f8fafc"/>
+      <text x="1142" y="195" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">SHARED</text>
 
+      <!-- channel → front door -->
       <path d="M 224,128 H 240 Q 248,128 248,132 V 218 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
       <path d="M 224,248 H 240 Q 248,248 248,240 V 236 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
+      <!-- ASK: FD → ADP -->
       <path d="M 336,204 V 164" fill="none" stroke="#0d9488" stroke-width="1.4" marker-end="url(#hir-arch-arrow-data)"/>
+      <!-- ROUTE: ADP → FD -->
       <path d="M 408,164 V 204" fill="none" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow-data)"/>
-      <path d="M 560,204 V 164" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
-      <line x1="452" y1="232" x2="560" y2="232" stroke="#f97316" stroke-width="1.8" marker-end="url(#hir-arch-arrow-accent)"/>
-      <line x1="560" y1="248" x2="452" y2="248" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow)"/>
-      <path d="M 680,204 V 164" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
+      <!-- FETCH: Runtime → ADP (orthogonal up then left into ADP bottom) -->
+      <path d="M 820,204 V 176 H 418 Q 418,176 418,168 V 164" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
+      <!-- ASYNC: FD → Runtime -->
+      <line x1="744" y1="232" x2="792" y2="232" stroke="#f97316" stroke-width="1.8" marker-end="url(#hir-arch-arrow-accent)"/>
+      <!-- 202: Runtime → FD -->
+      <line x1="792" y1="248" x2="744" y2="248" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow)"/>
+      <!-- HYDRATE: Runtime → Registry -->
+      <path d="M 940,204 V 148 H 744" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
       <line x1="224" y1="68" x2="264" y2="68" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
       <line x1="260" y1="62" x2="272" y2="74" stroke="#64748b" stroke-width="1.2"/>
       <line x1="272" y1="62" x2="260" y2="74" stroke="#64748b" stroke-width="1.2"/>
@@ -132,14 +139,14 @@
       <text x="306" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASK</text>
       <rect x="420" y="176" width="40" height="12" rx="2" fill="#f8fafc"/>
       <text x="440" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ROUTE</text>
-      <rect x="508" y="176" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="528" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">FETCH</text>
-      <rect x="692" y="176" width="52" height="12" rx="2" fill="#f8fafc"/>
-      <text x="718" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
-      <rect x="486" y="220" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="506" y="229" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASYNC</text>
-      <rect x="492" y="240" width="28" height="12" rx="2" fill="#f8fafc"/>
-      <text x="506" y="249" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
+      <rect x="740" y="176" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="760" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">FETCH</text>
+      <rect x="948" y="176" width="52" height="12" rx="2" fill="#f8fafc"/>
+      <text x="974" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
+      <rect x="748" y="220" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="229" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASYNC</text>
+      <rect x="754" y="240" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="249" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
       <rect x="232" y="64" width="56" height="12" rx="2" fill="#f8fafc"/>
       <text x="260" y="73" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">BLOCKED</text>
 
@@ -194,62 +201,62 @@
       <text x="664" y="124" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Registry</text>
       <text x="664" y="144" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">id@version</text>
 
-      <rect x="268" y="204" width="184" height="124" rx="6" fill="#f8fafc"/>
-      <rect x="268" y="204" width="184" height="124" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="268" y="204" width="476" height="124" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="204" width="476" height="124" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
       <rect x="272" y="210" width="44" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
       <text x="294" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAFD</text>
-      <use href="#hir-db" x="428" y="208" width="16" height="16"/>
-      <text x="360" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
-      <text x="360" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · pin · start</text>
-
-      <rect x="560" y="204" width="184" height="124" rx="6" fill="#f8fafc"/>
-      <rect x="560" y="204" width="184" height="124" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <rect x="564" y="210" width="36" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
-      <text x="582" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">Agent runtime</text>
       <use href="#hir-db" x="720" y="208" width="16" height="16"/>
-      <text x="652" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
-      <text x="652" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fetch · hydrate · loop</text>
+      <text x="506" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
+      <text x="506" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · pin · start</text>
 
-      <line x1="744" y1="268" x2="792" y2="268" stroke="#64748b" stroke-width="1" marker-end="url(#hir-arch-arrow)"/>
+      <rect x="792" y="204" width="184" height="124" rx="6" fill="#f8fafc"/>
+      <rect x="792" y="204" width="184" height="124" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="796" y="210" width="36" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="814" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">Agent runtime</text>
+      <use href="#hir-db" x="952" y="208" width="16" height="16"/>
+      <text x="884" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
+      <text x="884" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fetch · hydrate · loop</text>
 
-      <rect x="792" y="208" width="236" height="40" rx="6" fill="#f8fafc"/>
-      <rect x="792" y="208" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="910" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
+      <line x1="976" y1="268" x2="1024" y2="268" stroke="#64748b" stroke-width="1" marker-end="url(#hir-arch-arrow)"/>
 
-      <rect x="792" y="256" width="236" height="40" rx="6" fill="#f8fafc"/>
-      <rect x="792" y="256" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="910" y="280" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
+      <rect x="1024" y="208" width="236" height="40" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="208" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="1142" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
 
-      <rect x="792" y="304" width="236" height="40" rx="6" fill="#f8fafc"/>
-      <rect x="792" y="304" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="910" y="328" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
+      <rect x="1024" y="256" width="236" height="40" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="256" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="1142" y="280" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
 
-      <line x1="360" y1="328" x2="360" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
-      <line x1="652" y1="328" x2="652" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
-      <line x1="910" y1="344" x2="910" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+      <rect x="1024" y="304" width="236" height="40" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="304" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="1142" y="328" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
 
-      <rect x="40" y="360" width="496" height="44" rx="6" fill="#f8fafc"/>
-      <rect x="40" y="360" width="496" height="44" rx="6" fill="rgba(14,165,233,0.08)" stroke="#38bdf8" stroke-width="1"/>
-      <text x="288" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Observability</text>
+      <line x1="506" y1="328" x2="506" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="884" y1="328" x2="884" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="1142" y1="344" x2="1142" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
 
-      <rect x="548" y="360" width="496" height="44" rx="6" fill="#f8fafc"/>
-      <rect x="548" y="360" width="496" height="44" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
-      <text x="796" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent audit</text>
+      <rect x="40" y="360" width="612" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="360" width="612" height="44" rx="6" fill="rgba(14,165,233,0.08)" stroke="#38bdf8" stroke-width="1"/>
+      <text x="346" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Observability</text>
 
-      <line x1="288" y1="404" x2="288" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
-      <line x1="796" y1="404" x2="796" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
+      <rect x="664" y="360" width="612" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="664" y="360" width="612" height="44" rx="6" fill="rgba(59,130,246,0.08)" stroke="#3b82f6" stroke-width="1"/>
+      <text x="970" y="386" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent audit</text>
 
-      <rect x="40" y="416" width="1004" height="44" rx="6" fill="#f8fafc"/>
-      <rect x="40" y="416" width="1004" height="44" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="542" y="442" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Dashboard</text>
+      <line x1="346" y1="404" x2="346" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="970" y1="404" x2="970" y2="416" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
 
-      <line x1="542" y1="460" x2="542" y2="472" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
+      <rect x="40" y="416" width="1236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="416" width="1236" height="44" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="658" y="442" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Dashboard</text>
 
-      <rect x="40" y="472" width="1004" height="44" rx="6" fill="#f8fafc"/>
-      <rect x="40" y="472" width="1004" height="44" rx="6" fill="rgba(124,143,111,0.10)" stroke="#7c8f6f" stroke-width="1"/>
-      <text x="542" y="498" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Responsible / Governed AI</text>
+      <line x1="658" y1="460" x2="658" y2="472" stroke="#64748b" stroke-width="1.2" marker-end="url(#hir-arch-arrow)"/>
 
-      <line x1="40" y1="548" x2="1044" y2="548" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="40" y="472" width="1236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="472" width="1236" height="44" rx="6" fill="rgba(124,143,111,0.10)" stroke="#7c8f6f" stroke-width="1"/>
+      <text x="658" y="498" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Responsible / Governed AI</text>
+
+      <line x1="40" y1="548" x2="1276" y2="548" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <text x="40" y="568" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.18em">LEGEND</text>
       <rect x="40" y="576" width="14" height="10" rx="2" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
       <text x="60" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Ingress</text>
@@ -282,15 +289,11 @@
       <line x1="316" y1="599" x2="304" y2="611" stroke="#64748b" stroke-width="1.2"/>
       <text x="324" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Skip blocked</text>
       </g>
-      <line x1="360" y1="268" x2="360" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="506" y1="268" x2="506" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       <line x1="418" y1="132" x2="418" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
-      <line x1="652" y1="268" x2="652" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="884" y1="268" x2="884" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       </g>
     </svg>
-
-
-
-
   </div>
 </body>
 </html>
