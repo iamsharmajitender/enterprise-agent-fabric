@@ -36,7 +36,7 @@ Domain HTTP doubles live at repo root: [`agent-fabric-mocks/tools/`](../agent-fa
 | How a box works | [04-architecture](04-architecture/), then [02-understand](02-understand/overview.md) |
 | Which ids to track a request | [02-understand/ids.md](02-understand/ids.md) |
 | Enhance later | [tasks/](tasks/), especially [dataflow-plan.md](tasks/dataflow-plan.md), [intent-plan.md](tasks/intent-plan.md), [audit-plan.md](tasks/audit-plan.md), [tool-failure-plan.md](tasks/tool-failure-plan.md) |
-| Routing eval gate | [eval-plan.md](tasks/eval-plan.md) (fixtures removed; design notes only) |
+| Routing eval gate | [eval-plan.md](tasks/eval-plan.md), fixtures in [`agent-fabric-evals/`](../agent-fabric-evals/) |
 | Intent router (①–③) | [intent-plan.md](tasks/intent-plan.md) (operator checklist in the demo path) |
 | Fabric evidence / audit | [audit-plan.md](tasks/audit-plan.md), [audit-todo.md](tasks/audit-todo.md) |
 | Tool failures (business / technical) | [tool-failure-plan.md](tasks/tool-failure-plan.md), [tool-failure-todo.md](tasks/tool-failure-todo.md) |

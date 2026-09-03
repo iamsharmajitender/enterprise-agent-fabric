@@ -1,0 +1,43 @@
+{
+  "cases": [
+    {
+      "id": "chat-wrong-channel-abstain",
+      "ingress": "chat",
+      "channel": "sms",
+      "message": "My blue jacket arrived damaged and I want a refund",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": [
+        "guard"
+      ]
+    },
+    {
+      "id": "chat-ood-abstain",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "xyzzy-no-such-intent",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true,
+          "accounts:read": true
+        }
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": [
+        "guard"
+      ]
+    }
+  ]
+}

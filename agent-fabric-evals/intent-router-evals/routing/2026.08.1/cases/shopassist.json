@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "id": "chat-shopassist-damaged",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "My blue jacket arrived damaged and I want a refund",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "shopassist_case",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "chat-shopassist-charged-twice",
+      "ingress": "chat",
+      "channel": "web",
+      "message": "I was charged twice for my order and need help",
+      "route_id": null,
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "shopassist_case",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    }
+  ]
+}

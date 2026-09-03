@@ -357,7 +357,12 @@ Image build runs `mvn test`. No Compose required for unit tests:
 mvn -q -B test
 ```
 
-`RoutingEvalTest`, `JobsEntitleEvalTest`, and `CataloguePinLintTest` still run when their fixtures are present in the test classpath.
+`RoutingEvalTest`, `JobsEntitleEvalTest`, `CataloguePinLintTest`, and `RouteQualityEvalTest` load fixtures from repo-root `agent-fabric-evals/` (Maven `testResources`). Run:
+
+```bash
+./run-eval.sh
+./run-eval.sh --quality
+```
 
 ---
 

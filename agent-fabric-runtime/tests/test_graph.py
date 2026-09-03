@@ -995,12 +995,12 @@ def test_branch_high_routes_to_manual_review_not_activate() -> None:
     except HumanGateWaiting as exc:
         assert calls == ["http://agent-mocks:3010/kyc/risk"]
         assert exc.stage_id == "manual_review"
-        assert exc.resume_index == 3
+        assert exc.resume_index == 2
         return
     raise AssertionError("expected human_gate waiting")
 
 
-def test_human_gate_resume_runs_merge_stage_only() -> None:
+def test_human_gate_resume_runs_activate_then_summarize() -> None:
     from app.graph.human_gate import resume_index_after_gate
 
     calls: list[str] = []
@@ -1008,11 +1008,13 @@ def test_human_gate_resume_runs_merge_stage_only() -> None:
     class Invoker:
         def call(self, invoke: dict, payload: dict) -> dict:
             calls.append(str(invoke.get("url") or ""))
+            if str(invoke.get("url") or "").endswith("/kyc/activate"):
+                return {"text": "Account activated.", "status": "activated"}
             return {"risk": "high", "text": "KYC risk: high."}
 
     class Llm:
         def complete(self, system: str, user: str, schema=None) -> str:
-            return "KYC summary."
+            return "KYC summary: manual review approved; account activated."
 
     tools = _kyc_branch_tools()
     graph = build_tool_graph(
@@ -1028,8 +1030,8 @@ def test_human_gate_resume_runs_merge_stage_only() -> None:
             "slots": {"manual_review": {"decision": "approve", "reviewer_id": "ops-1"}},
         }
     )
-    assert calls == []
-    assert output["result"] == "KYC summary."
+    assert calls == ["http://agent-mocks:3010/kyc/activate"]
+    assert output["result"] == "KYC summary: manual review approved; account activated."
 
 
 def test_branch_unknown_risk_fails_closed() -> None:

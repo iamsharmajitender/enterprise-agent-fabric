@@ -1,0 +1,23 @@
+{
+  "cases": [
+    {
+      "id": "jobs-ticket_triage-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "ticket_triage",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "ticket_triage",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    }
+  ]
+}

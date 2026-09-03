@@ -15,7 +15,8 @@ def test_resume_index_after_gate_linear() -> None:
     assert resume_index_after_gate(tools, 1) == 2
 
 
-def test_resume_index_after_gate_branch_target_merges() -> None:
+def test_resume_index_after_gate_continues_to_next_stage() -> None:
+    """Branch peer write after the gate must still run on approve (KYC activate)."""
     tools = [
         {
             "id": "risk",
@@ -26,7 +27,7 @@ def test_resume_index_after_gate_branch_target_merges() -> None:
         {"id": "activate", "workflow_stage_id": "activate_account"},
         {"id": "summarize", "workflow_stage_id": "summarize"},
     ]
-    assert resume_index_after_gate(tools, 1) == 3
+    assert resume_index_after_gate(tools, 1) == 2
 
 
 def test_parse_gate_packet_rejects_message_only() -> None:
@@ -46,8 +47,8 @@ def test_human_gate_waiting_carries_resume_index() -> None:
     exc = HumanGateWaiting(
         stage_id="manual_review",
         gate_index=1,
-        resume_index=3,
+        resume_index=2,
         state={"goal": {}, "notes": [], "slots": {}},
     )
-    assert exc.resume_index == 3
+    assert exc.resume_index == 2
     assert "human_gate" in str(exc)

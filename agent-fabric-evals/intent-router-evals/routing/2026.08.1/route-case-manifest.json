@@ -1,0 +1,11 @@
+{
+  "suite_id": "routing",
+  "suite_version": "2026.08.1",
+  "case_files": [
+    "shopassist.json",
+    "fee.json",
+    "overdraft.json",
+    "guards.json",
+    "adversarial.json"
+  ]
+}

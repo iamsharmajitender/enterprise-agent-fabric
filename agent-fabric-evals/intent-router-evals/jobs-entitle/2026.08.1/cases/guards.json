@@ -1,0 +1,55 @@
+{
+  "cases": [
+    {
+      "id": "jobs-kyc-missing-claim",
+      "ingress": "jobs",
+      "channel": "api",
+      "message": null,
+      "route_id": "kyc_onboarding",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": [
+        "guard"
+      ]
+    },
+    {
+      "id": "jobs-shopassist-missing-claim",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "shopassist_case",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": [
+        "guard"
+      ]
+    },
+    {
+      "id": "jobs-fee-missing-claim",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "fee_explain",
+      "claims": {
+        "sub": "jane",
+        "emts": {}
+      },
+      "expected": {
+        "outcome": "abstain"
+      },
+      "tags": [
+        "guard"
+      ]
+    }
+  ]
+}

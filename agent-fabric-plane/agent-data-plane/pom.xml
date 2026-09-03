@@ -75,6 +75,11 @@
       <testResource>
         <directory>src/test/resources</directory>
       </testResource>
+      <testResource>
+        <!-- Repo-root eval fixtures (kept outside ADP). -->
+        <directory>${project.basedir}/../../agent-fabric-evals</directory>
+        <targetPath>agent-fabric-evals</targetPath>
+      </testResource>
     </testResources>
     <plugins>
       <plugin>

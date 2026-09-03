@@ -1,0 +1,38 @@
+{
+  "suite_id": "routing",
+  "suite_version": "2026.08.1",
+  "catalogue": [
+    {
+      "route_id": "billing_assistant",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "duplicate_charge_review",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "fee_explain",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "kyc_onboarding",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "overdraft_fee_qa",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "shopassist_case",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "ticket_draft_reply",
+      "route_version": "2026.08.1"
+    },
+    {
+      "route_id": "ticket_triage",
+      "route_version": "2026.08.1"
+    }
+  ]
+}

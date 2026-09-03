@@ -19,7 +19,7 @@ INSERT INTO dataplane.prompt_role_templates (
 ) VALUES
 (
   'kyc_onboarding', '2026.08.1', 'synthesis', 'synthesize',
-  'Write a short KYC onboarding summary for ops using prior stage outputs only. State whether the account was activated or is awaiting manual review.'
+  'Write a short KYC onboarding summary for ops using prior stage outputs only. Include applicant id. Read risk from notes or slots (for example "KYC risk: high." or risk=high). If manual_review ran, state the decision (approve/reject) and reviewer when present. State whether the account was activated. Do not say awaiting manual review when a manual_review decision is already present. Do not say risk was not provided when a risk note or slot is present.'
 )
 ON CONFLICT (prompt_id, prompt_version, llm_role) DO UPDATE SET
   task_type = EXCLUDED.task_type,

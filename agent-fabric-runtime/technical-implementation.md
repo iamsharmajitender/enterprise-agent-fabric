@@ -843,7 +843,7 @@ A **`waiting`** pin means the graph stopped on purpose — not because of an err
 | **Gate** | A stage that cannot proceed until external input arrives (human, customer, or child job). Implemented by raising a `*Waiting` exception — not a failed HTTP call. |
 | **`waiting_for`** | String on `checkpoint` identifying which gate type must be cleared: `human_gate`, `customer_ask`, or `subagent`. |
 | **`gate_index`** | Index in `hydrated_tools[]` (or Pattern 1 loop step) where the run paused. Stored as `checkpoint.step`. |
-| **`resume_index`** | Index in `hydrated_tools[]` where the linear graph continues **after** the gate clears. May skip branch targets for human gates ([`resume_index_after_gate()`](./app/graph/human_gate.py)). |
+| **`resume_index`** | Index in `hydrated_tools[]` where the linear graph continues **after** the gate clears. Always the next stage after the gate ([`resume_index_after_gate()`](./app/graph/human_gate.py)) so a gated write (e.g. KYC activate) still runs on approve. |
 | **`resume_loop_step`** | Pattern 1 only — loop iteration to restart from after ASK or subagent pause. Stored on checkpoint. |
 | **Gate packet** | `/turns` body that satisfies the gate (decision, customer message, or subagents list). |
 

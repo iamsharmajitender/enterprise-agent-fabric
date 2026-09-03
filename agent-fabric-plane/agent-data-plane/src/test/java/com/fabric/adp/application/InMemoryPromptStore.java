@@ -16,6 +16,23 @@ public class InMemoryPromptStore implements PromptStore {
     return this;
   }
 
+  /** Prompts for the stack-route eval board. */
+  public InMemoryPromptStore seedEvalBoard() {
+    for (String id :
+        List.of(
+            "shopassist_case",
+            "billing_assistant",
+            "duplicate_charge_review",
+            "fee_explain",
+            "kyc_onboarding",
+            "overdraft_fee_qa",
+            "ticket_draft_reply",
+            "ticket_triage")) {
+      put(stub(id));
+    }
+    return this;
+  }
+
   public static PromptPack shopassistCase() {
     return new PromptPack(
         "shopassist_case",
@@ -24,6 +41,10 @@ public class InMemoryPromptStore implements PromptStore {
         "published",
         "shopassist",
         List.of());
+  }
+
+  private static PromptPack stub(String id) {
+    return new PromptPack(id, "2026.08.1", "Eval stub prompt for " + id, "published", "eval", List.of());
   }
 
   private void put(PromptPack pack) {

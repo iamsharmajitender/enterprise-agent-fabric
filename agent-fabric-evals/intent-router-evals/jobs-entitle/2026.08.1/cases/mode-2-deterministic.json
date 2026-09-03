@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "id": "jobs-duplicate_charge_review-entitled",
+      "ingress": "jobs",
+      "channel": "web",
+      "message": null,
+      "route_id": "duplicate_charge_review",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "duplicate_charge_review",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    },
+    {
+      "id": "jobs-kyc_onboarding-entitled",
+      "ingress": "jobs",
+      "channel": "api",
+      "message": null,
+      "route_id": "kyc_onboarding",
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "kyc:operate": true
+        }
+      },
+      "expected": {
+        "outcome": "route",
+        "route_id": "kyc_onboarding",
+        "route_version": "2026.08.1"
+      },
+      "tags": []
+    }
+  ]
+}

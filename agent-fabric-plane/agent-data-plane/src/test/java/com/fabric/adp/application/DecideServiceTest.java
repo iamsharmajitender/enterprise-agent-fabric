@@ -68,7 +68,8 @@ class DecideServiceTest {
 
   @Test
   void slashCommandRoutesShopassist() {
-    DecideResult result = decide.decide(chat("/shopassist damaged jacket refund", jane()), "afd");
+    // Layer ① command rules match the full message (exact), not a prefix.
+    DecideResult result = decide.decide(chat("/shopassist", jane()), "afd");
     assertThat(result.outcome()).isEqualTo("route");
     assertThat(result.routeId()).isEqualTo("shopassist_case");
     assertLayer(result, DecideResult.LAYER_RULES);

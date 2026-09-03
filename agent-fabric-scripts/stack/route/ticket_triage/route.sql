@@ -12,7 +12,7 @@ INSERT INTO dataplane.routes (
   'ticket_triage', '2026.08.1', TRUE, 'active', 'ticket_triage',
   'Pattern 3 (guided): fixed outer stages parse → tag → draft_reply (kind=agent, join). Child route ticket_draft_reply drafts the customer reply.',
   'http://agent-runtime-custom:3008/v1/runs', 'agent-ticket-triage', 'ticket_triage', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'ticket_triage', 'ticket_triage', NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'ticket_triage', 'ticket_triage', NULL, 'ticket_triage_tools', NULL, 'clarify',
   '["support:case"]'::jsonb, '["web","api"]'::jsonb, TRUE,
   '["ticket","triage","duplicate charge","billing","ORD-77819","support"]'::jsonb,
   3

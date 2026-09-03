@@ -393,10 +393,19 @@ class RunService:
     def _prior_working(
         self, pin: RunPin, profile: dict[str, Any]
     ) -> tuple[list[str], dict[str, Any]]:
-        """Restore notes/slots from working memory when the route profile allows it."""
+        """Restore notes/slots from working memory.
+
+        Waiting resumes always reload ``pin.working`` when present — gate pauses
+        persist prior stage outputs even without a session working profile, so
+        synthesis after approve still sees risk and earlier KYC stages.
+        """
+        notes = notes_from_working(pin.working)
+        slots = slots_from_working(pin.working)
+        if notes or slots:
+            return notes, slots
         if not save_working(profile):
             return [], {}
-        return notes_from_working(pin.working), slots_from_working(pin.working)
+        return notes, slots
 
     def _resume_waiting(
         self,

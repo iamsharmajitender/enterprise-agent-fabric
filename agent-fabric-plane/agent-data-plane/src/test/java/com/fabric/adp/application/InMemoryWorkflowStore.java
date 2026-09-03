@@ -16,6 +16,10 @@ public class InMemoryWorkflowStore implements WorkflowStore {
 
   private final Map<String, Workflow> rows = new LinkedHashMap<>();
 
+  public InMemoryWorkflowStore seedEvalBoard() {
+    return seedDemo();
+  }
+
   public InMemoryWorkflowStore seedDemo() {
     put(parse("llm_pipeline", "2026.08.1", "Pattern 2: three LLM stages (classify then two synthesis). No domain HTTP.",
         """
@@ -88,6 +92,7 @@ public class InMemoryWorkflowStore implements WorkflowStore {
         """));
     put(msaRiskReview());
     put(kycOnboarding());
+    put(duplicateChargeReview());
     put(parse("claims_adjudicate", "2026.08.1", "Forced playbook retrieve then named clause retrieve",
         """
         [{"id":"pack_playbook","tool":"policy_search","corpus":"legal-playbook","llm_role":"none"},
@@ -95,11 +100,11 @@ public class InMemoryWorkflowStore implements WorkflowStore {
          {"id":"score","tool":"risk_engine","llm_role":"none"},
          {"id":"memo","tool":"draft_memo","llm_role":"synthesis"}]
         """));
-    put(parse("ticket_triage", "2026.08.1", "Pattern 3: HTTP parse/tag, then synthesis reply. Stage allowlists are catalogue-only.",
+    put(parse("ticket_triage", "2026.08.1", "Pattern 3: parse ticket, tag intent, then draft_reply.",
         """
         [{"id":"extract","tool":"parse_ticket","llm_role":"none","allowlist":["parse_ticket"],"max_tool_calls":2},
          {"id":"analyse","tool":"tag_intent","llm_role":"none","allowlist":["parse_ticket","tag_intent"],"max_tool_calls":4},
-         {"id":"reply","tool":"draft_reply","llm_role":"synthesis","allowlist":["draft_reply"],"max_tool_calls":2}]
+         {"id":"reply","tool":"draft_reply","llm_role":"none","allowlist":["draft_reply"],"max_tool_calls":2}]
         """));
     put(parse("product_explain", "2026.08.1", "Pattern 3: prefetch placeholder, HTTP score/compare, then synthesis. Allowlists are catalogue-only.",
         """
@@ -121,6 +126,21 @@ public class InMemoryWorkflowStore implements WorkflowStore {
          {"id":"report","tool":"draft_memo","llm_role":"synthesis"}]
         """));
     return this;
+  }
+
+  public static Workflow duplicateChargeReview() {
+    return parse(
+        "duplicate_charge_review",
+        "2026.08.1",
+        "Pattern 2: classify order id, lookup order, duplicate check, synthesis reply",
+        """
+        [
+          {"id":"intake","tool":"duplicate_charge_intake","llm_role":"classify"},
+          {"id":"order_lookup","tool":"lookup_order_by_order_id","llm_role":"none"},
+          {"id":"dup_check","tool":"investigate_duplicate_charge","llm_role":"none"},
+          {"id":"respond","tool":"duplicate_charge_respond","llm_role":"synthesis"}
+        ]
+        """);
   }
 
   public static Workflow kycOnboarding() {

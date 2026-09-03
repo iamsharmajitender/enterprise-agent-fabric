@@ -1,6 +1,7 @@
 -- kyc_onboarding — remove catalogue rows for this route pack.
 
 \c adp
+DELETE FROM dataplane.memory_profiles WHERE route_id = 'kyc_onboarding';
 DELETE FROM dataplane.routes WHERE route_id = 'kyc_onboarding';
 DELETE FROM dataplane.workflows WHERE workflow_id = 'kyc_onboarding';
 DELETE FROM dataplane.prompt_role_templates WHERE prompt_id = 'kyc_onboarding';

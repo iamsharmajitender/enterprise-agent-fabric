@@ -1,0 +1,48 @@
+{
+  "suite_id": "duplicate_charge_review_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "duplicate_charge_review-happy",
+      "route_id": "duplicate_charge_review",
+      "ingress": "jobs",
+      "channel": "web",
+      "goal": {
+        "order_id": "ORD-77819"
+      },
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "intake",
+            "tool": "duplicate_charge_intake",
+            "llm_role": "classify"
+          },
+          {
+            "id": "order_lookup",
+            "tool": "lookup_order_by_order_id",
+            "llm_role": "none"
+          },
+          {
+            "id": "dup_check",
+            "tool": "investigate_duplicate_charge",
+            "llm_role": "none"
+          },
+          {
+            "id": "respond",
+            "tool": "duplicate_charge_respond",
+            "llm_role": "synthesis"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence"
+      ]
+    }
+  ]
+}

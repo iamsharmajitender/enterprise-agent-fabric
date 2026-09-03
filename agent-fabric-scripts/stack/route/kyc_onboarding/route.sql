@@ -12,7 +12,7 @@ INSERT INTO dataplane.routes (
   'kyc_onboarding', '2026.08.1', TRUE, 'active', 'kyc_onboarding',
   'Pattern 2 (deterministic): KYC pipeline with designer-owned branch on risk_score slot (high → manual_review gate, low → activate_account).',
   'http://agent-runtime-shared:3008/v1/runs', 'agent-kyc-onboarding', 'kyc_onboarding', '2026.08.1',
-  'read_only_standard', 'reasoning-standard', 'kyc_onboarding', 'kyc_onboarding', NULL, NULL, NULL, 'clarify',
+  'read_only_standard', 'reasoning-standard', 'kyc_onboarding', 'kyc_onboarding', NULL, 'kyc_onboarding_tools', NULL, 'clarify',
   '["kyc:operate"]'::jsonb, '["api"]'::jsonb, FALSE,
   '["kyc","onboarding","activate","manual review","applicant"]'::jsonb,
   2

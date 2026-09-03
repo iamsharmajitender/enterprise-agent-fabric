@@ -8,7 +8,7 @@ flow — they pause the pin rather than marking it failed.
 from typing import Any, Protocol
 
 from app import telemetry
-from app.core.memory import checkpoint_payload, save_loop, save_working, working_payload
+from app.core.memory import checkpoint_payload, save_loop, working_payload
 from app.core.session_ids import is_jobs_session
 from app.core.state import RunPin, RunStore
 from app.graph.customer_ask import CustomerAskWaiting
@@ -257,13 +257,9 @@ def _pause_waiting(
     profile: dict[str, Any],
     extra_checkpoint: dict[str, Any] | None = None,
 ) -> RunPin:
-    working = (
-        working_payload(
-            list(waiting_state.get("notes") or []),
-            waiting_state.get("slots") if isinstance(waiting_state.get("slots"), dict) else {},
-        )
-        if save_working(profile)
-        else None
+    working = working_payload(
+        list(waiting_state.get("notes") or []),
+        waiting_state.get("slots") if isinstance(waiting_state.get("slots"), dict) else {},
     )
     checkpoint: dict[str, Any] = {
         "step": gate_index,

@@ -20,31 +20,14 @@ class HumanGateWaiting(Exception):
 
 
 def resume_index_after_gate(tools: list[dict[str, Any]], gate_index: int) -> int:
-    """Return the hydrated-tools index to continue from after a gate resumes."""
-    if gate_index + 1 >= len(tools):
-        return gate_index + 1
+    """Return the hydrated-tools index to continue from after a gate resumes.
 
-    gate_stage_id = str(tools[gate_index].get("workflow_stage_id") or tools[gate_index].get("id") or "")
-    branch_at = None
-    branch_map: dict[str, Any] | None = None
-    for index, tool in enumerate(tools):
-        branch = tool.get("branch")
-        if isinstance(branch, dict) and branch:
-            branch_at = index
-            branch_map = branch
-            break
-    if branch_at is None or branch_map is None:
-        return gate_index + 1
-
-    branch_targets = {str(value) for value in branch_map.values()}
-    if gate_stage_id not in branch_targets:
-        return gate_index + 1
-
-    for index in range(branch_at + 1, len(tools)):
-        stage_id = str(tools[index].get("workflow_stage_id") or tools[index].get("id") or "")
-        if stage_id not in branch_targets:
-            return index
-    raise RuntimeError("branch workflow missing merge stage after branch targets")
+    Always continues at the next stage after the gate (linear). For KYC-style
+    branch workflows that is typically the gated write (``activate_account``),
+    then the shared merge stage (``summarize``). Do not jump to merge and skip
+    the write — approve must be allowed to run the following side-effect stage.
+    """
+    return gate_index + 1
 
 
 def human_gate_slot_key(pinned: dict[str, Any]) -> str:

@@ -3,8 +3,9 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn -q -B -DskipTests dependency:go-offline
 COPY src src
-# Image build packages only. Unit tests run via `mvn test` / CI — not Compose image builds.
-RUN mvn -q -B -DskipTests package
+# Image build packages only. Skip compiling tests too (-DskipTests still runs testCompile).
+# Unit tests run via `mvn test` / CI — not Compose image builds.
+RUN mvn -q -B -Dmaven.test.skip=true package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app

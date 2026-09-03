@@ -1,0 +1,43 @@
+{
+  "suite_id": "ticket_triage_tools",
+  "suite_version": "2026.08.1",
+  "cases": [
+    {
+      "id": "ticket_triage-happy",
+      "route_id": "ticket_triage",
+      "ingress": "jobs",
+      "channel": "web",
+      "goal": {
+        "ticket_id": "tkt-eval-1"
+      },
+      "claims": {
+        "sub": "jane",
+        "emts": {
+          "support:case": true
+        }
+      },
+      "expected": {
+        "stages": [
+          {
+            "id": "extract",
+            "tool": "parse_ticket",
+            "llm_role": "none"
+          },
+          {
+            "id": "analyse",
+            "tool": "tag_intent",
+            "llm_role": "none"
+          },
+          {
+            "id": "reply",
+            "tool": "draft_reply",
+            "llm_role": "none"
+          }
+        ]
+      },
+      "tags": [
+        "tool-sequence"
+      ]
+    }
+  ]
+}

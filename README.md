@@ -122,7 +122,15 @@ Open [http://localhost:3014/chat](http://localhost:3014/chat) (included in Compo
 
 ## Evals
 
-Eval fixtures were removed in the shopassist-only cut. Design notes remain in [eval-plan.md](agent-fabric-docs/tasks/eval-plan.md) and [eval-todo.md](agent-fabric-docs/tasks/eval-todo.md).
+Golden fixtures live under [`agent-fabric-evals/`](agent-fabric-evals/) (outside Data Plane). ADP runs the thin JUnit harness:
+
+```bash
+./agent-fabric-plane/agent-data-plane/run-eval.sh              # routing + jobs-entitle + pin
+./agent-fabric-plane/agent-data-plane/run-eval.sh --quality   # per-route tool sequences
+./agent-fabric-plane/agent-data-plane/run-eval.sh --all
+```
+
+Design notes: [eval-plan.md](agent-fabric-docs/tasks/eval-plan.md) / [eval-todo.md](agent-fabric-docs/tasks/eval-todo.md).
 ## Ports and URLs
 
 Five Fabric folders: [`agent-fabric-front-door`](agent-fabric-front-door/README.md) · [`agent-fabric-plane/agent-control-plane`](agent-fabric-plane/agent-control-plane/README.md) · [`agent-fabric-plane/agent-data-plane`](agent-fabric-plane/agent-data-plane/README.md) · [`agent-fabric-runtime`](agent-fabric-runtime/README.md) · [`agent-fabric-capability-registry`](agent-fabric-capability-registry/README.md).

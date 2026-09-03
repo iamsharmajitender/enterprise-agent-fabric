@@ -1,0 +1,11 @@
+{
+  "suite_id": "jobs-entitle",
+  "suite_version": "2026.08.1",
+  "case_files": [
+    "mode-0-inference.json",
+    "mode-1-autonomous.json",
+    "mode-2-deterministic.json",
+    "mode-3-guided.json",
+    "guards.json"
+  ]
+}

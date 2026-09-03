@@ -21,6 +21,51 @@ public class InMemoryManifestStore implements ManifestStore {
     return this;
   }
 
+  /** Manifests for the stack-route eval board. */
+  public InMemoryManifestStore seedEvalBoard() {
+    put(shopassistCase());
+    put(feeExplain());
+    put(billingAssistant());
+    put(duplicateChargeReview());
+    put(ticketTriage());
+    put(kycOnboarding());
+    return this;
+  }
+
+  public static ToolManifest feeExplain() {
+    return parse(
+        "fee_explain",
+        "2026.08.1",
+        "One retrieve tool for account fees",
+        """
+        [{"name":"account_fee_lookup","capability_id":"account_fee_lookup","capability_version":"1.0.0","pdp_action":"account_fee_lookup","risk_tier":"low"}]
+        """);
+  }
+
+  public static ToolManifest billingAssistant() {
+    return parse(
+        "billing_assistant",
+        "2026.08.1",
+        "Pattern 1: LLM picks account_fee_lookup vs lookup_order_by_order_id",
+        """
+        [{"name":"account_fee_lookup","capability_id":"account_fee_lookup","capability_version":"1.0.0","pdp_action":"account_fee_lookup","risk_tier":"low"},
+         {"name":"lookup_order_by_order_id","capability_id":"lookup_order_by_order_id","capability_version":"1.0.0","pdp_action":"lookup_order_by_order_id","risk_tier":"low"}]
+        """);
+  }
+
+  public static ToolManifest duplicateChargeReview() {
+    return parse(
+        "duplicate_charge_review",
+        "2026.08.1",
+        "Pattern 2: classify, lookup, duplicate-charge check, synthesis",
+        """
+        [{"name":"duplicate_charge_intake","capability_id":"duplicate_charge_intake","capability_version":"1.0.0","pdp_action":"duplicate_charge_intake","risk_tier":"low"},
+         {"name":"lookup_order_by_order_id","capability_id":"lookup_order_by_order_id","capability_version":"1.0.0","pdp_action":"lookup_order_by_order_id","risk_tier":"low"},
+         {"name":"investigate_duplicate_charge","capability_id":"investigate_duplicate_charge","capability_version":"1.0.0","pdp_action":"investigate_duplicate_charge","risk_tier":"low"},
+         {"name":"duplicate_charge_respond","capability_id":"duplicate_charge_respond","capability_version":"1.0.0","pdp_action":"duplicate_charge_respond","risk_tier":"low"}]
+        """);
+  }
+
   public static ToolManifest shopassistCase() {
     return parse(
         "shopassist_case",

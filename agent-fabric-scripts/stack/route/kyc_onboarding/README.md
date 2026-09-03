@@ -12,7 +12,7 @@ Fixed KYC pipeline. After `kyc_risk_engine` returns a `risk` slot, the workflow 
 | `risk_score` | `kyc_risk_engine` | `none` | **`branch`**: `high` → `manual_review`, `low` → `activate_account` |
 | `manual_review` | — | — | `type=human_gate` — run pauses until `/turns` resume |
 | `activate_account` | `kyc_account_activate` | `none` | Side-effect write (`requires_approval`) |
-| `summarize` | — | `synthesis` | Ops summary from prior `notes` |
+| `summarize` | — | `synthesis` | Ops summary from prior `notes` / slots (needs working memory across the gate) |
 
 ## Branch demo
 
@@ -49,6 +49,8 @@ Resume after manual review: open [Human scratchpad](http://localhost:3014/human)
 POST /v1/jobs/{correlation_id}/turns
 {"decision":"approve","reviewer":"ops-jane","notes":"Approved after doc check"}
 ```
+
+On **approve**, Runtime continues to `activate_account`, then `summarize`. On **reject**, the run fails closed and does not activate.
 
 Required claim: `kyc:operate`
 

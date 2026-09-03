@@ -43,7 +43,21 @@ public class InMemoryCorpusStore implements CorpusStore {
         "published",
         null,
         UPDATED));
+    put(new Corpus(
+        "product-disclosure",
+        "Product disclosure",
+        CorpusGatewayUrls.dedicated("product-disclosure"),
+        "product-disclosure",
+        "workload-oauth",
+        "product",
+        "published",
+        null,
+        UPDATED));
     return this;
+  }
+
+  public InMemoryCorpusStore seedEvalBoard() {
+    return seedDemo();
   }
 
   public static Corpus policyEngine() {
