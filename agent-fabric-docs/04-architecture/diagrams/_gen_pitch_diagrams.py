@@ -560,9 +560,21 @@ def swim_step(x: int, y: int, w: int, h: int, title: str, sub: str = "",
 
 def executive_swimlane_automated() -> tuple[str, str]:
     slug = "agent-fabric-executive-swimlane-jobs"
-    w, h = 1080, 440
+    w, h = 1080, 460
     lane_x, lane_w = 148, 900
     steps = [220, 400, 580, 760, 940]
+
+    def ortho(points: str, stroke: str, sw: str = "1.3", accent: bool = False) -> str:
+        mk = "exec-sw-arrow-accent" if accent else "exec-sw-arrow"
+        return f'<path d="{points}" fill="none" stroke="{stroke}" stroke-width="{sw}" marker-end="url(#{mk})"/>'
+
+    audit_drops = ""
+    for cx in steps[1:]:
+        audit_drops += (
+            f'<line x1="{cx}" y1="302" x2="{cx}" y2="340" stroke="{MUTED}" '
+            f'stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>\n'
+        )
+
     body = f"""
     <svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="{slug}-title {slug}-desc">
@@ -571,13 +583,11 @@ def executive_swimlane_automated() -> tuple[str, str]:
       <defs>{markers("exec-sw")}</defs>
       <rect width="100%" height="100%" fill="{PAPER}"/>
 
-      <!-- lane bands -->
       <rect x="{lane_x}" y="44" width="{lane_w}" height="76" fill="rgba(100,116,139,0.06)" rx="4"/>
       <rect x="{lane_x}" y="132" width="{lane_w}" height="92" fill="{ACCENT_TINT}" rx="4"/>
       <rect x="{lane_x}" y="236" width="{lane_w}" height="76" fill="{DOMAIN_TINT}" rx="4"/>
       <rect x="{lane_x}" y="328" width="{lane_w}" height="76" fill="rgba(30,41,59,0.04)" rx="4"/>
 
-      <!-- lane dividers -->
       <line x1="{lane_x}" y1="44" x2="{lane_x + lane_w}" y2="44" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
       <line x1="{lane_x}" y1="128" x2="{lane_x + lane_w}" y2="128" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
       <line x1="{lane_x}" y1="224" x2="{lane_x + lane_w}" y2="224" stroke="rgba(30,41,59,0.08)" stroke-width="1"/>
@@ -585,10 +595,9 @@ def executive_swimlane_automated() -> tuple[str, str]:
       <line x1="{lane_x}" y1="404" x2="{lane_x + lane_w}" y2="404" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
       <line x1="{lane_x}" y1="44" x2="{lane_x}" y2="404" stroke="rgba(30,41,59,0.12)" stroke-width="1"/>
 
-      <!-- lane labels -->
       <text x="24" y="88" fill="{MUTED}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">APPLICATION</text>
-      <text x="24" y="98" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Claims system</text>
-      <text x="24" y="110" fill="{MUTED}" font-size="8" font-family="{SANS}">or batch job</text>
+      <text x="24" y="100" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Claims system</text>
+      <text x="24" y="112" fill="{MUTED}" font-size="8" font-family="{SANS}">or batch job</text>
 
       <text x="24" y="176" fill="{ACCENT}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">ENTERPRISE</text>
       <text x="24" y="188" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Agent Fabric</text>
@@ -599,7 +608,6 @@ def executive_swimlane_automated() -> tuple[str, str]:
       <text x="24" y="360" fill="{MUTED}" font-size="8" font-family="{MONO}" letter-spacing="0.12em">ALONGSIDE</text>
       <text x="24" y="372" fill="{INK}" font-size="9" font-weight="600" font-family="{SANS}">Audit &amp; ops</text>
 
-      <!-- steps -->
       {swim_step(steps[0] - 56, 60, 112, 44, "Trigger job", "route case")}
       {swim_step(steps[1] - 64, 148, 128, 52, "Verify", "identity &amp; entitle", accent=True)}
       {swim_step(steps[2] - 64, 148, 128, 52, "Route &amp; pin", "select capability", accent=True)}
@@ -610,28 +618,25 @@ def executive_swimlane_automated() -> tuple[str, str]:
       {swim_step(steps[3] - 48, 344, 96, 40, "Record", fill="rgba(30,41,59,0.02)", stroke=MUTED)}
       {swim_step(steps[4] - 48, 344, 96, 40, "Record", fill="rgba(30,41,59,0.02)", stroke=MUTED)}
 
-      <!-- optional control callout -->
       <rect x="{steps[3] - 20}" y="196" width="88" height="22" rx="4" fill="{WHITE}" stroke="{MUTED}" stroke-width="1" stroke-dasharray="4 3"/>
       <text x="{steps[3] + 24}" y="211" fill="{MUTED}" font-size="8" font-family="{SANS}" text-anchor="middle">approval if required</text>
 
-      <!-- flow arrows -->
-      <line x1="{steps[0] + 56}" y1="82" x2="{steps[1] - 64}" y2="148" stroke="{MUTED}" stroke-width="1.3" marker-end="url(#exec-sw-arrow)"/>
-      <line x1="{steps[1] + 64}" y1="174" x2="{steps[2] - 64}" y2="174" stroke="{ACCENT}" stroke-width="1.5" marker-end="url(#exec-sw-arrow-accent)"/>
-      <line x1="{steps[2] + 64}" y1="174" x2="{steps[3] - 64}" y2="248" stroke="{MUTED}" stroke-width="1.3" marker-end="url(#exec-sw-arrow)"/>
-      <line x1="{steps[3] + 64}" y1="274" x2="{steps[4] - 56}" y2="82" stroke="{MUTED}" stroke-width="1.3" marker-end="url(#exec-sw-arrow)"/>
+      {ortho(f"M {steps[0] + 56} 82 L {steps[0] + 56} 120 L {steps[1] - 64} 120 L {steps[1] - 64} 148", MUTED)}
+      {ortho(f"M {steps[1] + 64} 174 L {steps[2] - 64} 174", ACCENT, "1.5", accent=True)}
+      {ortho(f"M {steps[2] + 64} 174 L {steps[2] + 64} 210 L {steps[3] - 64} 210 L {steps[3] - 64} 248", MUTED)}
+      {ortho(f"M {steps[3] + 64} 274 L {steps[4]} 274 L {steps[4]} 104", MUTED)}
 
-      <!-- alongside track -->
+      {audit_drops}
       <line x1="{steps[1]}" y1="364" x2="{steps[4]}" y2="364" stroke="{MUTED}" stroke-width="1" stroke-dasharray="5 4" opacity="0.7"/>
-      <text x="{lane_x + lane_w - 8}" y="358" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="end">runs alongside — does not block unless approval required</text>
 
-      <!-- column headers -->
       <text x="{steps[0]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">START</text>
       <text x="{steps[1]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">VERIFY</text>
       <text x="{steps[2]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">ROUTE</text>
       <text x="{steps[3]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">EXECUTE</text>
       <text x="{steps[4]}" y="28" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle" letter-spacing="0.1em">COMPLETE</text>
 
-      <text x="540" y="428" fill="{INK}" font-size="13" font-family="{SERIF}" font-style="italic" text-anchor="middle">Same governed path for chat and automated jobs — verify → route → execute → evidence → outcome</text>
+      <text x="540" y="424" fill="{MUTED}" font-size="8" font-family="{MONO}" text-anchor="middle">Audit runs alongside — does not block unless approval required</text>
+      <text x="540" y="448" fill="{INK}" font-size="13" font-family="{SERIF}" font-style="italic" text-anchor="middle">verify → route → execute → evidence → outcome</text>
     </svg>"""
     html = chrome(
         slug,
