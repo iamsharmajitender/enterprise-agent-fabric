@@ -104,13 +104,13 @@
       <rect x="422" y="186" width="168" height="12" rx="2" fill="#f8fafc"/>
       <text x="506" y="195" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT FRONT DOOR</text>
 
-      <rect x="776" y="182" width="216" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="806" y="186" width="156" height="12" rx="2" fill="#f8fafc"/>
-      <text x="884" y="195" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT RUNTIME</text>
+      <rect x="776" y="48" width="216" height="300" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="806" y="52" width="156" height="12" rx="2" fill="#f8fafc"/>
+      <text x="884" y="61" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT RUNTIME</text>
 
-      <rect x="1008" y="182" width="268" height="166" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="1112" y="186" width="60" height="12" rx="2" fill="#f8fafc"/>
-      <text x="1142" y="195" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">SHARED</text>
+      <rect x="1008" y="48" width="268" height="300" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="1112" y="52" width="60" height="12" rx="2" fill="#f8fafc"/>
+      <text x="1142" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">SHARED</text>
 
       <!-- channel → front door -->
       <path d="M 224,128 H 240 Q 248,128 248,132 V 218 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
@@ -119,14 +119,14 @@
       <path d="M 336,204 V 164" fill="none" stroke="#0d9488" stroke-width="1.4" marker-end="url(#hir-arch-arrow-data)"/>
       <!-- ROUTE: ADP → FD -->
       <path d="M 408,164 V 204" fill="none" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow-data)"/>
-      <!-- FETCH: Runtime → ADP (orthogonal up then left into ADP bottom) -->
-      <path d="M 820,204 V 176 H 418 Q 418,176 418,168 V 164" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
+      <!-- FETCH: Runtime → ADP -->
+      <path d="M 792,116 H 568 Q 560,116 560,124 V 164" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
       <!-- ASYNC: FD → Runtime -->
-      <line x1="744" y1="232" x2="792" y2="232" stroke="#f97316" stroke-width="1.8" marker-end="url(#hir-arch-arrow-accent)"/>
+      <line x1="744" y1="266" x2="792" y2="266" stroke="#f97316" stroke-width="1.8" marker-end="url(#hir-arch-arrow-accent)"/>
       <!-- 202: Runtime → FD -->
-      <line x1="792" y1="248" x2="744" y2="248" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="792" y1="282" x2="744" y2="282" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow)"/>
       <!-- HYDRATE: Runtime → Registry -->
-      <path d="M 940,204 V 148 H 744" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
+      <path d="M 792,148 H 744" fill="none" stroke="#0d9488" stroke-width="1.2" marker-end="url(#hir-arch-arrow-data)"/>
       <line x1="224" y1="68" x2="264" y2="68" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
       <line x1="260" y1="62" x2="272" y2="74" stroke="#64748b" stroke-width="1.2"/>
       <line x1="272" y1="62" x2="260" y2="74" stroke="#64748b" stroke-width="1.2"/>
@@ -139,14 +139,14 @@
       <text x="306" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASK</text>
       <rect x="420" y="176" width="40" height="12" rx="2" fill="#f8fafc"/>
       <text x="440" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ROUTE</text>
-      <rect x="740" y="176" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="760" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">FETCH</text>
-      <rect x="948" y="176" width="52" height="12" rx="2" fill="#f8fafc"/>
-      <text x="974" y="185" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
-      <rect x="748" y="220" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="768" y="229" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASYNC</text>
-      <rect x="754" y="240" width="28" height="12" rx="2" fill="#f8fafc"/>
-      <text x="768" y="249" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
+      <rect x="700" y="104" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="720" y="113" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">FETCH</text>
+      <rect x="748" y="136" width="52" height="12" rx="2" fill="#f8fafc"/>
+      <text x="774" y="145" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
+      <rect x="748" y="254" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="263" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASYNC</text>
+      <rect x="754" y="274" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="283" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
       <rect x="232" y="64" width="56" height="12" rx="2" fill="#f8fafc"/>
       <text x="260" y="73" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">BLOCKED</text>
 
@@ -209,31 +209,31 @@
       <text x="506" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
       <text x="506" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · pin · start</text>
 
-      <rect x="792" y="204" width="184" height="124" rx="6" fill="#f8fafc"/>
-      <rect x="792" y="204" width="184" height="124" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <rect x="796" y="210" width="36" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
-      <text x="814" y="219" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">Agent runtime</text>
-      <use href="#hir-db" x="952" y="208" width="16" height="16"/>
-      <text x="884" y="256" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
-      <text x="884" y="274" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fetch · hydrate · loop</text>
+      <rect x="792" y="68" width="184" height="264" rx="6" fill="#f8fafc"/>
+      <rect x="792" y="68" width="184" height="264" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <rect x="796" y="74" width="36" height="12" rx="2" fill="transparent" stroke="rgba(30,41,59,0.40)" stroke-width="0.8"/>
+      <text x="814" y="83" fill="rgba(30,41,59,0.80)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ART</text>
+      <use href="#hir-db" x="952" y="72" width="16" height="16"/>
+      <text x="884" y="196" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
+      <text x="884" y="214" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">fetch · hydrate · loop</text>
 
-      <line x1="976" y1="268" x2="1024" y2="268" stroke="#64748b" stroke-width="1" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="976" y1="200" x2="1024" y2="200" stroke="#64748b" stroke-width="1" marker-end="url(#hir-arch-arrow)"/>
 
-      <rect x="1024" y="208" width="236" height="40" rx="6" fill="#f8fafc"/>
-      <rect x="1024" y="208" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="1142" y="232" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
+      <rect x="1024" y="68" width="236" height="80" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="68" width="236" height="80" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="1142" y="112" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
 
-      <rect x="1024" y="256" width="236" height="40" rx="6" fill="#f8fafc"/>
-      <rect x="1024" y="256" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="1142" y="280" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
+      <rect x="1024" y="160" width="236" height="80" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="160" width="236" height="80" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="1142" y="204" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
 
-      <rect x="1024" y="304" width="236" height="40" rx="6" fill="#f8fafc"/>
-      <rect x="1024" y="304" width="236" height="40" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
-      <text x="1142" y="328" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
+      <rect x="1024" y="252" width="236" height="80" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="252" width="236" height="80" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+      <text x="1142" y="296" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
 
-      <line x1="506" y1="328" x2="506" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
-      <line x1="884" y1="328" x2="884" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
-      <line x1="1142" y1="344" x2="1142" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="506" y1="348" x2="506" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="884" y1="348" x2="884" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="1142" y1="348" x2="1142" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
 
       <rect x="40" y="360" width="612" height="44" rx="6" fill="#f8fafc"/>
       <rect x="40" y="360" width="612" height="44" rx="6" fill="rgba(14,165,233,0.08)" stroke="#38bdf8" stroke-width="1"/>
@@ -291,7 +291,7 @@
       </g>
       <line x1="506" y1="268" x2="506" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       <line x1="418" y1="132" x2="418" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
-      <line x1="884" y1="268" x2="884" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="884" y1="132" x2="884" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       </g>
     </svg>
   </div>
