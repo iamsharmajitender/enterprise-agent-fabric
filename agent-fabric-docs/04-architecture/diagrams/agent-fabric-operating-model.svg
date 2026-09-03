@@ -1,0 +1,127 @@
+<svg viewBox="0 0 1500 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="own-title own-desc">
+  <title id="own-title">Enterprise Agent Fabric — operating model ownership</title>
+  <desc id="own-desc">Same fabric layout colored by owner. Identity and Security and Quality and Evals are platform rails. Channels are domain-owned. Plane, Front Door, Events, Observability, and Dashboard are enterprise platform. Runtime and Shared are both: platform provides the shell, domains own the agent and published content. Audit and Responsible / Governed AI are risk and governance.</desc>
+  <defs>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
+  </defs>
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+      <rect x="16" y="20" width="80" height="500" rx="10" fill="#f8fafc"/>
+      <rect x="16" y="20" width="80" height="500" rx="10" fill="rgba(51,65,85,0.06)" stroke="#475569" stroke-width="1.2"/>
+      <text x="56" y="40" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">PLATFORM</text>
+      <text x="56" y="270" transform="rotate(-90 56 270)" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Identity &amp; Security</text>
+
+      <rect x="104" y="20" width="80" height="500" rx="10" fill="#f8fafc"/>
+      <rect x="104" y="20" width="80" height="500" rx="10" fill="rgba(94,122,155,0.10)" stroke="#5e7a9b" stroke-width="1.2"/>
+      <text x="144" y="40" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">PLATFORM</text>
+      <text x="144" y="270" transform="rotate(-90 144 270)" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Quality &amp; Evals</text>
+
+      <g transform="translate(192,0)">
+      <rect x="24" y="20" width="1268" height="500" rx="10" fill="none" stroke="rgba(30,41,59,0.22)" stroke-width="1.2"/>
+      <rect x="470" y="14" width="340" height="14" rx="2" fill="#f8fafc"/>
+      <text x="640" y="25" fill="rgba(30,41,59,0.55)" font-size="9" font-weight="600" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">Operating model · who owns what</text>
+
+      <rect x="40" y="40" width="1236" height="40" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="40" width="1236" height="40" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="640" y="64" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Events</text>
+      <text x="1260" y="64" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end">PLATFORM</text>
+
+      <g transform="translate(0, 52)">
+      <rect x="40" y="48" width="200" height="250" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="104.0" y="52" width="72.0" height="12" rx="2" fill="#f8fafc"/>
+      <text x="140.0" y="61" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">CHANNELS</text>
+      <rect x="252" y="48" width="508" height="130" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="460.2" y="52" width="91.5" height="12" rx="2" fill="#f8fafc"/>
+      <text x="506.0" y="61" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AGENT PLANE</text>
+      <rect x="252" y="190" width="508" height="108" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="444.0" y="194" width="124.0" height="12" rx="2" fill="#f8fafc"/>
+      <text x="506.0" y="203" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AGENT FRONT DOOR</text>
+      <rect x="776" y="48" width="216" height="250" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="831.8" y="52" width="104.5" height="12" rx="2" fill="#f8fafc"/>
+      <text x="884.0" y="61" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AGENT RUNTIME</text>
+      <rect x="1008" y="48" width="268" height="250" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="1112.0" y="52" width="60.0" height="12" rx="2" fill="#f8fafc"/>
+      <text x="1142.0" y="61" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">SHARED</text>
+
+      <rect x="56" y="72" width="168" height="90" rx="6" fill="#f8fafc"/>
+      <rect x="56" y="72" width="168" height="90" rx="6" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="1.2"/>
+      <text x="140.0" y="115.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Chat / UI</text>
+      <text x="140.0" y="131.0" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">experiences</text>
+      <text x="214" y="86" fill="#0d9488" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">DOMAIN</text>
+      <rect x="56" y="180" width="168" height="90" rx="6" fill="#f8fafc"/>
+      <rect x="56" y="180" width="168" height="90" rx="6" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="1.2"/>
+      <text x="140.0" y="223.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">API / Jobs</text>
+      <text x="140.0" y="239.0" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">systems</text>
+      <text x="214" y="194" fill="#0d9488" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">DOMAIN</text>
+
+      <rect x="268" y="68" width="476" height="30" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="68" width="476" height="30" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="506.0" y="87.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Capability Registry</text>
+      <text x="734" y="82" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">PLATFORM</text>
+      <rect x="268" y="104" width="476" height="30" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="104" width="476" height="30" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="506.0" y="123.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Control Plane</text>
+      <text x="734" y="118" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">PLATFORM</text>
+      <rect x="268" y="140" width="476" height="30" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="140" width="476" height="30" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="506.0" y="159.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Data Plane</text>
+      <text x="734" y="154" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">PLATFORM</text>
+
+      <rect x="268" y="210" width="476" height="72" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="210" width="476" height="72" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="506.0" y="244.0" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
+      <text x="506.0" y="260.0" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · pin · start</text>
+      <text x="734" y="224" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">PLATFORM</text>
+
+      <rect x="792" y="68" width="184" height="210" rx="6" fill="#f8fafc"/>
+      <rect x="792" y="68" width="184" height="210" rx="6" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1.2"/>
+      <text x="884.0" y="171.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Runtime</text>
+      <text x="884.0" y="187.0" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">platform shell · domain agent</text>
+      <text x="966" y="82" fill="#ea580c" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">BOTH</text>
+
+      <rect x="1024" y="68" width="236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="68" width="236" height="44" rx="6" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1.2"/>
+      <text x="1142.0" y="94.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
+      <text x="1250" y="82" fill="#ea580c" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">BOTH</text>
+      <rect x="1024" y="120" width="236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="120" width="236" height="44" rx="6" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1.2"/>
+      <text x="1142.0" y="146.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
+      <text x="1250" y="134" fill="#ea580c" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">BOTH</text>
+      <rect x="1024" y="172" width="236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="172" width="236" height="44" rx="6" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1.2"/>
+      <text x="1142.0" y="198.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Model</text>
+      <text x="1250" y="186" fill="#ea580c" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">BOTH</text>
+      <rect x="1024" y="224" width="236" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="224" width="236" height="44" rx="6" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1.2"/>
+      <text x="1142.0" y="250.0" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
+      <text x="1250" y="238" fill="#ea580c" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">BOTH</text>
+
+      <rect x="40" y="316" width="600" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="316" width="600" height="44" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="340.0" y="342.0" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Observability</text>
+      <text x="630" y="330" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">PLATFORM</text>
+      <rect x="656" y="316" width="600" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="656" y="316" width="600" height="44" rx="6" fill="rgba(124,58,237,0.10)" stroke="#7c3aed" stroke-width="1.2"/>
+      <text x="956.0" y="342.0" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent audit</text>
+      <text x="1246" y="330" fill="#7c3aed" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">RISK</text>
+      <rect x="40" y="372" width="600" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="40" y="372" width="600" height="44" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <text x="340.0" y="398.0" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Dashboard</text>
+      <text x="630" y="386" fill="#2563eb" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">PLATFORM</text>
+      <rect x="656" y="372" width="600" height="44" rx="6" fill="#f8fafc"/>
+      <rect x="656" y="372" width="600" height="44" rx="6" fill="rgba(124,58,237,0.10)" stroke="#7c3aed" stroke-width="1.2"/>
+      <text x="956.0" y="398.0" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Responsible / Governed AI</text>
+      <text x="1246" y="386" fill="#7c3aed" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="end" letter-spacing="0.06em">RISK</text>
+
+      <line x1="40" y1="436" x2="1276" y2="436" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <text x="40" y="456" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" letter-spacing="0.14em">OWNERSHIP</text>
+      <rect x="40" y="468" width="14" height="10" rx="2" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1"/>
+      <text x="60" y="476" fill="#64748b" font-size="9" font-family="'Inter', sans-serif">Enterprise platform — path, controls, ops</text>
+      <rect x="340" y="468" width="14" height="10" rx="2" fill="rgba(13,148,136,0.12)" stroke="#0d9488" stroke-width="1"/>
+      <text x="360" y="476" fill="#64748b" font-size="9" font-family="'Inter', sans-serif">Domain — intelligence, UX, outcomes</text>
+      <rect x="600" y="468" width="14" height="10" rx="2" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1"/>
+      <text x="620" y="476" fill="#64748b" font-size="9" font-family="'Inter', sans-serif">Both — platform shell, domain content</text>
+      <rect x="900" y="468" width="14" height="10" rx="2" fill="rgba(124,58,237,0.10)" stroke="#7c3aed" stroke-width="1"/>
+      <text x="920" y="476" fill="#64748b" font-size="9" font-family="'Inter', sans-serif">Risk &amp; governance — evidence &amp; policy</text>
+      </g>
+      </g>
+</svg>

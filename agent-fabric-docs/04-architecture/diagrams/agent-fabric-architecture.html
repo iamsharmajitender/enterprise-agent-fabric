@@ -54,7 +54,7 @@
     <h1>One fabric. One ingress. One control plane. Specialized agents underneath.</h1>
     <svg viewBox="0 0 1500 790" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="hir-arch-title hir-arch-desc">
       <title id="hir-arch-title">Enterprise Agent Fabric</title>
-      <desc id="hir-arch-desc">Agent security and Agent evals sit on the left. Events sits at the top. Agent Fabric Plane holds three stacked rows: Capability Registry, Control Plane, and Data Plane. Front Door spans the same width beneath. Runtime and Shared sit to the right at full column height. Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Observability and Agent audit sit side by side at the bottom; both feed Dashboard. Dashboard feeds Responsible / Governed AI.</desc>
+      <desc id="hir-arch-desc">Identity and Security and Quality and Evals sit on the left. Events sits at the top. Agent Fabric Plane holds three stacked rows: Capability Registry, Control Plane, and Data Plane. Front Door spans the same width beneath. Runtime and Shared sit to the right at full column height. Chat/UI and API enter only through Agent Fabric Front Door. Front Door asks Agent Data Plane to classify, pins the frozen route/session, then starts Agent Fabric Runtime. Agent Fabric Runtime fetches the route row from Agent Data Plane and hydrates tool metadata from the Agent Fabric Capability Registry. Observability and Agent audit sit side by side at the bottom; both feed Dashboard. Dashboard feeds Responsible / Governed AI.</desc>
       <defs>
         <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Inter:wght@400;500;600;700&amp;display=swap');</style>
         <marker id="hir-arch-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#64748b"/></marker>
@@ -73,14 +73,14 @@
       <rect x="16" y="20" width="80" height="586" rx="10" fill="#f8fafc"/>
       <rect x="16" y="20" width="80" height="586" rx="10" fill="rgba(51,65,85,0.06)" stroke="#475569" stroke-width="1.2"/>
       <rect x="32" y="28" width="48" height="12" rx="2" fill="transparent" stroke="rgba(71,85,105,0.40)" stroke-width="0.8"/>
-      <text x="56" y="37" fill="#475569" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">SEC</text>
-      <text x="56" y="290" transform="rotate(-90 56 290)" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent security</text>
+      <text x="56" y="37" fill="#475569" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">ID</text>
+      <text x="56" y="290" transform="rotate(-90 56 290)" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Identity &amp; Security</text>
 
       <rect x="104" y="20" width="80" height="586" rx="10" fill="#f8fafc"/>
       <rect x="104" y="20" width="80" height="586" rx="10" fill="rgba(94,122,155,0.10)" stroke="#5e7a9b" stroke-width="1.2"/>
       <rect x="120" y="28" width="48" height="12" rx="2" fill="transparent" stroke="rgba(94,122,155,0.45)" stroke-width="0.8"/>
-      <text x="144" y="37" fill="#5e7a9b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">EVAL</text>
-      <text x="144" y="290" transform="rotate(-90 144 290)" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent evals</text>
+      <text x="144" y="37" fill="#5e7a9b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">QE</text>
+      <text x="144" y="290" transform="rotate(-90 144 290)" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Quality &amp; Evals</text>
 
       <g transform="translate(192,0)">
       <rect x="24" y="20" width="1268" height="586" rx="10" fill="none" stroke="rgba(30,41,59,0.22)" stroke-width="1.2"/>
@@ -219,17 +219,22 @@
 
       <line x1="976" y1="200" x2="1024" y2="200" stroke="#64748b" stroke-width="1" marker-end="url(#hir-arch-arrow)"/>
 
-      <rect x="1024" y="68" width="236" height="80" rx="6" fill="#f8fafc"/>
-      <rect x="1024" y="68" width="236" height="80" rx="6" fill="rgba(14,165,233,0.12)" stroke="#0ea5e9" stroke-width="1.2"/>
-      <text x="1142" y="112" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
 
-      <rect x="1024" y="160" width="236" height="80" rx="6" fill="#f8fafc"/>
-      <rect x="1024" y="160" width="236" height="80" rx="6" fill="rgba(20,184,166,0.12)" stroke="#14b8a6" stroke-width="1.2"/>
-      <text x="1142" y="204" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
+      <rect x="1024" y="68" width="236" height="60" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="68" width="236" height="60" rx="6" fill="rgba(14,165,233,0.12)" stroke="#0ea5e9" stroke-width="1.2"/>
+      <text x="1142" y="102" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Memory</text>
 
-      <rect x="1024" y="252" width="236" height="80" rx="6" fill="#f8fafc"/>
-      <rect x="1024" y="252" width="236" height="80" rx="6" fill="rgba(100,116,139,0.14)" stroke="#64748b" stroke-width="1.2"/>
-      <text x="1142" y="296" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
+      <rect x="1024" y="136" width="236" height="60" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="136" width="236" height="60" rx="6" fill="rgba(20,184,166,0.12)" stroke="#14b8a6" stroke-width="1.2"/>
+      <text x="1142" y="170" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">RAG</text>
+
+      <rect x="1024" y="204" width="236" height="60" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="204" width="236" height="60" rx="6" fill="rgba(168,85,247,0.12)" stroke="#a855f7" stroke-width="1.2"/>
+      <text x="1142" y="238" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Model</text>
+
+      <rect x="1024" y="272" width="236" height="60" rx="6" fill="#f8fafc"/>
+      <rect x="1024" y="272" width="236" height="60" rx="6" fill="rgba(100,116,139,0.14)" stroke="#64748b" stroke-width="1.2"/>
+      <text x="1142" y="306" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Tools</text>
 
       <line x1="506" y1="348" x2="506" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
       <line x1="884" y1="348" x2="884" y2="360" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3"/>
@@ -285,9 +290,9 @@
       <line x1="1048" y1="581" x2="1076" y2="581" stroke="#f97316" stroke-width="1.4" marker-end="url(#hir-arch-arrow-accent)"/>
       <text x="1084" y="584" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">FD starts Runtime</text>
       <rect x="40" y="600" width="14" height="10" rx="2" fill="rgba(51,65,85,0.06)" stroke="#475569" stroke-width="1"/>
-      <text x="60" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent security</text>
+      <text x="60" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Identity &amp; Security</text>
       <rect x="168" y="600" width="14" height="10" rx="2" fill="rgba(94,122,155,0.10)" stroke="#5e7a9b" stroke-width="1"/>
-      <text x="188" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Agent evals</text>
+      <text x="188" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Quality &amp; Evals</text>
       <line x1="276" y1="605" x2="300" y2="605" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
       <line x1="304" y1="599" x2="316" y2="611" stroke="#64748b" stroke-width="1.2"/>
       <line x1="316" y1="599" x2="304" y2="611" stroke="#64748b" stroke-width="1.2"/>

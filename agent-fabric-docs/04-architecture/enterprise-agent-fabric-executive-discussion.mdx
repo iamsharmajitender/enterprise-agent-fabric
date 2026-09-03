@@ -78,18 +78,18 @@ If you remember one sequence, remember that. Architecture is only names for thos
 
 <div className="gain-diagram-wrap">
 
-![Enterprise Agent Fabric architecture: Front Door as only ingress; Plane classifies; Runtime executes; Shared Memory RAG Tools; Audit and Observability underneath.](./diagrams/agent-fabric-architecture.svg)
+![Enterprise Agent Fabric architecture: Front Door as only ingress; Plane classifies; Runtime executes; Shared Memory RAG Model Tools; Audit and Observability underneath.](./diagrams/agent-fabric-architecture.svg)
 
 </div>
 
-_Caption: One ingress spanning the plane. Runtime beside it. Shared memory, retrieve, and tools. Audit and observability underneath._
+_Caption: One ingress spanning the plane. Runtime beside it. Shared memory, retrieve, model, and tools. Audit and observability underneath._
 
 | Job in the idea | Name in the picture |
 | --- | --- |
 | The only way in — entitle, lock the path, start work | **Front Door** |
 | Which governed capability, at which version | **Plane** (catalogue, decide, operator view) + **Registry** (published tools) |
 | Do the work | **Runtime** — ours, or another activation behind the pin |
-| Memory, grounding, dual-checked actions | **Shared** |
+| Memory, grounding, model, dual-checked actions | **Shared** |
 | Prove it and see it | **Audit** and **Observability** |
 
 Three identities stay distinct: the **user**, the **agent** (software acting), the **runtime** (the box that runs). Pin the path **before** minting the agent token. Channels never skip the door.
@@ -98,12 +98,20 @@ Three identities stay distinct: the **user**, the **agent** (software acting), t
 
 ## Who does which job
 
+<div className="gain-diagram-wrap">
+
+![Operating model ownership: Identity and Security and Quality and Evals are platform; Channels are domain; Plane Front Door Events Observability Dashboard are platform; Runtime and Shared are both; Audit and Governed AI are risk.](./diagrams/agent-fabric-operating-model.svg)
+
+</div>
+
+_Caption: Same fabric, colored by owner. Platform runs the path. Domains keep the intelligence. Risk owns evidence and policy._
+
 | | Owns | Does not own |
 | --- | --- | --- |
 | **Front Door** | Ingress, entitlement, pin, start | Choosing the specialist; running the loop |
 | **Plane + Registry** | Catalogue, decide, published capabilities | Pinning, starting, invoking tools |
 | **Runtime** | The work after the pin | Being a second front door |
-| **Shared** | Memory, retrieve, tool permit (user **and** agent) | Routing |
+| **Shared** | Memory, retrieve, model, tool permit (user **and** agent) | Routing |
 | **Audit / observability** | Evidence and ops signal | Blocking the request path |
 | **Domain** | Intelligence, tools, outcomes, which runtime | Rebuilding enterprise plumbing |
 
