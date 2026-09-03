@@ -3,20 +3,30 @@ title: "Enterprise Agent Fabric — Executive discussion brief"
 sidebar_label: Exec discussion brief
 sidebar_position: 2
 slug: /enterprise-agent-fabric/v1/executive-discussion
-description: "Exec walkthrough: architecture, request swimlanes, what the Fabric solves, and component roles and responsibilities."
+description: "Self-contained exec walkthrough: architecture, one request swimlane, what the Fabric solves, decision ask, and component roles and responsibilities."
 ---
 
 # Enterprise Agent Fabric — Executive discussion brief
 
-**Purpose:** A short walkthrough for leadership — four pictures, what the Fabric solves, and who owns what.
+**Purpose:** One room document for leadership — architecture, one request swimlane, what the Fabric solves, the decision ask, and who owns what. This page stands alone.
 
-**Companion reading:** [Executive TL;DR](./enterprise-agent-fabric-executive-deck-enhanced.mdx) · [Technical design](./enterprise-agent-fabric-architecture.mdx) · [Box packs index](./index.mdx)
+**One-line proposition:** One front door → central security, governance, audit, observability, and evaluation → many domain-owned specialised AIs.
+
+---
+
+## Executive summary
+
+- **Problem:** AI is moving from pilots to a portfolio of acting capabilities. Without a common operating model we face duplicated platform work, inconsistent controls, and governance risk.
+- **Proposal:** Build an Enterprise Agent Fabric — one governed front door that applies central security, policy, audit, and observability while domains retain specialised AI and data.
+- **Decision requested:** Approve a V1 reference pilot (about 3 months) with an executive sponsor, funding for platform/security engineering, and success metrics (sample: onboard 3 domains; &lt;2 weeks to onboard a capability; 90% central audit coverage).
 
 ---
 
 ## 1. Architecture (what we are building)
 
-One governed ingress. Chat and jobs enter only through **Agent Fabric Front Door**. The **Agent Fabric Plane** (Control + Data Plane + Capability Registry) decides the path. **Agent Fabric Runtime** does the work. **Shared** holds Memory, RAG, and Tools. **Audit** and **Observability** sit under every run.
+One governed ingress. Chat and jobs enter only through **Agent Fabric Front Door**. The **Agent Fabric Plane** (Control Plane + Data Plane + Capability Registry) decides the path. **Agent Fabric Runtime** does the work. **Shared** holds Memory, RAG, and Tools. **Audit** and **Observability** sit under every run.
+
+Channels never dial domain runtimes. Users do not pick chatbots. High-risk paths do not get side doors. Centralise controls; keep intelligence in domains.
 
 <div className="gain-diagram-wrap">
 
@@ -24,63 +34,66 @@ One governed ingress. Chat and jobs enter only through **Agent Fabric Front Door
 
 </div>
 
-_Caption: Boxes and trust boundaries — channels never dial domain runtimes directly._
+_Caption: Boxes and trust boundaries — Front Door asks Data Plane to classify, pins the route, then starts Runtime; Runtime hydrates from Registry and calls Shared._
+
+### How the boxes fit together
+
+| Band | Boxes | Job |
+| --- | --- | --- |
+| Ingress | Chat AFD · API AFD (one contract; two fleets at scale) | Authenticate, entitle, freeze, start |
+| Plane | ACP · Data Plane · Capability Registry | Catalogue, classify, publish capabilities |
+| Run | Runtime (per activation target) | Pin hydrate, Patterns 0–3, call Shared |
+| Shared | Memory · RAG · Tools / PEP | Session memory, retrieve, dual-checked actions |
+| Evidence | Audit · Observability · Dashboard | Prove what happened; operate the fleet |
 
 ---
 
-## 2. One request — interactive (chat)
+## 2. One request (chat and jobs — same path)
 
-Same operating path every turn: authenticate → entitle → decide → (on `route`) freeze → start Runtime → slim reply. Clarify / abstain never start work.
+Every request — interactive chat or automated job — follows the same Fabric path:
+
+1. **Ask** — User or system calls the enterprise Front Door.
+2. **Verify** — Fabric confirms identity and entitlement (claims ∩ channel; chat also requires chat-visible).
+3. **Route** — Intent is decided under policy (`route` / `clarify` / `abstain`). Jobs name the route explicitly: no classifier contest, no clarify — missing claims **fail closed**.
+4. **Freeze & start** — Only on `route`: pin version + agent identity, async-start Runtime. Chat gets a slim reply (no routing internals). Jobs get `202` + correlation id.
+5. **Execute** — Domain AI runs with approved knowledge and tools under the freeze.
+6. **Control & audit** — Pause, approval, or hand-off for high-risk actions; outcome returned; evidence retained.
+
+Clarify and abstain **never** start work. Chat sockets and job bursts use the same contract; at production scale they are separate Front Door fleets so one cannot take the other down.
 
 <div className="gain-diagram-wrap">
 
-![UI happy-path swimlane: Chat UI to Front Door to Data Plane classify, freeze, async-start Runtime; slim accepted reply back to the UI.](./diagrams/agent-fabric-swimlane-ui.svg)
+![Request swimlane: caller asks; Enterprise Fabric verifies and routes; domain AI executes; audit records evidence; outcome returned — same path for chat and jobs.](./diagrams/agent-fabric-executive-swimlane-jobs.svg)
 
 </div>
 
-_Caption: Human turn — Front Door owns pin and start; Plane owns classify; Runtime owns the work._
+_Caption: One swimlane for every request — verify → route → execute → audit. Chat and jobs share the gates; only how the route is chosen differs._
 
 ---
 
-## 3. One request — automated (jobs)
+## 3. What it solves
 
-Systems and batch callers use the same contract with an explicit `route_id`. No classifier contest, no clarify — still entitle and fail closed.
+### Why leadership should care
 
-<div className="gain-diagram-wrap">
+AI is now **production capability** — it acts on customer data, money, and regulated processes. If every division builds its own entry point, security model, approval path, and audit trail, we do not get more innovation. We rebuild the same enterprise plumbing many times — with different standards, different gaps, and no single place to answer hard questions when something goes wrong.
 
-![Jobs swimlane: application triggers job; Fabric verifies and routes; domain AI executes; audit records evidence; outcome returned.](./diagrams/agent-fabric-executive-swimlane-jobs.svg)
+The Fabric makes the **safe path the easy path**.
 
-</div>
+### Why now
 
-_Caption: Automated path — same Fabric gates, thinner decide (named route + claims)._
+AI is moving from **answering questions** to **taking action**. A standalone chatbot can live with light controls. A portfolio of AI that acts on behalf of the business cannot. The window to set the operating model is **before** the portfolio outgrows our ability to govern it.
 
----
+### Problem today
 
-## 4. Operating model (one line)
+Capabilities emerge independently (employees, customers, partners). Each team solves the visible assistant and often rebuilds the invisible work: who can access it, how requests are directed, what the AI may do, how actions are approved, and how we prove what happened.
 
-One front door → central security, governance, audit, observability, evaluation → many domain-owned specialised AIs.
+The organisation cannot consistently answer:
 
-<div className="gain-diagram-wrap">
+- **Who** was allowed to use this AI?
+- **What** was it permitted to do?
+- **Why** was this capability chosen, and what did it actually do?
 
-![Proposition: users enter one front door; Fabric centralises controls; domain AI capabilities remain independently owned below.](./diagrams/agent-fabric-executive-proposition.svg)
-
-</div>
-
-_Caption: Centralise controls. Keep intelligence in domains._
-
----
-
-## 5. What it solves
-
-Drawn from the [executive TL;DR](./enterprise-agent-fabric-executive-deck-enhanced.mdx).
-
-### Problem
-
-AI is moving from pilots to a **portfolio of acting capabilities** (customer data, money, regulated processes). Without a common operating model we get:
-
-- Duplicated platform plumbing per assistant
-- Inconsistent security, approval, and audit
-- No single place to answer who was allowed, what ran, and why
+It also lacks controls that should exist **once** for the whole portfolio: one audit trail, one operational view, one security model, one kill switch, one approval path, one release bar.
 
 ### Proposal
 
@@ -91,56 +104,123 @@ Build an **Enterprise Agent Fabric** — one governed front door that applies ce
 | Control | Outcome |
 | --- | --- |
 | **Security** | Identity, entitlement, least-privilege for users and agent principals |
-| **Governance** | Policy, approval gates, rules for high-risk actions |
+| **Governance** | Policy, approval gates, and rules for high-risk actions |
 | **Audit** | Evidence of who asked, what was decided, what ran, who approved |
-| **Observability** | Central ops view across capabilities |
+| **Observability** | Central ops view and alerts across capabilities |
 | **Evaluation** | Pre-release checks (routing goldens, adversarial cases) before ship |
 
 ### What domains keep
 
 - Business problems, domain knowledge, models, and outcomes
-- Choice of runtime / specialist logic behind the Fabric contract (`activation_target`)
+- Freedom to choose runtime and specialist logic while integrating with the Fabric contract (activation target behind the Front Door)
 
 > Centralise controls. Keep intelligence in domains.
 
-### Why leadership should care
+### Risks and mitigations
 
-If every division builds its own entry point, we do not get more innovation — we rebuild the same enterprise plumbing many times, with different gaps. The Fabric makes the **safe path the easy path**.
+| Risk | Mitigation |
+| --- | --- |
+| Data privacy | Restrict data flows; least-privilege; data minimisation |
+| Unsafe model behaviour | Pre-release evaluation; canarying; human-in-the-loop for risky flows |
+| Latency / UX impact | Measure policy gating overhead; fast-paths for low-risk actions |
+| Operational cost | Shared platform reduces duplicated spend; budget observability and SRE |
 
-### Decision framing (from TL;DR)
+### Success measures (sample KPIs)
 
-Approve a V1 reference pilot with executive sponsor, platform/security SMEs, and success measures such as: onboard pilot domains quickly, high central audit coverage, and fewer duplicated control components.
+| KPI | Example target |
+| --- | --- |
+| Domain capabilities onboarded in pilot | 3 |
+| Time to onboard a capability | &lt; 2 weeks |
+| Central audit coverage of actions for onboarded capabilities | 90% |
+| Duplicated control components removed | ≥ 3 |
+| Mean time to revoke a capability | Minutes, not days |
+
+### Roadmap (V1 pilot → scale)
+
+| Phase | Timing | Focus |
+| --- | --- | --- |
+| **Phase 0** | Weeks 0–2 | Executive sponsor, success metrics, pilot domains selected |
+| **Phase 1** | Weeks 3–12 | V1 reference Fabric (ingress, entitlement, routing, audit schema, basic observability); onboard 1–3 pilot domains |
+| **Phase 2** | Months 3–9 | Harden controls; evaluations and approvals; scale onboarding; automate evidence exports for compliance |
+
+**Owners:** Enterprise platform (build & run) · Domain teams (onboard & own outcomes) · Risk & governance (policy & evidence requirements).
+
+### Proof the model works
+
+A reference implementation already demonstrates: message → classify → entitlement → pin → execute → response, with capability registry, routing, audit foundations, and observability. That is the pilot baseline to harden, not a greenfield invent.
 
 ---
 
-## 6. Roles and responsibilities (by component)
+## 4. Roles and responsibilities (by component)
 
-| Component | Owns | Does **not** own |
+| Component | Owns | Does **not** own | If it dies |
+| --- | --- | --- | --- |
+| **Chat / channel frontends** | UI, chips, slim replies | Route table, tools, policy enforcement | That UI down; API path still works |
+| **Agent Fabric Front Door (AFD)** | Only public ingress. Authenticate, entitle, call decide, **freeze** route pin, **async-start** Runtime, slim chat / `202` jobs. Two fleets at scale (Chat + API), one contract. | Classify logic; agent loop; catalogue UI | Chat fleet down ≠ jobs fleet down (at scale) |
+| **Agent Data Plane (ADP)** | Versioned catalogue + **decide** (`route` / `clarify` / `abstain`). Eligible set = claims ∩ channel. Eval golden surface for misroutes. Serves pinned catalogue row to Runtime. | Pin; start Runtime; tool invoke | Classify fails closed — no silent start |
+| **Agent Control Plane (ACP)** | Operator catalogue **UI** / control surface; policy and version visibility for humans | Hot-path decide; start Runtime; channel traffic | Operators blind; in-flight runs continue |
+| **Agent Fabric Capability Registry** | Immutable published capabilities `id@version`. Manifests Runtime hydrates at pin. Agent-start tools point at API Front Door, not callee Runtime URLs. | Decide; pin; permit at tool invoke | New runs cannot hydrate; in-flight pins keep schemas |
+| **Agent Fabric Runtime (AR)** | Pin hydrate, Patterns 0–3 (single inference → autonomous → deterministic → guided), call Shared. Workload identity ≠ user ≠ agent robot. May be Fabric Runtime **or** another activation (for example a Bedrock Agent) behind the pinned activation target. | Channel ingress; re-decide against live `active`; widen scopes after freeze | Controlled error after accept — not a fake success |
+| **Shared — Memory** | Short / long-term memory keyed by session | Ingress classify | Runs degrade; routing still works |
+| **Shared — RAG** | Corpus retrieve for grounding | Ingress classify | Grounding degrades; routing still works |
+| **Shared — Tools / PEP** | Actions scoped by pinned manifest. **Dual check:** user entitlements (or approval) **and** agent scopes | Route choice; mint freeze | Side effects stop |
+| **Agent Audit (data + control)** | Append-only evidence chain; examiner view by correlation id. Default-deny raw utterance, claims, and tokens in payloads. | Block the hot path; replace ops dashboards | New events may drop (fail-open); runs continue |
+| **Observability** | Traces, metrics, logs across Front Door, Plane, Runtime, Shared | Compliance evidence store (that is Audit) | Runs continue; operators cannot see them |
+| **Agent security / identity** | User, agent, and Runtime workload principals; mint after pin; revoke; no side doors | Classify; pin; loop | Fabric can run; not governed |
+| **Agent evals (platform)** | Routing golden set, adversarial cases, CI release gate | Pin; start; loop | Fabric can run; cannot gate misroutes |
+| **Domain teams** | Route rows, prompts, workflows, tools, domain outcomes, choice of runtime behind activation | Building a second enterprise front door | That domain capability pauses; Fabric remains |
+| **Platform / Risk** | Fabric build & run; policy and evidence requirements; eval release bar | Owning every domain model and prompt | — |
+
+### Three routers (do not collapse)
+
+| Router | Question | Who calls it |
 | --- | --- | --- |
-| **Agent Fabric Front Door (AFD)** | Only public ingress. Authenticate channel caller, entitle, call decide, **freeze** route pin, **async-start** Runtime, return slim chat / `202` jobs. Two fleets at scale (Chat + API), one contract. | Classify logic; run the agent loop; host catalogue UI |
-| **Agent Data Plane (ADP)** | Versioned catalogue + **decide** (`route` / `clarify` / `abstain`). Eligible set = claims ∩ channel (chat-visible for chat). Eval golden surface for misroutes. | Pin; start Runtime; tool invoke |
-| **Agent Control Plane (ACP)** | Operator catalogue **UI** / control surface. Policy and version visibility for humans. | Hot-path decide API; start Runtime; channel traffic |
-| **Agent Fabric Capability Registry** | Immutable published capabilities `id@version`. Manifests AR hydrates at pin. Agent-start tools point at API AFD, not callee Runtime URLs. | Decide; pin; PEP permit at invoke time |
-| **Agent Fabric Runtime (AR)** | Pin hydrate, Patterns 0–3 loop, call Shared (Memory / RAG / Tools). Workload identity ≠ user ≠ agent robot. May be Fabric AR **or** another activation (e.g. Bedrock Agent) behind `activation_target`. | Channel ingress; re-decide mid-run against `active`; widen scopes after freeze |
-| **Shared (Memory, RAG, Tools / PEP)** | Durable memory, retrieval, and **tool dual-check** (user entitlements + agent scopes). | Route choice; mint freeze; classify |
-| **Agent Audit (AADP + AACP)** | Append-only evidence chain; examiner UI by `correlation_id`. Default-deny sensitive payload fields. | Block the hot path; replace ops dashboards |
-| **Observability (OTLP / LGTM)** | Traces, metrics, logs for runs and journeys. | Compliance evidence store (that is Audit) |
-| **Domain teams** | Route rows, prompts, workflows, tools, domain outcomes, choice of runtime behind activation. | Building a second enterprise front door |
-| **Platform / Risk** | Fabric build & run; policy and evidence requirements; eval release bar. | Owning every domain model and prompt |
+| **Data Plane (decide)** | Which governed path / workflow / manifest? | Front Door (classify). Runtime (catalogue row at pinned version — not classify) |
+| **Agent planner (inside Runtime)** | Which tool or step next? | Runtime (LLM loop or fixed workflow) |
+| **Model router** | Which LLM endpoint for this inference? | Runtime (or cloud agent behind activation) |
+
+### Autonomy patterns (who picks the next step inside Runtime)
+
+| Mode | Name | Who decides the next step |
+| --- | --- | --- |
+| **0** | Single inference | Nobody — one model call |
+| **1** | Autonomous | Model chooses tools until done |
+| **2** | Deterministic | Designer — fixed stages (may include human gates) |
+| **3** | Guided | Designer outer stages; model inside an allowlist |
 
 ### Locked operating rules (for the room)
 
-1. **Four jobs.** AFD entitles, pins, starts. Data Plane classifies. ACP is control. AR runs.
+1. **Four jobs.** Front Door entitles, pins, starts. Data Plane classifies. Control Plane is control UI. Runtime runs.
 2. **Only `route` starts work.** Clarify / abstain never pin.
-3. **Jobs name `route_id`.** Skip classifier; do **not** skip entitle.
-4. **Three principals.** User ≠ agent (`agent_client_id`) ≠ AR workload.
-5. **Channels never dial `activation_target`.** Front Door is the only way in.
+3. **Jobs name the route.** Skip classifier; do **not** skip entitle.
+4. **Three principals.** User ≠ agent (software acting) ≠ Runtime workload.
+5. **Channels never dial the activation target.** Front Door is the only way in.
+6. **Pin first, then mint the agent token.** Do not widen scopes mid-session; new route → new freeze.
 
 ---
 
-## Next steps
+## 5. What we are asking leaders to decide
 
-- Walk diagrams 1–4 in the room (architecture → chat turn → jobs → proposition).
-- Confirm what we standardise vs what domains keep (§5).
-- Agree component owners for the pilot (§6).
-- Decision package: [Executive TL;DR](./enterprise-agent-fabric-executive-deck-enhanced.mdx) · [Full pitch](./enterprise-agent-fabric-pitch.mdx)
+**Decision requested**
+
+- Approve delivery of a V1 reference Enterprise Agent Fabric (pilot: about 3 months).
+- **Sponsor:** [Executive name to be added].
+- **Budget:** estimate for engineering, security, and observability [insert figure].
+- **Success measures** (sample): onboard 3 domain capabilities; &lt;2 weeks to onboard; 90% central audit coverage; ≥3 duplicated control components removed.
+
+**What leadership enables**
+
+- Mandate to make the Fabric the **default intake** for new cross-domain AI capabilities.
+- 2–4 engineering/security SMEs for the pilot.
+- Agreement on minimum compliance and evidence requirements for production.
+
+---
+
+## Next steps (in this room)
+
+1. Walk diagrams 1–2 (architecture → one request swimlane).
+2. Confirm what we standardise vs what domains keep (§3).
+3. Agree component owners for the pilot (§4).
+4. Approve sponsor, budget, pilot domains, and success metrics (§5).
+
+**Decision requested:** Approve V1 delivery (3-month pilot), sponsor, and budget to prove the Enterprise Agent Fabric operating model.
