@@ -1,0 +1,154 @@
+---
+title: "Enterprise Agent Fabric — Executive Brief (Executive TL;DR)"
+sidebar_label: Executive quick deck (enhanced)
+sidebar_position: 1
+slug: /enterprise-agent-fabric/v1/executive-deck-enhanced
+description: "Executive brief for Enterprise Agent Fabric — concise TL;DR, explicit decision ask, KPIs, risks, and a short roadmap."
+---
+
+# Enterprise Agent Fabric — Executive TL;DR
+
+## Executive summary (TL;DR)
+
+- Problem: AI is moving from pilots to a portfolio of acting capabilities. Without a common operating model we will face duplicated platform work, inconsistent controls, and governance risk.
+- Proposal: Build an Enterprise Agent Fabric — one governed front door that applies central security, policy, audit and observability while domains retain their specialised AI and data.
+- Decision requested: Approve a V1 reference pilot (3 months) with an executive sponsor, funding for X FTEs, and success metrics (onboard 3 domains; <2 week onboarding; 90% audit coverage).
+
+---
+
+## Why leadership should care
+
+AI is now production capability — it acts on customer data, money, and regulated processes. If teams build their own entry points, we get repeated platform plumbing and inconsistent controls. The Fabric prevents that by making the safe path the easy path.
+
+---
+
+## What we are asking leaders to decide
+
+**Decision requested**
+
+- Approve delivery of a V1 reference Enterprise Agent Fabric (pilot: 3 months).
+- Sponsor: [Executive name to be added].
+- Budget: estimate for engineering, security and observability (insert figure).
+- Success measures (sample KPIs):
+  - Onboard 3 domain capabilities in pilot.
+  - Time to onboard a capability: <2 weeks.
+  - Central audit coverage: 90% of actions for onboarded capabilities.
+  - Number of duplicated control components removed: ≥3.
+
+**What leadership enables**
+
+- Executive sponsorship and the mandate to make the Fabric the default intake for new cross-domain AI capabilities.
+- Commitment to provide 2–4 engineering/security SMEs for the pilot.
+- Agreement on minimum compliance and evidence requirements for production.
+
+---
+
+## High-level proposition (one line)
+
+One front door → central security, governance, audit, and observability → many specialised domain AIs.
+
+<div className="gain-diagram-wrap">
+
+![Enterprise Agent Fabric: one front door with central security, governance, audit and observability, routing to many domain-owned AI capabilities.](./diagrams/agent-fabric-executive-proposition.svg)
+
+</div>
+
+_Caption: One enterprise ingress that enforces policy and collects evidence while domains run specialised AI._
+
+---
+
+## How every request flows (concise)
+
+1. Ask — user or system calls the enterprise front door.
+2. Verify — Fabric confirms identity and entitlement.
+3. Route — intent routed to the right domain capability under policy.
+4. Execute — domain AI runs with approved knowledge and tools.
+5. Control — pause, approval, or hand-off for high-risk actions.
+6. Complete & audit — outcome returned and evidence retained.
+
+This same path applies to interactive chats and automated jobs.
+
+<div className="gain-diagram-wrap">
+
+![Automated AI request swimlane: application triggers job, Enterprise Fabric verifies and routes, domain AI executes, audit records evidence alongside, outcome returned.](./diagrams/agent-fabric-executive-automated.svg)
+
+</div>
+
+_Alt/caption: Swimlane showing verify → route → execute → audit for automated jobs._
+
+---
+
+## What the Fabric standardises
+
+- Security: identity, entitlement, least-privilege for users and capabilities.
+- Governance: policy, approval gates, and rules for actions.
+- Audit: consistent evidence trail of who asked, what ran, why, and who approved.
+- Observability: central operational visibility and alerts across capabilities.
+- Evaluation: pre-release checks for safe behaviour.
+
+---
+
+## What domains keep
+
+- Business problems, domain knowledge, models, and outcomes.
+- Freedom to choose runtime and specialist logic while integrating with the Fabric contract.
+
+> Centralise controls. Keep intelligence in domains.
+
+---
+
+## Risks & mitigations (concise table)
+
+- Data privacy: restrict data flows, apply least-privilege and data minimisation.
+- Unsafe model behaviour: pre-release evaluation, canarying, and human-in-the-loop for risky flows.
+- Latency / UX impact: measure policy gating overhead; implement fast-paths for low-risk actions.
+- Operational cost: shared platform reduces duplicated spend; budget for observability and SRE.
+
+---
+
+## Success measures (example KPIs)
+
+- Onboarding time per capability (days).
+- Number of domain capabilities onboarded (count).
+- Percent of user actions covered by central audit (percent).
+- Mean time to revoke a capability (minutes).
+
+---
+
+## 3‑phase roadmap (V1 pilot → scale)
+
+- Phase 0 (Weeks 0–2): Executive sponsor, success metrics, pilot domains selected.
+- Phase 1 (Weeks 3–12): Build V1 reference Fabric (ingress, entitlement checks, routing, audit schema, basic observability). Onboard 1–3 pilot domains.
+- Phase 2 (Months 3–9): Harden controls, add evaluations and approvals, scale onboarding process, automate evidence exports for compliance.
+
+Owners: Enterprise platform (build & run), Domain teams (onboard & own outcomes), Risk & governance (policy & evidence requirements).
+
+---
+
+## Proof the model works
+
+A reference implementation demonstrates: message → classify → entitlement → pin → execute → response. It provides capability registry, routing, audit foundations and observability. See: [status](../../02-understand/status.md) · [technical design](./enterprise-agent-fabric-architecture.mdx).
+
+---
+
+## Accessibility & visuals
+
+- Add alt text and one‑line captions to every diagram to aid accessibility and clarity.
+- Suggested alt texts:
+  - agent-fabric-executive-problem.svg → "Fragmented enterprise AI: separate assistants per audience, duplicated controls, no shared governance." 
+  - agent-fabric-executive-proposition.svg → "One front door with central security, governance and observability routing to many domain-owned AI capabilities." 
+  - agent-fabric-v1-story.svg → "Five-stage story diagram from fragmentation to scale with control." 
+
+---
+
+## Next steps (ask to leadership)
+
+- Approve the V1 pilot and sponsor.
+- Confirm pilot domains and budget.
+- Assign platform and security SMEs for delivery.
+
+---
+
+**Decision requested:** Approve V1 delivery (3 months pilot), sponsor, and budget to prove the Enterprise Agent Fabric operating model. 
+
+**Links:** [Full decision paper](./enterprise-agent-fabric-pitch.mdx) · [Technical design](./enterprise-agent-fabric-architecture.mdx)
