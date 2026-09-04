@@ -97,13 +97,13 @@
       <rect x="104" y="52" width="72" height="12" rx="2" fill="#f8fafc"/>
       <text x="140" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">CHANNELS</text>
 
-      <rect x="252" y="48" width="508" height="150" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="252" y="48" width="508" height="158" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <rect x="432" y="52" width="148" height="12" rx="2" fill="#f8fafc"/>
       <text x="506" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">AGENT PLANE</text>
 
-      <rect x="252" y="210" width="508" height="138" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
-      <rect x="422" y="214" width="168" height="12" rx="2" fill="#f8fafc"/>
-      <text x="506" y="223" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT FRONT DOOR</text>
+      <rect x="252" y="218" width="508" height="130" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+      <rect x="422" y="222" width="168" height="12" rx="2" fill="#f8fafc"/>
+      <text x="506" y="231" fill="rgba(30,41,59,0.40)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">AGENT FRONT DOOR</text>
 
       <rect x="776" y="48" width="216" height="300" rx="8" fill="rgba(30,41,59,0.02)" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
       <rect x="806" y="52" width="156" height="12" rx="2" fill="#f8fafc"/>
@@ -114,40 +114,40 @@
       <text x="1142" y="61" fill="rgba(30,41,59,0.40)" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.14em">SHARED</text>
 
       <!-- channel → front door -->
-      <path d="M 224,128 H 240 Q 248,128 248,132 V 250 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
-      <path d="M 224,280 H 240 Q 248,280 248,272 V 268 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
+      <path d="M 224,128 H 240 Q 248,128 248,132 V 256 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
+      <path d="M 224,286 H 240 Q 248,286 248,278 V 274 H 268" fill="none" stroke="#2563eb" stroke-width="1.2" marker-end="url(#hir-arch-arrow-link)"/>
       <!-- ASK: FD → ADP (data row) -->
-      <path d="M 336,232 V 194" fill="none" stroke="#0d9488" stroke-width="1.4" marker-end="url(#hir-arch-arrow-data)"/>
+      <path d="M 336,238 V 196" fill="none" stroke="#0d9488" stroke-width="1.4" marker-end="url(#hir-arch-arrow-data)"/>
       <!-- ROUTE: ADP → FD -->
-      <path d="M 408,194 V 232" fill="none" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow-data)"/>
+      <path d="M 408,196 V 238" fill="none" stroke="#0d9488" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow-data)"/>
       <!-- FETCH: Runtime → Data Plane -->
-      <path d="M 792,172 H 744" fill="none" stroke="#0d9488" stroke-width="1.4" marker-end="url(#hir-arch-arrow-data)"/>
+      <path d="M 792,169 H 744" fill="none" stroke="#0d9488" stroke-width="1.4" marker-end="url(#hir-arch-arrow-data)"/>
       <!-- ASYNC: FD → Runtime -->
-      <line x1="744" y1="274" x2="792" y2="274" stroke="#f97316" stroke-width="1.8" marker-end="url(#hir-arch-arrow-accent)"/>
+      <line x1="744" y1="278" x2="792" y2="278" stroke="#f97316" stroke-width="1.8" marker-end="url(#hir-arch-arrow-accent)"/>
       <!-- 202: Runtime → FD -->
-      <line x1="792" y1="290" x2="744" y2="290" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="792" y1="294" x2="744" y2="294" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#hir-arch-arrow)"/>
       <!-- HYDRATE: Runtime → Capability Registry -->
       <path d="M 792,84 H 744" fill="none" stroke="#8b5cf6" stroke-width="1.4" marker-end="url(#hir-arch-arrow-cap)"/>
       <line x1="224" y1="68" x2="264" y2="68" stroke="#64748b" stroke-width="1" stroke-dasharray="4,4"/>
       <line x1="260" y1="62" x2="272" y2="74" stroke="#64748b" stroke-width="1.2"/>
       <line x1="272" y1="62" x2="260" y2="74" stroke="#64748b" stroke-width="1.2"/>
 
-      <rect x="228" y="232" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="248" y="241" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">TURN</text>
-      <rect x="228" y="282" width="32" height="12" rx="2" fill="#f8fafc"/>
-      <text x="244" y="291" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">JOB</text>
-      <rect x="288" y="204" width="36" height="12" rx="2" fill="#f8fafc"/>
-      <text x="306" y="213" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASK</text>
-      <rect x="420" y="204" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="440" y="213" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ROUTE</text>
-      <rect x="748" y="160" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="768" y="169" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">FETCH</text>
+      <rect x="228" y="238" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="248" y="247" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">TURN</text>
+      <rect x="228" y="288" width="32" height="12" rx="2" fill="#f8fafc"/>
+      <text x="244" y="297" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">JOB</text>
+      <rect x="288" y="208" width="36" height="12" rx="2" fill="#f8fafc"/>
+      <text x="306" y="217" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASK</text>
+      <rect x="420" y="208" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="440" y="217" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ROUTE</text>
+      <rect x="748" y="157" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="166" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">FETCH</text>
       <rect x="748" y="72" width="52" height="12" rx="2" fill="#f8fafc"/>
       <text x="774" y="81" fill="#8b5cf6" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
-      <rect x="748" y="262" width="40" height="12" rx="2" fill="#f8fafc"/>
-      <text x="768" y="271" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASYNC</text>
-      <rect x="754" y="282" width="28" height="12" rx="2" fill="#f8fafc"/>
-      <text x="768" y="291" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
+      <rect x="748" y="266" width="40" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="275" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">ASYNC</text>
+      <rect x="754" y="286" width="28" height="12" rx="2" fill="#f8fafc"/>
+      <text x="768" y="295" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">202</text>
       <rect x="232" y="64" width="56" height="12" rx="2" fill="#f8fafc"/>
       <text x="260" y="73" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.06em">BLOCKED</text>
 
@@ -180,34 +180,35 @@
       <text x="176" y="281" fill="#1e293b" font-size="9" font-weight="500" font-family="'Inter', sans-serif" text-anchor="middle">Kafka</text>
 
       <!-- Row 1: Capability Registry -->
-      <rect x="268" y="66" width="476" height="36" rx="6" fill="#f8fafc"/>
-      <rect x="268" y="66" width="476" height="36" rx="6" fill="rgba(139,92,246,0.14)" stroke="#8b5cf6" stroke-width="1.2"/>
+      <rect x="268" y="66" width="476" height="32" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="66" width="476" height="32" rx="6" fill="rgba(139,92,246,0.14)" stroke="#8b5cf6" stroke-width="1.2"/>
       <rect x="272" y="70" width="36" height="12" rx="2" fill="transparent" stroke="rgba(139,92,246,0.50)" stroke-width="0.8"/>
       <text x="290" y="79" fill="#8b5cf6" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">CAP</text>
-      <use href="#hir-db" x="720" y="70" width="16" height="16"/>
-      <text x="506" y="88" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Capability Registry · id@version</text>
+      <use href="#hir-db" x="720" y="68" width="16" height="16"/>
+      <text x="506" y="86" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Capability Registry · id@version</text>
 
       <!-- Row 2: Control Plane -->
-      <rect x="268" y="110" width="476" height="36" rx="6" fill="#f8fafc"/>
-      <rect x="268" y="110" width="476" height="36" rx="6" fill="rgba(249,115,22,0.14)" stroke="#f97316" stroke-width="1.2"/>
-      <rect x="272" y="114" width="36" height="12" rx="2" fill="transparent" stroke="rgba(249,115,22,0.50)" stroke-width="0.8"/>
-      <text x="290" y="123" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">CTRL</text>
-      <text x="506" y="132" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Control Plane</text>
+      <rect x="268" y="104" width="476" height="32" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="104" width="476" height="32" rx="6" fill="rgba(249,115,22,0.14)" stroke="#f97316" stroke-width="1.2"/>
+      <rect x="272" y="108" width="36" height="12" rx="2" fill="transparent" stroke="rgba(249,115,22,0.50)" stroke-width="0.8"/>
+      <text x="290" y="117" fill="#f97316" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">CTRL</text>
+      <text x="506" y="124" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Control Plane</text>
 
       <!-- Row 3: Data Plane -->
-      <rect x="268" y="154" width="476" height="36" rx="6" fill="#f8fafc"/>
-      <rect x="268" y="154" width="476" height="36" rx="6" fill="rgba(13,148,136,0.14)" stroke="#0d9488" stroke-width="1.2"/>
-      <rect x="272" y="158" width="36" height="12" rx="2" fill="transparent" stroke="rgba(13,148,136,0.50)" stroke-width="0.8"/>
-      <text x="290" y="167" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DATA</text>
-      <text x="506" y="176" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Data Plane</text>
+      <rect x="268" y="142" width="476" height="54" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="142" width="476" height="54" rx="6" fill="rgba(13,148,136,0.14)" stroke="#0d9488" stroke-width="1.2"/>
+      <rect x="272" y="146" width="36" height="12" rx="2" fill="transparent" stroke="rgba(13,148,136,0.50)" stroke-width="0.8"/>
+      <text x="290" y="155" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">DATA</text>
+      <text x="506" y="164" fill="#1e293b" font-size="11" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Data Plane</text>
+      <text x="506" y="182" fill="#0d9488" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">routes · prompts · manifest · workflow</text>
 
-      <rect x="268" y="232" width="476" height="96" rx="6" fill="#f8fafc"/>
-      <rect x="268" y="232" width="476" height="96" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
-      <rect x="272" y="238" width="44" height="12" rx="2" fill="transparent" stroke="rgba(37,99,235,0.45)" stroke-width="0.8"/>
-      <text x="294" y="247" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAFD</text>
-      <use href="#hir-db" x="720" y="236" width="16" height="16"/>
-      <text x="506" y="274" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
-      <text x="506" y="292" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · pin · start</text>
+      <rect x="268" y="238" width="476" height="90" rx="6" fill="#f8fafc"/>
+      <rect x="268" y="238" width="476" height="90" rx="6" fill="rgba(37,99,235,0.10)" stroke="#2563eb" stroke-width="1.2"/>
+      <rect x="272" y="244" width="44" height="12" rx="2" fill="transparent" stroke="rgba(37,99,235,0.45)" stroke-width="0.8"/>
+      <text x="294" y="253" fill="#2563eb" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle" letter-spacing="0.08em">NAFD</text>
+      <use href="#hir-db" x="720" y="242" width="16" height="16"/>
+      <text x="506" y="278" fill="#1e293b" font-size="12" font-weight="600" font-family="'Inter', sans-serif" text-anchor="middle">Agent Fabric Front Door</text>
+      <text x="506" y="296" fill="#64748b" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" text-anchor="middle">auth · session · intent · pin · start</text>
 
       <rect x="792" y="68" width="184" height="264" rx="6" fill="#f8fafc"/>
       <rect x="792" y="68" width="184" height="264" rx="6" fill="rgba(234,88,12,0.10)" stroke="#ea580c" stroke-width="1.2"/>
@@ -298,7 +299,7 @@
       <line x1="316" y1="599" x2="304" y2="611" stroke="#64748b" stroke-width="1.2"/>
       <text x="324" y="608" fill="#64748b" font-size="8" font-family="'Inter', sans-serif">Skip blocked</text>
       </g>
-      <line x1="360" y1="296" x2="360" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
+      <line x1="360" y1="300" x2="360" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       <line x1="506" y1="174" x2="506" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       <line x1="884" y1="132" x2="884" y2="84" stroke="#64748b" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#hir-arch-arrow)"/>
       </g>
