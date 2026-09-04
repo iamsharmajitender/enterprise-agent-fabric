@@ -7,6 +7,7 @@
       "autonomy_mode": 0,
       "label": "Single inference",
       "claims": [],
+      "hint_contains": "Pattern 0",
       "message": "What is the overdraft fee on our Everyday account?",
       "expected_status": "completed"
     },
@@ -16,6 +17,7 @@
       "autonomy_mode": 1,
       "label": "Autonomous",
       "claims": ["accounts:read"],
+      "hint_contains": "over account_fee_lookup",
       "message": "Why was I charged $42?",
       "expected_status": "completed"
     },
@@ -25,6 +27,7 @@
       "autonomy_mode": 1,
       "label": "Autonomous",
       "claims": ["support:case"],
+      "hint_contains": "ShopAssist",
       "message": "Hi, I received my blue jacket yesterday and it arrived damaged. I also think I was charged twice. I want a full refund, not a replacement.",
       "expected_status": "waiting"
     },
@@ -34,6 +37,7 @@
       "autonomy_mode": 2,
       "label": "Deterministic",
       "claims": ["support:case"],
+      "hint_contains": "Pattern 2",
       "message": "I was charged twice on order ORD-77819. Can you check if it's a duplicate charge?",
       "expected_status": "completed"
     },
@@ -43,6 +47,7 @@
       "autonomy_mode": 3,
       "label": "Guided",
       "claims": ["support:case"],
+      "hint_contains": "Pattern 3",
       "message": "Customer ticket: charged twice on order ORD-77819. Please triage and draft a reply.",
       "expected_status": "completed"
     },
@@ -52,6 +57,7 @@
       "autonomy_mode": 1,
       "label": "Autonomous",
       "claims": ["accounts:read", "support:case"],
+      "hint_contains": "picks account_fee_lookup",
       "message": "Why was I charged $42 on account acct-4412?",
       "expected_status": "completed"
     },
@@ -61,6 +67,7 @@
       "autonomy_mode": 1,
       "label": "Autonomous",
       "claims": ["accounts:read", "support:case"],
+      "hint_contains": "picks account_fee_lookup",
       "message": "Can you tell me the status of order ORD-77819?",
       "expected_status": "completed"
     }

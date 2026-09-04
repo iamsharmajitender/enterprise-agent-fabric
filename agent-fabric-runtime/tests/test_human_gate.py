@@ -52,3 +52,19 @@ def test_human_gate_waiting_carries_resume_index() -> None:
     )
     assert exc.resume_index == 2
     assert "human_gate" in str(exc)
+
+
+def test_waiting_message_for_gate_prefers_catalogue_copy() -> None:
+    from app.graph.human_gate import waiting_message_for_gate
+
+    assert (
+        waiting_message_for_gate(
+            {"waiting_message": "Escalated for human manual review."},
+            {"result": "KYC risk: high."},
+        )
+        == "Escalated for human manual review."
+    )
+    defaulted = waiting_message_for_gate({}, {"result": "KYC risk: high."})
+    assert "KYC risk: high" in defaulted
+    assert "escalated" in defaulted.lower()
+    assert "manual review" in defaulted.lower()

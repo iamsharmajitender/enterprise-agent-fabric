@@ -34,6 +34,7 @@ final class WorkflowBodies {
     body.put("branch", stage.branch());
     body.put("allowlist", stage.allowlist().isEmpty() ? null : stage.allowlist());
     body.put("max_tool_calls", stage.maxToolCalls());
+    body.put("waiting_message", stage.waitingMessage());
     return body;
   }
 }

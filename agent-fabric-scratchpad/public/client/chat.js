@@ -1,4 +1,4 @@
-import { catalogKey, claimsFor, claimsHeader, expandToken, groupByLabel } from "../shared/catalog.js";
+import { catalogKey, claimsFor, claimsHeader, expandToken, groupByLabel, pickDemoHintId, } from "../shared/catalog.js";
 import { FrontDoorClient, resultMessages, } from "./front-door.js";
 import { addMessage, clearThread, showTyping, hideTyping } from "./thread.js";
 /** Runtime Ollama client timeout is 300s; keep poll window above that plus stage overhead. */
@@ -29,27 +29,16 @@ export async function mountChat(root) {
         resizeComposer();
         const claims = (chat.claims ?? []).join(", ") || "none";
         const parts = [chat.label || "Chat", `claims ${claims}`];
-        if (chat.hint_contains)
-            parts.push("uses hint chip");
+        if (chat.route_id)
+            parts.push(`pins ${chat.route_id}`);
         root.meta.textContent = parts.join(" · ");
     };
     const resolveHintId = async () => {
-        if (!selected)
+        if (!selected?.route_id)
             return null;
         const hints = await client.fetchJson("/v1/assistant/hints");
         sessionId = hints.session_id ?? sessionId;
-        const list = hints.hints ?? [];
-        if (selected.hint_contains) {
-            const hit = list.find((h) => String(h.label ?? "").toLowerCase().includes(selected.hint_contains.toLowerCase()));
-            if (!hit)
-                throw new Error(`no hint matching ${selected.hint_contains}`);
-            return hit.hint_id;
-        }
-        // Demo catalog rows pin a route via claims; when only one chip is eligible, bind layer ①.
-        if (selected.route_id && list.length === 1) {
-            return list[0].hint_id;
-        }
-        return null;
+        return pickDemoHintId(hints.hints ?? [], selected);
     };
     const poll = async (id) => {
         const seen = new Set();
@@ -65,7 +54,14 @@ export async function mountChat(root) {
         for (let i = 0; i < POLL_MAX_ATTEMPTS; i += 1) {
             const ev = await client.fetchJson(`/v1/assistant/sessions/${encodeURIComponent(id)}/events`);
             flush(ev);
-            const terminal = ev.status === "completed" || ev.status === "waiting" || ev.status === "failed";
+            // Subagent join is status=waiting but auto-resumes — keep polling.
+            // Stop on waiting only when a human must reply (ASK / human_gate).
+            const stopOnWaiting = ev.awaiting_input === true ||
+                (ev.awaiting_input !== false &&
+                    !resultMessages(ev).some((msg) => /started subagent/i.test(msg)));
+            const terminal = ev.status === "completed" ||
+                ev.status === "failed" ||
+                (ev.status === "waiting" && stopOnWaiting);
             if (terminal) {
                 hideTyping(root.thread);
                 if (ev.status === "failed" && seen.size === 0) {

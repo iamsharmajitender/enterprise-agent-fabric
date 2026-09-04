@@ -68,6 +68,29 @@ def test_parse_subagent_packet_requires_terminal_rows() -> None:
     ]
 
 
+def test_join_note_includes_draft_text() -> None:
+    from app.graph.subagent_gate import join_note, subagent_result_text
+
+    assert (
+        subagent_result_text(
+            {"message": "Dear customer…"}, status="completed", stage_id="draft_reply"
+        )
+        == "Dear customer…"
+    )
+    note = join_note(
+        "draft_reply",
+        [
+            {
+                "correlation_id": "corr-1",
+                "status": "completed",
+                "result": {"message": "Dear customer, we are reviewing ORD-77819."},
+            }
+        ],
+    )
+    assert "Dear customer, we are reviewing ORD-77819." in note
+    assert "['completed']" not in note
+
+
 def test_merge_subagent_packet_into_stage_slot() -> None:
     slots = {
         "start_contract_review": {

@@ -45,7 +45,13 @@ from app.core.state import RunPin, RunStore
 from app.graph.human_gate import parse_gate_packet
 from app.graph.llm import LlmPort
 from app.graph.state import append_customer_reply
-from app.graph.subagent_gate import merge_subagent_packet, parse_subagent_packet, poll_subagents
+from app.graph.subagent_gate import (
+    join_note,
+    merge_subagent_packet,
+    parse_subagent_packet,
+    poll_subagents,
+    subagent_result_text,
+)
 from app.graph.workflow import build_agent_loop, build_tool_graph
 from app.tools.invoker import ToolInvoker
 
@@ -430,9 +436,13 @@ class RunService:
         resume_loop: int | None = None
 
         if waiting_for == "subagent":
-            prior_notes, merged_slots, resume_loop = self._apply_subagent_resume(
+            prior_notes, merged_slots, resume_loop, draft = self._apply_subagent_resume(
                 body, checkpoint, stage_id, prior_notes, merged_slots
             )
+            if draft:
+                # So chat can show the child draft while synthesis finishes, and so
+                # completion can fall back if synthesis invents a CALL.
+                self._append_progress_message(correlation_id, draft)
         elif waiting_for == "customer_ask":
             prior_notes, resume_loop = self._apply_customer_ask_resume(
                 body, checkpoint, prior_notes
@@ -487,7 +497,7 @@ class RunService:
         stage_id: str,
         prior_notes: list[str],
         merged_slots: dict[str, Any],
-    ) -> tuple[list[str], dict[str, Any], int | None]:
+    ) -> tuple[list[str], dict[str, Any], int | None, str]:
         """Merge child job results into the parent slot map."""
         packet = parse_subagent_packet(body if isinstance(body, dict) else {})
         if packet is None:
@@ -499,14 +509,44 @@ class RunService:
         if expected and got != expected:
             raise ValueError("subagent resume packet missing expected correlation ids")
         merged_slots = merge_subagent_packet(merged_slots, stage_id, packet)
-        note = f"Joined subagent {stage_id}: {[p['status'] for p in packet]}"
+        note = join_note(stage_id, packet)
         notes = list(prior_notes) + [note]
+        # Surface the child draft on the parent pin immediately so chat poll can show it
+        # before the trailing synthesis stage finishes.
+        draft = ""
+        if len(packet) == 1:
+            draft = subagent_result_text(
+                packet[0].get("result"),
+                status=str(packet[0].get("status") or "completed"),
+                stage_id=stage_id,
+            )
+            if draft.startswith("Subagent "):
+                draft = ""
         resume_loop = (
             int(checkpoint["resume_loop_step"])
             if checkpoint.get("resume_loop_step") is not None
             else None
         )
-        return notes, merged_slots, resume_loop
+        return notes, merged_slots, resume_loop, draft
+
+    def _append_progress_message(self, correlation_id: str, message: str) -> None:
+        """Append an interim assistant message without requiring status=running."""
+        text = message.strip()
+        if not text:
+            return
+        pin = self._store.get(correlation_id)
+        if pin is None:
+            return
+        prior = pin.result if isinstance(pin.result, dict) else {}
+        messages = [str(item) for item in (prior.get("messages") or [])]
+        if not messages and prior.get("message"):
+            messages = [str(prior["message"])]
+        if text not in messages:
+            messages.append(text)
+        self._store.save_progress(
+            correlation_id,
+            result={"message": text, "messages": messages},
+        )
 
     def _apply_customer_ask_resume(
         self,

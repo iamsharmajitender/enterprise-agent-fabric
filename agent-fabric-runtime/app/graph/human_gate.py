@@ -41,6 +41,24 @@ def gate_packet_present(slots: dict[str, Any], stage_id: str) -> bool:
     return isinstance(body, dict) and bool(body)
 
 
+_DEFAULT_WAITING_MESSAGE = (
+    "We've escalated this for human manual review. "
+    "We'll continue once a reviewer finishes."
+)
+
+
+def waiting_message_for_gate(pinned: dict[str, Any], state: dict[str, Any]) -> str:
+    """Customer-facing text while the run is paused at a human_gate."""
+    custom = str(pinned.get("waiting_message") or "").strip()
+    if custom:
+        return custom
+    prior = str(state.get("result") or "").strip()
+    if prior:
+        base = prior.rstrip(".")
+        return f"{base}. {_DEFAULT_WAITING_MESSAGE}"
+    return _DEFAULT_WAITING_MESSAGE
+
+
 def parse_gate_packet(body: dict[str, Any]) -> dict[str, Any] | None:
     """Extract a human resume packet; empty or message-only bodies stay paused."""
     if not isinstance(body, dict) or not body:

@@ -45,7 +45,8 @@ public final class WorkflowMapper {
                 bool(node, "requires_approval"),
                 objectStrings(node.get("branch")),
                 stringList(node.get("allowlist")),
-                integer(node, "max_tool_calls")));
+                integer(node, "max_tool_calls"),
+                text(node, "waiting_message")));
       }
       return List.copyOf(stages);
     } catch (Exception e) {

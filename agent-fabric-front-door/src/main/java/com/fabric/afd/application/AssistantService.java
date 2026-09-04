@@ -184,6 +184,9 @@ public class AssistantService {
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("session_id", sessionId);
     body.put("status", status.get("status"));
+    if (status.get("awaiting_input") != null) {
+      body.put("awaiting_input", status.get("awaiting_input"));
+    }
     putResultMessages(body, status.get("result"));
     String journeyId = live.routeId() == null ? "chat.turn" : "chat." + live.routeId();
     if ("completed".equals(String.valueOf(status.get("status")))) {

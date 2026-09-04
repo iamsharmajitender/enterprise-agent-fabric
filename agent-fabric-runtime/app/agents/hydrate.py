@@ -149,16 +149,18 @@ def _hydrate_workflow_ordered(
         tool_id = str(stage.get("tool") or "")
         stage_type = str(stage.get("type") or "")
         if stage_type == "human_gate":
-            hydrated.append(
-                {
-                    "id": stage_id,
-                    "workflow_stage_id": stage_id,
-                    "stage_type": "human_gate",
-                    "llm_role": "none",
-                    "llm_prompt": prompts.get(role) or host,
-                    "invoke": {},
-                }
-            )
+            node = {
+                "id": stage_id,
+                "workflow_stage_id": stage_id,
+                "stage_type": "human_gate",
+                "llm_role": "none",
+                "llm_prompt": prompts.get(role) or host,
+                "invoke": {},
+            }
+            waiting_message = str(stage.get("waiting_message") or "").strip()
+            if waiting_message:
+                node["waiting_message"] = waiting_message
+            hydrated.append(node)
             continue
         if tool_id:
             capability = by_capability.get(tool_id)
@@ -289,7 +291,8 @@ def _attach_llm_roles(
 _ANSWER_ROLES = frozenset({"classify", "synthesis"})
 _DEFAULT_SYNTHESIS = (
     "Write the user-facing answer from the goal and prior stage outputs only. "
-    "Do not invent facts that are not in those outputs."
+    "When a joined subagent result includes a drafted customer reply, return that "
+    "reply text verbatim. Do not invent tool calls or facts that are not in those outputs."
 )
 
 

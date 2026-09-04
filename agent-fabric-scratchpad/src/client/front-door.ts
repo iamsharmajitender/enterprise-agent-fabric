@@ -40,6 +40,7 @@ export type TurnResponse = {
 
 export type EventsResponse = {
   status?: string;
+  awaiting_input?: boolean;
   message?: string;
   messages?: string[];
   result?: { message?: string; messages?: string[] };

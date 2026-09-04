@@ -48,6 +48,41 @@ def subagent_result_present(slots: dict[str, Any], stage_id: str) -> bool:
     return status in {"completed", "failed"} and "result" in body
 
 
+def subagent_result_text(result: Any, *, status: str = "completed", stage_id: str = "") -> str:
+    """Extract user-facing text from a child job result (message/text) for parent notes."""
+    if isinstance(result, dict):
+        for key in ("message", "text"):
+            value = result.get(key)
+            if value is not None and str(value).strip():
+                return str(value).strip()
+        label = stage_id or "subagent"
+        return f"Subagent {status}: {label}"
+    if result is not None and str(result).strip():
+        return str(result).strip()
+    label = stage_id or "subagent"
+    return f"Subagent {status}: {label}"
+
+
+def join_note(stage_id: str, packet: list[dict[str, Any]]) -> str:
+    """Build a prior-stage note that includes each child's drafted text when present."""
+    parts: list[str] = []
+    for item in packet:
+        status = str(item.get("status") or "completed")
+        text = subagent_result_text(
+            item.get("result"),
+            status=status,
+            stage_id=stage_id,
+        )
+        # Prefer the draft body alone when it is real customer text (not a status stub).
+        if text.startswith("Subagent "):
+            parts.append(f"{status}")
+        else:
+            parts.append(text)
+    if len(parts) == 1:
+        return f"Joined subagent {stage_id}: {parts[0]}"
+    return f"Joined subagent {stage_id}: {parts}"
+
+
 def parse_subagent_packet(body: dict[str, Any] | None) -> list[dict[str, Any]] | None:
     """Extract a subagent resume packet; empty / human-gate shaped bodies stay paused."""
     if not isinstance(body, dict) or not body:

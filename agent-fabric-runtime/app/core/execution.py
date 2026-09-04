@@ -211,6 +211,15 @@ def _handle_failure(
     raise exc
 
 
+def _looks_like_tool_call(text: str) -> bool:
+    """True when synthesis returned empty or a CALL stub instead of user-facing prose."""
+    stripped = text.strip()
+    if not stripped:
+        return True
+    upper = stripped.upper()
+    return upper.startswith("CALL ") or upper.startswith("ASK ") or upper.startswith("DONE")
+
+
 def _handle_completed(
     store: RunStore,
     pin: RunPin,
@@ -218,7 +227,25 @@ def _handle_completed(
     output: dict[str, Any],
 ) -> RunPin:
     message = str(output.get("result") or "")
-    completed = store.complete(pin.correlation_id, {"message": message})
+    prior = pin.result if isinstance(pin.result, dict) else {}
+    messages = [str(item) for item in (prior.get("messages") or [])]
+    if not messages and prior.get("message"):
+        messages = [str(prior["message"])]
+    # Prefer an earlier drafted reply when trailing synthesis invents a CALL/empty answer.
+    if _looks_like_tool_call(message):
+        for prior_msg in reversed(messages):
+            text = str(prior_msg).strip()
+            if text and not text.startswith("Started subagent") and not _looks_like_tool_call(text):
+                message = text
+                break
+    if message and message not in messages:
+        messages.append(message)
+    result: dict[str, Any] = {"message": message}
+    # Only expose the progressive transcript when more than the final bubble exists
+    # (keeps slim status shape stable for single-shot completes).
+    if len(messages) > 1:
+        result["messages"] = messages
+    completed = store.complete(pin.correlation_id, result)
     telemetry.emit(
         "run.graph.completed",
         journey_id=journey_id,

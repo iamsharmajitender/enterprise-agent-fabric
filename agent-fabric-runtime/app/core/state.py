@@ -33,6 +33,11 @@ class RunPin:
         }
         if self.result is not None:
             body["result"] = self.result
+        # Chat clients stop on waiting only when a human must reply (ASK / human_gate).
+        # Subagent join auto-resumes in-process — pollers should keep watching.
+        if self.status == "waiting" and isinstance(self.checkpoint, dict):
+            waiting_for = str(self.checkpoint.get("waiting_for") or "")
+            body["awaiting_input"] = waiting_for in {"customer_ask", "human_gate"}
         return body
 
     def open_run(self) -> dict[str, Any]:

@@ -18,7 +18,7 @@ Fixed KYC pipeline. After `kyc_risk_engine` returns a `risk` slot, the workflow 
 
 Mock risk engine (`POST /kyc/risk`):
 
-- `applicant_id` containing `app-high` or `high-risk` → `risk: "high"` → **human gate** (`status=waiting`)
+- `applicant_id` containing `app-high` or `high-risk` → `risk: "high"` → **human gate** (`status=waiting`) with a customer message that the case was escalated for human manual review
 - any other applicant id → `risk: "low"` → **activate** → completed summary
 
 ```bash

@@ -13,7 +13,8 @@ public record WorkflowStage(
     Boolean requiresApproval,
     Map<String, String> branch,
     List<String> allowlist,
-    Integer maxToolCalls) {
+    Integer maxToolCalls,
+    String waitingMessage) {
 
   public WorkflowStage {
     branch = branch == null ? Map.of() : Map.copyOf(branch);

@@ -20,6 +20,7 @@ from app.graph.human_gate import (
     gate_packet_present,
     human_gate_slot_key,
     resume_index_after_gate,
+    waiting_message_for_gate,
 )
 from app.graph.llm import LlmPort
 from app.graph.llm.messages import llm_messages_preview
@@ -37,6 +38,7 @@ from app.graph.subagent_gate import (
     SubagentWaiting,
     join_enabled,
     subagent_result_present,
+    subagent_result_text,
 )
 from app import telemetry
 from app.tools.invoker import ToolInvoker
@@ -259,6 +261,8 @@ def _run_human_gate(
     gate_id = human_gate_slot_key(pinned)
     if gate_packet_present(slot_map, gate_id):
         return {"result": str(state.get("result") or ""), "notes": notes, "slots": slot_map}
+    waiting_text = waiting_message_for_gate(pinned, dict(state))
+    notes = append_unique_note(notes, waiting_text)
     raise HumanGateWaiting(
         stage_id=gate_id,
         gate_index=int(pinned.get("_graph_index") or 0),
@@ -267,7 +271,7 @@ def _run_human_gate(
             int(pinned.get("_graph_index") or 0),
         ),
         state={
-            "result": str(state.get("result") or ""),
+            "result": waiting_text,
             "goal": goal,
             "notes": notes,
             "slots": slot_map,
@@ -341,9 +345,14 @@ def _run_subagent(
         raise RuntimeError("jobs client required for kind=agent")
     if subagent_result_present(slot_map, stage_id):
         prior = slot_map.get(stage_id) if isinstance(slot_map.get(stage_id), dict) else {}
-        text = str((prior or {}).get("result") or state.get("result") or "")
-        if isinstance((prior or {}).get("result"), dict):
-            text = f"Subagent {(prior or {}).get('status')}: {stage_id}"
+        prior = prior if isinstance(prior, dict) else {}
+        text = subagent_result_text(
+            prior.get("result"),
+            status=str(prior.get("status") or "completed"),
+            stage_id=stage_id,
+        )
+        if not text:
+            text = str(state.get("result") or "")
         notes.append(text)
         return {"result": text, "notes": notes, "slots": slot_map}
 

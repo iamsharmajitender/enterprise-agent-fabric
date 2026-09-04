@@ -12,7 +12,7 @@ INSERT INTO dataplane.workflows (
     {"id":"identity_check","tool":"kyc_id_verify","llm_role":"none"},
     {"id":"sanctions_screen","tool":"kyc_sanctions_api","llm_role":"none"},
     {"id":"risk_score","tool":"kyc_risk_engine","llm_role":"none","branch":{"high":"manual_review","low":"activate_account"}},
-    {"id":"manual_review","type":"human_gate"},
+    {"id":"manual_review","type":"human_gate","waiting_message":"KYC risk is high, so we've escalated your application for human manual review. A reviewer will check your details before we continue."},
     {"id":"activate_account","tool":"kyc_account_activate","llm_role":"none","side_effect":true,"requires_approval":true},
     {"id":"summarize","llm_role":"synthesis"}
   ]$$::jsonb,
