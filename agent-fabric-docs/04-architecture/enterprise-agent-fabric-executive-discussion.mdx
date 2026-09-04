@@ -96,27 +96,6 @@ Three identities stay distinct: the **user**, the **agent** (software acting), t
 
 ---
 
-## Who does which job
-
-<div className="gain-diagram-wrap">
-
-![Operating model ownership: Identity and Security and Quality and Evals are platform; Channels are domain; Plane Front Door Events Observability Dashboard are platform; Runtime and Shared are both; Audit and Governed AI are risk.](./diagrams/agent-fabric-operating-model.svg)
-
-</div>
-
-_Caption: Same fabric, colored by owner. Platform runs the path. Domains keep the intelligence. Risk owns evidence and policy._
-
-| | Owns | Does not own |
-| --- | --- | --- |
-| **Front Door** | Ingress, entitlement, pin, start | Choosing the specialist; running the loop |
-| **Plane + Registry** | Catalogue, decide, published capabilities | Pinning, starting, invoking tools |
-| **Runtime** | The work after the pin | Being a second front door |
-| **Shared** | Memory, retrieve, model, tool permit (user **and** agent) | Routing |
-| **Audit / observability** | Evidence and ops signal | Blocking the request path |
-| **Domain** | Intelligence, tools, outcomes, which runtime | Rebuilding enterprise plumbing |
-
----
-
 ## The sentence to leave in the room
 
 > One front door. Controls once. Intelligence stays in the domain. Every request — chat or job — is verify, route, execute, record.
