@@ -1,0 +1,10 @@
+{
+  "label": "Concepts",
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Concepts",
+    "description": "The vocabulary of the Fabric: what you attach to a route when you author a product, and what happens when a request executes."
+  }
+}

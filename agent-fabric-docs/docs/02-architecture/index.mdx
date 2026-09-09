@@ -1,0 +1,49 @@
+---
+title: "Architecture"
+sidebar_label: Architecture
+description: "Index for Fabric architecture: the idea, the operating model, the technical design, and one solution pack per deployable box."
+---
+
+# Architecture
+
+The Fabric described four ways, from the sentence you say in a steering committee to the failure modes of one deployable box.
+
+These packs may be ahead of code. Behaviour of the running binary is [coverage status](/catalogue/coverage-status).
+
+**Status:** Draft, aligned to the pin-split proposal (AFD pins and starts; Agent Plane classifies; AR runs).
+
+## Where to start
+
+| Page | For | In one line |
+| --- | --- | --- |
+| [The idea](/architecture/the-idea) | Anyone | One door, controls once, intelligence in domains |
+| [Operating model](/architecture/operating-model) | Owners and reviewers | Who publishes, who approves, who runs it |
+| [Technical design](/architecture/technical-design) | Engineers | One decide contract, two AFD fleets, three principals |
+| [Executive briefs](/architecture/executive-briefs/fabric-v1-brief) | Funding conversations | Decision ask, KPIs, roadmap |
+
+## Service packs
+
+One pack per deployable box: deployment, APIs, data, sequences, failure. Read order matches a request.
+
+| Pack | Box | Job in one line |
+| --- | --- | --- |
+| [Agent Front Door](/architecture/service-packs/agent-front-door) | Chat AFD + API AFD | Only way in. Entitle, freeze, start. Two fleets, one contract. |
+| [Agent Plane](/architecture/service-packs/agent-plane) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |
+| [Agent Runtime](/architecture/service-packs/agent-runtime) | AR + Shared calls | Pin, hydrate, LangGraph loop, autonomy modes 0–3. |
+| [Agent Audit](/architecture/service-packs/agent-audit) | AADP + AACP | Producers emit async. Append-only evidence chain. AACP examines by `correlation_id`. |
+| [Agent Capability Registry](/architecture/service-packs/agent-capability-registry) | Registry (with Agent Plane) | Publishers append `id@version`. AR hydrates at pin. |
+
+## Diagrams
+
+Every figure is a generated SVG served from `/diagrams/`, with a standalone HTML page as the editorial source beside it. Both come from the Python generators in [`diagram-sources/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/diagram-sources/); run `npm run diagrams` to regenerate them. Do not hand-edit the SVGs.
+
+## Locked fabric rules
+
+1. **Four jobs.** AFD entitles, pins, starts. Data Plane classifies. ACP is control + audit. AR runs.
+2. **Two AFD fleets, one contract.** Separate process (FR-9). `{runs_topic}` is AR return.
+3. **Jobs name `route_id`.** Skip classifier and clarify. Do not skip entitle + record.
+4. **Generic chat still classifies.** Hints are eligible + chat-visible.
+5. **Only `route` starts AR.** Clarify / abstain never pin. Default start is async `202`.
+6. **One Agent Plane per trust domain.** Not one mega-agent.
+7. **Three principals.** User ≠ agent ≠ AR workload.
+8. **Capabilities are references.** AR hydrates the whole pinned manifest before the LLM.

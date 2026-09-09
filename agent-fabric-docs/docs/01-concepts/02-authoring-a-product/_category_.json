@@ -1,0 +1,10 @@
+{
+  "label": "Authoring a product",
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Authoring a product",
+    "description": "Everything you can attach to a route. A product is a route plus the rows that hang off it: capability, prompts, schema, retrieval, memory, LLM, audit, observability, and corpus."
+  }
+}

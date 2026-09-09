@@ -1,0 +1,10 @@
+{
+  "label": "Executive briefs",
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Executive briefs",
+    "description": "The same architecture told for a funding and sequencing conversation: the v1 brief, a short deck, and the decision ask with KPIs and roadmap."
+  }
+}

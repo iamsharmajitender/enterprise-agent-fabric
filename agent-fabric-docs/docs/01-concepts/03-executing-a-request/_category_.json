@@ -1,0 +1,10 @@
+{
+  "label": "Executing a request",
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Executing a request",
+    "description": "What the running Fabric does with an authored product: the lifecycle from ingress to terminal state, which autonomy mode picks the next step, what data crosses stage boundaries, and which identifiers to trace."
+  }
+}

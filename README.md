@@ -366,9 +366,10 @@ Supporting pieces:
 | --- | --- |
 | [`agent-fabric-scripts/`](agent-fabric-scripts/) | Local run tree: Compose, start/stop/seed scripts, dummy requests |
 | [`agent-fabric-mocks/`](agent-fabric-mocks/) | Local doubles — today [`agent-fabric-mocks/`](agent-fabric-mocks/tools/) (domain HTTP `:3010`) |
-| [`agent-fabric-docs/README.md`](agent-fabric-docs/README.md) | Documentation map (start / understand / catalogue / architecture / reference) |
-| [`agent-fabric-docs/04-architecture/`](agent-fabric-docs/04-architecture/) | Architecture packs |
-| [`agent-fabric-docs/05-reference/`](agent-fabric-docs/05-reference/) | Frozen request/response fixtures and [stub auth](agent-fabric-docs/05-reference/stub-auth.md) |
+| [`agent-fabric-docs/`](agent-fabric-docs/README.md) | Docusaurus documentation site. `npm start` to read it locally |
+| [`agent-fabric-docs/docs/`](agent-fabric-docs/docs/index.md) | Documentation map (concepts / architecture / autonomy / use cases / catalogue / reference) |
+| [`agent-fabric-docs/docs/02-architecture/`](agent-fabric-docs/docs/02-architecture/index.mdx) | Architecture packs |
+| [`agent-fabric-docs/static/fixtures/`](agent-fabric-docs/static/fixtures/) | Frozen request/response fixtures and [stub auth](agent-fabric-docs/docs/06-reference/01-stub-auth.md) |
 | [`agent-fabric-docs/`](agent-fabric-docs/) | [plan](agent-fabric-docs/tasks/plan.md), [evals](agent-fabric-docs/tasks/eval-plan.md), [intent router](agent-fabric-docs/tasks/intent-plan.md), and [future-enhancement.md](agent-fabric-docs/tasks/future-enhancement.md) |
 
 ## The four boxes (AFD, ADP, ACR, AR)
@@ -394,7 +395,7 @@ How the later README topics land on each box is summarized at the end of this se
 
 **Database `afd`.** Schema `frontdoor`. Freeze is route stickiness (`session_id` → pin + `correlation_id`), not conversation memory. Local jobs freeze is in-memory until the chat-path table; prod is Redis/Valkey. Outbound workload: `Authorization: Bearer fabric-internal`, `X-Workload: afd`.
 
-Pack: [agent-fabric-front-door](agent-fabric-docs/04-architecture/agent-fabric-front-door.mdx). Service notes: [`agent-fabric-front-door/README.md`](agent-fabric-front-door/README.md).
+Pack: [agent-fabric-front-door](agent-fabric-docs/docs/02-architecture/05-service-packs/01-agent-front-door.mdx). Service notes: [`agent-fabric-front-door/README.md`](agent-fabric-front-door/README.md).
 
 ### ADP — Agent Data Plane (`adp`, :3007)
 
@@ -411,7 +412,7 @@ Pack: [agent-fabric-front-door](agent-fabric-docs/04-architecture/agent-fabric-f
 
 **Database `adp`.** Schema `dataplane`. Policy lives here; memories do not. A down catalogue fails closed (no new starts). A down Runtime does not stop classify.
 
-Pack: [agent-plane](agent-fabric-docs/04-architecture/agent-fabric-plane.mdx) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-fabric-plane/agent-data-plane/README.md`](agent-fabric-plane/agent-data-plane/README.md).
+Pack: [agent-plane](agent-fabric-docs/docs/02-architecture/05-service-packs/02-agent-plane.mdx) (Data Plane half; ACP is the UI + future audit). Service notes: [`agent-fabric-plane/agent-data-plane/README.md`](agent-fabric-plane/agent-data-plane/README.md).
 
 ### ACR — Agent Capability Registry (`acr`, :3009)
 
@@ -427,7 +428,7 @@ Pack: [agent-plane](agent-fabric-docs/04-architecture/agent-fabric-plane.mdx) (D
 
 **Database `acr`.** Append-only versions. If ACR dies, **new** runs cannot hydrate; in-flight pins already have schemas on the run pin.
 
-Pack: [agent-fabric-capability-registry](agent-fabric-docs/04-architecture/agent-fabric-capability-registry.mdx).
+Pack: [agent-fabric-capability-registry](agent-fabric-docs/docs/02-architecture/05-service-packs/05-agent-capability-registry.mdx).
 
 ### AR — Agent Runtime (`ar`, :3008)
 
@@ -446,7 +447,7 @@ Pack: [agent-fabric-capability-registry](agent-fabric-docs/04-architecture/agent
 
 **Database `ar`.** Schema `runtime`. Run pin is authoritative for the loop (longer than freeze TTL). Shared Memory is a fifth store, not this database.
 
-Pack: [agent-fabric-runtime](agent-fabric-docs/04-architecture/agent-fabric-runtime.mdx).
+Pack: [agent-fabric-runtime](agent-fabric-docs/docs/02-architecture/05-service-packs/03-agent-runtime.mdx).
 
 ### How README topics map onto the four boxes
 
@@ -589,7 +590,7 @@ Each LLM call is `llm.complete(system, user)`. Hydrate picks **one** system stri
 
 Same `llm_role` → same template. Two `synthesis` stages share one synthesis `text`. Seeded packs with more than one role: `llm_pipeline` (`classify` + `synthesis`); `clause_lookup`, `template_retrieve`, `msa_risk_review`, `claims_adjudicate` (`query_formulation` + `synthesis`); `purchase_refund` (`classify` + `synthesis`). Pattern 0/1 packs are `host` only. Most other Pattern 2/3 packs have a single `synthesis` template.
 
-Example (`llm_pipeline`): classify gets `"Extract the requested fields from the input only."` Synthesis gets `"Rewrite or format using the previous stage output only."` `host` (`"Pattern 2. Do only the current stage…"`) is unused because both roles have text. Any LLM stage with a bindable capability `output_schema` validates through `with_structured_output` (`purchase_refund` classify → receipt JSON in `slots` + `notes`; synthesis `{text}` schemas unwrap to prose). How to write that schema: [docs/02-understand/schemas.md](agent-fabric-docs/02-understand/schemas.md). Route `output_schema_id=receipt_fields` is a pointer only — not loaded. On `json_to_http` routes, the next HTTP body merges **schema-named keys** from prior slots (see [Memory](#memory)); older paths may still pass classify prose on `payload["notes"]`.
+Example (`llm_pipeline`): classify gets `"Extract the requested fields from the input only."` Synthesis gets `"Rewrite or format using the previous stage output only."` `host` (`"Pattern 2. Do only the current stage…"`) is unused because both roles have text. Any LLM stage with a bindable capability `output_schema` validates through `with_structured_output` (`purchase_refund` classify → receipt JSON in `slots` + `notes`; synthesis `{text}` schemas unwrap to prose). How to write that schema: [schema](agent-fabric-docs/docs/01-concepts/02-authoring-a-product/04-schema.md). Route `output_schema_id=receipt_fields` is a pointer only — not loaded. On `json_to_http` routes, the next HTTP body merges **schema-named keys** from prior slots (see [Memory](#memory)); older paths may still pass classify prose on `payload["notes"]`.
 
 ### What prompt to put on a route
 
@@ -665,7 +666,7 @@ Publish is append-only. A second `PUT` of a published version is **409**. Runtim
 | `domain` | Domain HTTP (`http://agent-mocks:3010/fees/explain`) | Tools in [`agent-fabric-mocks/tools/`](agent-fabric-mocks/tools/) |
 | `agent` | API AFD jobs (`POST /v1/jobs` with callee `route_id`) | Not the callee AR. LLM never sees `{jobs_url}` or `activation_target` |
 
-Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [`agent-fabric-docs/02-understand/capabilities.md`](agent-fabric-docs/02-understand/capabilities.md).
+Do not add kinds for retrieve, prompts, workflows, memory, or MCP. Contract: [capability](agent-fabric-docs/docs/01-concepts/02-authoring-a-product/02-capability.md).
 
 Add a domain tool: add `agent-fabric-mocks/tools/tools/<id>.json` with unique `method`+`path`, point the capability `invoke.url` at `http://agent-mocks:3010{path}`, rebuild.
 
@@ -709,7 +710,7 @@ When `working=session`, Runtime persists `{ "notes": [...], "slots": { ... } }` 
 
 **HTTP assembly** (`agent-fabric-runtime/app/graph/payload.py`): `payload = dict(goal)`, then merge keys from **all prior stage slots** whose names appear in the **next** capability `input_schema.properties` and are not already in `goal`. Fail closed if any `input_schema.required` key is missing. Do not dump every slot or every note onto HTTP.
 
-**How stage 2 gets stage 1’s JSON:** stage 1 writes its result to `working.slots[<stage_1_id>]`. Stage 2’s HTTP invoke merges only the keys that stage 2’s `input_schema` declares. Example: `purchase_refund` — `extract_fields` (classify) supplies `merchant`, `amount`, `date` to `match_purchase`; the job payload has only `doc_id` and `account_id`. See [agent-fabric-docs/dataflow/scenarios.md](agent-fabric-docs/dataflow/scenarios.md) and the [verification checklist](agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
+**How stage 2 gets stage 1’s JSON:** stage 1 writes its result to `working.slots[<stage_1_id>]`. Stage 2’s HTTP invoke merges only the keys that stage 2’s `input_schema` declares. Example: `purchase_refund` — `extract_fields` (classify) supplies `merchant`, `amount`, `date` to `match_purchase`; the job payload has only `doc_id` and `account_id`. See [dataflow scenarios](agent-fabric-docs/docs/07-running-locally/01-dataflow-scenarios.md) and the [verification checklist](agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
 
 ### Where each type is stored
 
@@ -777,15 +778,17 @@ Authorization: Bearer stub
 X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}
 ```
 
-Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of `afd` | `adp` | `acp` | `ar` | `acr`. Details: [stub-auth.md](agent-fabric-docs/05-reference/stub-auth.md).
+Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of `afd` | `adp` | `acp` | `ar` | `acr`. Details: [stub-auth.md](agent-fabric-docs/docs/06-reference/01-stub-auth.md).
 
 ## Docs
 
-- [Documentation map](agent-fabric-docs/README.md) (start / understand / catalogue / architecture / reference)
+The documentation is a Docusaurus site in [`agent-fabric-docs/`](agent-fabric-docs/README.md), published to GitHub Pages at **https://iamsharmajitender.github.io/enterprise-agent-fabric/** on every push to `main`. Run `npm install && npm start` there to read it locally; the links below go to the source files so they also work on GitHub.
+
+- [Documentation map](agent-fabric-docs/docs/index.md) (concepts / architecture / autonomy / use cases / catalogue / reference)
 - [The four boxes](#the-four-boxes-afd-adp-acr-ar) (this README — AFD, ADP, ACR, AR)
 - [Workflows](#workflows), [Prompts](#prompts), [Retrieve](#retrieve), [Tools](#tools)
 - [Intent](agent-fabric-docs/intent/enterprise-agent-fabric-v1.md)
-- [Architecture packs](agent-fabric-docs/04-architecture/index.mdx)
+- [Architecture packs](agent-fabric-docs/docs/02-architecture/index.mdx)
 - [Plan](agent-fabric-docs/tasks/plan.md)
 - [Evals](#evals) — [eval-plan.md](agent-fabric-docs/tasks/eval-plan.md) / [eval-todo.md](agent-fabric-docs/tasks/eval-todo.md) (routing golden set — not on the hot path)
 - [Intent router](agent-fabric-docs/tasks/intent-plan.md) / [intent-todo.md](agent-fabric-docs/tasks/intent-todo.md) (① rules, ② retrieve, ③ **off**; chat JSON still FR-5 slim)

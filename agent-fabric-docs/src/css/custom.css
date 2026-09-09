@@ -1,0 +1,67 @@
+:root {
+  --ifm-color-primary: #2563eb;
+  --ifm-color-primary-dark: #1d4ed8;
+  --ifm-color-primary-darker: #1e40af;
+  --ifm-color-primary-darkest: #1e3a8a;
+  --ifm-color-primary-light: #3b82f6;
+  --ifm-color-primary-lighter: #60a5fa;
+  --ifm-color-primary-lightest: #93c5fd;
+
+  --ifm-code-font-size: 92%;
+  --ifm-font-family-monospace: ui-monospace, 'SF Mono', 'Geist Mono', Menlo, monospace;
+  --docusaurus-highlighted-code-line-bg: rgba(37, 99, 235, 0.1);
+
+  --eaf-rule: rgba(30, 41, 59, 0.12);
+  --eaf-surface: #f8fafc;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3b82f6;
+  --ifm-color-primary-darker: #2563eb;
+  --ifm-color-primary-darkest: #1d4ed8;
+  --ifm-color-primary-light: #93c5fd;
+  --ifm-color-primary-lighter: #bfdbfe;
+  --ifm-color-primary-lightest: #dbeafe;
+
+  --docusaurus-highlighted-code-line-bg: rgba(96, 165, 250, 0.2);
+
+  --eaf-rule: rgba(226, 232, 240, 0.16);
+  --eaf-surface: #0f172a;
+}
+
+/* Figures carry their own paper background, so they need a light mat even in
+   dark mode or the diagram edges disappear into the page. */
+.gain-diagram-wrap {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--eaf-rule);
+  border-radius: 10px;
+  background: #f8fafc;
+  overflow-x: auto;
+}
+
+.gain-diagram-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 640px;
+}
+
+.gain-diagram-wrap + p > a {
+  font-size: 0.85rem;
+}
+
+.markdown table {
+  display: table;
+  width: 100%;
+}
+
+.markdown table th,
+.markdown table td {
+  vertical-align: top;
+}
+
+.theme-doc-markdown pre code {
+  font-size: 0.85rem;
+}

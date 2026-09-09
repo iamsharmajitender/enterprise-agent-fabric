@@ -1,0 +1,84 @@
+---
+title: Operating model
+sidebar_label: Operating model
+description: "Who owns what. The platform/domain split across channels, plane, front door, runtime, and shared services — and what that means when you publish."
+---
+
+# Operating model
+
+[The idea](/architecture/the-idea) says controls run once and intelligence stays in the domain. This page is the boring version of that sentence: **which team owns which box**, and what changes hands when you publish a capability.
+
+The split is the whole design. Get it wrong in either direction and you lose the point — a platform that owns the intelligence becomes a bottleneck, and domains that own the controls rebuild identity and audit five times.
+
+<div className="gain-diagram-wrap">
+
+![Ownership map across five bands: channels owned by domains; agent plane, front door, and capability registry owned by the platform; runtime split between a platform shell and domain agents; memory, model, tools, and observability owned by both.](/diagrams/agent-fabric-operating-model.svg)
+
+</div>
+
+_Caption: Platform owns the path. Domains own the work. Shared services are jointly owned._
+
+## Who owns what
+
+| Band | Component | Owner |
+| --- | --- | --- |
+| Channels | Chat and UI experiences | **Domain** |
+| Channels | API and jobs systems | **Domain** |
+| Agent Front Door | Auth, session, intent, pin, start | **Platform** |
+| Agent Plane | Control Plane (catalogue UI) | **Platform** |
+| Agent Plane | Data Plane — routes, prompts, manifests, workflows | **Platform** |
+| Agent Plane | Capability Registry | **Platform** |
+| Agent Runtime | The runtime shell | **Platform** |
+| Agent Runtime | The domain agent inside it | **Domain** |
+| Shared | Memory, model, tools, observability | **Both** |
+
+The Runtime row is the one people misread. The platform owns the *shell* — pin, hydrate, graph execution, telemetry, the evidence emit. The domain owns the *agent* — the prompts, the capabilities, the workflow, the judgement about what good output looks like. One process, two owners, a clean seam at the catalogue.
+
+## What the platform guarantees
+
+Because the path is owned once, these hold for every route without a domain team implementing them:
+
+| Guarantee | Where it comes from |
+| --- | --- |
+| One way in | Front Door is the only public ingress. Channels never dial the Plane or Runtime |
+| Entitlement on every request | Jobs skip classification, never entitlement |
+| An immutable execution snapshot | The [route pin](/concepts/authoring-a-product/route) fixes `route_id@version` before the first LLM call |
+| Evidence without opt-out | [Audit](/concepts/authoring-a-product/audit) events fire from every box; no route field disables them |
+| Journey telemetry | [Observability](/concepts/authoring-a-product/observability) keyed by `route_id`, correlated end to end |
+| Three separated identities | The user, the agent, and the Runtime workload never collapse into one token |
+
+## What a domain owns
+
+Everything that makes the product good, and nothing that makes it safe:
+
+- The **[capabilities](/concepts/authoring-a-product/capability)** they publish, and the business APIs behind them.
+- The **[prompt pack](/concepts/authoring-a-product/prompts)** and the quality of what the model is told.
+- The **[schemas](/concepts/authoring-a-product/schema)** that constrain model output.
+- The **[autonomy mode](/concepts/executing-a-request/autonomy-modes)** — how much latitude the model gets.
+- The **[corpora](/concepts/authoring-a-product/corpus)** their answers are grounded in.
+
+## Publishing: what actually changes hands
+
+Publication is the transfer point, and it is deliberately one-way.
+
+1. **A domain publishes a capability** to the Registry as `id@version`. Published versions are immutable — a fix is a new version, never an edit.
+2. **A route pins that version.** The route is itself versioned, and only one version per `route_id` is `active`.
+3. **A run pins the route version.** From that moment the run is immune to catalogue changes; publishing a new active version does not disturb work in flight.
+4. **The pin becomes evidence.** The `hydrate.snapshot` audit event records every resolved capability version and schema digest, so the composition is provable later.
+
+Because every step is append-only, "what was running last Tuesday" is a query rather than an archaeology project.
+
+:::note Authoring is SQL today
+Neither routes nor corpora have a write API — both are seeded from SQL under `agent-fabric-scripts/stack/route/`. Capabilities and manifests do have a `PUT`, and it is the only path that emits `capability.published` and `manifest.published` audit events. Seed loading writes the rows silently.
+:::
+
+## Scaling rules that follow
+
+These are consequences of the ownership split, not separate policies:
+
+1. **One Agent Plane per trust domain**, not one mega-agent. The plane is a boundary, and boundaries are how the model stays reviewable.
+2. **Two Front Door fleets, one contract.** Chat is connection-bound; jobs are bursty. Separate processes so a hung chat pool cannot take down jobs.
+3. **Capabilities are references, not copies.** Runtime hydrates the whole pinned manifest before the LLM sees anything, and never re-reads the registry mid-loop.
+4. **Only `route` starts a run.** `clarify` and `abstain` never pin, so an ambiguous request cannot quietly execute something.
+
+The technical expression of all four is [technical design](/architecture/technical-design). What runs today versus what is designed: [coverage status](/catalogue/coverage-status).

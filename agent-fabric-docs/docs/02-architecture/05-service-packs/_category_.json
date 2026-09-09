@@ -1,0 +1,10 @@
+{
+  "label": "Service packs",
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "generated-index",
+    "title": "Service packs",
+    "description": "One solution pack per deployable box: deployment shape, APIs, data, sequences, and failure modes. Read order matches a request — Front Door, Plane, Runtime, Audit, Capability Registry."
+  }
+}
