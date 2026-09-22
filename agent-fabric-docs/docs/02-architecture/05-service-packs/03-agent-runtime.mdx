@@ -13,9 +13,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
 
-**Specialised agents underneath. Does the work. Does not classify the next utterance.** · **Status:** Draft · **Date:** 2026-09-02
-
-**Behaviour source:** [status](/catalogue/coverage-status). This pack may be ahead of code.
+**Specialised agents underneath. Does the work. Does not classify the next utterance.**
 
 Only the **AFD** starts AR. On `route`, that AFD `POST`s the freeze. AR **fetches the catalogue row** at the pinned version, **hydrates** from the Registry, copies the **run pin**, returns `202 { "correlation_id" }`, and runs LangGraph. Memory, RAG, and Tools sit in **Shared**. Fabric rule: [Three principals](/architecture/technical-design#three-principals).
 

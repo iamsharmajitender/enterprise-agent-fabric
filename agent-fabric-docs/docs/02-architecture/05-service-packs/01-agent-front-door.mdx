@@ -13,9 +13,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
 
-**Two fleets. One contract. Only way in.** · **Status:** Draft · **Date:** 2026-09-02
-
-**Behaviour source:** [status](/catalogue/coverage-status). This pack may be ahead of code.
+**Two fleets. One contract. Only way in.**
 
 Chat AFD is BFF-shaped (Chat/UI). API AFD is handler-shaped (HTTP jobs + Kafka ingest). They share [Agent Fabric Plane](/architecture/service-packs/agent-plane), the frozen-route/session store, and the start contract. They do not share a process (FR-9). Kafka `{runs_topic}` is [AR](/architecture/service-packs/agent-runtime) return, not a third AFD.
 

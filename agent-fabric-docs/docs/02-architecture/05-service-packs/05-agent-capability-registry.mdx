@@ -13,9 +13,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
 
-**Publishers publish versions. Agent developers refer. AR hydrates once, then calls `invoke`.** · **Status:** Draft · **Date:** 2026-09-02
-
-**Behaviour source:** [status](/catalogue/coverage-status). This pack may be ahead of code.
+**Publishers publish versions. Agent developers refer. AR hydrates once, then calls `invoke`.**
 
 The registry sits **with Agent Fabric Plane** (beside ACP and Data Plane). Memory, RAG, and Tools / PEP stay in Shared. It is a catalog, not a third AFD, not MCP `list_tools`, and not a client the loop calls on every turn.
 

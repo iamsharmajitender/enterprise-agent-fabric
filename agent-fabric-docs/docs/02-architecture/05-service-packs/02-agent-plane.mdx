@@ -13,9 +13,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
 
-**One plane per trust domain. Two boxes inside it. Does not do the work.** · **Status:** Draft · **Date:** 2026-09-02
-
-**Behaviour source:** [status](/catalogue/coverage-status). This pack may be ahead of code.
+**One plane per trust domain. Two boxes inside it. Does not do the work.**
 
 [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) **calls** the **Agent Data Plane** (catalogue + classify). **ACP** is the sibling **control** box (policy, versions, decision audit). Neither box pins. Neither box starts AR.
 

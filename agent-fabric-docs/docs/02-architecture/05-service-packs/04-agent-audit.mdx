@@ -13,9 +13,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry)
 
-**Producers emit async. AADP appends once. AACP examines by correlation.** · **Status:** Draft · **Date:** 2026-09-02
-
-**Behaviour source:** [status](/catalogue/coverage-status). This pack may be ahead of code.
+**Producers emit async. AADP appends once. AACP examines by correlation.**
 
 The audit boxes sit **beside** the request path. They are not a channel API, not OTel, and not folded into ACP catalogue or ADP schema. **AFD, ADP, AR, and ACR** POST events to **AADP**. **AACP** queries only. Decide, freeze, pin, and start **never wait** on audit commit.
 
