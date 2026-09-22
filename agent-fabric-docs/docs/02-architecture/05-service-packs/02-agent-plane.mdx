@@ -1,27 +1,54 @@
 ---
-title: "Agent Fabric Plane"
+title: "Agent Plane"
 sidebar_label: Agent Plane
-description: "Agent Fabric Plane: Agent Control Plane (ACP) and Agent Data Plane. Catalogue plus classify. Does not pin or start AR."
+description: "Catalogue and classify. The Agent Control Plane and Agent Data Plane sit here. Neither pins a route nor starts Runtime."
 ---
 
 import Details from '@theme/Details';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-# Agent Fabric Plane
+# Agent Plane
 
-**Box:** Agent Control Plane (ACP) + Agent Data Plane
+The Agent Plane is the catalogue and the classifier. There is one plane per trust domain — not one mega-agent for the enterprise.
 
-Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
+Two boxes sit inside it:
 
-**One plane per trust domain. Two boxes inside it. Does not do the work.**
+- **Agent Data Plane** — routes, prompts, manifests, workflows. The [Front Door](/architecture/service-packs/agent-front-door) calls it to decide.
+- **Agent Control Plane** — the catalogue UI. Locally it has no database and no decide API.
 
-[Agent Fabric Front Door](/architecture/service-packs/agent-front-door) **calls** the **Agent Data Plane** (catalogue + classify). **ACP** is the sibling **control** box (policy, versions, decision audit). Neither box pins. Neither box starts AR.
+Neither box pins a route. Neither box starts [Runtime](/architecture/service-packs/agent-runtime). The [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) sits beside them and shares the same store.
 
-**Local v1:** ACP is a **catalogue UI only** (port 3006) — no database, no decide API. Data Plane serves decide and catalogue on port **3007**. Decision audit is production target, not local yet.
+## What it is
+
+The Data Plane answers: given this caller, this channel, and this utterance (or named `route_id`), which governed path owns the turn? Outcomes are `route`, `clarify`, or `abstain`. Only `route` is startable, and it is the Front Door that starts.
+
+## What it owns
+
+| Owns | Does not own |
+| --- | --- |
+| Route catalogue, eligible set, decide | The freeze, the run pin |
+| Prompt packs, workflow pointers | LangGraph execution |
+| Control UI over the catalogue | Channel auth, public ingress |
+
+## What it must not do
+
+- Pin `route_id` or start Runtime.
+- Expose a public URL. Only Front Door calls decide.
+- Collapse Control Plane and Data Plane into one process that both classifies and executes.
+
+## How to talk to it
+
+| Method | Path | Who |
+| --- | --- | --- |
+| `POST` | `/v1/intent/decide` | Front Door only |
+| `GET` | `/v1/intent/eligible` | Front Door, Control Plane |
+| `GET` | `/v1/catalog/routes` | Front Door, Control Plane, Runtime (pinned version) |
+
+Fixtures: [decide-chat-request.json](/fixtures/decide-chat-request.json).
 
 ---
 
-## 1. Solution on a page
+## Design notes
 
 ### Business problem
 
@@ -103,7 +130,7 @@ AFD calls classify, then freezes and starts. This plane does not call AR.
 | **Decision** | ACP | Audit store (target) | Why this turn routed, clarified, or abstained |
 | **Route/workflow catalogue** | Platform / domain teams | Agent Data Plane | Versioned rows. Includes `agent_client_id` per row. |
 
-Frozen route/session is on the [AFD](/architecture/service-packs/agent-front-door#frozen-route-session). Run pin is on [AR](/architecture/service-packs/agent-runtime). Capability versions are on the [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) (same Agent Fabric Plane band).
+Frozen route/session is on the [AFD](/architecture/service-packs/agent-front-door#frozen-route-session). Run pin is on [AR](/architecture/service-packs/agent-runtime). Capability versions are on the [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) (same Agent Plane band).
 
 ---
 
@@ -223,7 +250,7 @@ Chat with a frozen route/session and a continuation **does not** call decide.
 
 </Details>
 
-AFD channel APIs: [Agent Fabric Front Door §6](/architecture/service-packs/agent-front-door#apis).
+AFD channel APIs: [Agent Front Door §6](/architecture/service-packs/agent-front-door#apis).
 
 ---
 
@@ -318,10 +345,10 @@ Scale Chat AFD, API AFD, and Agent Plane as three fleets. Decide must not wait o
 | **Agent Data Plane** | Catalogue reads at pinned version | Version bump, not turn rate |
 | **Decision audit** | Decide RPS (async) | Queue depth. Lag is OK |
 
-AFD and AR scale: [Agent Fabric Front Door §12](/architecture/service-packs/agent-front-door#scaling) · [Agent Fabric Runtime §12](/architecture/service-packs/agent-runtime#scaling).
+AFD and AR scale: [Agent Front Door §12](/architecture/service-packs/agent-front-door#scaling) · [Agent Runtime §12](/architecture/service-packs/agent-runtime#scaling).
 
 ---
 
 ## Read next
 
-**[Agent Fabric Runtime](/architecture/service-packs/agent-runtime)** · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Catalogue matrix](/catalogue/)
+**[Agent Runtime](/architecture/service-packs/agent-runtime)** · [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) · [Agent Front Door](/architecture/service-packs/agent-front-door) · [Catalogue matrix](/catalogue/)

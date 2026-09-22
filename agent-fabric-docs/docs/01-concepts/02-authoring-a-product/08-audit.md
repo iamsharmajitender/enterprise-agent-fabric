@@ -40,7 +40,7 @@ The store adds `received_at` at insert.
 | **Runtime** | `hydrate.snapshot` | The pinned `route_id@version`, manifest, prompt, retrieval block, and every capability with digests of its invoke URL and schemas |
 | **Runtime** | `stage.completed` / `stage.failed` | `stage_id`, `llm_role`, `status`, `latency_ms`, request and response digests |
 | **Runtime** | `run.terminal` | `status` (`completed`, `failed`, or `waiting`), route pin, `reason_code` |
-| **Capability Registry** | `capability.published`, `manifest.published` | The published id, version, and a digest of the body |
+| **Capability Plane** | `capability.published`, `manifest.published` | The published id, version, and a digest of the body |
 
 The hydrate snapshot is the interesting one for an author. It records exactly which capability versions and which schema shapes were resolved at pin — so when someone asks in six months why a run behaved the way it did, the answer is in the row rather than in whatever the catalogue happens to say today.
 

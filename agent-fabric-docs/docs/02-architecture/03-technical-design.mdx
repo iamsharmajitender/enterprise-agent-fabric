@@ -4,27 +4,21 @@ sidebar_label: Technical design
 description: "Enterprise Agent Fabric. Agent Front Door (AFD), Agent Plane (ACP + Data Plane), Agent Runtime (AR), Shared. One fabric. One front door. One agent plane. Specialised agents underneath."
 ---
 
-# Enterprise Agent Fabric
+# Technical design
 
-**Agent Fabric Front Door (AFD) · Agent Fabric Plane · Agent Control Plane (ACP) · Agent Data Plane · Agent Fabric Runtime (AR) · Shared**
+This is the internals paper: one decide contract, two Front Door fleets at scale, three principals. If you are new to the platform, start at the [home page](/) or [the idea](/architecture/the-idea). APIs and failure modes live on the [component](/category/components) pages.
 
-One fabric. One front door. One agent plane. Specialised agents underneath.
+**How a request is split.** [Agent Front Door](/architecture/service-packs/agent-front-door) calls the Agent Data Plane to classify. The Agent Control Plane is the sibling control box. Front Door **pins** `route_id` + versions and async-starts [Agent Runtime](/architecture/service-packs/agent-runtime).
 
-Local architecture paper. How-to stays in playbooks and box packs. This page is the working design: one decide contract, two AFD fleets at scale. APIs, fleets, and scale live on the child pages.
+**How ingress is split.** One **contract** (entitle, classify, freeze, start). Two **fleets** at production scale: Chat Front Door and API Front Door. Kafka `{runs_topic}` is Runtime return, not a third door. Locally, chat and jobs share port 3005 — same contract, one process.
 
-> **Naming.** These packs use **AFD**, **ACP**, **AR** (Agent runtime). Diagrams label the runtime **Agent runtime**; some editorial sources may still say NAFD until redrawn.
-
-**Pin split:** Agent Front Door **calls** the Agent Data Plane (catalogue + classify). Agent Control Plane is the sibling control box. AFD **pins** `route_id` + versions and async-starts AR. Playbooks still put the pin on the ACP. Treat this page as the proposal until they catch up.
-
-**AFD split:** one **contract** (entitle, classify, freeze, start). Two **fleets** at production scale: Chat AFD (BFF, Chat/UI) and API AFD (HTTP; Kafka job ingest is this AFD). Kafka `{runs_topic}` is AR return, not a third AFD. **Local v1:** chat and jobs share one Front Door process on port 3005 — same contract, not yet separate fleets.
-
-| Playbooks | This paper |
+| Job | Component |
 | --- | --- |
 | Front door | **[AFD](/architecture/service-packs/agent-front-door)** — entitles, freezes, starts. Only way in. |
-| Intent router | **[Agent Fabric Plane](/architecture/service-packs/agent-plane)** — AFD calls **Agent Data Plane** (catalogue + classify). **ACP** is the control box. Does not do the work. |
+| Intent router | **[Agent Plane](/architecture/service-packs/agent-plane)** — AFD calls **Agent Data Plane** (catalogue + classify). **ACP** is the control box. Does not do the work. |
 | Agentic app | **[AR](/architecture/service-packs/agent-runtime)** — specialised agents underneath. Pin, hydrate, LangGraph loop. |
 | Memory / RAG / tools | **Shared** — called from AR. Not inside AR. |
-| Tool manifests | **[Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry)** — sits with Agent Fabric Plane. Publishers append `id@version`. AR hydrates at pin. Agent-start `invoke` is API AFD. |
+| Tool manifests | **[Agent Capability Plane](/architecture/service-packs/agent-capability-registry)** — sits with Agent Plane. Publishers append `id@version`. AR hydrates at pin. Agent-start `invoke` is API AFD. |
 
 ---
 
@@ -34,11 +28,11 @@ Seven processes prove the fabric chain. Channels talk only to Front Door.
 
 | Port | Box | Job |
 | --- | --- | --- |
-| 3005 | **Agent Fabric Front Door** | Chat `/v1/assistant/*` and jobs `/v1/jobs*` on one process |
+| 3005 | **Agent Front Door** | Chat `/v1/assistant/*` and jobs `/v1/jobs*` on one process |
 | 3006 | **Agent Control Plane** | Catalogue UI only — no database, no decide API |
 | 3007 | **Agent Data Plane** | Catalogue + classify (`POST /v1/intent/decide`) |
-| 3008 | **Agent Fabric Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
-| 3009 | **Agent Fabric Capability Registry** | Published capabilities; hydrate once at pin |
+| 3008 | **Agent Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
+| 3009 | **Agent Capability Plane** | Published capabilities; hydrate once at pin |
 | 3012 | **Agent Audit Data Plane (AADP)** | Append-only evidence ingest + query |
 | 3013 | **Agent Audit Control Plane (AACP)** | Ops UI; queries AADP only |
 
@@ -58,7 +52,7 @@ Two AFD fleets (production) and one **Agent Plane** per **trust domain**. Every 
 
 **Target:** Chat/UI hits the Chat AFD. Partners, systems, and Kafka job starts hit the API AFD. That AFD calls the **Agent Data Plane** to decide which governed path owns this turn. On `route`, the **AFD** pins it and starts AR.
 
-Agent Data Plane classifies against the route/workflow catalogue. ACP is the control box in the same Agent Plane. The **Agent Capability Registry** sits next to those two boxes. AR does the work (Memory, RAG, Tools via **Shared**). AFD freezes and starts. The two AFDs share that contract and that Agent Plane. They do not share a process.
+Agent Data Plane classifies against the route/workflow catalogue. ACP is the control box in the same Agent Plane. The **Agent Capability Plane** sits next to those two boxes. AR does the work (Memory, RAG, Tools via **Shared**). AFD freezes and starts. The two AFDs share that contract and that Agent Plane. They do not share a process.
 
 | With one shared Agent Plane | Without |
 | --- | --- |
@@ -144,7 +138,7 @@ How those numbers become fleets: [Front Door scaling](/architecture/service-pack
 
 </div>
 
-Child pages: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit).
+Child pages: [Agent Front Door](/architecture/service-packs/agent-front-door) · [Agent Plane](/architecture/service-packs/agent-plane) · [Agent Runtime](/architecture/service-packs/agent-runtime) · [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) · [Agent Audit](/architecture/service-packs/agent-audit).
 
 ### Roles and responsibilities
 
@@ -166,8 +160,8 @@ Child pages: [Agent Fabric Front Door](/architecture/service-packs/agent-front-d
 | **Memory** (in Shared) | Short / long term via `session_id` | Ingress classify | Platform | Runs degrade; routing still works |
 | **RAG** (in Shared) | Corpus retrieve | Ingress classify | Platform | Grounding degrades; routing still works |
 | **Tools / PEP** (in Shared) | Actions scoped by pinned manifest. Dual check: user entitlements (or approval) and agent scopes | Route choice, mint | With AR | Side effects stop |
-| **Agent Fabric Capability Registry** (with Agent Fabric Plane) | Immutable `id@version`. Domain `invoke` and agent-start `invoke`. AR hydrates at pin | Pin, start, PEP permit | Platform | New runs cannot hydrate; in-flight pins still have schemas |
-| **Agent Fabric Audit** (AADP + AACP) | Append-only fabric evidence chain. Async emit from AFD, ADP, AR, ACR. Ops query by `correlation_id` | Decide, pin, start, loop | AADP ingest + query | New events may drop (fail-open); in-flight runs continue |
+| **Agent Capability Plane** (with Agent Plane) | Immutable `id@version`. Domain `invoke` and agent-start `invoke`. AR hydrates at pin | Pin, start, PEP permit | Platform | New runs cannot hydrate; in-flight pins still have schemas |
+| **Agent Audit** (AADP + AACP) | Append-only fabric evidence chain. Async emit from AFD, ADP, AR, ACR. Ops query by `correlation_id` | Decide, pin, start, loop | AADP ingest + query | New events may drop (fail-open); in-flight runs continue |
 | **Model router** | Which LLM. Called by AR | Which `route_id` | LLM gateway | Inference fails; decide unaffected |
 
 ### Three routers (do not collapse)
@@ -339,7 +333,7 @@ Channel APIs and swim lanes: [Front Door](/architecture/service-packs/agent-fron
 
 FRs above are the testable form.
 
-1. **Four jobs.** AFD (entitle, pin, start), Agent Data Plane (classify + catalogue; called by AFD), ACP (control + audit), AR (run pin + LangGraph loop; requests agent token). Pin sits on AFD. Agent Capability Registry sits with Agent Plane. Memory, RAG, and Tools sit in Shared.
+1. **Four jobs.** AFD (entitle, pin, start), Agent Data Plane (classify + catalogue; called by AFD), ACP (control + audit), AR (run pin + LangGraph loop; requests agent token). Pin sits on AFD. Agent Capability Plane sits with Agent Plane. Memory, RAG, and Tools sit in Shared.
 2. **Two AFD fleets, one contract.** Separate process (FR-9). Shared Agent Plane. `{runs_topic}` is return. Kafka job start is the API AFD.
 3. **Jobs name the route.** Skip classifier and clarify. Do not skip Plane ①.
 4. **Generic chat still classifies.** Hints are eligible + chat-visible. A tap is Layer ①.
@@ -352,4 +346,4 @@ FRs above are the testable form.
 
 ## Read next
 
-**[Agent Fabric Front Door](/architecture/service-packs/agent-front-door)** · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit) · [Catalogue matrix](/catalogue/) · [Runtime status](/catalogue/coverage-status) · [Patterns](/autonomy/)
+**[Agent Front Door](/architecture/service-packs/agent-front-door)** · [Agent Plane](/architecture/service-packs/agent-plane) · [Agent Runtime](/architecture/service-packs/agent-runtime) · [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) · [Agent Audit](/architecture/service-packs/agent-audit) · [Catalogue matrix](/catalogue/) · [Runtime status](/catalogue/coverage-status) · [Patterns](/autonomy/)

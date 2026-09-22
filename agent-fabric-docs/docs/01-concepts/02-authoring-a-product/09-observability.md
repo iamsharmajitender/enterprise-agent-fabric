@@ -18,7 +18,7 @@ Every box exports OpenTelemetry over OTLP to a local `otel-lgtm` container — G
 | --- | --- | --- | --- |
 | Agent Front Door | Yes | Yes | Yes |
 | Agent Data Plane | Yes | Yes | Yes |
-| Agent Capability Registry | Yes | Yes | Yes |
+| Agent Capability Plane | Yes | Yes | Yes |
 | Agent Runtime | Yes | Yes | Yes |
 | Agent Audit Data Plane | Yes | Yes | **No** |
 | Agent Control Plane | Yes | No | No |
@@ -52,7 +52,7 @@ Business events are log lines whose body is the event name, with fields carried 
 | Runtime — stage | `run.stage.started` / `.completed` / `.failed` |
 | Runtime — LLM | `run.llm.started` / `.completed` / `.failed` |
 
-The Capability Registry, Audit, and Control Plane emit no business events.
+The Capability Plane, Audit, and Control Plane emit no business events.
 
 The LLM events carry `llm_model`, `llm_role`, `llm_schema`, `llm_structured`, latency, and request/response digests. They are the fastest way to answer "did the model actually get the prompt I think it got" without turning on payload logging.
 

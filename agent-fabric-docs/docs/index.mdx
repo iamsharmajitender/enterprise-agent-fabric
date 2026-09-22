@@ -1,0 +1,89 @@
+---
+title: Enterprise Agent Fabric
+sidebar_label: Home
+sidebar_position: 0
+slug: /
+description: "One front door for acting AI. Identity, routing, policy, and proof run once. Domains keep the intelligence."
+hide_title: true
+---
+
+<div className="eaf-hero">
+
+<p className="eaf-eyebrow">Enterprise Agent Fabric</p>
+
+# One front door. Many governed agents.
+
+Identity, routing, policy, and proof run **once**. Domains keep the intelligence. People and systems never dial Legal, payments, or KYC URLs — they come in one door, and the fabric verifies, routes, runs, and records.
+
+</div>
+
+<div className="eaf-cards">
+
+<div className="eaf-card">
+
+<p className="eaf-eyebrow">Guides</p>
+
+### [Start here](/running-locally)
+
+Run the stack on this machine, then send one request through Front Door and watch it pin, hydrate, and complete.
+
+</div>
+
+<div className="eaf-card">
+
+<p className="eaf-eyebrow">Concepts</p>
+
+### [Author an agent](/concepts/authoring-a-product/route)
+
+A route, a capability, a prompt pack, and an autonomy mode. Everything you attach before the first request.
+
+</div>
+
+<div className="eaf-card">
+
+<p className="eaf-eyebrow">Architecture</p>
+
+### [How the boxes fit](/architecture/the-idea)
+
+Front Door, Agent Plane, Runtime, and Shared. Who owns the path, who owns the work.
+
+</div>
+
+</div>
+
+## What the platform is
+
+The Fabric is the shared front door and control plane for **acting** AI — money, customer data, regulated process. Chatbots that only answer can live on their own. Anything that *does* something needs the same enterprise answers every time:
+
+1. Who was allowed to use this?
+2. What was it permitted to do?
+3. Why this agent, and what did it actually do?
+
+Those answers come from one place. Specialist agents stay in the domains that know the work.
+
+<div className="gain-diagram-wrap">
+
+![Enterprise Agent Fabric: Chat and API enter only through the Agent Front Door. Inside the Agent Plane the Control Plane sits on top, with the Data Plane and Agent Capability Plane side by side. Runtime executes. Shared holds Memory, RAG, Model and Tools. Audit and Observability sit underneath.](/diagrams/agent-fabric-architecture.svg)
+
+</div>
+
+## How a request travels
+
+1. **Front Door** authenticates the caller and is the only public ingress.
+2. **Agent Data Plane** classifies the turn (or entitles a named job) and never starts Runtime.
+3. **Front Door** freezes the route version, then starts **Agent Runtime**.
+4. **Runtime** hydrates the pinned capabilities and runs the agent.
+5. **Audit** and **observability** record the same `correlation_id` so you can prove what happened.
+
+Walk it with a real call: [your first request](/guides/first-request). The full sequence: [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+
+## Where to go next
+
+| If you want | Open |
+| --- | --- |
+| Start the stack | [Start the fabric](/running-locally) |
+| Send a chat turn or a job | [First request](/guides/first-request) |
+| Understand a word | [Glossary](/concepts/glossary) |
+| See who owns which box | [Operating model](/architecture/operating-model) |
+| Read the internals paper | [Technical design](/architecture/technical-design) |
+| See what actually runs today | [Coverage status](/catalogue/coverage-status) |

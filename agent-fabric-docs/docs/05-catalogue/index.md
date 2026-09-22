@@ -5,7 +5,7 @@ sidebar_label: Overview
 
 # Catalogue matrix
 
-How to read [routes](/catalogue/routes) and [seed use cases](/catalogue/seed-use-cases). This is the **active seed** from [`route/shopassist_case/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-scripts/stack/route/shopassist_case/) (`route_version=2026.08.1`, `status=active`). It is not a claim that every catalogue field runs.
+What is seeded today, and what actually runs. Read [routes](/catalogue/routes) and [seed use cases](/catalogue/seed-use-cases) against the **active seed** in [`route/shopassist_case/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-scripts/stack/route/shopassist_case/) (`route_version=2026.08.1`, `status=active`). A named field is not a claim that Runtime executes it.
 
 **32** `route_id`s. Payload files are [`chats.json`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-scratchpad/catalog/chats.json). Run demos at [http://localhost:3014/chat](http://localhost:3014/chat).
 
@@ -44,9 +44,9 @@ Fabric up, then open [http://localhost:3014/chat](http://localhost:3014/chat). S
 
 Tool-only HTTP paths can finish against agent-fabric-mocks. LLM stages still need Ollama.
 
-## When to regenerate this folder
+## When these pages change
 
-Rewrite these three files when **seed** or **dummy payloads/scripts** change. No generator in this pass. Walk:
+Rewrite the three catalogue files when **seed** or dummy payloads change. Walk:
 
 1. Active seed `INSERT`s in [`route/shopassist_case/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-scripts/stack/route/shopassist_case/) (`dataplane.routes`, `dataplane.prompt_packs`, `dataplane.memory_profiles`, ACR capabilities/manifests).
 2. Payload keys, channels, and **route_id spelling** from `jobs.json` / `chats.json` (source of demo wrappers).

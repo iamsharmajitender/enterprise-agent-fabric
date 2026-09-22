@@ -6,9 +6,9 @@ description: "Index for Fabric architecture: the idea, the operating model, the 
 
 # Architecture
 
-The Fabric described four ways, from the sentence you say in a steering committee to the failure modes of one deployable box.
+Why the fabric exists, who owns which box, the internals paper, and one page per deployable component.
 
-These packs may be ahead of code. Behaviour of the running binary is [coverage status](/catalogue/coverage-status).
+What actually runs today: [coverage status](/catalogue/coverage-status).
 
 ## Where to start
 
@@ -28,11 +28,11 @@ One page per deployable box: deployment, APIs, data, sequences, failure. Read or
 | [Agent Plane](/architecture/service-packs/agent-plane) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |
 | [Agent Runtime](/architecture/service-packs/agent-runtime) | AR + Shared calls | Pin, hydrate, LangGraph loop, autonomy modes 0–3. |
 | [Agent Audit](/architecture/service-packs/agent-audit) | AADP + AACP | Producers emit async. Append-only evidence chain. AACP examines by `correlation_id`. |
-| [Agent Capability Registry](/architecture/service-packs/agent-capability-registry) | Registry (with Agent Plane) | Publishers append `id@version`. AR hydrates at pin. |
+| [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) | Registry (with Agent Plane) | Publishers append `id@version`. AR hydrates at pin. |
 
 ## Diagrams
 
-Every figure is a generated SVG served from `/diagrams/`, with a standalone HTML page as the editorial source beside it. Both come from the Python generators in [`diagram-sources/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/diagram-sources/); run `npm run diagrams` to regenerate them. Do not hand-edit the SVGs.
+Every figure on these pages is a generated SVG. The standalone HTML next to it is the same drawing, opened as a page. Both come from [`diagram-sources/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/diagram-sources/).
 
 ## Locked fabric rules
 

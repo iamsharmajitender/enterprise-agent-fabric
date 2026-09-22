@@ -1,29 +1,58 @@
 ---
-title: "Agent Fabric Front Door (AFD)"
+title: "Agent Front Door"
 sidebar_label: Agent Front Door
-description: "Agent Fabric Front Door: two fleets, one contract. Chat AFD and API AFD entitle, freeze, and start. Only way into Enterprise Agent Fabric."
+description: "The only public way into the Fabric. Entitles the caller, freezes the route, and starts Runtime. Chat and jobs share one contract."
 ---
 
 import Details from '@theme/Details';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-# Agent Fabric Front Door (AFD)
+# Agent Front Door
 
-**Box:** Chat AFD (BFF) + API AFD (HTTP handler + Kafka job-start worker)
+The Front Door is the only public way into the Fabric. Chat, jobs, and partner APIs all stop here. It checks who you are, freezes which agent will run, and starts [Agent Runtime](/architecture/service-packs/agent-runtime). It never classifies a request itself and it never runs the agent.
 
-Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
+Try it: [your first request](/guides/first-request).
 
-**Two fleets. One contract. Only way in.**
+## What it is
 
-Chat AFD is BFF-shaped (Chat/UI). API AFD is handler-shaped (HTTP jobs + Kafka ingest). They share [Agent Fabric Plane](/architecture/service-packs/agent-plane), the frozen-route/session store, and the start contract. They do not share a process (FR-9). Kafka `{runs_topic}` is [AR](/architecture/service-packs/agent-runtime) return, not a third AFD.
+Two shapes, one contract: **entitle → classify (chat) or entitle-only (jobs) → freeze → start**.
 
-**Pin split:** AFD **calls** the Agent Data Plane (catalogue + classify). On `route`, this AFD **pins** `route_id` + versions and async-starts AR.
+- **Chat** is a BFF. Humans send an utterance. The Front Door asks the [Agent Data Plane](/architecture/service-packs/agent-plane) to classify. Only `outcome=route` starts Runtime.
+- **Jobs** are an API. The caller already named `route_id`. Classification is skipped; entitlement is not.
 
-**Local v1:** chat and jobs share one Front Door process on port **3005**. Production splits into two fleets (FR-9); the contract is unchanged.
+Locally both shapes share port **3005**. At production scale they are separate fleets so a hung chat pool cannot take down jobs. They still share the Agent Plane, the freeze store, and the start contract.
+
+## What it owns
+
+| Owns | Does not own |
+| --- | --- |
+| Channel auth, `session_id`, hints, SSE/poll, jobs API | Classify, eligible set, route catalogue |
+| Frozen route/session, pin, async start | The run pin, the LangGraph loop |
+| Fan-out of Runtime status | Agent identity mint, tool invoke |
+
+## What it must not do
+
+- Classify. That is the Data Plane.
+- Start Runtime on `clarify` or `abstain`.
+- Let a channel dial Runtime or the Agent Plane.
+- Show the chat UI a `route_id`, `run_id`, or `agent_client_id`.
+
+## How to talk to it
+
+| Method | Path | Who |
+| --- | --- | --- |
+| `POST` | `/v1/assistant/turns` | Chat |
+| `GET` | `/v1/assistant/hints` | Chat empty state |
+| `POST` | `/v1/jobs` | Jobs, partners, parent agents |
+| `GET` | `/v1/jobs/{correlation_id}` | Jobs poll |
+
+Headers: [stub auth](/reference/stub-auth). Fixtures: [reference](/reference/).
 
 ---
 
-## 1. Solution on a page
+## Design notes
+
+The sections below are the internals of this box — fleets, freeze record, APIs, and scale.
 
 ### Business problem
 
@@ -242,7 +271,7 @@ Continuation: skip decide. Resume AR.
 | Jobs HTTP / Kafka / AR agent-start | Decide with explicit `route_id`. Catalogue row on `route` | Start |
 | `{runs_topic}` consume / `GET` job | None | Status only |
 
-Decide JSON: [Agent Fabric Plane](/architecture/service-packs/agent-plane#apis). Start / `202`: [Agent Fabric Runtime](/architecture/service-packs/agent-runtime#apis).
+Decide JSON: [Agent Plane](/architecture/service-packs/agent-plane#apis). Start / `202`: [Agent Runtime](/architecture/service-packs/agent-runtime#apis).
 
 ---
 
@@ -342,10 +371,10 @@ Decide capacity is turns/s × (entitle + classify + pin + start-ack). Run capaci
 
 **Start edge.** Wait only for `202` + `correlation_id`, never the memo.
 
-Plane and AR scale: [Agent Fabric Plane §12](/architecture/service-packs/agent-plane#scaling) · [Agent Fabric Runtime §12](/architecture/service-packs/agent-runtime#scaling).
+Plane and AR scale: [Agent Plane §12](/architecture/service-packs/agent-plane#scaling) · [Agent Runtime §12](/architecture/service-packs/agent-runtime#scaling).
 
 ---
 
 ## Read next
 
-**[Agent Fabric Plane](/architecture/service-packs/agent-plane)** · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Enterprise Agent Fabric](/architecture/technical-design)
+**[Agent Plane](/architecture/service-packs/agent-plane)** · [Agent Runtime](/architecture/service-packs/agent-runtime) · [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) · [Enterprise Agent Fabric](/architecture/technical-design)

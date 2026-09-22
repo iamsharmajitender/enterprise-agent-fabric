@@ -6,12 +6,12 @@ description: "The two capability kinds a manifest can reference: domain HTTP and
 
 # Capability
 
-The registry has **two kinds**. That is the catalog contract. A kind is how Runtime calls after PEP, not a taxonomy of “things an agent can do.”
+The Capability Plane publishes **two kinds**. That is the catalog contract. A kind is how Runtime calls after PEP, not a taxonomy of “things an agent can do.”
 
 | `kind` | Invoke | What it is |
 | --- | --- | --- |
 | `domain` | HTTP to a governed business API (local: agent-fabric-mocks) | OCR, fee lookup, freeze, notify. |
-| `agent` | Front Door `POST /v1/jobs` with a **fixed** `route_id` in `invoke.body` | Start another catalogue product. New freeze, new entitle, callee `agent_client_id`. Not a POST to the callee Runtime. |
+| `agent` | Front Door `POST /v1/jobs` with a **fixed** `route_id` in `invoke.body` | Start another catalogue agent. New freeze, new entitle, callee `agent_client_id`. Not a POST to the callee Runtime. |
 
 Same `id` + `version` UX for both. Control Plane lists them together. Manifests only store `{capability_id, capability_version}`; `kind` lives on the capability row (`acr.registry.capabilities.kind`).
 

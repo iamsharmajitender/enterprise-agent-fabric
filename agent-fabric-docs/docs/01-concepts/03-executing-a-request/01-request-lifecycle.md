@@ -6,7 +6,7 @@ description: "The five processes a request crosses, the pin-then-hydrate-then-La
 
 # Request lifecycle
 
-Five processes. Channels talk only to Front Door.
+A request crosses five processes. Channels talk only to the [Front Door](/architecture/service-packs/agent-front-door). Walk it with [your first request](/guides/first-request) before reading this page.
 
 | Port | Process | Job |
 | --- | --- | --- |
@@ -14,9 +14,9 @@ Five processes. Channels talk only to Front Door.
 | 3006 | Agent Control Plane (ACP) | Catalogue UI. No database. Not a Fabric box. |
 | 3007 | Agent Data Plane (ADP) | Catalogue and classify. `POST /v1/intent/decide`. Does not start Runtime. |
 | 3008 | Agent Runtime (AR) | Pin the freeze, hydrate, run LangGraph (linear for 0/2/3; CALL/DONE loop for Pattern 1). |
-| 3009 | Agent Capability Registry (ACR) | Published capabilities and manifests. Hydrate once at pin. |
+| 3009 | Agent Capability Plane (ACR) | Published capabilities and manifests. Hydrate once at pin. |
 
-Catalogue matrix: [catalogue](/catalogue/). Box packs: [architecture](/architecture/). Contracts: [reference](/reference/).
+Catalogue: [catalogue](/catalogue/). Components: [architecture](/architecture/). Contracts: [reference](/reference/).
 
 ## Pin, then hydrate, then LangGraph
 

@@ -1,27 +1,57 @@
 ---
-title: "Agent Fabric Runtime (AR)"
+title: "Agent Runtime"
 sidebar_label: Agent Runtime
-description: "Agent Fabric Runtime: specialised agents underneath. Run pin, LangGraph loop, Patterns 0-3. Calls Shared for Memory, RAG, and Tools. Hydrates from the Agent Fabric Capability Registry."
+description: "Where the agent actually runs. Pins the freeze, hydrates capabilities, and executes the graph. Does not classify the next utterance."
 ---
 
 import Details from '@theme/Details';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-# Agent Fabric Runtime (AR)
+# Agent Runtime
 
-**Box:** AR (Agent Fabric Runtime) + calls into Shared (Memory, RAG, Tools / PEP)
+Runtime is where the agent does the work. Only the [Front Door](/architecture/service-packs/agent-front-door) starts it. It copies the freeze onto a durable **run pin**, hydrates every capability on that pin, returns `202` with a `correlation_id`, and runs the graph.
 
-Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
+It does not classify the next utterance. Memory, RAG, model, and tools sit in **Shared** and are called from here, not built in.
 
-**Specialised agents underneath. Does the work. Does not classify the next utterance.**
+## What it is
 
-Only the **AFD** starts AR. On `route`, that AFD `POST`s the freeze. AR **fetches the catalogue row** at the pinned version, **hydrates** from the Registry, copies the **run pin**, returns `202 { "correlation_id" }`, and runs LangGraph. Memory, RAG, and Tools sit in **Shared**. Fabric rule: [Three principals](/architecture/technical-design#three-principals).
+Three steps, always in this order:
 
-**Local v1:** Python FastAPI + LangGraph on port **3008**. Patterns 0–3, `human_gate`, `kind=agent`, checkpoint resume wired. See [status](/catalogue/coverage-status) for gaps.
+1. **Pin** — copy `route_id@version` from the freeze. Do not re-read `active`.
+2. **Hydrate** — resolve the catalogue row and every `id@version` from the [Agent Capability Plane](/architecture/service-packs/agent-capability-registry).
+3. **Run** — compile the LangGraph for the route's [autonomy mode](/concepts/executing-a-request/autonomy-modes).
+
+The platform owns the shell (pin, hydrate, graph, telemetry). The domain owns the agent (prompts, capabilities, judgement).
+
+## What it owns
+
+| Owns | Does not own |
+| --- | --- |
+| Run pin, hydrate snapshot, graph loop | Classify, eligible set |
+| Calls into Shared (memory, RAG, tools) | Channel auth, public ingress |
+| `correlation_id` on `202` | The freeze store |
+
+## What it must not do
+
+- Classify or start itself.
+- Re-read the catalogue or registry mid-loop.
+- Use the user token as the tool-call caller. User, agent, and Runtime workload are [three principals](/architecture/technical-design#three-principals).
+
+## How to talk to it
+
+Channels never see this URL. Front Door calls:
+
+| Method | Path |
+| --- | --- |
+| `POST` | `/v1/runs` |
+| `POST` | `/v1/runs/{id}/turns` |
+| `GET` | `/v1/runs/{id}` |
+
+Fixtures: [run-start.json](/fixtures/run-start.json).
 
 ---
 
-## 1. Solution on a page
+## Design notes
 
 ### Business problem
 
@@ -188,15 +218,15 @@ Not a public URL. `202` comes from AR. AFD does not send `correlation_id` on `mo
 
 </Details>
 
-Who calls start: [Agent Fabric Front Door call map](/architecture/service-packs/agent-front-door#call-map).
+Who calls start: [Agent Front Door call map](/architecture/service-packs/agent-front-door#call-map).
 
 ---
 
 ## 6. Shared
 
-**Memory**, **RAG**, and **Tools** sit in Shared. The **Agent Fabric Capability Registry** sits with Agent Fabric Plane. AR calls them. They are not inside AR.
+**Memory**, **RAG**, and **Tools** sit in Shared. The **Agent Capability Plane** sits with Agent Plane. AR calls them. They are not inside AR.
 
-After freeze, AR **downloads the whole pinned manifest**, hydrates each `id@version` onto the run pin, then sends schemas only to the LLM. Domain `invoke` hits a governed business API. Agent-start `invoke` hits the API AFD jobs URL. [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry).
+After freeze, AR **downloads the whole pinned manifest**, hydrates each `id@version` onto the run pin, then sends schemas only to the LLM. Domain `invoke` hits a governed business API. Agent-start `invoke` hits the API AFD jobs URL. [Agent Capability Plane](/architecture/service-packs/agent-capability-registry).
 
 Every tool call dual-checks **user** and **agent**. If Shared is down, routing still works and AR degrades.
 
@@ -288,10 +318,10 @@ Run capacity is a different fleet from decide. AR instances scale per `activatio
 | **Shared** | In-flight AR calls | Per-capability latency / error rate |
 | **Registry** | Pin hydrates (refs per new run) | Hydrate p99, catalog QPS |
 
-AFD and Plane scale: [Agent Fabric Front Door §12](/architecture/service-packs/agent-front-door#scaling) · [Agent Fabric Plane §12](/architecture/service-packs/agent-plane#scaling).
+AFD and Plane scale: [Agent Front Door §12](/architecture/service-packs/agent-front-door#scaling) · [Agent Plane §12](/architecture/service-packs/agent-plane#scaling).
 
 ---
 
 ## Read next
 
-**[Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry)** · [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Patterns](/autonomy/) · [Runtime status](/catalogue/coverage-status)
+**[Agent Capability Plane](/architecture/service-packs/agent-capability-registry)** · [Agent Front Door](/architecture/service-packs/agent-front-door) · [Agent Plane](/architecture/service-packs/agent-plane) · [Patterns](/autonomy/) · [Runtime status](/catalogue/coverage-status)

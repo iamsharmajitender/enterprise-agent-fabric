@@ -24,7 +24,18 @@ const config: Config = {
       onBrokenMarkdownLinks: 'throw',
     },
   },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        indexDocs: true,
+        docsRouteBasePath: '/',
+        explicitSearchResultPath: true,
+      },
+    ],
+  ],
 
   i18n: {
     defaultLocale: 'en',
@@ -60,10 +71,10 @@ const config: Config = {
         src: 'img/logo.svg',
       },
       items: [
-        {type: 'docSidebar', sidebarId: 'docs', position: 'left', label: 'Docs'},
-        {to: '/concepts/glossary', label: 'Glossary', position: 'left'},
+        {to: '/guides', label: 'Guides', position: 'left'},
+        {to: '/concepts/glossary', label: 'Concepts', position: 'left'},
         {to: '/architecture/the-idea', label: 'Architecture', position: 'left'},
-        {to: '/autonomy', label: 'Autonomy', position: 'left'},
+        {to: '/reference', label: 'Reference', position: 'left'},
       ],
     },
     footer: {
@@ -73,7 +84,7 @@ const config: Config = {
           title: 'Concepts',
           items: [
             {label: 'Glossary', to: '/concepts/glossary'},
-            {label: 'Authoring a agent', to: '/concepts/authoring-a-product/route'},
+            {label: 'Authoring an agent', to: '/concepts/authoring-a-product/route'},
             {label: 'Executing a request', to: '/concepts/executing-a-request/request-lifecycle'},
           ],
         },
@@ -88,13 +99,14 @@ const config: Config = {
         {
           title: 'Build and run',
           items: [
-            {label: 'Running locally', to: '/running-locally'},
+            {label: 'Start the fabric', to: '/running-locally'},
+            {label: 'First request', to: '/guides/first-request'},
             {label: 'Reference', to: '/reference'},
             {label: 'Catalogue', to: '/catalogue'},
           ],
         },
       ],
-      copyright: 'Enterprise Agent Fabric — internal documentation.',
+      copyright: 'Enterprise Agent Fabric documentation.',
     },
     prism: {
       theme: prismThemes.github,

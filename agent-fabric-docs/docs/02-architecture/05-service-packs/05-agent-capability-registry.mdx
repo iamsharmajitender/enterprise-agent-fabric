@@ -1,27 +1,47 @@
 ---
-title: "Agent Fabric Capability Registry"
-sidebar_label: Agent Capability Registry
-description: "Agent Fabric Capability Registry: publishers append id@version. Agent developers refer from the tool manifest. AR hydrates at pin. Domain APIs and agent-start invoke go through PEP."
+title: "Agent Capability Plane"
+sidebar_label: Agent Capability Plane
+description: "Publishers append id@version. Routes refer. Runtime hydrates once at pin. Not a client the loop calls on every turn."
 ---
 
 import Details from '@theme/Details';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-# Agent Fabric Capability Registry
+# Agent Capability Plane
 
-**Box:** Agent Fabric Capability Registry (with Agent Fabric Plane; AR hydrates at pin)
+Publishers append a capability as `id@version`. A route refers to those versions. [Runtime](/architecture/service-packs/agent-runtime) hydrates the whole pinned manifest **once**, at pin, then never re-reads the registry mid-loop.
 
-Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Audit](/architecture/service-packs/agent-audit)
+This box sits with the [Agent Plane](/architecture/service-packs/agent-plane), beside Control Plane and Data Plane. It is a catalogue of tools and child agents — not a third Front Door, not MCP `list_tools`, and not Shared Tools.
 
-**Publishers publish versions. Agent developers refer. AR hydrates once, then calls `invoke`.**
+## What it is
 
-The registry sits **with Agent Fabric Plane** (beside ACP and Data Plane). Memory, RAG, and Tools / PEP stay in Shared. It is a catalog, not a third AFD, not MCP `list_tools`, and not a client the loop calls on every turn.
+Two kinds of capability:
 
-**Local v1:** Java service on port **3009**. Hydrate is real at pin. Capability kinds: [capabilities](/concepts/authoring-a-product/capability).
+- **domain** — a governed business API the agent may invoke.
+- **agent** — start another catalogue route through the Front Door jobs API.
+
+Kinds and schemas: [capabilities](/concepts/authoring-a-product/capability).
+
+## What it owns
+
+| Owns | Does not own |
+| --- | --- |
+| Immutable `id@version` rows and manifests | Classify, pin, start |
+| Hydrate reads at the pinned version | Mid-loop tool dispatch |
+
+## What it must not do
+
+- Edit a published version. A fix is a new version.
+- Be called from the LangGraph loop on every tool turn.
+- Live in Shared. Memory, RAG, and Tools stay there.
+
+## How to talk to it
+
+Runtime GETs at pin. Publishers PUT a version. Fixtures: [capability-account-fee-lookup.json](/fixtures/capability-account-fee-lookup.json), [manifest-fee-explain.json](/fixtures/manifest-fee-explain.json).
 
 ---
 
-## 1. Solution on a page
+## Design notes
 
 ### Business problem
 
@@ -60,7 +80,7 @@ Three objects, two writers. Three moments — only the last is the AR loop.
 | Hydrate whole manifest at pin | No mid-loop registry GET. Cache `(manifest_id, manifest_version)`. |
 | Two `kind`s, one catalog | `domain` = governed business API. `agent` = start another catalogue row via API AFD. |
 | PEP then invoke | A published capability is not permission. Dual check still runs. |
-| Registry with Agent Fabric Plane | Same band as catalogue. Shared stays Memory / RAG / Tools. |
+| Registry with Agent Plane | Same band as catalogue. Shared stays Memory / RAG / Tools. |
 
 ### Expected outcomes
 
@@ -344,4 +364,4 @@ Hydrate is pin-time, not turn-time. Scale with new starts and catalog reads, not
 
 ## Read next
 
-**[Agent Fabric Runtime](/architecture/service-packs/agent-runtime)** · [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Audit](/architecture/service-packs/agent-audit) · [Capabilities](/concepts/authoring-a-product/capability) · [Enterprise Agent Fabric](/architecture/technical-design)
+**[Agent Runtime](/architecture/service-packs/agent-runtime)** · [Agent Front Door](/architecture/service-packs/agent-front-door) · [Agent Plane](/architecture/service-packs/agent-plane) · [Agent Audit](/architecture/service-packs/agent-audit) · [Capabilities](/concepts/authoring-a-product/capability) · [Enterprise Agent Fabric](/architecture/technical-design)

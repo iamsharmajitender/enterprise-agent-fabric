@@ -41,4 +41,4 @@ ADP `dataplane.corpora` stores gateway url, collection, status. `retrieval.scope
 
 Omit the retrieval row when the route must not touch an index (`email_summarize`, `llm_pipeline`).
 
-Box packs: [architecture](/architecture/). Scenario matrix: [dataflow scenarios](/running-locally/dataflow-scenarios). Verification: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
+Components: [architecture](/architecture/). Scenario matrix: [dataflow scenarios](/running-locally/dataflow-scenarios). Verification: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).

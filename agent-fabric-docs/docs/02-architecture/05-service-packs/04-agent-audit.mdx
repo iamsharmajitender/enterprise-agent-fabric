@@ -1,27 +1,47 @@
 ---
-title: "Agent Fabric Audit"
+title: "Agent Audit"
 sidebar_label: Agent Audit
-description: "Agent Fabric Audit: AADP append-only evidence store and AACP ops UI. Producers emit async. Examine chains by correlation_id. Not the decide hot path."
+description: "Append-only evidence for every run. Producers emit asynchronously. Examine a chain by correlation_id. Not on the decide hot path."
 ---
 
 import Details from '@theme/Details';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 
-# Agent Fabric Audit
+# Agent Audit
 
-**Box:** Agent Audit Data Plane (AADP) + Agent Audit Control Plane (AACP)
+Audit sits **beside** the request path. Front Door, Data Plane, Runtime, and the Capability Plane emit events asynchronously. Decide, freeze, pin, and start never wait on a commit.
 
-Parent: [Enterprise Agent Fabric](/architecture/technical-design) · Siblings: [Agent Fabric Front Door](/architecture/service-packs/agent-front-door) · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Agent Fabric Capability Registry](/architecture/service-packs/agent-capability-registry)
+This is not [observability](/concepts/authoring-a-product/observability). Observability is OpenTelemetry into Grafana, sampled, dropped freely. Audit is the evidence path: append-only, idempotent, queried months later by `correlation_id`.
 
-**Producers emit async. AADP appends once. AACP examines by correlation.**
+## What it is
 
-The audit boxes sit **beside** the request path. They are not a channel API, not OTel, and not folded into ACP catalogue or ADP schema. **AFD, ADP, AR, and ACR** POST events to **AADP**. **AACP** queries only. Decide, freeze, pin, and start **never wait** on audit commit.
+Two boxes:
 
-**Local v1:** AADP Java service on port **3012** (Postgres DB `audit`). AACP TypeScript UI on port **3013** (no database). Envelope and examples: [audit-event-envelope](/fixtures/audit-event-envelope.json).
+- **Audit Data Plane** — ingest and query. Append-only Postgres.
+- **Audit Control Plane** — ops UI over evidence chains. No database of its own.
+
+There is no route field that turns audit off.
+
+## What it owns
+
+| Owns | Does not own |
+| --- | --- |
+| Evidence ingest and chain query | The decide hot path |
+| The event envelope | Metrics, traces, logs |
+
+## What it must not do
+
+- Block classify, freeze, or start.
+- Live inside the Agent Control Plane catalogue or the Data Plane schema.
+- Be a channel API.
+
+## How to talk to it
+
+Producers POST events. Examiners query by `correlation_id`. Envelope: [audit-event-envelope.json](/fixtures/audit-event-envelope.json). Concept page: [audit](/concepts/authoring-a-product/audit).
 
 ---
 
-## 1. Solution on a page
+## Design notes
 
 ### Business problem
 
@@ -85,7 +105,7 @@ If AADP dies: **new** events may drop (fail-open); in-flight runs continue. If A
 
 ## 2. Job
 
-Two boxes inside Agent Fabric Audit. Four producers, one examiner.
+Two boxes inside Agent Audit. Four producers, one examiner.
 
 | Box | Port | Stack | Job |
 | --- | --- | --- | --- |
@@ -340,4 +360,4 @@ Emit is off the hot path. Scale with new runs and ops query load, not with loop 
 
 ## Read next
 
-**[Enterprise Agent Fabric](/architecture/technical-design)** · [Agent Fabric Plane](/architecture/service-packs/agent-plane) · [Agent Fabric Runtime](/architecture/service-packs/agent-runtime) · [Audit plan](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/audit-plan.md) · [Audit event envelope](/fixtures/audit-event-envelope.json)
+**[Enterprise Agent Fabric](/architecture/technical-design)** · [Agent Plane](/architecture/service-packs/agent-plane) · [Agent Runtime](/architecture/service-packs/agent-runtime) · [Audit plan](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/audit-plan.md) · [Audit event envelope](/fixtures/audit-event-envelope.json)

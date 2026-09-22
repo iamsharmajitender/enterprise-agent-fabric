@@ -1,6 +1,8 @@
 ---
 title: "Scenario matrix: catalogue seed data sharing"
 sidebar_label: Dataflow scenarios
+slug: /running-locally/dataflow-scenarios
+description: "How seeded routes share data between stages."
 ---
 
 # Scenario matrix: catalogue seed data sharing

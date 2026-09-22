@@ -6,9 +6,9 @@ description: "The four autonomy modes and the orthogonal attachments (retrieval,
 
 # Autonomy
 
-This section is the **intended mode set**: what a route is allowed to be. It is not a dump of what Agent Runtime hydrates today. Gaps live on [status](/catalogue/coverage-status). Seed examples live in [catalogue](/catalogue/). How this binary hydrates: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
+`autonomy_mode` answers one question: **who picks the next step**. Retrieval, memory, tools, and ingress compose around that integer — they are not a fifth mode.
 
-There are **four** autonomy patterns. That integer is `autonomy_mode`. It answers **who picks the next step**. Retrieval, memory, tools, and ingress do not mint a fifth mode.
+Gaps versus what Runtime hydrates today: [coverage status](/catalogue/coverage-status). Seed examples: [catalogue](/catalogue/). How hydrate uses the mode: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
 
 | Mode | Page | Who picks the next step |
 | --- | --- | --- |

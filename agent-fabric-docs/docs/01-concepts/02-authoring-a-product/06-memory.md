@@ -35,4 +35,4 @@ Retrieval is a sibling table. Prefetch writes `working.slots.prefetch`; it is no
 
 Omit the profile on one-shot LLM/jobs (`email_summarize`, `llm_pipeline`). Author it when later stages or a later turn must keep working memory (`working=session`) or when an open loop should record a cursor (`loop=checkpoint`). `fee_explain` authors working + loop.
 
-Box packs: [architecture](/architecture/). Scenario matrix: [dataflow scenarios](/running-locally/dataflow-scenarios). Verification: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
+Components: [architecture](/architecture/). Scenario matrix: [dataflow scenarios](/running-locally/dataflow-scenarios). Verification: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).

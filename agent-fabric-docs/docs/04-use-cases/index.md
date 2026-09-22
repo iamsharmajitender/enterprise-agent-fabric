@@ -5,13 +5,11 @@ sidebar_label: Overview
 
 # Use cases
 
-Intended **caller and process shapes** this fabric will support. Not a dump of seed routes (those live in [catalogue](/catalogue/)). Not autonomy patterns (those live in [autonomy](/autonomy/)).
+Caller and process shapes the fabric supports — documents, human review, handoff. Seed routes that prove them live in the [catalogue](/catalogue/). Who picks the next step is [autonomy](/autonomy/), not a new shape.
 
-Add a file here when a new caller or control-flow shape is real. One concern per file. Each page should say: who acts, what the request or stage contract contains, what Runtime sees, and what is out of scope.
+Each page says who acts, what the request or stage contract contains, what Runtime sees, and what is out of scope. Jobs vs chat is ingress, not a new use case.
 
-Autonomy mode does not change these pages. Jobs vs chat is ingress, not a new use case.
-
-**Index of domain-agnostic shapes** (control-flow + autonomy + attachments + seed map): [generic-shapes](/use-cases/generic-shapes).
+Domain-agnostic index (control-flow, autonomy, attachments, seed map): [generic shapes](/use-cases/generic-shapes).
 
 ## Files
 

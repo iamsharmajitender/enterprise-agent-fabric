@@ -5,9 +5,9 @@ sidebar_label: Overview
 
 # Reference
 
-Frozen request/response examples. They are **not** a live OpenAPI spec and the running services do not serve this folder.
+Frozen request and response examples. They are not a live OpenAPI spec.
 
-Docs map: [documentation map](/). Stub headers: [stub auth](/reference/stub-auth).
+Stub headers: [stub auth](/reference/stub-auth). Site layout: [working on the docs](/reference/working-on-the-docs).
 
 ## Auth
 
@@ -55,7 +55,7 @@ Docs map: [documentation map](/). Stub headers: [stub auth](/reference/stub-auth
 | [run-start.json](/fixtures/run-start.json) | AR start after pin |
 | [run-status-completed.json](/fixtures/run-status-completed.json) | Run status `completed` |
 
-## Capabilities and manifests (Registry)
+## Capabilities and manifests (Capability Plane)
 
 | File | What |
 | --- | --- |

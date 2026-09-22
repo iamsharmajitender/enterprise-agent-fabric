@@ -38,4 +38,4 @@ What the catalogue can name versus what this Runtime does. Present tense on the 
 - **conversation / long_term** — flags on `dataplane.memory_profiles`. Not a Shared Memory box. See [memory](/concepts/authoring-a-product/memory).
 - **loop=checkpoint** — cursor JSON and `resume_index` are written after each stage. Failed runs with `loop=checkpoint` resume from the next stage via `POST /v1/runs/{id}/turns` with `{}` or `{ "resume": true }`; `goal` reloads from checkpoint, `slots`/`notes` from `working`. `loop=none` still fails closed.
 
-Later work: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md). Do not treat dummy `--all` green as dataflow. Catalogue matrix: [catalogue](/catalogue/). Contracts: [reference](/reference/). Box packs: [architecture](/architecture/).
+Later work: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md). Do not treat dummy `--all` green as dataflow. Catalogue matrix: [catalogue](/catalogue/). Contracts: [reference](/reference/). Components: [architecture](/architecture/).

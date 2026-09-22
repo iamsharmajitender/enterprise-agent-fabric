@@ -22,7 +22,7 @@ Two distinctions cause most of the confusion here, so they are worth stating up 
 | **ADP** — Agent Data Plane | Catalogue and classify. Owns `POST /v1/intent/decide`. Does not pin or start Runtime. `:3007` |
 | **ACP** — Agent Control Plane | The catalogue browser UI. No database, no decide API. Not a Fabric box. `:3006` |
 | **AR** — Agent Runtime | Pins the freeze, hydrates, and runs the LangGraph graph. `:3008` |
-| **ACR** — Agent Capability Registry | Published capabilities and manifests as immutable `id@version`. Hydrated once, at pin. `:3009` |
+| **ACR** — Agent Capability Plane | Published capabilities and manifests as immutable `id@version`. Hydrated once, at pin. `:3009` |
 | **AADP** — Agent Audit Data Plane | Append-only evidence ingest and query. `:3012` |
 | **AACP** — Agent Audit Control Plane | Ops UI over evidence chains. No database of its own. `:3013` |
 | **Agent Plane** | ACP plus ADP, one per trust domain. Classifies; does not execute |

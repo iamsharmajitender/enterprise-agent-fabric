@@ -1,0 +1,12 @@
+{
+  "label": "Guides",
+  "position": 1,
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "title": "Guides",
+    "description": "Run the fabric, send a request, then author an agent. Start here if you are new to the platform.",
+    "slug": "/guides"
+  }
+}

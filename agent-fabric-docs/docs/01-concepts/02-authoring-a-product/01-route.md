@@ -6,7 +6,7 @@ description: "The route is the product. What the row holds, which fields each au
 
 # Route
 
-A route **is** the agent. Everything else on this section — capability, prompts, schema, retrieval, memory, corpus — is a row that hangs off one. Authoring a agent means writing a route row and the rows it points at.
+A route **is** the agent. Everything else on this section — capability, prompts, schema, retrieval, memory, corpus — is a row that hangs off one. Authoring an agent means writing a route row and the rows it points at.
 
 Routes live in `dataplane.routes` on the Agent Data Plane. The primary key is **`(route_id, route_version)`**, so a route id is a family of immutable versions, not a single mutable record.
 

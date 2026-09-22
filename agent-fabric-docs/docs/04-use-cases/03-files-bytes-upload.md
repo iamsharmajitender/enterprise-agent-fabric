@@ -27,7 +27,7 @@ Front Door
 Runtime  →  POST dict(goal) to ocr_extract  →  DMS GET  →  notes text
 ```
 
-**Who must not upload:** Runtime, the LLM, Data Plane, Capability Registry, `ocr_extract` (that tool **reads** the DMS).
+**Who must not upload:** Runtime, the LLM, Data Plane, Capability Plane, `ocr_extract` (that tool **reads** the DMS).
 
 Bind the PUT to the entitled `route_id` and jobs `idempotency_key`. A `fee_explain` caller must not mint objects into Legal’s vault.
 

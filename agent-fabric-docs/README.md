@@ -1,6 +1,6 @@
 # agent-fabric-docs
 
-The Enterprise Agent Fabric documentation site — a [Docusaurus](https://docusaurus.io) project. Content lives in [`docs/`](docs/); the reader-facing entry point is the [documentation map](docs/index.md).
+The Enterprise Agent Fabric documentation site — a [Docusaurus](https://docusaurus.io) project. Content lives in [`docs/`](docs/). The reader-facing entry point is the [home page](docs/index.mdx).
 
 ## Run it
 
