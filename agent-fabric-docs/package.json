@@ -9,7 +9,7 @@
     "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "typecheck": "tsc",
-    "diagrams": "python3 diagram-sources/_gen_pitch_diagrams.py && python3 diagram-sources/_gen_swimlanes.py"
+    "diagrams": "python3 diagram-sources/_gen_pitch_diagrams.py && python3 diagram-sources/_gen_swimlanes.py && python3 diagram-sources/_gen_architecture.py"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.2",
