@@ -53,7 +53,7 @@ The UI uploaded earlier, or the object already existed. The job names the DMS id
 
 **Use when** the DMS can authorize a service identity. The signed URL never sits on the run pin or in logs.
 
-Seed illustration: [`msa_risk_review`](/catalogue/seed-use-cases), [`contract_review`](/catalogue/seed-use-cases) — payload key `doc_id`.
+Seed illustration: `msa_risk_review`, `contract_review` — payload key `doc_id`.
 
 ## Variant B — presigned GET in the request
 
@@ -105,7 +105,7 @@ or
 | --- | --- |
 | Multipart bytes on Front Door | [files-bytes-upload](/use-cases/files-bytes-upload) |
 | Bytes in `goal` or `notes` | Never. [data](/concepts/executing-a-request/run-data) |
-| Pattern 0 with no OCR tool | Caller must already send `text` (see [`email_summarize`](/catalogue/seed-use-cases)) |
+| Pattern 0 with no OCR tool | Caller must already send `text` (see `email_summarize`) |
 
 ## Status
 

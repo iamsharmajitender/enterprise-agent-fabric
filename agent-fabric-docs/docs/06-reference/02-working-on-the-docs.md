@@ -17,7 +17,6 @@ This page is for people editing the site, not for learning the platform. Start a
 | [Architecture](/architecture/) | Why the fabric exists, who owns what, internals, one page per box |
 | [Autonomy](/autonomy/) | Who picks the next step (modes 0–3) |
 | [Use cases](/use-cases/) | Caller and process shapes |
-| [Catalogue](/catalogue/) | Seed routes and coverage |
 | [Reference](/reference/) | Frozen fixtures and stub auth |
 
 Engineering material that is **not** published with this site:

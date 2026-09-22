@@ -15,7 +15,7 @@ The catalogue seed is autonomy **0–3**. `autonomy_mode` on the route is that i
 | 2 Deterministic | `2` | Workflow required. Manifest when there are tools | Fixed stage list. Mix `none` (HTTP) with `classify` / `query_formulation` / `synthesis`. Hydrate appends a `respond` synthesis node if there is no classify/synthesis stage yet |
 | 3 Guided | `3` | Workflow required; stages may carry an allowlist | Same linear graph as Pattern 2. Allowlist is catalogue-only |
 
-Intended compositions (what is possible, including rows not in the seed): [autonomy](/autonomy/). Examples in this binary’s seed: Pattern 0 `email_summarize`; Pattern 1 `fee_explain`; Pattern 2 `llm_pipeline`, `card_freeze`, `policy_memo`. Catalogue matrix: [catalogue](/catalogue/).
+Intended compositions (what is possible, including rows not in the seed): [autonomy](/autonomy/). Examples in this binary’s seed: Pattern 0 `overdraft_fee_qa`; Pattern 1 `fee_explain`; Pattern 2 `duplicate_charge_review`.
 
 Pattern 1/2/3 may call the LLM many times, with domain HTTP **between** those calls. Pattern 0 never calls a domain API.
 
@@ -31,4 +31,4 @@ With a manifest, ACR hydrates every capability; the workflow only stamps `llm_ro
 
 `agent-runtime/app/graph/workflow.py` builds Pattern 0/2/3 as `START → n0 → n1 → … → END`. Pattern 1 is an LLM `CALL` / `DONE` loop over the manifest tools. There is no workflow `branch` edge.
 
-Stage data that actually moves: [data](/concepts/executing-a-request/run-data). Catalogue vs Runtime: [status](/catalogue/coverage-status).
+Stage data that actually moves: [data](/concepts/executing-a-request/run-data). Catalogue vs Runtime: [autonomy modes](/concepts/executing-a-request/autonomy-modes).

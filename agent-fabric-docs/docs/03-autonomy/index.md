@@ -8,7 +8,7 @@ description: "The four autonomy modes and the orthogonal attachments (retrieval,
 
 `autonomy_mode` answers one question: **who picks the next step**. Retrieval, memory, tools, and ingress compose around that integer — they are not a fifth mode.
 
-Gaps versus what Runtime hydrates today: [coverage status](/catalogue/coverage-status). Seed examples: [catalogue](/catalogue/). How hydrate uses the mode: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
+How hydrate uses the mode: [autonomy modes](/concepts/executing-a-request/autonomy-modes). Seed a route: [author an agent](/guides/author-an-agent).
 
 | Mode | Page | Who picks the next step |
 | --- | --- | --- |

@@ -7,7 +7,7 @@ sidebar_label: Escalate to human
 
 A Pattern 1 domain tool **opens a ticket for a human queue**, then the **parent run completes**. The human works the case later outside this correlation. The run does **not** pause for `/turns`.
 
-Seed proof: [`shopassist_case`](/catalogue/routes). Runtime: `build_agent_loop` in `agent-runtime/app/graph/workflow.py`.
+Seed proof: `shopassist_case`. Runtime: `build_agent_loop` in `agent-runtime/app/graph/workflow.py`.
 
 This is **not** a [process gate](/use-cases/human-review-process-gate). Use `human_gate` when the **same** run must continue after an in-flow approve/reject.
 
@@ -70,7 +70,7 @@ Customer: damaged jacket ORD-77819, possible double charge, wants full refund.
 4. Parent **completes** (auto) with the handoff reference.  
 5. Ops works `hof-1` later; this chat run is already done.
 
-[chat scratchpad — `shopassist_case_ask`](http://localhost:3014/chat).
+Chat scratchpad — `shopassist_case_ask`.
 
 ## Contrast
 

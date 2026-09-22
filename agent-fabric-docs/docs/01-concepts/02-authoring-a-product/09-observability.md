@@ -12,7 +12,7 @@ This page is about that connection — what your authoring choices do to the tel
 
 ## What you get automatically
 
-Every box exports OpenTelemetry over OTLP to a local `otel-lgtm` container — Grafana on `:3000`, OTLP on `:4317` and `:4318`. Traces land in Tempo, metrics in Prometheus, logs in Loki.
+Every box exports OpenTelemetry over OTLP to a local `otel-lgtm` container. Traces land in Tempo, metrics in Prometheus, logs in Loki. Grafana is the browser.
 
 | Box | Traces | Metrics | Logs |
 | --- | --- | --- | --- |

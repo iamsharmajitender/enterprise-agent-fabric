@@ -5,7 +5,7 @@ sidebar_label: Overview
 
 # Use cases
 
-Caller and process shapes the fabric supports — documents, human review, handoff. Seed routes that prove them live in the [catalogue](/catalogue/). Who picks the next step is [autonomy](/autonomy/), not a new shape.
+Caller and process shapes the fabric supports — documents, human review, handoff. Who picks the next step is [autonomy](/autonomy/), not a new shape.
 
 Each page says who acts, what the request or stage contract contains, what Runtime sees, and what is out of scope. Jobs vs chat is ingress, not a new use case.
 
@@ -28,8 +28,8 @@ Default for risky writes is a process gate ([human-review-process-gate](/use-cas
 
 ## Honest now vs later
 
-Today jobs/chat are JSON. Seed document routes already pass `doc_id` (see [`msa_risk_review`](/catalogue/seed-use-cases)). Tool-mock does **not** GET the DMS; it returns canned `text`. Presigned URLs, `ingress_files`, and Front Door PUT to DMS are **not** built.
+Today jobs/chat are JSON. Seed document routes already pass `doc_id` (see `msa_risk_review`). Tool-mock does **not** GET the DMS; it returns canned `text`. Presigned URLs, `ingress_files`, and Front Door PUT to DMS are **not** built.
 
-Seed refund/KYC workflows **execute** `human_gate` (pause/resume via `/turns`) and `branch` (slot → next stage). See [human-review-process-gate](/use-cases/human-review-process-gate) and [status](/catalogue/coverage-status).
+Seed refund/KYC workflows **execute** `human_gate` (pause/resume via `/turns`) and `branch` (slot → next stage). See [human-review-process-gate](/use-cases/human-review-process-gate) and [autonomy modes](/concepts/executing-a-request/autonomy-modes).
 
 Stage handoff after ingress: [data](/concepts/executing-a-request/run-data) — `goal`, `slots`, `notes`. Proof checklist: [dataflow-plan D13](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).

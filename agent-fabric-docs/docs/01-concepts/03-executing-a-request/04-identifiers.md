@@ -105,10 +105,10 @@ Caller still supplies `idempotency_key` (e.g. `job-fee-explain:v1`) and `route_i
 sequenceDiagram
   autonumber
   actor Caller
-  participant AFD as AFD :3005
-  participant ADP as ADP :3007
-  participant ACR as ACR :3009
-  participant AR as AR :3008
+  participant AFD as Front Door
+  participant ADP as Data Plane
+  participant ACR as Capability Plane
+  participant AR as Runtime
   participant LLM as LLM
   participant Loki as Loki
 
@@ -179,10 +179,10 @@ flowchart TD
 sequenceDiagram
   autonumber
   actor User
-  participant AFD as AFD :3005
-  participant ADP as ADP :3007
-  participant ACR as ACR :3009
-  participant AR as AR :3008
+  participant AFD as Front Door
+  participant ADP as Data Plane
+  participant ACR as Capability Plane
+  participant AR as Runtime
   participant LLM as LLM
   participant Loki as Loki
 
@@ -229,8 +229,8 @@ Skip decide and ACR. Same `session_id` and `correlation_id`; **new** `request_id
 sequenceDiagram
   autonumber
   actor User
-  participant AFD as AFD :3005
-  participant AR as AR :3008
+  participant AFD as Front Door
+  participant AR as Runtime
   participant LLM as LLM
   participant Loki as Loki
 
@@ -346,7 +346,7 @@ AFD parses `parent_correlation_id` from the `subagent-corr-…` pattern for audi
 
 ## 9. Grafana
 
-Login: [http://localhost:3000](http://localhost:3000) (`admin` / `admin`).
+Login: Grafana in the local `otel-lgtm` stack (`admin` / `admin`).
 
 | Event | Example labels |
 | --- | --- |

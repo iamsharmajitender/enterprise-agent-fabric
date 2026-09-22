@@ -107,10 +107,10 @@ If AADP dies: **new** events may drop (fail-open); in-flight runs continue. If A
 
 Two boxes inside Agent Audit. Four producers, one examiner.
 
-| Box | Port | Stack | Job |
-| --- | --- | --- | --- |
-| **Agent Audit Data Plane (AADP)** | **3012** | Java 21 hexagonal + Flyway + Postgres `audit` | Ingest append-only events; query APIs |
-| **Agent Audit Control Plane (AACP)** | **3013** | TypeScript UI/client; **no database** | Ops UI; **only** calls AADP over HTTP |
+| Box | Stack | Job |
+| --- | --- | --- |
+| **Agent Audit Data Plane (AADP)** | Java 21 hexagonal + Flyway + Postgres `audit` | Ingest append-only events; query APIs |
+| **Agent Audit Control Plane (AACP)** | TypeScript UI/client; **no database** | Ops UI; **only** calls AADP over HTTP |
 
 | Moment | Who | What happens |
 | --- | --- | --- |
@@ -279,12 +279,12 @@ AADP is not a channel API. Producers POST async. AACP and ops tools GET.
 
 | Surface | Role |
 | --- | --- |
-| `http://localhost:3013` | Landing: completed + in-progress tabs (50/page) |
+| Landing | Completed + in-progress tabs (50/page) |
 | Search | Chain lookup by `correlation_id` / `session_id` |
 | Nested / Flat | Agent-start families with `parent_correlation_id` |
-| Route link | Opens catalogue row in ACP (`:3006/routes/…`) |
+| Route link | Opens catalogue row in the Control Plane (`/routes/…`) |
 
-Env: `AUDIT_DATA_PLANE_URL` (default `http://localhost:3012`). AACP never calls ADP, AR, AFD, or ACR for audit data.
+Env: `AUDIT_DATA_PLANE_URL` points at AADP. AACP never calls ADP, AR, AFD, or ACR for audit data.
 
 ---
 
@@ -297,7 +297,6 @@ Env: `AUDIT_DATA_PLANE_URL` (default `http://localhost:3012`). AACP never calls 
 | Fail-open producers | Bounded queue / fire-and-forget. Metric on drop or non-2xx. |
 | Failover | AADP read replicas for query. In-flight runs do not need AADP to complete. |
 | Isolation | Independent of decide CPU and AR loop workers. |
-| Ports | AADP **3012**, AACP **3013** (`agent-mocks` keeps **3010**). |
 
 ---
 

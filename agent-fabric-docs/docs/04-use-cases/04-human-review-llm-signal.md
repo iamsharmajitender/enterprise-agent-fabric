@@ -94,7 +94,7 @@ Example classify completion (into `notes` today; into `slots.extract_fields` whe
 
 The flag does **not** open the gate. On an always-gated route it is the **reviewer packet**. On a branched route (KYC-style), a later `branch` may map `true` → `manual_review` and `false` → the write — still by reading a **slot**, not by trusting free prose.
 
-Seed: [`purchase_refund`](/catalogue/seed-use-cases). Patterns: [deterministic](/autonomy/mode-2-deterministic) (overlay `branch` / `human_gate`).
+Seed: `purchase_refund`. Patterns: [deterministic](/autonomy/mode-2-deterministic) (overlay `branch` / `human_gate`).
 
 ## Not this use case
 
@@ -112,6 +112,6 @@ Seed: [`purchase_refund`](/catalogue/seed-use-cases). Patterns: [deterministic](
 | `output_schema` fields on `extract_fields` | Yes. Bound on classify in Runtime. |
 | Validated JSON in `notes` | Yes (string form of the completion). |
 | Slot `extract_fields` for branch / reviewer UI | No. Dataflow D3. |
-| Branch on `human_review_required` | No. Catalogue may name `branch`; Runtime is linear. See [status](/catalogue/coverage-status). |
+| Branch on `human_review_required` | No. Catalogue may name `branch`; Runtime is linear. See [autonomy modes](/concepts/executing-a-request/autonomy-modes). |
 | Auto-pause when flag is true | Never planned. Gate stages only. |
 | Review SLA / due-by clock | Not on this signal. Optional on [`human_gate`](/use-cases/human-review-process-gate#review-sla-optional) (`fail` / `reject` / `escalate` / rare `approve`). |

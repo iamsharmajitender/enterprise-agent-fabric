@@ -102,7 +102,6 @@ const config: Config = {
             {label: 'Start the fabric', to: '/running-locally'},
             {label: 'First request', to: '/guides/first-request'},
             {label: 'Reference', to: '/reference'},
-            {label: 'Catalogue', to: '/catalogue'},
           ],
         },
       ],

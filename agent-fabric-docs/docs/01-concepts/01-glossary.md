@@ -10,7 +10,7 @@ One line each. Follow the link when one line is not enough.
 
 Two distinctions cause most of the confusion here, so they are worth stating up front:
 
-- **Catalogue-only versus executed.** The catalogue can record more than Agent Runtime does. Where a term is recorded but not acted on, it says so. The full list is [coverage status](/catalogue/coverage-status).
+- **Catalogue-only versus executed.** The catalogue can record more than Agent Runtime does. Where a term is recorded but not acted on, it says so. See [autonomy modes](/concepts/executing-a-request/autonomy-modes).
 - **Audit versus observability.** Both watch a run. [Audit](/concepts/authoring-a-product/audit) is the evidence path — append-only, queried by `correlation_id`, kept. [Observability](/concepts/authoring-a-product/observability) is the ops path — OpenTelemetry into Grafana, for debugging.
 
 ## Boxes and services
@@ -18,19 +18,19 @@ Two distinctions cause most of the confusion here, so they are worth stating up 
 | Term | Definition |
 | --- | --- |
 | **Enterprise Agent Fabric** | The shared front door and control plane for acting AI. Identity, routing, policy, and proof run once; domains keep the intelligence |
-| **AFD** — Agent Front Door | The only public ingress. Entitles, freezes, and starts Runtime. Chat and jobs, `:3005` |
-| **ADP** — Agent Data Plane | Catalogue and classify. Owns `POST /v1/intent/decide`. Does not pin or start Runtime. `:3007` |
-| **ACP** — Agent Control Plane | The catalogue browser UI. No database, no decide API. Not a Fabric box. `:3006` |
-| **AR** — Agent Runtime | Pins the freeze, hydrates, and runs the LangGraph graph. `:3008` |
-| **ACR** — Agent Capability Plane | Published capabilities and manifests as immutable `id@version`. Hydrated once, at pin. `:3009` |
-| **AADP** — Agent Audit Data Plane | Append-only evidence ingest and query. `:3012` |
-| **AACP** — Agent Audit Control Plane | Ops UI over evidence chains. No database of its own. `:3013` |
+| **AFD** — Agent Front Door | The only public ingress. Entitles, freezes, and starts Runtime. Chat and jobs |
+| **ADP** — Agent Data Plane | Catalogue and classify. Owns `POST /v1/intent/decide`. Does not pin or start Runtime |
+| **ACP** — Agent Control Plane | The catalogue browser UI. No database, no decide API. Not a Fabric box |
+| **AR** — Agent Runtime | Pins the freeze, hydrates, and runs the LangGraph graph |
+| **ACR** — Agent Capability Plane | Published capabilities and manifests as immutable `id@version`. Hydrated once, at pin |
+| **AADP** — Agent Audit Data Plane | Append-only evidence ingest and query |
+| **AACP** — Agent Audit Control Plane | Ops UI over evidence chains. No database of its own |
 | **Agent Plane** | ACP plus ADP, one per trust domain. Classifies; does not execute |
 | **Shared** | Memory, RAG, model, and tools — called *from* Runtime, not built into it. Largely not implemented |
 | **PEP** — Policy Enforcement Point | The dual user-and-agent check before a tool invoke. Production target, not local |
 | **BFF** | The connection-bound shape of the Chat Front Door fleet, as opposed to the handler-shaped API fleet |
 | **DMS** | The enterprise document store. Front Door puts bytes there and starts Runtime with a JSON id only |
-| **agent-mocks** | Local HTTP doubles for domain tools and corpus gateways. `:3010` |
+| **agent-mocks** | Local HTTP doubles for domain tools and corpus gateways |
 
 ## Catalogue objects
 

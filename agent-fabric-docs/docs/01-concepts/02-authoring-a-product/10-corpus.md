@@ -77,8 +77,8 @@ The model does not search and cannot skip the pack — that is the whole point o
 
 | `corpus_id` | Gateway |
 | --- | --- |
-| `fee-schedule` | `http://agent-mocks:3010/corpora/fee-schedule/search` |
-| `product-disclosure` | `http://agent-mocks:3010/corpora/product-disclosure/search` |
+| `fee-schedule` | `agent-mocks` `/corpora/fee-schedule/search` |
+| `product-disclosure` | `agent-mocks` `/corpora/product-disclosure/search` |
 
 Both are `published`, both are named in the route's `retrieval.scope`. The mock gateway returns `{"chunks": [{id, text, tags}]}`.
 
@@ -88,7 +88,7 @@ Both are `published`, both are named in the route's `retrieval.scope`. The mock 
 
 ## Managing corpora
 
-The [Control Plane](http://localhost:3006/corpora) browses them: a list with status counts, a detail view with a JSON inspector, and a **Uses** panel that lists every route whose `retrieval.scope` names the corpus. That reverse lookup is the one to check before deprecating anything.
+The Control Plane browses them: a list with status counts, a detail view with a JSON inspector, and a **Uses** panel that lists every route whose `retrieval.scope` names the corpus. That reverse lookup is the one to check before deprecating anything.
 
 It is read-only. Like [routes](/concepts/authoring-a-product/route), corpora are authored as seed SQL — the Data Plane exposes no create, update, or delete endpoint.
 

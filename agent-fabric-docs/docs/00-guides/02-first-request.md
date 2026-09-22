@@ -7,7 +7,7 @@ description: "Send one job and one chat turn through Front Door, then follow the
 
 # Your first request
 
-The stack is up from [Start the fabric](/running-locally). You will send two calls through the **Agent Front Door** on port 3005. Nothing else is public.
+The stack is up from [Start the fabric](/running-locally). You will send two calls through the **Agent Front Door**. Nothing else is public. Set `FRONT_DOOR` to that ingress URL (stack README).
 
 Local identity is stubbed. Every channel call needs both headers from [stub auth](/reference/stub-auth):
 
@@ -23,7 +23,7 @@ X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}
 A job names the route. Front Door still entitles the caller. It skips classification, freezes `fee_explain`, and starts Runtime.
 
 ```bash
-curl -sS http://localhost:3005/v1/jobs \
+curl -sS "$FRONT_DOOR/v1/jobs" \
   -H 'Authorization: Bearer stub' \
   -H 'Content-Type: application/json' \
   -H 'X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}' \
@@ -43,7 +43,7 @@ You should get `202` and a `correlation_id`. Front Door does not mint that id �
 Poll until the run completes:
 
 ```bash
-curl -sS "http://localhost:3005/v1/jobs/corr-…" \
+curl -sS "$FRONT_DOOR/v1/jobs/corr-…" \
   -H 'Authorization: Bearer stub' \
   -H 'X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}'
 ```
@@ -55,7 +55,7 @@ Bodies for this call: [jobs-start.json](/fixtures/jobs-start.json) and [jobs-acc
 Chat does **not** name a route. Front Door asks the Agent Data Plane to classify the utterance. Only `outcome=route` starts Runtime. `clarify` and `abstain` talk back and never pin.
 
 ```bash
-curl -sS http://localhost:3005/v1/assistant/turns \
+curl -sS "$FRONT_DOOR/v1/assistant/turns" \
   -H 'Authorization: Bearer stub' \
   -H 'Content-Type: application/json' \
   -H 'X-Stub-Claims: {"sub":"jane","emts":{"accounts:read":true}}' \
@@ -70,7 +70,7 @@ Accepted turns return a `session_id`. Follow-ups reuse that session and skip cla
 
 Request body: [assistant-turn-request.json](/fixtures/assistant-turn-request.json).
 
-Or open [http://localhost:3014/chat](http://localhost:3014/chat) and type the same sentence.
+Or open the local chat scratchpad and type the same sentence.
 
 ## What just happened
 
@@ -95,13 +95,12 @@ The same `correlation_id` is the handle for [audit](/concepts/authoring-a-produc
 
 | Symptom | Likely cause |
 | --- | --- |
-| Connection refused on 3005 | Stack is not up — [start the fabric](/running-locally) |
+| Connection refused | Stack is not up — [start the fabric](/running-locally) |
 | `401` | Missing `Authorization` or `X-Stub-Claims` |
 | `403` | Claims do not entitle the route |
-| `202` then a failed run | Seed or mocks — reload seed, check [coverage status](/catalogue/coverage-status) |
+| `202` then a failed run | Seed or mocks — reload seed |
 
 ## Next
 
 - Author the rows that made `fee_explain` exist: [author an agent](/guides/author-an-agent)
 - The same path in more detail: [request lifecycle](/concepts/executing-a-request/request-lifecycle)
-- Every seeded route: [catalogue](/catalogue/)

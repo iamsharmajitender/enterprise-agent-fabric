@@ -15,7 +15,7 @@ The Capability Plane publishes **two kinds**. That is the catalog contract. A ki
 
 Same `id` + `version` UX for both. Control Plane lists them together. Manifests only store `{capability_id, capability_version}`; `kind` lives on the capability row (`acr.registry.capabilities.kind`).
 
-Seed `agent` rows: `start_contract_review` → `contract_review`, `start_kyc_onboarding` → `kyc_onboarding`. Parents: `fraud_investigate`, `ops_start_kyc`. Runtime skips that HTTP today; see [status](/catalogue/coverage-status).
+Seed `agent` rows: `start_contract_review` → `contract_review`, `start_kyc_onboarding` → `kyc_onboarding`. Parents: `fraud_investigate`, `ops_start_kyc`. Runtime skips that HTTP today; see [autonomy modes](/concepts/executing-a-request/autonomy-modes).
 
 ## Do not add a kind for
 
@@ -26,7 +26,7 @@ These already have a home. A new `kind` would split the catalog and confuse hydr
 | Retrieve / RAG / named corpus | Route `retrieval` + [retrieve](/concepts/authoring-a-product/retrieval). Not a capability kind. |
 | Prompt pack / `llm_role` | [prompts](/concepts/authoring-a-product/prompts). Not a capability. |
 | JSON Schema in/out | [schemas](/concepts/authoring-a-product/schema). `output_schema` binds on LLM stages; `input_schema` is catalogue today. |
-| Workflow stage, `branch`, `human_gate` | ADP workflow JSON. Linear graph today; see [patterns](/concepts/executing-a-request/autonomy-modes) and [status](/catalogue/coverage-status). |
+| Workflow stage, `branch`, `human_gate` | ADP workflow JSON. Linear graph today; see [patterns](/concepts/executing-a-request/autonomy-modes) and [autonomy modes](/concepts/executing-a-request/autonomy-modes). |
 | Memory policy | [memory](/concepts/authoring-a-product/memory). |
 | MCP `list_tools` | Not the catalog. Exam and pin need a frozen `id@version`. |
 | “Any agent” / model-chosen `route_id` | An `agent` capability **is** a named product. The invoke body already has `route_id`. The model proposes the capability id, not a free route. |
@@ -35,4 +35,4 @@ These already have a home. A new `kind` would split the catalog and confuse hydr
 
 Only if **invoke is a different gate**: not domain HTTP and not AFD jobs. Example: a human work-item API, or a non-HTTP bus. Until then, two kinds.
 
-Register with `PUT` on ACR (port 3009), not Control Plane. After `add-seed-data.sh`, seed rows reload from `agent-fabric-scripts/stack/route/`.
+Register with `PUT` on the Capability Plane, not Control Plane. After `add-seed-data.sh`, seed rows reload from `agent-fabric-scripts/stack/route/`.

@@ -15,7 +15,7 @@ JSON Schema on a capability is the contract for what goes in and what comes out.
 
 For an extraction / classify stage, put the extraction contract on **`output_schema`**, not `input_schema`. The same keywords can live on `input_schema` to document a domain HTTP body.
 
-Seed example: [`extract_fields`](http://localhost:3006/capabilities/extract_fields) (`purchase_refund` classify). Frozen copy: [`capability-extract-fields.json`](/fixtures/capability-extract-fields.json).
+Seed example: `extract_fields` (`purchase_refund` classify). Frozen copy: [`capability-extract-fields.json`](/fixtures/capability-extract-fields.json).
 
 ## Bindable `output_schema`
 

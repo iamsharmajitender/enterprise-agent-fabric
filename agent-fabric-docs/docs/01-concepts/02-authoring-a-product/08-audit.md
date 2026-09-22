@@ -76,7 +76,7 @@ Retention is documented, not implemented. Local runs keep everything; production
 | `GET /v1/audit/sessions/{sessionId}` | Every event for one session |
 | `GET /v1/audit/workflows?limit&offset&status` | Completed or in-progress runs, including `parent_correlation_id` |
 
-The Audit Control Plane on [:3013](http://localhost:3013) is the UI over those endpoints — it holds no database of its own. It lists completed and in-progress runs, toggles between a flat list and a nested view that groups `kind=agent` children under their parent, searches by `correlation_id` or `session_id`, and links each route back to the catalogue on the Control Plane.
+The Audit Control Plane is the UI over those endpoints — it holds no database of its own. It lists completed and in-progress runs, toggles between a flat list and a nested view that groups `kind=agent` children under their parent, searches by `correlation_id` or `session_id`, and links each route back to the catalogue on the Control Plane.
 
 A typical chain reads: `decide.completed` → `freeze.written` → `hydrate.snapshot` → `stage.completed` × n → `run.terminal`.
 

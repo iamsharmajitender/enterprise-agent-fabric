@@ -45,4 +45,4 @@ On `deterministic_prefetch`, empty-invoke prefetch stages POST corpus gateways a
 - **`conversation` / `long_term`** — Shared Memory (not the run pin). See [memory](/concepts/authoring-a-product/memory).
 - **Stage allowlists** on Pattern 3 — metadata only; AR does not enforce inner tool picks yet.
 
-Catalogue vs Runtime matrix: [status](/catalogue/coverage-status). Verification checklist: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
+Catalogue vs Runtime matrix: [autonomy modes](/concepts/executing-a-request/autonomy-modes). Verification checklist: [dataflow-plan.md](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).

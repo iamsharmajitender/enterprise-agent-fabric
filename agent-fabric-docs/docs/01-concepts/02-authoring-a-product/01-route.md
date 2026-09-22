@@ -26,7 +26,7 @@ Routes live in `dataplane.routes` on the Agent Data Plane. The primary key is **
 | `max_loop_steps` | `CALL`/`DONE` budget | Mode 1 (defaults to `8` at Runtime when unset) |
 | `policy_profile` | Risk bar that Layer ② confirmation reads | Always |
 | `model_profile` | Model tier. FK to `dataplane.model_profiles` | Always |
-| `activation_target` | Where Runtime runs, e.g. `http://agent-runtime-shared:3008/v1/runs` | Always in practice — Front Door dials it |
+| `activation_target` | Where Runtime runs — the `/v1/runs` URL | Always in practice — Front Door dials it |
 | `agent_client_id` | Workload identity pinned on the run | Optional |
 | `required_claims` | Entitlement filter. Defaults to `[]` | Optional |
 | `channels` | Channel filter. Defaults to `["web"]` | Optional |
@@ -88,7 +88,7 @@ Only `active` rows participate in routing — decide and the eligible list both 
 | `GET /v1/catalog/routes/{routeId}/versions` | Every version of one route |
 | `GET /v1/intent/eligible?channel=` | Chat-eligible active routes |
 
-The response nests the resolved `manifest`, `retrieval`, and `memory_profile` alongside the route fields, so one GET is enough to see the whole product. The [Control Plane](http://localhost:3006) browses the same endpoints.
+The response nests the resolved `manifest`, `retrieval`, and `memory_profile` alongside the route fields, so one GET is enough to see the whole product. The Control Plane browses the same endpoints.
 
 ## How decide picks a route
 
@@ -126,4 +126,4 @@ Every stack seed uses `route_version = '2026.08.1'` with `active = true`.
 
 Layer ① command seeds exist too: `/shopassist` binds `shopassist_case`, `/overdraft` binds `overdraft_fee_qa`.
 
-The full matrix is [catalogue routes](/catalogue/routes); what actually executes is [coverage status](/catalogue/coverage-status).
+What each mode hydrates: [autonomy modes](/concepts/executing-a-request/autonomy-modes).

@@ -55,7 +55,7 @@ Front Door POST /v1/runs
 
 Data that moves: every HTTP body is `dict(goal)` plus `notes`. `query_formulation` then sets `payload["query"]`. LLM stages read `goal` + `notes`. See [data](/concepts/executing-a-request/run-data).
 
-This Runtime: prefetch invoke is empty (no pack); slots do not copy tool JSON into the next HTTP body; `branch` / `human_gate` / child start are not executed. Gaps: [status](/catalogue/coverage-status).
+This Runtime: prefetch invoke is empty (no pack); slots do not copy tool JSON into the next HTTP body; `branch` / `human_gate` / child start are not executed. Gaps: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
 
 ## Swimlane
 

@@ -8,15 +8,15 @@ description: "The five processes a request crosses, the pin-then-hydrate-then-La
 
 A request crosses five processes. Channels talk only to the [Front Door](/architecture/service-packs/agent-front-door). Walk it with [your first request](/guides/first-request) before reading this page.
 
-| Port | Process | Job |
-| --- | --- | --- |
-| 3005 | Agent Front Door (AFD) | Only public ingress. Entitle, freeze, start Runtime. Chat and jobs share this process. |
-| 3006 | Agent Control Plane (ACP) | Catalogue UI. No database. Not a Fabric box. |
-| 3007 | Agent Data Plane (ADP) | Catalogue and classify. `POST /v1/intent/decide`. Does not start Runtime. |
-| 3008 | Agent Runtime (AR) | Pin the freeze, hydrate, run LangGraph (linear for 0/2/3; CALL/DONE loop for Pattern 1). |
-| 3009 | Agent Capability Plane (ACR) | Published capabilities and manifests. Hydrate once at pin. |
+| Process | Job |
+| --- | --- |
+| Agent Front Door (AFD) | Only public ingress. Entitle, freeze, start Runtime. Chat and jobs share this process. |
+| Agent Control Plane (ACP) | Catalogue UI. No database. Not a Fabric box. |
+| Agent Data Plane (ADP) | Catalogue and classify. `POST /v1/intent/decide`. Does not start Runtime. |
+| Agent Runtime (AR) | Pin the freeze, hydrate, run LangGraph (linear for 0/2/3; CALL/DONE loop for Pattern 1). |
+| Agent Capability Plane (ACR) | Published capabilities and manifests. Hydrate once at pin. |
 
-Catalogue: [catalogue](/catalogue/). Components: [architecture](/architecture/). Contracts: [reference](/reference/).
+Components: [architecture](/architecture/). Contracts: [reference](/reference/).
 
 ## Pin, then hydrate, then LangGraph
 
@@ -36,4 +36,4 @@ Catalogue: [catalogue](/catalogue/). Components: [architecture](/architecture/).
 
 Both return `202 { "correlation_id" }`. AFD never mints that id.
 
-What Runtime passes between stages: [data](/concepts/executing-a-request/run-data). Capability JSON Schema (`input_schema` / `output_schema`): [schemas](/concepts/authoring-a-product/schema). Capability kinds (`domain` vs `agent`): [capabilities](/concepts/authoring-a-product/capability). Catalogue vs Runtime: [status](/catalogue/coverage-status). Who mints `request_id` / `session_id` / `correlation_id` (and Grafana queries): [ids](/concepts/executing-a-request/identifiers).
+What Runtime passes between stages: [data](/concepts/executing-a-request/run-data). Capability JSON Schema (`input_schema` / `output_schema`): [schemas](/concepts/authoring-a-product/schema). Capability kinds (`domain` vs `agent`): [capabilities](/concepts/authoring-a-product/capability). Catalogue vs Runtime: [autonomy modes](/concepts/executing-a-request/autonomy-modes). Who mints `request_id` / `session_id` / `correlation_id` (and Grafana queries): [ids](/concepts/executing-a-request/identifiers).

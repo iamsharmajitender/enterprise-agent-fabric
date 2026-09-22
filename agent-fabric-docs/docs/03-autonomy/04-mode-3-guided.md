@@ -56,7 +56,7 @@ Front Door POST /v1/runs
             branch / human_gate: designer-owned edges between stages
 ```
 
-How this binary hydrates: [patterns](/concepts/executing-a-request/autonomy-modes). Gaps: [status](/catalogue/coverage-status). Data channels: HTTP is `dict(goal)`; the LLM reads `notes`. See [data](/concepts/executing-a-request/run-data).
+How this binary hydrates: [patterns](/concepts/executing-a-request/autonomy-modes). Gaps: [autonomy modes](/concepts/executing-a-request/autonomy-modes). Data channels: HTTP is `dict(goal)`; the LLM reads `notes`. See [data](/concepts/executing-a-request/run-data).
 
 ## Swimlane
 

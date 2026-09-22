@@ -59,7 +59,7 @@ Front Door POST /v1/runs
 
 Jobs vs chat is ingress only: same pin, same node, same call. Data that moves: the LLM reads `goal` plus `notes`. The completion is `result` and is appended to `notes`. Nothing POSTs a domain API. See [data](/concepts/executing-a-request/run-data).
 
-This Runtime: prefetch **does** POST each scoped corpus gateway and fails the run if nothing comes back — see [corpus](/concepts/authoring-a-product/corpus). `conversation=session` has no transcript store. Gaps: [status](/catalogue/coverage-status). How this binary hydrates: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
+This Runtime: prefetch **does** POST each scoped corpus gateway and fails the run if nothing comes back — see [corpus](/concepts/authoring-a-product/corpus). `conversation=session` has no transcript store. Gaps: [autonomy modes](/concepts/executing-a-request/autonomy-modes). How this binary hydrates: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
 
 ## Swimlane
 

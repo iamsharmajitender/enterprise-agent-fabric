@@ -32,24 +32,16 @@ Chat demos and extra flags: [stack/README.md](https://github.com/iamsharmajitend
 
 ## What should be listening
 
-| Port | Component | Job |
-| --- | --- | --- |
-| 3005 | [Agent Front Door](/architecture/service-packs/agent-front-door) | Only public ingress. Chat and jobs. |
-| 3006 | Control Plane UI | Catalogue browser. |
-| 3007 | [Agent Data Plane](/architecture/service-packs/agent-plane) | Catalogue and classify. |
-| 3008 | [Agent Runtime](/architecture/service-packs/agent-runtime) | Pin, hydrate, run. |
-| 3009 | [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) | Published capabilities. |
-| 3014 | Chat scratchpad | Seeded demo UI. |
+| Component | Job |
+| --- | --- |
+| [Agent Front Door](/architecture/service-packs/agent-front-door) | Only public ingress. Chat and jobs. |
+| Control Plane UI | Catalogue browser. |
+| [Agent Data Plane](/architecture/service-packs/agent-plane) | Catalogue and classify. |
+| [Agent Runtime](/architecture/service-packs/agent-runtime) | Pin, hydrate, run. |
+| [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) | Published capabilities. |
+| Chat scratchpad | Seeded demo UI. |
 
-Open [http://localhost:3014/chat](http://localhost:3014/chat) when you want a browser, or stay on the next page and use `curl`.
-
-Health check the door:
-
-```bash
-curl -sf http://localhost:3005/health
-```
-
-A healthy Front Door is enough to continue.
+Local binds are in the [stack README](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-scripts/stack/README.md). A healthy Front Door (`GET /health`) is enough to continue.
 
 ## Next
 

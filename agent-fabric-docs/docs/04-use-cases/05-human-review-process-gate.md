@@ -70,9 +70,9 @@ Seed illustrations:
 
 | Route | Gate shape |
 | --- | --- |
-| [`purchase_refund`](/catalogue/seed-use-cases) | Always gate before refund; LLM signal on `extract_fields` |
-| [`kyc_onboarding`](/catalogue/seed-use-cases) | `branch` on risk → gate or activate |
-| [`card_freeze`](/catalogue/seed-use-cases) | `requires_approval` on freeze; no gate stage yet |
+| `purchase_refund` | Always gate before refund; LLM signal on `extract_fields` |
+| `kyc_onboarding` | `branch` on risk → gate or activate |
+| `card_freeze` | `requires_approval` on freeze; no gate stage yet |
 
 Patterns: [deterministic](/autonomy/mode-2-deterministic) overlay 11; [guided](/autonomy/mode-3-guided) may put a copilot stage in front of the same gate.
 
@@ -183,7 +183,7 @@ On fire: reload the pin. If still waiting on that gate → apply `on_timeout`. I
 | Piece | Now |
 | --- | --- |
 | `human_gate` / `branch` / `requires_approval` on seed workflows | Yes. Shown in Control Plane. |
-| Runtime pauses at `human_gate` | Yes. `status=waiting`; resume via `/turns`. See [status](/catalogue/coverage-status). |
+| Runtime pauses at `human_gate` | Yes. `status=waiting`; resume via `/turns`. See [autonomy modes](/concepts/executing-a-request/autonomy-modes). |
 | Resume merges human packet into slots | Yes (D9). |
 | Gate `sla` / `review_due_at` / timeout wake | **Not built.** Options above are the intended menu; closest scheduler pattern is subagent join. |
 | Dummy `purchase_refund` may still complete without a person in some smoke paths | Treat green carefully — pair with a real wait/resume check. |

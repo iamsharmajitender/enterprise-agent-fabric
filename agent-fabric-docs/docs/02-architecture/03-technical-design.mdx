@@ -10,7 +10,7 @@ This is the internals paper: one decide contract, two Front Door fleets at scale
 
 **How a request is split.** [Agent Front Door](/architecture/service-packs/agent-front-door) calls the Agent Data Plane to classify. The Agent Control Plane is the sibling control box. Front Door **pins** `route_id` + versions and async-starts [Agent Runtime](/architecture/service-packs/agent-runtime).
 
-**How ingress is split.** One **contract** (entitle, classify, freeze, start). Two **fleets** at production scale: Chat Front Door and API Front Door. Kafka `{runs_topic}` is Runtime return, not a third door. Locally, chat and jobs share port 3005 — same contract, one process.
+**How ingress is split.** One **contract** (entitle, classify, freeze, start). Two **fleets** at production scale: Chat Front Door and API Front Door. Kafka `{runs_topic}` is Runtime return, not a third door. Locally, chat and jobs share one Front Door process — same contract.
 
 | Job | Component |
 | --- | --- |
@@ -26,17 +26,17 @@ This is the internals paper: one decide contract, two Front Door fleets at scale
 
 Seven processes prove the fabric chain. Channels talk only to Front Door.
 
-| Port | Box | Job |
-| --- | --- | --- |
-| 3005 | **Agent Front Door** | Chat `/v1/assistant/*` and jobs `/v1/jobs*` on one process |
-| 3006 | **Agent Control Plane** | Catalogue UI only — no database, no decide API |
-| 3007 | **Agent Data Plane** | Catalogue + classify (`POST /v1/intent/decide`) |
-| 3008 | **Agent Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
-| 3009 | **Agent Capability Plane** | Published capabilities; hydrate once at pin |
-| 3012 | **Agent Audit Data Plane (AADP)** | Append-only evidence ingest + query |
-| 3013 | **Agent Audit Control Plane (AACP)** | Ops UI; queries AADP only |
+| Box | Job |
+| --- | --- |
+| **Agent Front Door** | Chat `/v1/assistant/*` and jobs `/v1/jobs*` on one process |
+| **Agent Control Plane** | Catalogue UI only — no database, no decide API |
+| **Agent Data Plane** | Catalogue + classify (`POST /v1/intent/decide`) |
+| **Agent Runtime** | Pin, hydrate, LangGraph (Patterns 0–3) |
+| **Agent Capability Plane** | Published capabilities; hydrate once at pin |
+| **Agent Audit Data Plane (AADP)** | Append-only evidence ingest + query |
+| **Agent Audit Control Plane (AACP)** | Ops UI; queries AADP only |
 
-**32 routes** in the seed catalogue. Four autonomy patterns (`autonomy_mode` 0–3). Pin → hydrate → graph is wired; gaps vs the full design are listed in [status](/catalogue/coverage-status).
+Four autonomy patterns (`autonomy_mode` 0–3). Pin → hydrate → graph is wired. Seed packs live under `agent-fabric-scripts/stack/route/`.
 
 **v1 deferrals** (production target, not local yet): second AFD fleet (FR-9), decision audit store, Layer ③ LLM classifier, real Kafka / IdP / dual-check PEP, Shared Memory and long-term retrieve.
 
@@ -346,4 +346,4 @@ FRs above are the testable form.
 
 ## Read next
 
-**[Agent Front Door](/architecture/service-packs/agent-front-door)** · [Agent Plane](/architecture/service-packs/agent-plane) · [Agent Runtime](/architecture/service-packs/agent-runtime) · [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) · [Agent Audit](/architecture/service-packs/agent-audit) · [Catalogue matrix](/catalogue/) · [Runtime status](/catalogue/coverage-status) · [Patterns](/autonomy/)
+**[Agent Front Door](/architecture/service-packs/agent-front-door)** · [Agent Plane](/architecture/service-packs/agent-plane) · [Agent Runtime](/architecture/service-packs/agent-runtime) · [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) · [Agent Audit](/architecture/service-packs/agent-audit) · [Patterns](/autonomy/)

@@ -56,7 +56,7 @@ Omitted `ingress_files` means JSON only — today’s behaviour. Present means t
 
 `part` is the channel name. `goal_key` is the capability name. Do not invent a fabric-wide `files[]` that every HTTP body would have to understand.
 
-Sibling of `retrieval` and `memory_profile` on the route. Not a fifth `autonomy_mode`. Example composition: [`msa_risk_review`](/catalogue/seed-use-cases) would keep Pattern 2, retrieval, memory, and add this block.
+Sibling of `retrieval` and `memory_profile` on the route. Not a fifth `autonomy_mode`. Example composition: `msa_risk_review` would keep Pattern 2, retrieval, memory, and add this block.
 
 ## Request
 

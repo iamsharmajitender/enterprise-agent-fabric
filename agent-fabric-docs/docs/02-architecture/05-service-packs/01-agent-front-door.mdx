@@ -20,7 +20,7 @@ Two shapes, one contract: **entitle â†’ classify (chat) or entitle-only (jobs) â
 - **Chat** is a BFF. Humans send an utterance. The Front Door asks the [Agent Data Plane](/architecture/service-packs/agent-plane) to classify. Only `outcome=route` starts Runtime.
 - **Jobs** are an API. The caller already named `route_id`. Classification is skipped; entitlement is not.
 
-Locally both shapes share port **3005**. At production scale they are separate fleets so a hung chat pool cannot take down jobs. They still share the Agent Plane, the freeze store, and the start contract.
+Locally both shapes share one Front Door process. At production scale they are separate fleets so a hung chat pool cannot take down jobs. They still share the Agent Plane, the freeze store, and the start contract.
 
 ## What it owns
 

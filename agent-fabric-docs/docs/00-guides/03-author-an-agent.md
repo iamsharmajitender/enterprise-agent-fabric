@@ -43,4 +43,4 @@ The platform owns the path. You own whether the agent is good. That split is the
 
 ## Try it
 
-Start from a seeded route such as `fee_explain` ([catalogue](/catalogue/routes)), send [a first request](/guides/first-request), then read the [route](/concepts/authoring-a-product/route) and [capability](/concepts/authoring-a-product/capability) pages for the fields you would change.
+Start from a seeded route such as `fee_explain`, send [a first request](/guides/first-request), then read the [route](/concepts/authoring-a-product/route) and [capability](/concepts/authoring-a-product/capability) pages for the fields you would change.

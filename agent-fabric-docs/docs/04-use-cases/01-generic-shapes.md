@@ -5,7 +5,7 @@ sidebar_label: Generic shapes
 
 # Generic shapes this fabric supports
 
-Domain-agnostic **caller, control-flow, and composition** shapes. Seed routes (`fee_explain`, `purchase_refund`, …) are proofs — not the product list. Autonomy integers live in [autonomy](/autonomy/). Seed matrix: [catalogue](/catalogue/). Runtime vs catalogue: [status](/catalogue/coverage-status).
+Domain-agnostic **caller, control-flow, and composition** shapes. Seed routes (`fee_explain`, `purchase_refund`, …) are proofs — not the product list. Autonomy integers live in [autonomy](/autonomy/).
 
 Jobs vs chat is **ingress**, not a shape on this page. Autonomy mode does not invent a fifth document or human-review shape.
 
@@ -17,7 +17,7 @@ Detail pages in this section. One concern per page.
 | --- | --- | --- | --- |
 | Document by enterprise id | DMS already holds the object; JSON carries `doc_id` (or short-lived GET) | [files-via-dms](/use-cases/files-via-dms) | JSON `doc_id` yes; real DMS GET mocked |
 | Document via channel upload | Multipart → Front Door PUT → mint id → same JSON path | [files-bytes-upload](/use-cases/files-bytes-upload) | **Not built** (`ingress_files`) |
-| Review evidence (no pause) | Classify emits structured `human_review_*` for a later branch or reviewer | [human-review-llm-signal](/use-cases/human-review-llm-signal) | Schema + notes yes; slot/`branch` consumers see [status](/catalogue/coverage-status) |
+| Review evidence (no pause) | Classify emits structured `human_review_*` for a later branch or reviewer | [human-review-llm-signal](/use-cases/human-review-llm-signal) | Schema + notes yes; slot/`branch` consumers see [autonomy modes](/concepts/executing-a-request/autonomy-modes) |
 | In-run process gate | Designer `human_gate` → `waiting` → resume → `requires_approval` write | [human-review-process-gate](/use-cases/human-review-process-gate) | Pause/resume **runs** |
 | Async human handoff | Domain `escalate_to_human` → ticket id → parent **completed** | [escalate-to-human-handoff](/use-cases/escalate-to-human-handoff) | Pattern 1 auto-complete + idempotent re-CALL **runs** |
 
@@ -62,20 +62,18 @@ Compose beside `autonomy_mode`. Not new modes. See [patterns README](/autonomy/#
 
 | Seed proof | Generic shape |
 | --- | --- |
-| [`email_summarize`](/catalogue/seed-use-cases) | Pattern 0 synthesis |
-| [`fee_explain`](/catalogue/seed-use-cases) | Pattern 1 lookup loop |
-| [`msa_risk_review`](/catalogue/seed-use-cases) / [`contract_review`](/catalogue/seed-use-cases) | Doc-id intake → retrieve/score → memo |
-| [`purchase_refund`](/catalogue/seed-use-cases) | Extract → LLM signal → **process gate** → write |
-| [`kyc_onboarding`](/catalogue/seed-use-cases) | Screen → **branch** → gate or activate |
-| [`shopassist_case`](/catalogue/routes) | Locator ASK → domain APIs → **async escalate** → complete |
-| [`fraud_investigate`](/catalogue/seed-use-cases) / [`ops_start_kyc`](/catalogue/seed-use-cases) | Parent starts **child agent** job |
-| [`policy_memo`](/catalogue/seed-use-cases) / `pack_then_*` | **Prefetch pack** then act/generate |
+| `email_summarize` | Pattern 0 synthesis |
+| `fee_explain` | Pattern 1 lookup loop |
+| `msa_risk_review` / `contract_review` | Doc-id intake → retrieve/score → memo |
+| `purchase_refund` | Extract → LLM signal → **process gate** → write |
+| `kyc_onboarding` | Screen → **branch** → gate or activate |
+| `shopassist_case` | Locator ASK → domain APIs → **async escalate** → complete |
+| `fraud_investigate` / `ops_start_kyc` | Parent starts **child agent** job |
+| `policy_memo` / `pack_then_*` | **Prefetch pack** then act/generate |
 
 ## Not on this page
 
 | Topic | Where |
 | --- | --- |
 | Full Pattern 0–3 contracts and illegal combinations | [autonomy](/autonomy/) |
-| Active route table and demo paths | [routes](/catalogue/routes) |
-| What Runtime executes vs catalogue-only | [status](/catalogue/coverage-status) |
 | Stage data (`goal` / `slots` / `notes`) | [data](/concepts/executing-a-request/run-data) |
