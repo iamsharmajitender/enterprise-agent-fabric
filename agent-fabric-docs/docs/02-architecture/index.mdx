@@ -1,7 +1,7 @@
 ---
 title: "Architecture"
 sidebar_label: Architecture
-description: "Index for Fabric architecture: the idea, the operating model, the technical design, and one solution pack per deployable box."
+description: "Index for Fabric architecture: the idea, the operating model, the technical design, and one page per deployable box."
 ---
 
 # Architecture
@@ -19,13 +19,12 @@ These packs may be ahead of code. Behaviour of the running binary is [coverage s
 | [The idea](/architecture/the-idea) | Anyone | One door, controls once, intelligence in domains |
 | [Operating model](/architecture/operating-model) | Owners and reviewers | Who publishes, who approves, who runs it |
 | [Technical design](/architecture/technical-design) | Engineers | One decide contract, two AFD fleets, three principals |
-| [Executive briefs](/architecture/executive-briefs/fabric-v1-brief) | Funding conversations | Decision ask, KPIs, roadmap |
 
-## Service packs
+## Components
 
-One pack per deployable box: deployment, APIs, data, sequences, failure. Read order matches a request.
+One page per deployable box: deployment, APIs, data, sequences, failure. Read order matches a request.
 
-| Pack | Box | Job in one line |
+| Component | Box | Job in one line |
 | --- | --- | --- |
 | [Agent Front Door](/architecture/service-packs/agent-front-door) | Chat AFD + API AFD | Only way in. Entitle, freeze, start. Two fleets, one contract. |
 | [Agent Plane](/architecture/service-packs/agent-plane) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |

@@ -94,4 +94,4 @@ Do not design against these.
 | Audit drop metric | Planned. Only a log warning today |
 | Scheduled retention | Documented policy only |
 
-Full detail on the box: [Agent Audit service pack](/architecture/service-packs/agent-audit). Frozen event fixtures: [reference](/reference/).
+Full detail on the box: [Agent Audit](/architecture/service-packs/agent-audit). Frozen event fixtures: [reference](/reference/).

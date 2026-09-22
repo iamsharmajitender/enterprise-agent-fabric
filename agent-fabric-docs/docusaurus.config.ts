@@ -73,7 +73,7 @@ const config: Config = {
           title: 'Concepts',
           items: [
             {label: 'Glossary', to: '/concepts/glossary'},
-            {label: 'Authoring a product', to: '/concepts/authoring-a-product/route'},
+            {label: 'Authoring a agent', to: '/concepts/authoring-a-product/route'},
             {label: 'Executing a request', to: '/concepts/executing-a-request/request-lifecycle'},
           ],
         },

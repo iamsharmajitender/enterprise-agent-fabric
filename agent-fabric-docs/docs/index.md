@@ -18,18 +18,18 @@ Documentation for the Enterprise Agent Fabric. **Behaviour is what Agent Runtime
 | The words this project uses | [Glossary](/concepts/glossary) |
 | What a request actually does | [Request lifecycle](/concepts/executing-a-request/request-lifecycle) |
 | What I can build | [Generic shapes](/use-cases/generic-shapes), then [Autonomy](/autonomy/) |
-| How a box works | [Service packs](/architecture/service-packs/agent-front-door) |
+| How a box works | [Components](/architecture/service-packs/agent-front-door) |
 | Why this exists at all | [The idea](/architecture/the-idea) |
 
 ## Sections
 
 ### [Concepts](/concepts/glossary)
 
-The vocabulary, split by when you need it. **[Authoring a product](/concepts/authoring-a-product/route)** is everything you attach to a route: [route](/concepts/authoring-a-product/route), [capability](/concepts/authoring-a-product/capability), [prompts](/concepts/authoring-a-product/prompts), [schema](/concepts/authoring-a-product/schema), [retrieval](/concepts/authoring-a-product/retrieval), [memory](/concepts/authoring-a-product/memory), [LLM](/concepts/authoring-a-product/llm), [audit](/concepts/authoring-a-product/audit), [observability](/concepts/authoring-a-product/observability), and [corpus](/concepts/authoring-a-product/corpus). **[Executing a request](/concepts/executing-a-request/request-lifecycle)** is what the running fabric then does with it: the [lifecycle](/concepts/executing-a-request/request-lifecycle), the [autonomy mode](/concepts/executing-a-request/autonomy-modes) that picks the next step, the [run data](/concepts/executing-a-request/run-data) crossing stage boundaries, and the [identifiers](/concepts/executing-a-request/identifiers) you trace it by.
+The vocabulary, split by when you need it. **[Authoring a agent](/concepts/authoring-a-product/route)** is everything you attach to a route: [route](/concepts/authoring-a-product/route), [capability](/concepts/authoring-a-product/capability), [prompts](/concepts/authoring-a-product/prompts), [schema](/concepts/authoring-a-product/schema), [retrieval](/concepts/authoring-a-product/retrieval), [memory](/concepts/authoring-a-product/memory), [LLM](/concepts/authoring-a-product/llm), [audit](/concepts/authoring-a-product/audit), [observability](/concepts/authoring-a-product/observability), and [corpus](/concepts/authoring-a-product/corpus). **[Executing a request](/concepts/executing-a-request/request-lifecycle)** is what the running fabric then does with it: the [lifecycle](/concepts/executing-a-request/request-lifecycle), the [autonomy mode](/concepts/executing-a-request/autonomy-modes) that picks the next step, the [run data](/concepts/executing-a-request/run-data) crossing stage boundaries, and the [identifiers](/concepts/executing-a-request/identifiers) you trace it by.
 
 ### [Architecture](/architecture/)
 
-[The idea](/architecture/the-idea) is the pitch. [Operating model](/architecture/operating-model) is who owns what. [Technical design](/architecture/technical-design) is the whole-fabric design. [Service packs](/architecture/service-packs/agent-front-door) are one solution pack per deployable box. These packs may be ahead of code.
+[The idea](/architecture/the-idea) is the pitch. [Operating model](/architecture/operating-model) is who owns what. [Technical design](/architecture/technical-design) is the whole-fabric design. [Components](/architecture/service-packs/agent-front-door) are one page per deployable box. These pages may be ahead of code.
 
 ### [Autonomy](/autonomy/)
 
