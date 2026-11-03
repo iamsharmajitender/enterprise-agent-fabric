@@ -5,7 +5,9 @@ sidebar_label: Overview
 
 # Reference
 
-Frozen request and response examples. They are not a live OpenAPI spec.
+:::note You are in the deep end
+Frozen request and response examples. They are not a live OpenAPI spec. The story is [how it hangs together](/how-it-hangs-together).
+:::
 
 Stub headers: [stub auth](/reference/stub-auth). Site layout: [working on the docs](/reference/working-on-the-docs).
 

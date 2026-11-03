@@ -5,7 +5,9 @@ sidebar_label: Files as bytes
 
 # User uploads bytes
 
-The channel request carries file bytes. The fabric must not keep them. **Front Door** is the only box that may see bytes: entitle the route, enforce the route allowlist, PUT to the DMS, mint an id, then start Runtime with JSON `goal` only.
+The user attached a file in chat. Front Door is allowed to see the bytes once. Runtime and the model never are.
+
+The channel request carries file bytes. The fabric must not keep them. **Front Door** entitles the route, enforces the route allowlist, puts the bytes in the DMS, mints an id, then starts Runtime with JSON `goal` only. The public index: [use cases](/use-cases/).
 
 After mint, this use case is identical to [files-via-dms](/use-cases/files-via-dms). The domain tool GETs the DMS. Runtime and the LLM never see bytes.
 

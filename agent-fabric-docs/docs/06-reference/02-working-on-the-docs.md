@@ -6,12 +6,13 @@ description: "How this documentation site is laid out, and how to regenerate it.
 
 # Working on the docs
 
-This page is for people editing the site, not for learning the platform. Start at the [home page](/) instead.
+This page is for people editing the site, not for learning the platform. Start at [how it hangs together](/how-it-hangs-together).
 
 ## Sections
 
 | Section | For |
 | --- | --- |
+| [How it hangs together](/how-it-hangs-together) | The public spine |
 | [Guides](/running-locally) | Start the stack, send a request, author an agent |
 | [Concepts](/concepts/glossary) | Vocabulary you attach to a route, and what happens when a request runs |
 | [Architecture](/architecture/) | Why the fabric exists, who owns what, internals, one page per box |

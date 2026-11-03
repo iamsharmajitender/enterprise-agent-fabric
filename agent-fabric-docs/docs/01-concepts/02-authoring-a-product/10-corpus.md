@@ -6,6 +6,10 @@ description: "A corpus is a registered search gateway. What the row holds, how r
 
 # Corpus
 
+:::note You are in the deep end
+Authoring contract. The story: [how it hangs together](/how-it-hangs-together).
+:::
+
 A corpus is a **registered search gateway**, not a document store. The Fabric never holds your content: the row records where to ask, and Runtime POSTs a query there at run time.
 
 Corpora are the other half of [retrieval](/concepts/authoring-a-product/retrieval). The retrieval row on a route says *how* to retrieve; the corpus rows it names say *where from*.

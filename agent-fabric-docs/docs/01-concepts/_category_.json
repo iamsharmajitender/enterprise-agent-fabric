@@ -1,10 +1,11 @@
 {
   "label": "Concepts",
+  "position": 3,
   "collapsible": true,
   "collapsed": false,
   "link": {
     "type": "generated-index",
     "title": "Concepts",
-    "description": "The vocabulary of the Fabric: what you attach to a route when you author an agent, and what happens when a request executes."
+    "description": "What happens when a request executes, then what you attach to a route when you author an agent. Start at How it hangs together if you want the story first."
   }
 }

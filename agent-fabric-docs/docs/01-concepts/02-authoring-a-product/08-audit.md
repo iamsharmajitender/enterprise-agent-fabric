@@ -6,6 +6,10 @@ description: "The evidence chain: what every box emits, what the envelope allows
 
 # Audit
 
+:::note You are in the deep end
+Proof is not optional. Why: [how it hangs together](/how-it-hangs-together#what-it-governs).
+:::
+
 Audit is **platform evidence, not a catalogue knob**. No route field turns it on, off, or sideways. What you author still shapes the evidence — your pins become the hydrate snapshot, your stages become the stage events — but you cannot opt out and you cannot add fields.
 
 That is the point. Evidence you can switch off is not evidence.

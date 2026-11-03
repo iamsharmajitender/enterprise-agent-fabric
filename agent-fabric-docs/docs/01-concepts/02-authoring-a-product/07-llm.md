@@ -6,6 +6,10 @@ description: "How Agent Runtime calls the model: one global backend, four llm_ro
 
 # LLM
 
+:::note You are in the deep end
+Authoring contract. The story: [how it hangs together](/how-it-hangs-together).
+:::
+
 Every route calls the model at least once. This page is what happens on that call: which backend, what the model receives, what comes back, and what an author can actually change.
 
 **The short version: not much.** The model, temperature, and timeout are global to the Runtime process. What you author is *when* the model is called and *what it sees* — the stage list, the `llm_role` on each stage, the [prompt pack](/concepts/authoring-a-product/prompts), and the capability [output schema](/concepts/authoring-a-product/schema) bound to the response.

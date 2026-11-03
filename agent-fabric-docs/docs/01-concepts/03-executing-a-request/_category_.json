@@ -1,10 +1,11 @@
 {
   "label": "Executing a request",
+  "position": 1,
   "collapsible": true,
   "collapsed": false,
   "link": {
     "type": "generated-index",
     "title": "Executing a request",
-    "description": "What the running Fabric does with an authored product: the lifecycle from ingress to terminal state, which autonomy mode picks the next step, what data crosses stage boundaries, and which identifiers to trace."
+    "description": "How a request moves: lifecycle, autonomy, identities, and claims. Identifiers and run data sit behind those pages."
   }
 }

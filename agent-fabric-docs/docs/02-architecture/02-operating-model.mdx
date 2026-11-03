@@ -1,14 +1,16 @@
 ---
 title: Operating model
 sidebar_label: Operating model
-description: "Who owns what. The platform/domain split across channels, plane, front door, runtime, and shared services — and what that means when you publish."
+description: "Who owns what. The platform owns the path. Domains own the work. Publishing is the transfer point."
 ---
 
 # Operating model
 
-[The idea](/architecture/the-idea) says controls run once and intelligence stays in the domain. This page is the boring version of that sentence: **which team owns which box**, and what changes hands when you publish a capability.
+[The idea](/architecture/the-idea) says controls run once and intelligence stays in the domain. This page is the ownership version of that sentence: **which team owns which box**, and what changes hands when you publish a capability.
 
-The split is the whole design. Get it wrong in either direction and you lose the point — a platform that owns the intelligence becomes a bottleneck, and domains that own the controls rebuild identity and audit five times.
+Get the split wrong in either direction and you lose the point — a platform that owns the intelligence becomes a bottleneck, and domains that own the controls rebuild identity and audit five times.
+
+If you want the story first: [how it hangs together](/how-it-hangs-together).
 
 <div className="gain-diagram-wrap">
 
@@ -42,7 +44,7 @@ Because the path is owned once, these hold for every route without a domain team
 | --- | --- |
 | One way in | Front Door is the only public ingress. Channels never dial the Plane or Runtime |
 | Entitlement on every request | Jobs skip classification, never entitlement |
-| An immutable execution snapshot | The [route pin](/concepts/authoring-a-product/route) fixes `route_id@version` before the first LLM call |
+| An immutable execution snapshot | The [route pin](/concepts/authoring-a-product/route) fixes `route_id@version` before the first model call |
 | Evidence without opt-out | [Audit](/concepts/authoring-a-product/audit) events fire from every box; no route field disables them |
 | Journey telemetry | [Observability](/concepts/authoring-a-product/observability) keyed by `route_id`, correlated end to end |
 | Three separated identities | The user, the agent, and the Runtime workload never collapse into one token |
@@ -54,7 +56,7 @@ Everything that makes the product good, and nothing that makes it safe:
 - The **[capabilities](/concepts/authoring-a-product/capability)** they publish, and the business APIs behind them.
 - The **[prompt pack](/concepts/authoring-a-product/prompts)** and the quality of what the model is told.
 - The **[schemas](/concepts/authoring-a-product/schema)** that constrain model output.
-- The **[autonomy mode](/concepts/executing-a-request/autonomy-modes)** — how much latitude the model gets.
+- The **[autonomy mode](/autonomy/)** — how much latitude the model gets.
 - The **[corpora](/concepts/authoring-a-product/corpus)** their answers are grounded in.
 
 ## Publishing: what actually changes hands
@@ -78,7 +80,7 @@ These are consequences of the ownership split, not separate policies:
 
 1. **One Agent Plane per trust domain**, not one mega-agent. The plane is a boundary, and boundaries are how the model stays reviewable.
 2. **Two Front Door fleets, one contract.** Chat is connection-bound; jobs are bursty. Separate processes so a hung chat pool cannot take down jobs.
-3. **Capabilities are references, not copies.** Runtime hydrates the whole pinned manifest before the LLM sees anything, and never re-reads the registry mid-loop.
+3. **Capabilities are references, not copies.** Runtime hydrates the whole pinned manifest before the model sees anything, and never re-reads the registry mid-loop.
 4. **Only `route` starts a run.** `clarify` and `abstain` never pin, so an ambiguous request cannot quietly execute something.
 
-The technical expression of all four is [technical design](/architecture/technical-design). What runs today versus what is designed: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
+The internals paper: [technical design](/architecture/technical-design). What runs today versus what is designed: [autonomy](/autonomy/).

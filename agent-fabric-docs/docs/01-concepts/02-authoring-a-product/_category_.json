@@ -1,10 +1,11 @@
 {
   "label": "Authoring an agent",
+  "position": 2,
   "collapsible": true,
-  "collapsed": false,
+  "collapsed": true,
   "link": {
     "type": "generated-index",
     "title": "Authoring an agent",
-    "description": "Everything you attach to a route. An agent is a route plus the rows that hang off it: capability, prompts, schema, retrieval, memory, LLM, audit, observability, and corpus."
+    "description": "Everything you attach to a route. Deep end: start at How it hangs together if you want the story, then come back here to publish."
   }
 }

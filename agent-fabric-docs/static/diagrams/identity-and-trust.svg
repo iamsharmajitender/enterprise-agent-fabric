@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1080 400" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-labelledby="identity-trust-title identity-trust-desc">
+  <title id="identity-trust-title">Three identities on every run</title>
+  <desc id="identity-trust-desc">The user entitles a route. The route pins the agent. Runtime hydrates the pin. The three principals never share a bearer.</desc>
+  <defs>
+    <marker id="id-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#64748b"/>
+    </marker>
+    <marker id="id-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#f97316"/>
+    </marker>
+  </defs>
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+
+  <path d="M 180,220 V 160 Q 180,152 188,152 H 532 Q 540,152 540,144 V 128" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#id-arrow)"/>
+  <rect x="220" y="136" width="64" height="12" rx="2" fill="#f8fafc"/>
+  <text x="252" y="145" fill="#7a8399" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">ENTITLE</text>
+
+  <line x1="540" y1="128" x2="540" y2="220" fill="none" stroke="#f97316" stroke-width="1.3" marker-end="url(#id-arrow-accent)"/>
+  <rect x="556" y="164" width="36" height="12" rx="2" fill="#f8fafc"/>
+  <text x="574" y="173" fill="#f97316" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">PIN</text>
+
+  <path d="M 900,220 V 100 Q 900,92 892,92 H 640" fill="none" stroke="#64748b" stroke-width="1.2" marker-end="url(#id-arrow)"/>
+  <rect x="748" y="76" width="64" height="12" rx="2" fill="#f8fafc"/>
+  <text x="780" y="85" fill="#7a8399" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">HYDRATE</text>
+
+  <rect x="440" y="56" width="200" height="72" rx="6" fill="#f8fafc"/>
+  <rect x="440" y="56" width="200" height="72" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+  <text x="540" y="88" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Route</text>
+  <text x="540" y="108" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">the product</text>
+
+  <rect x="80" y="220" width="200" height="80" rx="6" fill="#f8fafc"/>
+  <rect x="80" y="220" width="200" height="80" rx="6" fill="rgba(100,116,139,0.10)" stroke="#94a3b8" stroke-width="1"/>
+  <text x="180" y="252" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">User</text>
+  <text x="180" y="272" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">who is asking</text>
+
+  <rect x="440" y="220" width="200" height="80" rx="6" fill="#f8fafc"/>
+  <rect x="440" y="220" width="200" height="80" rx="6" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="1"/>
+  <text x="540" y="252" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Agent</text>
+  <text x="540" y="272" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">which software acts</text>
+
+  <rect x="800" y="220" width="200" height="80" rx="6" fill="#f8fafc"/>
+  <rect x="800" y="220" width="200" height="80" rx="6" fill="#ffffff" stroke="#1e293b" stroke-width="1"/>
+  <text x="900" y="252" fill="#1e293b" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">Runtime</text>
+  <text x="900" y="272" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">which box runs</text>
+
+  <line x1="24" y1="332" x2="1056" y2="332" stroke="rgba(30,41,59,0.10)" stroke-width="0.8"/>
+  <text x="24" y="356" fill="#64748b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="120" y="348" width="16" height="12" rx="2" fill="rgba(249,115,22,0.10)" stroke="#f97316" stroke-width="1"/>
+  <text x="144" y="358" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Robot  never the user token</text>
+  <text x="400" y="358" fill="#64748b" font-size="8" font-family="'Geist', system-ui, sans-serif">Three principals. Three bearers. No collapse.</text>
+</svg>

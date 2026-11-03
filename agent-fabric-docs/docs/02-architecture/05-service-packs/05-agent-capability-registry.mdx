@@ -9,6 +9,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Agent Capability Plane
 
+:::note You are in the deep end
+This page is the registry contract. Publishing as a transfer of ownership: [operating model](/architecture/operating-model).
+:::
+
 Publishers append a capability as `id@version`. A route refers to those versions. [Runtime](/architecture/service-packs/agent-runtime) hydrates the whole pinned manifest **once**, at pin, then never re-reads the registry mid-loop.
 
 This box sits with the [Agent Plane](/architecture/service-packs/agent-plane), beside Control Plane and Data Plane. It is a catalogue of tools and child agents — not a third Front Door, not MCP `list_tools`, and not Shared Tools.

@@ -1,11 +1,16 @@
 ---
 title: Generic shapes this fabric supports
 sidebar_label: Generic shapes
+description: "The control-flow catalogue: documents, review, handoff, autonomy, and the seed proofs that illustrate them."
 ---
 
 # Generic shapes this fabric supports
 
-Domain-agnostic **caller, control-flow, and composition** shapes. Seed routes (`fee_explain`, `purchase_refund`, …) are proofs — not the product list. Autonomy integers live in [autonomy](/autonomy/).
+:::note Deep end
+The public shapes are on [use cases](/use-cases/). This page is the catalogue: caller, control-flow, composition, and the seed proofs that illustrate them. Autonomy integers live in [autonomy](/autonomy/).
+:::
+
+Domain-agnostic **caller, control-flow, and composition** shapes. Seed routes (`fee_explain`, `purchase_refund`, …) are proofs — not the product list.
 
 Jobs vs chat is **ingress**, not a shape on this page. Autonomy mode does not invent a fifth document or human-review shape.
 

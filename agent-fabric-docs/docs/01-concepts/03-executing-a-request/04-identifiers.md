@@ -6,9 +6,13 @@ description: "Who mints request_id, session_id, and correlation_id, how they pro
 
 # Identifiers
 
+:::note You are in the deep end
+This page is the identifier contract: who mints `request_id`, `session_id`, and `correlation_id`, and how to query them. The story is on [how it hangs together](/how-it-hangs-together). The public sequence is the [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+:::
+
 Which ids the fabric mints, who owns them, and how they show up in Grafana (Loki business events + Tempo spans).
 
-Related: [overview](/concepts/executing-a-request/request-lifecycle) · [memory](/concepts/authoring-a-product/memory) · [README observability](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/README.md#observability-grafana-lgtm)
+Related: [overview](/concepts/executing-a-request/request-lifecycle) · [identities](/concepts/executing-a-request/identities) · [claims and scopes](/concepts/executing-a-request/claims-and-scopes) · [memory](/concepts/authoring-a-product/memory) · [README observability](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/README.md#observability-grafana-lgtm)
 
 **Worked examples used below** (one jobs run + one chat thread):
 

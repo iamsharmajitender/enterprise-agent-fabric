@@ -7,6 +7,10 @@ description: "Build and start the local Enterprise Agent Fabric stack, then open
 
 # Start the fabric
 
+:::note Local runbook
+This page assumes you already know why the fabric exists. If you do not, start at [how it hangs together](/how-it-hangs-together).
+:::
+
 This is the local platform: one Front Door, one Agent Plane, one Runtime, and the shared boxes they call. You will start it, confirm it is up, then send a request on the next page.
 
 ## Prerequisites

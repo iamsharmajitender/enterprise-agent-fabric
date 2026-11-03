@@ -6,6 +6,10 @@ description: "Prompt packs and llm_role: the text the LLM actually sees, who own
 
 # Prompts
 
+:::note You are in the deep end
+Authoring contract. The story: [how it hangs together](/how-it-hangs-together).
+:::
+
 A prompt pack is the text the LLM sees, not the route description. ADP owns `dataplane.prompt_packs` (`host`, status, owner) and `dataplane.prompt_role_templates` (`llm_role`, `task_type`, `text`). Every active route stores a `prompt_id`. AR GETs the published pack at hydrate. AFD and ACR do not load packs.
 
 One pack per route. Pattern 0 and Pattern 1 use `host` only (Pattern 1 reuses that same host on every CALL/DONE turn). When a route makes more than one kind of LLM call, the pack holds a role template for each distinct `llm_role`. Two synthesis stages share one synthesis template. Role templates are unique per `(prompt_id, llm_role)`. `host` is a fallback when a stage’s role has no `text`, not a prefix: hydrate stamps **one** `llm_prompt` per node, and `llm.complete` uses that string as system. `task_type` is not sent.

@@ -1,35 +1,38 @@
 ---
 title: Use cases
 sidebar_label: Overview
+description: "Documents, human review, and handoff. The shapes the fabric supports, independent of industry."
 ---
 
 # Use cases
 
-Caller and process shapes the fabric supports — documents, human review, handoff. Who picks the next step is [autonomy](/autonomy/), not a new shape.
+These are the shapes a CIO or Chief Architect actually asks about: a document is already in the enterprise store; a person must approve a write; a bot must hand a case to operations.
 
-Each page says who acts, what the request or stage contract contains, what Runtime sees, and what is out of scope. Jobs vs chat is ingress, not a new use case.
+Who picks the next step is [autonomy](/autonomy/), not a new shape. Jobs versus chat is ingress, not a new use case. The story: [how it hangs together](/how-it-hangs-together).
 
-Domain-agnostic index (control-flow, autonomy, attachments, seed map): [generic shapes](/use-cases/generic-shapes).
+## Documents
 
-## Files
+The fabric does not become a file store.
 
-| File | Concern | Fabric sees |
+| Shape | What the business wants | What the fabric sees |
 | --- | --- | --- |
-| [generic-shapes](/use-cases/generic-shapes) | Domain-agnostic index of what EAF supports | Cross-links to these pages, autonomy, catalogue, tasks |
-| [files-via-dms](/use-cases/files-via-dms) | Objects already in the enterprise DMS | JSON ids, or a short-lived presigned GET |
-| [files-bytes-upload](/use-cases/files-bytes-upload) | Raw bytes on the channel request | Multipart on Front Door; DMS id on `goal` after mint |
-| [human-review-llm-signal](/use-cases/human-review-llm-signal) | Classify says a person should look | Structured `human_review_*` on stage output (evidence, not a pause) |
-| [human-review-process-gate](/use-cases/human-review-process-gate) | Designer stops before a write | `human_gate` → `waiting` → resume packet → `requires_approval` write |
-| [escalate-to-human-handoff](/use-cases/escalate-to-human-handoff) | Bot opens an async ops ticket then finishes | `escalate_to_human` → handoff id → parent **completed** (idempotent re-CALL) |
+| [Files already in the DMS](/use-cases/files-via-dms) | Review the contract that is already filed | A document id, or a short-lived GET |
+| [Bytes on the channel](/use-cases/files-bytes-upload) | The user uploaded a PDF in chat | Front Door puts the bytes in the DMS, then starts the run with an id |
 
-Default for documents is DMS-first ([files-via-dms](/use-cases/files-via-dms)). Byte upload is opt-in per route.
+Default is DMS-first. Byte upload is opt-in per route. Runtime and the model never keep bytes.
 
-Default for risky writes is a process gate ([human-review-process-gate](/use-cases/human-review-process-gate)). The LLM signal ([human-review-llm-signal](/use-cases/human-review-llm-signal)) feeds the reviewer (or a later `branch`); it does not pause by itself. For Pattern 1 “file a ticket and end the turn,” use [escalate-to-human-handoff](/use-cases/escalate-to-human-handoff) — that is not a gate.
+## People in the loop
 
-## Honest now vs later
+Three different ideas, often collapsed into “human in the loop.”
 
-Today jobs/chat are JSON. Seed document routes already pass `doc_id` (see `msa_risk_review`). Tool-mock does **not** GET the DMS; it returns canned `text`. Presigned URLs, `ingress_files`, and Front Door PUT to DMS are **not** built.
+| Shape | What the business wants | What the fabric does |
+| --- | --- | --- |
+| [LLM review signal](/use-cases/human-review-llm-signal) | The model thinks a person should look | Structured evidence. The run does **not** pause. |
+| [Process gate](/use-cases/human-review-process-gate) | Do not post the refund until a person says so | The run **stops**. A resume packet continues it. |
+| [Escalate to a human](/use-cases/escalate-to-human-handoff) | File a ticket and finish this turn | The parent run **completes**. The human works later, elsewhere. |
 
-Seed refund/KYC workflows **execute** `human_gate` (pause/resume via `/turns`) and `branch` (slot → next stage). See [human-review-process-gate](/use-cases/human-review-process-gate) and [autonomy modes](/concepts/executing-a-request/autonomy-modes).
+Default for a risky write is a process gate. The model’s signal feeds the reviewer; it does not pause by itself. Opening a ticket is not a gate.
 
-Stage handoff after ingress: [data](/concepts/executing-a-request/run-data) — `goal`, `slots`, `notes`. Proof checklist: [dataflow-plan D13](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/tasks/dataflow-plan.md#verification-checklist-d13).
+## Domain-agnostic index
+
+The control-flow catalogue, seed map, and “now versus later” honesty live on [generic shapes](/use-cases/generic-shapes).

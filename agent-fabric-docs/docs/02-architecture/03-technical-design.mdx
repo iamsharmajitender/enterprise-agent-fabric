@@ -6,7 +6,9 @@ description: "Enterprise Agent Fabric. Agent Front Door (AFD), Agent Plane (ACP 
 
 # Technical design
 
-This is the internals paper: one decide contract, two Front Door fleets at scale, three principals. If you are new to the platform, start at the [home page](/) or [the idea](/architecture/the-idea). APIs and failure modes live on the [component](/category/components) pages.
+:::note You are in the deep end
+This is the internals paper: one decide contract, two Front Door fleets at scale, three principals. If you want the story, start at [how it hangs together](/how-it-hangs-together) or [the idea](/architecture/the-idea). APIs and failure modes live on the [component](/category/components) pages.
+:::
 
 **How a request is split.** [Agent Front Door](/architecture/service-packs/agent-front-door) calls the Agent Data Plane to classify. The Agent Control Plane is the sibling control box. Front Door **pins** `route_id` + versions and async-starts [Agent Runtime](/architecture/service-packs/agent-runtime).
 
@@ -224,6 +226,8 @@ AR is the executor. It is not the agent. Shared AR is a compute choice. Identity
 `activation_target` isolates the **box** (PCI, release, network). `agent_client_id` names the **robot**. Omit `activation_target` and routes share AR compute. They do not share one agent bearer. A new use case is a new catalogue row and a new `agent_client_id`, not a new AR.
 
 Mint order: **pin first, then agent token.** Route change mid-session: new downscoped token. Do not widen the existing one. Jobs use the same robot badge; only how you carry the user changes (live claims vs stored approval). Dual check is Shared Tools / PEP: may this person, and may this robot.
+
+Concepts write-up: [identities](/concepts/executing-a-request/identities). Authorization that hangs off user and agent: [claims and scopes](/concepts/executing-a-request/claims-and-scopes).
 
 ---
 

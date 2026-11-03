@@ -5,7 +5,9 @@ sidebar_label: Files via DMS
 
 # Files via DMS (id vs presigned)
 
-The caller never sends file bytes to the fabric. The enterprise document management system (DMS) already holds the object. The request is JSON. The **domain tool** (for example `ocr_extract`) fetches the bytes from the DMS.
+The document is already filed. The fabric does not become a file store.
+
+The caller never sends file bytes to the fabric. The enterprise document management system (DMS) already holds the object. The request is JSON. The **domain tool** (for example `ocr_extract`) fetches the bytes from the DMS. The public index: [use cases](/use-cases/).
 
 This is the default document shape. Routes that only need this use case **omit** `ingress_files`. Front Door rejects multipart.
 

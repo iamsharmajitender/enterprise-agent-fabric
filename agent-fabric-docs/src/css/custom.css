@@ -123,8 +123,37 @@
   margin-bottom: 0;
 }
 
+.eaf-paths {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 1rem;
+  margin: 0 0 2.5rem;
+}
+
+.eaf-path {
+  background: var(--eaf-surface);
+  border: 1px solid var(--eaf-rule);
+  border-radius: 8px;
+  padding: 1.25rem 1.35rem;
+  height: 100%;
+}
+
+.eaf-path-focal {
+  border-color: var(--ifm-color-primary);
+}
+
+.eaf-path h3 {
+  font-size: 1.15rem;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.eaf-path p:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 860px) {
-  .eaf-cards {
+  .eaf-cards,
+  .eaf-paths {
     grid-template-columns: 1fr;
   }
 }

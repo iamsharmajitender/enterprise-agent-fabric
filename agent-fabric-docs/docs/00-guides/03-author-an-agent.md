@@ -7,6 +7,10 @@ description: "What you write to put an agent on the fabric: a route, the rows it
 
 # Author an agent
 
+:::note Local runbook
+This page is how you publish. The story is [how it hangs together](/how-it-hangs-together). Who owns the path versus the work: [operating model](/architecture/operating-model).
+:::
+
 An agent on this platform is a **route** plus the rows that hang off it. You do not stand up a new chatbot, a new identity stack, or a new audit trail. You publish a capability, pin it on a route, and choose how much latitude the model gets.
 
 ## The rows you write
@@ -18,6 +22,8 @@ An agent on this platform is a **route** plus the rows that hang off it. You do 
 | [Prompts](/concepts/authoring-a-product/prompts) | What the model is told, by `llm_role` | Prompts |
 | [Schema](/concepts/authoring-a-product/schema) | JSON Schema that binds model output | Schema |
 | [Autonomy mode](/concepts/executing-a-request/autonomy-modes) | Who picks the next step (0–3) | Autonomy modes |
+| [Claims and scopes](/concepts/executing-a-request/claims-and-scopes) | `required_claims` on the route; `pdp_action` on each tool | Claims and scopes |
+| [Identities](/concepts/executing-a-request/identities) | User, agent (`agent_client_id`), Runtime box. You pin the robot, not the box | Identities |
 | [Retrieval](/concepts/authoring-a-product/retrieval) and [corpus](/concepts/authoring-a-product/corpus) | Optional grounding | Retrieval |
 | [Memory](/concepts/authoring-a-product/memory) | Optional session / checkpoint flags | Memory |
 
@@ -37,7 +43,7 @@ Today, routes and corpora are seeded from SQL under `agent-fabric-scripts/stack/
 - A second front door
 - A per-agent identity provider
 - A per-agent audit store
-- Entitlements stored on the route row — those come from ingress claims
+- The caller's entitlements — those arrive as ingress `emts`. You do author `required_claims` on the route; see [claims and scopes](/concepts/executing-a-request/claims-and-scopes)
 
 The platform owns the path. You own whether the agent is good. That split is the [operating model](/architecture/operating-model).
 

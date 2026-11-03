@@ -9,6 +9,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Agent Audit
 
+:::note You are in the deep end
+This page is the evidence contract. Why proof is not optional: [how it hangs together](/how-it-hangs-together#what-it-governs).
+:::
+
 Audit sits **beside** the request path. Front Door, Data Plane, Runtime, and the Capability Plane emit events asynchronously. Decide, freeze, pin, and start never wait on a commit.
 
 This is not [observability](/concepts/authoring-a-product/observability). Observability is OpenTelemetry into Grafana, sampled, dropped freely. Audit is the evidence path: append-only, idempotent, queried months later by `correlation_id`.

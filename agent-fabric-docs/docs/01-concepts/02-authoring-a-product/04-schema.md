@@ -6,6 +6,10 @@ description: "Capability input_schema and output_schema: which one Runtime binds
 
 # Schema
 
+:::note You are in the deep end
+Authoring contract. The story: [how it hangs together](/how-it-hangs-together).
+:::
+
 JSON Schema on a capability is the contract for what goes in and what comes out. Control Plane shows it at `/capabilities/{id}`. Runtime binds `output_schema` on LLM stages (`classify`, `synthesis`, `query_formulation`) through `with_structured_output`. HTTP `none` stages do not bind either schema today.
 
 | Field | Who uses it | When it is real |

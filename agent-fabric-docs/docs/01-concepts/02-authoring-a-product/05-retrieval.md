@@ -6,6 +6,10 @@ description: "Deterministic prefetch, retrieve tools, and long-term retrieve-onl
 
 # Retrieval
 
+:::note You are in the deep end
+Authoring contract. Attachments compose around [autonomy](/autonomy/); they are not a fifth mode.
+:::
+
 Three ideas — do not conflate them:
 
 | Mechanism | What it is | Store / transport |

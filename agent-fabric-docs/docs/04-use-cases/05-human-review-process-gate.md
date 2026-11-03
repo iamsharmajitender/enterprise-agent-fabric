@@ -5,7 +5,9 @@ sidebar_label: Process gate
 
 # Process gate (human pause)
 
-A designer-owned workflow stage **stops the run** before a side-effect write. A person resumes with a structured decision packet. The LLM does not invent this edge.
+Do not post the refund — or activate the account, or freeze the card — until a person says so. The run **stops**. The model does not invent this edge.
+
+A designer-owned workflow stage pauses before a side-effect write. A person resumes with a structured decision packet. The public index: [use cases](/use-cases/).
 
 Use this for KYC activate, refunds, card freeze, or any path where the business write must wait on a person. Pair with an [LLM review signal](/use-cases/human-review-llm-signal) when classify/OCR evidence should sit on the reviewer packet — the signal is not the stop.
 

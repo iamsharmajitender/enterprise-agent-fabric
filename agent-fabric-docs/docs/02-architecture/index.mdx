@@ -1,14 +1,14 @@
 ---
 title: "Architecture"
 sidebar_label: Architecture
-description: "Index for Fabric architecture: the idea, the operating model, the technical design, and one page per deployable box."
+description: "Why the fabric exists, who owns which box, the internals paper, and one page per deployable component."
 ---
 
 # Architecture
 
-Why the fabric exists, who owns which box, the internals paper, and one page per deployable component.
+Why the fabric exists, who owns which box, then the internals. Component pages are the deep end.
 
-What actually runs today: [autonomy modes](/concepts/executing-a-request/autonomy-modes).
+The story first: [how it hangs together](/how-it-hangs-together). What actually runs today: [autonomy](/autonomy/).
 
 ## Where to start
 
@@ -20,27 +20,23 @@ What actually runs today: [autonomy modes](/concepts/executing-a-request/autonom
 
 ## Components
 
-One page per deployable box: deployment, APIs, data, sequences, failure. Read order matches a request.
+One page per deployable box: deployment, APIs, data, sequences, failure. These pages assume you already have the story.
 
 | Component | Box | Job in one line |
 | --- | --- | --- |
 | [Agent Front Door](/architecture/service-packs/agent-front-door) | Chat AFD + API AFD | Only way in. Entitle, freeze, start. Two fleets, one contract. |
-| [Agent Plane](/architecture/service-packs/agent-plane) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start AR. |
-| [Agent Runtime](/architecture/service-packs/agent-runtime) | AR + Shared calls | Pin, hydrate, LangGraph loop, autonomy modes 0–3. |
-| [Agent Audit](/architecture/service-packs/agent-audit) | AADP + AACP | Producers emit async. Append-only evidence chain. AACP examines by `correlation_id`. |
-| [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) | Registry (with Agent Plane) | Publishers append `id@version`. AR hydrates at pin. |
-
-## Diagrams
-
-Every figure on these pages is a generated SVG. The standalone HTML next to it is the same drawing, opened as a page. Both come from [`diagram-sources/`](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/agent-fabric-docs/diagram-sources/).
+| [Agent Plane](/architecture/service-packs/agent-plane) | ACP + Agent Data Plane | Catalogue and classify. Does not pin or start Runtime. |
+| [Agent Runtime](/architecture/service-packs/agent-runtime) | AR + Shared calls | Pin, hydrate, run the graph, autonomy modes 0–3. |
+| [Agent Audit](/architecture/service-packs/agent-audit) | AADP + AACP | Producers emit async. Append-only evidence chain. |
+| [Agent Capability Plane](/architecture/service-packs/agent-capability-registry) | Registry (with Agent Plane) | Publishers append `id@version`. Runtime hydrates at pin. |
 
 ## Locked fabric rules
 
-1. **Four jobs.** AFD entitles, pins, starts. Data Plane classifies. ACP is control + audit. AR runs.
-2. **Two AFD fleets, one contract.** Separate process (FR-9). `{runs_topic}` is AR return.
-3. **Jobs name `route_id`.** Skip classifier and clarify. Do not skip entitle + record.
-4. **Generic chat still classifies.** Hints are eligible + chat-visible.
-5. **Only `route` starts AR.** Clarify / abstain never pin. Default start is async `202`.
+1. **Four jobs.** Front Door entitles, pins, starts. Data Plane classifies. Control Plane is control and audit. Runtime runs.
+2. **Two Front Door fleets, one contract.** Separate process at production scale. Runtime return is not a third door.
+3. **Jobs name `route_id`.** Skip classifier and clarify. Do not skip entitle and record.
+4. **Generic chat still classifies.** Hints are eligible and chat-visible.
+5. **Only `route` starts Runtime.** Clarify and abstain never pin.
 6. **One Agent Plane per trust domain.** Not one mega-agent.
-7. **Three principals.** User ≠ agent ≠ AR workload.
-8. **Capabilities are references.** AR hydrates the whole pinned manifest before the LLM.
+7. **Three principals.** User ≠ agent ≠ Runtime workload.
+8. **Capabilities are references.** Runtime hydrates the whole pinned manifest before the model.

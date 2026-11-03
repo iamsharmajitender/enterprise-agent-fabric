@@ -1,6 +1,8 @@
 # LLM review signal
 
-A classify (or score) stage asks the model to say **whether a person should look** and **why**. That is evidence for a reviewer, not a pause. The model writes structured fields onto the stage output; Runtime keeps them on the run. A designer-owned [process gate](/use-cases/human-review-process-gate) is what actually stops the write.
+The model thinks a person should look. That is evidence, not a stop.
+
+A classify (or score) stage asks the model to say **whether a person should look** and **why**. The model writes structured fields onto the stage output; Runtime keeps them on the run. A designer-owned [process gate](/use-cases/human-review-process-gate) is what actually stops the write. The public index: [use cases](/use-cases/).
 
 Use this when OCR / intake is incomplete, confidence is low, or the notes are ambiguous — and a later human (or a `branch`) needs an explicit flag.
 

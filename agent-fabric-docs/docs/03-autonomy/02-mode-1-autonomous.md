@@ -8,7 +8,11 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Mode 1 — Autonomous
 
-The **LLM picks the next step**. The route points at a **tool manifest** and `max_loop_steps`. There is **no workflow**. Runtime runs a `CALL` / `DONE` loop: the model proposes a capability from the hydrated manifest, the app executes it, observes, and loops until `DONE` or the budget is exhausted.
+The **model picks the next step**, inside a budget. Two runs with the same goal may take different paths. Both can be valid. The app owns the budget; the model only proposes.
+
+Use this for investigation, lookup, and specialist fan-out — work where the path is not known in advance. The index: [autonomy](/autonomy/).
+
+The route points at a **tool manifest** and `max_loop_steps`. There is **no workflow**. Runtime runs a `CALL` / `DONE` loop: the model proposes a capability from the hydrated manifest, the app executes it, observes, and loops until `DONE` or the budget is exhausted.
 
 Two runs with the same goal may take different paths. Both can be valid. The app owns the budget; the LLM only proposes.
 

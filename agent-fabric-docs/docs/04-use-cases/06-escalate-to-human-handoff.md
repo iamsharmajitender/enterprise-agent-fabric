@@ -5,11 +5,11 @@ sidebar_label: Escalate to human
 
 # Escalate to human (async handoff)
 
-A Pattern 1 domain tool **opens a ticket for a human queue**, then the **parent run completes**. The human works the case later outside this correlation. The run does **not** pause for `/turns`.
+File a ticket and finish this turn. The human works the case later, elsewhere. This run does **not** wait.
 
-Seed proof: `shopassist_case`. Runtime: `build_agent_loop` in `agent-runtime/app/graph/workflow.py`.
+A Mode 1 domain tool **opens a ticket for a human queue**, then the **parent run completes**. That is not a [process gate](/use-cases/human-review-process-gate). Use a gate when the **same** run must continue after an approve or reject. The public index: [use cases](/use-cases/).
 
-This is **not** a [process gate](/use-cases/human-review-process-gate). Use `human_gate` when the **same** run must continue after an in-flow approve/reject.
+Seed proof: `shopassist_case`.
 
 ## Who does what
 

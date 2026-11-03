@@ -6,6 +6,10 @@ description: "The two capability kinds a manifest can reference: domain HTTP and
 
 # Capability
 
+:::note You are in the deep end
+Authoring contract. The story: [how it hangs together](/how-it-hangs-together). Publishing: [operating model](/architecture/operating-model).
+:::
+
 The Capability Plane publishes **two kinds**. That is the catalog contract. A kind is how Runtime calls after PEP, not a taxonomy of “things an agent can do.”
 
 | `kind` | Invoke | What it is |

@@ -8,7 +8,11 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Mode 3 — Guided
 
-The **designer picks the stages**; the **LLM picks tools inside a stage** from that stage’s **allowlist**. The route points at a **workflow** (required) and a **manifest** (required). Outer order is fixed. Inner choice is bounded.
+The **designer picks the stages**; the **model picks tools inside a stage** from that stage’s **allowlist**. Outer order is fixed. Inner choice is named.
+
+Use this for triage-then-draft or counsel-style review: a process on the outside, a short leash on the inside. The index: [autonomy](/autonomy/).
+
+The route points at a **workflow** (required) and a **manifest** (required).
 
 This is the hybrid: Pattern 2 on the outside, a small Pattern 1 loop on the inside of each stage that carries an allowlist.
 

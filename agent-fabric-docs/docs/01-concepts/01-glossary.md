@@ -6,7 +6,7 @@ description: "Every term of art in the Fabric, with a one-line definition and a 
 
 # Glossary
 
-One line each. Follow the link when one line is not enough.
+One line each. Follow the link when one line is not enough. The story those terms hang off: [how it hangs together](/how-it-hangs-together).
 
 Two distinctions cause most of the confusion here, so they are worth stating up front:
 
@@ -27,7 +27,7 @@ Two distinctions cause most of the confusion here, so they are worth stating up 
 | **AACP** — Agent Audit Control Plane | Ops UI over evidence chains. No database of its own |
 | **Agent Plane** | ACP plus ADP, one per trust domain. Classifies; does not execute |
 | **Shared** | Memory, RAG, model, and tools — called *from* Runtime, not built into it. Largely not implemented |
-| **PEP** — Policy Enforcement Point | The dual user-and-agent check before a tool invoke. Production target, not local |
+| **[PEP](/concepts/executing-a-request/claims-and-scopes)** — Policy Enforcement Point | The dual user-and-agent check before a tool invoke. Production target, not local |
 | **BFF** | The connection-bound shape of the Chat Front Door fleet, as opposed to the handler-shaped API fleet |
 | **DMS** | The enterprise document store. Front Door puts bytes there and starts Runtime with a JSON id only |
 | **agent-mocks** | Local HTTP doubles for domain tools and corpus gateways |
@@ -53,7 +53,7 @@ Two distinctions cause most of the confusion here, so they are worth stating up 
 
 | Term | Definition |
 | --- | --- |
-| **Entitle** | Check the caller's claims and channel against the route. Jobs skip classify, never entitle |
+| **[Entitle](/concepts/executing-a-request/claims-and-scopes)** | Check the caller's `emts` against the route `required_claims` (and channel). Jobs skip classify, still entitle |
 | **Decide** | The Data Plane classify call. Returns `route`, `clarify`, or `abstain` |
 | **`clarify`** | Decide asked the user to choose between candidates. Never pins |
 | **`abstain`** | Decide declined to route. Never pins |
@@ -65,7 +65,10 @@ Two distinctions cause most of the confusion here, so they are worth stating up 
 | **`notes`** | Append-only strings on `working`, fed to LLM stages |
 | **`GraphState`** | The Runtime state object: `result`, `goal`, `notes`, `slots` |
 | **`activation_target`** | Where Runtime runs for this route. Channels never dial it directly |
-| **`agent_client_id`** | The software identity pinned on the run, distinct from the user |
+| **`agent_client_id`** | The software identity pinned on the run, distinct from the user. The robot a downscoped token is minted **for** — [identities](/concepts/executing-a-request/identities) |
+| **`required_claims`** | User entitlement filter on the route. All-of against `emts`. Decide, before pin |
+| **`emts`** | True-valued keys on stub claims. The user's entitlement set |
+| **`pdp_action`** | Action id on a manifest tool ref. Intended agent-token scope and PEP action. Catalogue-only today |
 | **`human_gate`** | A workflow stage that pauses the run at `waiting` until a person resumes it through `/turns` |
 | **Escalation** | A Mode 1 tool that files an async ticket and lets the parent run **complete**. Not a gate |
 | **Evidence chain** | Every audit event sharing one `correlation_id`, time-ordered. A logical chain, not a hash chain |
@@ -104,7 +107,10 @@ Who mints what, and what it is good for. Detail: [identifiers](/concepts/executi
 
 | Term | Definition |
 | --- | --- |
-| **Three principals** | The user who asked, the agent acting as software, and the Runtime workload. Never conflated |
+| **[Three principals](/concepts/executing-a-request/identities)** | The user who asked, the agent acting as software, and the Runtime box. Never one bearer. Detail: [identities](/concepts/executing-a-request/identities) |
+| **User identity** | Channel caller. Stub: `Bearer stub` + `emts`. Entitles the route. Not the tool-call bearer |
+| **Agent identity** | Route `agent_client_id`. The robot. Intended Shared Tools bearer after pin |
+| **AR workload identity** | The Runtime box. Stub: `X-Workload: ar`. Calls Data Plane and Registry. Not a domain API principal |
 | **FR-5** | The rule that chat and UI responses must not leak `route_id`, `run_id`, confidence, or router internals |
 | **`router_layer`** | Which decide layer matched: `rules`, `retrieve`, or `llm`. Server-side only |
 | **`deterministic_prefetch`** | The retrieval mode where the app packs corpora *before* generate. The model cannot skip it |

@@ -7,6 +7,10 @@ description: "Send one job and one chat turn through Front Door, then follow the
 
 # Your first request
 
+:::note Local runbook
+This page assumes you already know why the fabric exists. If you do not, start at [how it hangs together](/how-it-hangs-together).
+:::
+
 The stack is up from [Start the fabric](/running-locally). You will send two calls through the **Agent Front Door**. Nothing else is public. Set `FRONT_DOOR` to that ingress URL (stack README).
 
 Local identity is stubbed. Every channel call needs both headers from [stub auth](/reference/stub-auth):

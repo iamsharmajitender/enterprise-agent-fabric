@@ -6,6 +6,10 @@ description: "Memory profiles are route policy, not a store. What Agent Runtime 
 
 # Memory
 
+:::note You are in the deep end
+Authoring contract. Attachments compose around [autonomy](/autonomy/); they are not a fifth mode.
+:::
+
 `dataplane.memory_profiles` is **policy** on the route (`conversation`, `working`, `loop`, `long_term`, TTL, isolation). It is not a memory store. ADP serves the row; AR honors `working` and `loop` on the run pin (`agent-runtime/app/core/memory.py`).
 
 | Field | Catalogue | This Runtime |

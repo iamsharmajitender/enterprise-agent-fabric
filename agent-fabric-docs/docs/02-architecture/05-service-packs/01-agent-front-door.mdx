@@ -9,6 +9,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Agent Front Door
 
+:::note You are in the deep end
+This page is the Front Door contract. The story is [how it hangs together](/how-it-hangs-together). The public sequence is the [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+:::
+
 The Front Door is the only public way into the Fabric. Chat, jobs, and partner APIs all stop here. It checks who you are, freezes which agent will run, and starts [Agent Runtime](/architecture/service-packs/agent-runtime). It never classifies a request itself and it never runs the agent.
 
 Try it: [your first request](/guides/first-request).

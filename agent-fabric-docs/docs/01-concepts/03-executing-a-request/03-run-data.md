@@ -6,6 +6,10 @@ description: "goal, slots, and notes: the three channels the run graph uses to h
 
 # Run data
 
+:::note You are in the deep end
+This page is the stage-handoff contract: `goal`, `slots`, and `notes`. Start at the [request lifecycle](/concepts/executing-a-request/request-lifecycle) if you want the sequence.
+:::
+
 The run graph has three channels for stage handoff inside one correlation id:
 
 | Channel | Lives on | Who consumes it |

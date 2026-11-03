@@ -1,0 +1,133 @@
+---
+title: How it hangs together
+sidebar_label: How it hangs together
+sidebar_position: 1
+slug: /how-it-hangs-together
+description: "The Fabric as one system: what it governs, how a request moves, who the three identities are, and how much autonomy a route is allowed."
+---
+
+# How it hangs together
+
+After ten minutes here you should be able to say:
+
+> This is an operating model for enterprise agents — identity, audit, and autonomy — not another chatbot framework.
+
+The rest of the site hangs off that sentence. This page is the spine. [Architecture](/architecture/) names the boxes. [Concepts](/concepts/executing-a-request/request-lifecycle) are the contracts. [Autonomy](/autonomy/) and [use cases](/use-cases/) are the product shapes.
+
+---
+
+## One door. Controls once. Intelligence in the domain.
+
+AI that only **answers** can live as a chatbot. AI that **acts** — posts a refund, opens a KYC case, freezes a card — needs shared enterprise plumbing.
+
+Do that plumbing once, and the organisation can answer four questions from one place:
+
+1. Who was allowed to use this?
+2. Why this agent, and not another?
+3. What was it permitted to do?
+4. What did it actually do?
+
+People and systems never dial Legal, payments, or KYC URLs. They come in **one front door**. The fabric verifies, routes, runs, and records. The domain AI does the work.
+
+| Runs once, for the whole portfolio | Still owned by the domain |
+| --- | --- |
+| Identity and entitlement | The business problem |
+| Routing to the right capability | Knowledge, models, prompts |
+| Policy, approval, kill switch | Specialist runtime |
+| Audit and the ops view | Outcomes and UX |
+
+That split is the whole design. A platform that owns the intelligence becomes a bottleneck. Domains that own the controls rebuild identity and audit five times. Detail: [operating model](/architecture/operating-model).
+
+<div className="gain-diagram-wrap">
+
+![Chat and jobs enter only through the Front Door. The Agent Plane classifies. Runtime starts the domain agent. Audit records alongside.](/diagrams/system-context.svg)
+
+</div>
+
+_Caption: One door. Plane decides. Runtime runs. Domain does the work. Audit sits beside the path._
+
+---
+
+## What it governs {#what-it-governs}
+
+Four controls. Everything else is a name for one of them.
+
+### Identity
+
+Three principals on every run, and they never share a token.
+
+| Principal | Answers |
+| --- | --- |
+| **User** | Who is asking? |
+| **Agent** | Which software is acting? |
+| **Runtime** | Which box is running the loop? |
+
+Jane’s entitlement gets her **onto** a route. The robot is what calls the tools. The box is what hydrates the catalogue. Collapsing those three into one bearer is how an entitled user becomes an unbounded agent, or a runtime process becomes a domain API caller.
+
+The public page: [identities](/concepts/executing-a-request/identities). The authorization contract: [claims and scopes](/concepts/executing-a-request/claims-and-scopes).
+
+### Routing
+
+A versioned **route** is the product. Chat is classified. Jobs name the route. Both still have to be entitled. Only a `route` outcome starts work. `clarify` and `abstain` never pin, so an ambiguous request cannot quietly execute something.
+
+### Autonomy
+
+`autonomy_mode` answers one question: **who picks the next step**.
+
+| Mode | Who picks the next step | Typical work |
+| --- | --- | --- |
+| **0** Single inference | Nobody. One model call. | Summarise, policy Q&A with no tools |
+| **1** Autonomous | The model, inside a tool budget | Investigate, look up, fan out |
+| **2** Deterministic | The workflow designer | Refund, KYC, any fixed pipeline |
+| **3** Guided | Designer for stages; model inside an allowlist | Triage then draft, counsel-style review |
+
+Retrieval, memory, tools, and human gates compose **around** that integer. They are not a fifth mode. The public page: [autonomy](/autonomy/).
+
+### Proof
+
+Every box emits evidence onto the same `correlation_id`. There is no route flag that turns audit off. “What ran last Tuesday” is a query, not an archaeology project.
+
+---
+
+## How a request moves {#how-a-request-moves}
+
+Chat and jobs are the **same idea**. Only how the path is chosen differs.
+
+1. **Ask** — a person or a system arrives at the door.
+2. **Verify** — are they entitled for this channel?
+3. **Route** — pick a governed path, ask a clarifying question, or refuse. Jobs name the path; they still must be entitled. A refusal never starts work.
+4. **Pin** — lock the route version and the agent identity, then start the runtime. Catalogue changes after this moment do not disturb work in flight.
+5. **Execute** — domain AI runs with the pinned capabilities, under the autonomy mode the route declared.
+6. **Record** — outcome back; evidence kept.
+
+<div className="gain-diagram-wrap">
+
+![Request swimlane: a system asks; the fabric verifies and routes; domain AI executes; audit records alongside; the outcome returns.](/diagrams/agent-fabric-executive-swimlane-jobs.svg)
+
+</div>
+
+_Caption: Verify → route → execute → record. One path for a human turn and for a system job._
+
+The named boxes are only names for those jobs:
+
+| Job | Name |
+| --- | --- |
+| The only way in — entitle, lock the path, start work | **Front Door** |
+| Which governed capability, at which version | **Agent Plane** |
+| Do the work | **Runtime** |
+| Memory, grounding, model, dual-checked actions | **Shared** |
+| Prove it and see it | **Audit** and **Observability** |
+
+The full sequence, including how jobs skip classify but never entitlement: [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+
+---
+
+## What a stranger should remember
+
+- One front door. Channels never dial a domain agent.
+- Controls once. Intelligence stays in the domain.
+- Three identities. User ≠ agent ≠ runtime box.
+- Four autonomy modes. Who picks the next step is a product decision, not an accident.
+- Pin before execute. Evidence is not optional.
+
+If you are deciding who owns which box, read the [operating model](/architecture/operating-model). If you are tracing a single request, read the [lifecycle](/concepts/executing-a-request/request-lifecycle). If you are choosing how much latitude a model gets, read [autonomy](/autonomy/). If you want documents, review, or handoff, read [use cases](/use-cases/).

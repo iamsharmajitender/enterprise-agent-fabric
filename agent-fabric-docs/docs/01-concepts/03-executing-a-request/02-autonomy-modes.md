@@ -6,7 +6,11 @@ description: "autonomy_mode 0-3 answers one question: who picks the next step. H
 
 # Autonomy modes
 
-The catalogue seed is autonomy **0–3**. `autonomy_mode` on the route is that integer. Pattern answers **who picks the next step**. Every route still calls the LLM at least once. There is no domain-HTTP-only route.
+:::note You are in the deep end
+This page is how Runtime hydrates each mode. The public page is [autonomy](/autonomy/). The story is [how it hangs together](/how-it-hangs-together).
+:::
+
+The catalogue seed is autonomy **0–3**. `autonomy_mode` on the route is that integer. Pattern answers **who picks the next step**. Every route still calls the model at least once. There is no domain-HTTP-only route.
 
 | Pattern | Mode | What the route points at | What Runtime runs |
 | --- | --- | --- | --- |

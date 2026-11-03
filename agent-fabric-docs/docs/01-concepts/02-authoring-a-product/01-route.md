@@ -6,6 +6,10 @@ description: "The route is the product. What the row holds, which fields each au
 
 # Route
 
+:::note You are in the deep end
+A route is the product. The story is [how it hangs together](/how-it-hangs-together). How a request binds one: [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+:::
+
 A route **is** the agent. Everything else on this section — capability, prompts, schema, retrieval, memory, corpus — is a row that hangs off one. Authoring an agent means writing a route row and the rows it points at.
 
 Routes live in `dataplane.routes` on the Agent Data Plane. The primary key is **`(route_id, route_version)`**, so a route id is a family of immutable versions, not a single mutable record.
@@ -28,7 +32,7 @@ Routes live in `dataplane.routes` on the Agent Data Plane. The primary key is **
 | `model_profile` | Model tier. FK to `dataplane.model_profiles` | Always |
 | `activation_target` | Where Runtime runs — the `/v1/runs` URL | Always in practice — Front Door dials it |
 | `agent_client_id` | Workload identity pinned on the run | Optional |
-| `required_claims` | Entitlement filter. Defaults to `[]` | Optional |
+| `required_claims` | User entitlement filter. Defaults to `[]`. Not agent scopes — [claims and scopes](/concepts/executing-a-request/claims-and-scopes) | Optional |
 | `channels` | Channel filter. Defaults to `["web"]` | Optional |
 | `chat_visible` | Whether the route appears in the chat eligible set | Defaults to `true` |
 | `description` | Display text for the Control Plane | Optional |

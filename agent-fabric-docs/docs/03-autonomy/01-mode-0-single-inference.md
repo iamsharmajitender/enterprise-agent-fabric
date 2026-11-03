@@ -8,7 +8,11 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Mode 0 — Single inference
 
-Nobody picks the next step. The route points at a **prompt pack** only. Runtime makes **one LLM call** (`host` as a single `synthesis` node) and returns the completion.
+Nobody picks the next step. One governed completion. No tools, no workflow, no investigation.
+
+Use this when the product is “answer this, under this prompt, with optional grounding.” The index: [autonomy](/autonomy/).
+
+The route points at a **prompt pack** only. Runtime makes **one model call** (`host` as a single `synthesis` node) and returns the completion.
 
 No tools. No workflow. No `CALL` / `DONE`. No `retrieval.mode=tool`.
 

@@ -1,12 +1,12 @@
 {
   "label": "Guides",
-  "position": 1,
+  "position": 6,
   "collapsible": true,
-  "collapsed": false,
+  "collapsed": true,
   "link": {
     "type": "generated-index",
     "title": "Guides",
-    "description": "Run the fabric, send a request, then author an agent. Start here if you are new to the platform.",
+    "description": "Run the local stack, send a request, then author an agent. These pages assume you already know why the fabric exists. If you do not, start at How it hangs together.",
     "slug": "/guides"
   }
 }

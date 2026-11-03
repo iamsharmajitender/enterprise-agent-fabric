@@ -8,7 +8,11 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Mode 2 — Deterministic
 
-The **workflow designer picks the next step**. The route points at a **workflow** (fixed stage list). The LLM does not invent the next stage. It only does the work a stage assigns (`llm_role`).
+The **workflow designer picks the next step**. Every execution follows the same sequence. Branching, if any, is explicit — including a [human gate](/use-cases/human-review-process-gate). The model does not invent the next stage.
+
+Use this for refunds, KYC, card freeze, or any process the business already knows. The index: [autonomy](/autonomy/).
+
+The route points at a **workflow** (fixed stage list). The model only does the work a stage assigns (`llm_role`).
 
 Manifest is required when any stage is a domain (or agent) tool. Omit the manifest for an LLM-only pipeline.
 

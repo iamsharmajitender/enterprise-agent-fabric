@@ -7,6 +7,10 @@ description: "How seeded routes share data between stages."
 
 # Scenario matrix: catalogue seed data sharing
 
+:::note You are in the deep end
+Seed-data sharing between stages. The public sequence is the [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+:::
+
 Source of truth: `agent-data-plane/.../V1__dataplane.sql`, `agent-capability-registry/.../V1__registry.sql`, `agent-fabric-scripts/route-runs/job/jobs.json`.
 
 Share kinds: `goal_only` | `notes_to_llm` | `json_to_http` | `prefetch_pack` | `branch` | `human_gate` | `agent` | `none`

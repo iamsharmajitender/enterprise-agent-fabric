@@ -3,7 +3,7 @@ title: Enterprise Agent Fabric
 sidebar_label: Home
 sidebar_position: 0
 slug: /
-description: "One front door for acting AI. Identity, routing, policy, and proof run once. Domains keep the intelligence."
+description: "An operating model for enterprise agents. Identity, audit, and autonomy run once. Domains keep the intelligence. Not a chatbot framework."
 hide_title: true
 ---
 
@@ -11,79 +11,76 @@ hide_title: true
 
 <p className="eaf-eyebrow">Enterprise Agent Fabric</p>
 
-# One front door. Many governed agents.
+# An operating model for acting AI.
 
-Identity, routing, policy, and proof run **once**. Domains keep the intelligence. People and systems never dial Legal, payments, or KYC URLs — they come in one door, and the fabric verifies, routes, runs, and records.
-
-</div>
-
-<div className="eaf-cards">
-
-<div className="eaf-card">
-
-<p className="eaf-eyebrow">Guides</p>
-
-### [Start here](/running-locally)
-
-Run the stack on this machine, then send one request through Front Door and watch it pin, hydrate, and complete.
+Identity, routing, policy, and proof run **once**. Domains keep the intelligence. This is not a chatbot framework. It is the shared front door and control plane for AI that *does* something — money, customer data, regulated process.
 
 </div>
 
-<div className="eaf-card">
+<div className="eaf-paths">
 
-<p className="eaf-eyebrow">Concepts</p>
+<div className="eaf-path">
 
-### [Author an agent](/concepts/authoring-a-product/route)
+<p className="eaf-eyebrow">For business</p>
 
-A route, a capability, a prompt pack, and an autonomy mode. Everything you attach before the first request.
+### [What it governs](/how-it-hangs-together#what-it-governs)
 
-</div>
-
-<div className="eaf-card">
-
-<p className="eaf-eyebrow">Architecture</p>
-
-### [How the boxes fit](/architecture/the-idea)
-
-Front Door, Agent Plane, Runtime, and Shared. Who owns the path, who owns the work.
+Who was allowed to use this. What it was permitted to do. Why this agent ran, and what it actually did. Those answers come from one place.
 
 </div>
 
+<div className="eaf-path eaf-path-focal">
+
+<p className="eaf-eyebrow">Start here</p>
+
+### [How it hangs together](/how-it-hangs-together)
+
+The whole system in one sitting. Same spine for a CIO and a Chief Architect. Two depths after that.
+
 </div>
 
-## What the platform is
+<div className="eaf-path">
 
-The Fabric is the shared front door and control plane for **acting** AI — money, customer data, regulated process. Chatbots that only answer can live on their own. Anything that *does* something needs the same enterprise answers every time:
+<p className="eaf-eyebrow">For architects</p>
 
-1. Who was allowed to use this?
-2. What was it permitted to do?
-3. Why this agent, and what did it actually do?
+### [How a request moves](/how-it-hangs-together#how-a-request-moves)
 
-Those answers come from one place. Specialist agents stay in the domains that know the work.
+Verify, route, pin, execute, record. Chat and jobs are the same idea. Only how the path is chosen differs.
+
+</div>
+
+</div>
+
+## What this is not
+
+A portfolio of chatbots. A framework you drop into every domain. A place where Legal, payments, and KYC each invent identity, approval, and audit again.
+
+People and systems never dial those URLs. They come in **one door**. The fabric verifies, routes, runs, and records. The domain AI does the work.
 
 <div className="gain-diagram-wrap">
 
-![Enterprise Agent Fabric: Chat and API enter only through the Agent Front Door. Inside the Agent Plane the Control Plane sits on top, with the Data Plane and Agent Capability Plane side by side. Runtime executes. Shared holds Memory, RAG, Model and Tools. Audit and Observability sit underneath.](/diagrams/agent-fabric-architecture.svg)
+![Channels enter only through the Agent Front Door. The Agent Plane decides. Runtime executes the specialised agent. Shared holds memory, retrieval, model, and tools. Audit and observability sit underneath.](/diagrams/agent-fabric-architecture.svg)
 
 </div>
 
-## How a request travels
+## Four questions, answered once
 
-1. **Front Door** authenticates the caller and is the only public ingress.
-2. **Agent Data Plane** classifies the turn (or entitles a named job) and never starts Runtime.
-3. **Front Door** freezes the route version, then starts **Agent Runtime**.
-4. **Runtime** hydrates the pinned capabilities and runs the agent.
-5. **Audit** and **observability** record the same `correlation_id` so you can prove what happened.
+Every acting capability needs the same answers. The fabric owns them so a domain team does not rebuild them.
 
-Walk it with a real call: [your first request](/guides/first-request). The full sequence: [request lifecycle](/concepts/executing-a-request/request-lifecycle).
+| Question | What answers it |
+| --- | --- |
+| Who was allowed to use this? | [Identity](/concepts/executing-a-request/identities) and [entitlement](/concepts/executing-a-request/claims-and-scopes) at the door |
+| Why this agent? | [Routing](/concepts/executing-a-request/request-lifecycle) against a versioned catalogue |
+| What was it permitted to do? | [Autonomy mode](/autonomy/) plus pinned tools and, when required, a [human gate](/use-cases/human-review-process-gate) |
+| What did it actually do? | [Audit](/concepts/authoring-a-product/audit) on one `correlation_id` |
 
 ## Where to go next
 
-| If you want | Open |
+| If you are | Open |
 | --- | --- |
-| Start the stack | [Start the fabric](/running-locally) |
-| Send a chat turn or a job | [First request](/guides/first-request) |
-| Understand a word | [Glossary](/concepts/glossary) |
-| See who owns which box | [Operating model](/architecture/operating-model) |
-| Read the internals paper | [Technical design](/architecture/technical-design) |
-| See what actually runs today | [Autonomy](/autonomy/) |
+| New to the fabric | [How it hangs together](/how-it-hangs-together) |
+| Deciding who owns what | [Operating model](/architecture/operating-model) |
+| Tracing a request | [Request lifecycle](/concepts/executing-a-request/request-lifecycle) |
+| Choosing how much latitude the model gets | [Autonomy](/autonomy/) |
+| Looking at documents, review, or handoff | [Use cases](/use-cases/) |
+| Running the local stack | [Start the fabric](/running-locally) |

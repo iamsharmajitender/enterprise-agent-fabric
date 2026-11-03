@@ -6,6 +6,10 @@ description: "What the fabric emits about your route without being asked, which 
 
 # Observability
 
+:::note You are in the deep end
+Ops path, not the evidence path. The story: [how it hangs together](/how-it-hangs-together).
+:::
+
 Like [audit](/concepts/authoring-a-product/audit), observability is platform-level: there is no route field that configures it. Unlike audit, what you author changes the *shape* of what you get quite a lot, because the breadcrumbs are keyed to your route id and emitted per stage.
 
 This page is about that connection — what your authoring choices do to the telemetry. The operational runbook (starting the LGTM stack, following a journey, example queries) lives in the [repository README](https://github.com/iamsharmajitender/enterprise-agent-fabric/blob/main/README.md#observability-grafana-lgtm) and is not repeated here.

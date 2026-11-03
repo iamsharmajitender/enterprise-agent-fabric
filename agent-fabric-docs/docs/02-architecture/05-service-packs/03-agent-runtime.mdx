@@ -9,6 +9,10 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 # Agent Runtime
 
+:::note You are in the deep end
+This page is the Runtime contract. Who picks the next step: [autonomy](/autonomy/). The story: [how it hangs together](/how-it-hangs-together).
+:::
+
 Runtime is where the agent does the work. Only the [Front Door](/architecture/service-packs/agent-front-door) starts it. It copies the freeze onto a durable **run pin**, hydrates every capability on that pin, returns `202` with a `correlation_id`, and runs the graph.
 
 It does not classify the next utterance. Memory, RAG, model, and tools sit in **Shared** and are called from here, not built in.
