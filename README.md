@@ -782,7 +782,7 @@ Service-to-service: `Authorization: Bearer fabric-internal` and `X-Workload` of 
 
 ## Docs
 
-The documentation is a Docusaurus site in [`agent-fabric-docs/`](agent-fabric-docs/README.md), published to GitHub Pages at **https://iamsharmajitender.github.io/enterprise-agent-fabric/** on every push to `main`. Run `npm install && npm start` there to read it locally; the links below go to the source files so they also work on GitHub.
+The documentation is a Docusaurus site in [`agent-fabric-docs/`](agent-fabric-docs/README.md), published at **https://eaf.jitendersharma.dev** on every push to `main`. Run `npm install && npm start` there to read it locally; the links below go to the source files so they also work on GitHub.
 
 - [Documentation map](agent-fabric-docs/docs/index.md) (concepts / architecture / autonomy / use cases / catalogue / reference)
 - [The four boxes](#the-four-boxes-afd-adp-acr-ar) (this README — AFD, ADP, ACR, AR)

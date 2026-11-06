@@ -7,8 +7,8 @@ const config: Config = {
   tagline: 'An operating model for enterprise agents',
   favicon: 'img/favicon.svg',
 
-  url: 'https://iamsharmajitender.github.io',
-  baseUrl: '/enterprise-agent-fabric/',
+  url: 'https://eaf.jitendersharma.dev',
+  baseUrl: '/',
 
   organizationName: 'iamsharmajitender',
   projectName: 'enterprise-agent-fabric',

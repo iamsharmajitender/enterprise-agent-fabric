@@ -6,17 +6,17 @@ The Enterprise Agent Fabric documentation site — a [Docusaurus](https://docusa
 
 ```bash
 npm install
-npm start          # dev server on http://localhost:3000/enterprise-agent-fabric/ with hot reload
+npm start          # dev server on http://localhost:3000/ with hot reload
 npm run build      # production build; fails the build on broken links
 npm run serve      # serve the production build
 npm run diagrams   # regenerate static/diagrams/ from diagram-sources/
 ```
 
-The site is a GitHub Pages **project site**, so every path is served under the `/enterprise-agent-fabric/` base URL — locally as well as in production.
+The site publishes at the custom domain root, so every path is served under `/` — locally as well as in production.
 
 ## Publish
 
-Published at **https://iamsharmajitender.github.io/enterprise-agent-fabric/** by [`.github/workflows/deploy-docs.yml`](../.github/workflows/deploy-docs.yml): pushes to `main` that touch `agent-fabric-docs/` build and deploy; pull requests build only. Repository **Settings → Pages → Source** must be set to **GitHub Actions**.
+Published at **https://eaf.jitendersharma.dev** by [`.github/workflows/deploy-docs.yml`](../.github/workflows/deploy-docs.yml): pushes to `main` that touch `agent-fabric-docs/` build and deploy; pull requests build only. Repository **Settings → Pages → Source** must be set to **GitHub Actions**.
 
 ## Layout
 
